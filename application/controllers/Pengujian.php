@@ -48,7 +48,7 @@ class Pengujian extends MY_Controller
 
     /**
      * Klaim Sampel Mandiri (Self-Assignment)
-     * Transisi status: "Menunggu Pengujian" -> "Sedang Diuji"
+     * Redirects to Pemilihan Jenis Pengujian (Step 4)
      * 
      * @param int $sample_id
      */
@@ -58,6 +58,12 @@ class Pengujian extends MY_Controller
 
         $penguji_id = $this->session->userdata('user_id');
 
+        // Jika sampel sudah memiliki sesi pengujian aktif milik penguji ini, arahkan langsung
+        $sesi_aktif = $this->Model_Pengujian->ambil_sesi_by_sample($sample_id);
+        if ($sesi_aktif && $sesi_aktif['penguji_id'] == $penguji_id && $sesi_aktif['status'] === 'Sedang Diuji') {
+            redirect('pengujian/proses_sesi/' . $sesi_aktif['id']);
+        }
+
         if ($this->Model_Pengujian->klaim_sampel($sample_id, $penguji_id)) {
             $this->catat_audit('ASSIGN', 'Pengujian', array(
                 'sample_id'  => $sample_id,
@@ -65,8 +71,8 @@ class Pengujian extends MY_Controller
                 'status'     => 'Sedang Diuji'
             ));
 
-            $this->session->set_flashdata('pesan_sukses', 'Sampel berhasil diklaim. Silakan pilih metode dan isi form pengujian.');
-            redirect('pengujian/proses/' . $sample_id);
+            $this->session->set_flashdata('pesan_sukses', 'Sampel berhasil diklaim. Silakan pilih jenis pengujian.');
+            redirect('pengujian/pilih_jenis/' . $sample_id);
         } else {
             $this->session->set_flashdata('pesan_gagal', 'Gagal mengklaim sampel (sampel mungkin sudah diklaim atau berstatus lain).');
             redirect('pengujian/antrean');
@@ -74,11 +80,11 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * Halaman Pengisian Form Pengujian Dinamis
+     * STEP 4 — Pemilihan Jenis Pengujian (Kimia / Mikrobiologi)
      * 
      * @param int $sample_id
      */
-    public function proses($sample_id = NULL)
+    public function pilih_jenis($sample_id = NULL)
     {
         $this->cek_hak_akses('pengujian_input');
 
@@ -87,104 +93,235 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        // Pastikan sampel berstatus "Sedang Diuji"
         if ($sampel['status'] !== 'Sedang Diuji') {
             $this->session->set_flashdata('pesan_gagal', 'Sampel tidak berstatus "Sedang Diuji". Klaim sampel terlebih dahulu.');
             redirect('pengujian/antrean');
         }
 
-        // Tangani submit hasil pengujian
         if ($this->input->method() === 'post') {
-            $template_id = $this->input->post('template_id', TRUE);
-            $method_id   = $this->input->post('method_id', TRUE);
-            $kesimpulan  = $this->input->post('kesimpulan', TRUE);
-            $catatan     = $this->input->post('catatan', TRUE);
-            $hasil_input = $this->input->post('hasil', TRUE);
-
-            if (!is_array($hasil_input)) {
-                $hasil_input = array();
+            $jenis_pengujian = $this->input->post('jenis_pengujian', TRUE);
+            if (!in_array($jenis_pengujian, array('Kimia', 'Mikrobiologi'), TRUE)) {
+                $this->session->set_flashdata('pesan_gagal', 'Jenis pengujian wajib dipilih (Kimia atau Mikrobiologi).');
+                redirect('pengujian/pilih_jenis/' . $sample_id);
             }
 
-            $penguji_id = $this->session->userdata('user_id');
+            redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
+        }
 
-            $data_hasil_uji = array(
-                'sample_id'    => $sample_id,
-                'method_id'    => $method_id ?: NULL,
-                'template_id'  => $template_id ?: NULL,
-                'penguji_id'   => $penguji_id,
-                'data_hasil'   => json_encode($hasil_input, JSON_UNESCAPED_UNICODE),
-                'kesimpulan'   => $kesimpulan ?: 'Belum Disimpulkan',
-                'catatan'      => $catatan ?: NULL,
-                'waktu_mulai'  => date('Y-m-d H:i:s')
-            );
+        $this->data['halaman_aktif'] = 'pengujian_antrean';
+        $this->data['judul_halaman'] = 'Pilih Jenis Pengujian';
+        $this->data['breadcrumbs']   = array(
+            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
+            array('label' => 'Pilih Jenis Pengujian', 'url' => '#')
+        );
+        $this->data['sampel']        = $sampel;
 
-            // Simpan Hasil Uji & Transisi status ke "Menunggu Verifikasi"
-            $test_id = $this->Model_Pengujian->simpan_hasil_uji($data_hasil_uji);
+        $this->muat_tampilan('pengujian/pilih_jenis');
+    }
 
-            if ($test_id) {
-                // Generate Laporan Hasil Uji PDF (Pra-Verifikasi)
-                $template_info = $this->Model_Template->ambil_by_id($template_id);
-                $hasil_info    = $this->Model_Pengujian->ambil_hasil_by_id($test_id);
-                $penguji_info  = $this->Model_Pengguna->ambil_by_id($penguji_id);
+    /**
+     * STEP 5 — Pemilihan Multiple Form Template Sesuai Kategori
+     * 
+     * @param int $sample_id
+     */
+    public function pilih_form($sample_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_input');
 
-                // Buat mapping fields untuk label di PDF
-                if ($template_info && !empty($template_info['skema_form'])) {
-                    $template_info['fields_map'] = json_decode($template_info['skema_form'], true);
-                }
+        $sampel = $this->Model_Sampel->ambil_by_id($sample_id);
+        if (!$sampel) {
+            show_404();
+        }
 
-                $pdf_dir  = FCPATH . 'uploads/laporan/';
-                $pdf_name = 'LHU_' . $sample_id . '_' . $test_id . '_' . time() . '.pdf';
-                $pdf_path = $pdf_dir . $pdf_name;
+        $jenis_pengujian = $this->input->get('jenis', TRUE);
+        if (!in_array($jenis_pengujian, array('Kimia', 'Mikrobiologi'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Jenis pengujian tidak valid.');
+            redirect('pengujian/pilih_jenis/' . $sample_id);
+        }
 
-                try {
-                    $pdf_gen = new Laporan_PDF();
-                    $pdf_gen->buat_laporan($sampel, $hasil_info, $template_info, $penguji_info, $pdf_path);
-                    
-                    // Simpan path PDF di database
-                    $rel_path = 'uploads/laporan/' . $pdf_name;
-                    $this->Model_Pengujian->update_file_laporan($test_id, $rel_path);
+        $daftar_template = $this->Model_Template->ambil_by_kategori($jenis_pengujian);
 
-                    $this->catat_audit('GENERATE_REPORT', 'Pengujian', array(
-                        'test_id'   => $test_id,
-                        'sample_id' => $sample_id,
-                        'file_pdf'  => $rel_path
-                    ));
-                } catch (Exception $e) {
-                    // Log warning jika PDF generation ada hambatan kecil
-                }
+        $this->data['halaman_aktif']    = 'pengujian_antrean';
+        $this->data['judul_halaman']    = 'Pilih Form / Parameter Pengujian (' . $jenis_pengujian . ')';
+        $this->data['breadcrumbs']      = array(
+            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
+            array('label' => 'Pilih Form', 'url' => '#')
+        );
+        $this->data['sampel']           = $sampel;
+        $this->data['jenis_pengujian']  = $jenis_pengujian;
+        $this->data['daftar_template']  = $daftar_template;
 
-                $this->catat_audit('SAVE_TEST_RESULT', 'Pengujian', array(
-                    'test_id'    => $test_id,
-                    'sample_id'  => $sample_id,
-                    'kesimpulan' => $kesimpulan,
-                    'status'     => 'Menunggu Verifikasi'
+        $this->muat_tampilan('pengujian/pilih_form');
+    }
+
+    /**
+     * STEP 6 & 7 — Inisialisasi Sesi Pengujian & Prevent Mixing Validation
+     * 
+     * @param int $sample_id
+     */
+    public function mulai_sesi($sample_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_input');
+
+        if ($this->input->method() !== 'post') {
+            redirect('pengujian/antrean');
+        }
+
+        $sampel = $this->Model_Sampel->ambil_by_id($sample_id);
+        if (!$sampel) {
+            show_404();
+        }
+
+        $jenis_pengujian = $this->input->post('jenis_pengujian', TRUE);
+        $template_ids    = $this->input->post('template_ids', TRUE);
+
+        // Validation 1: Mandatory Selection
+        if (empty($jenis_pengujian) || !in_array($jenis_pengujian, array('Kimia', 'Mikrobiologi'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Jenis pengujian wajib dipilih secara valid.');
+            redirect('pengujian/pilih_jenis/' . $sample_id);
+        }
+
+        if (empty($template_ids) || !is_array($template_ids)) {
+            $this->session->set_flashdata('pesan_gagal', 'Anda wajib memilih minimal 1 form/parameter pengujian.');
+            redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
+        }
+
+        // Validation 2: STEP 6 BACKEND PREVENT MIXING VALIDATION
+        foreach ($template_ids as $tid) {
+            $tpl = $this->Model_Template->ambil_by_id($tid);
+            if (!$tpl || $tpl['kategori'] !== $jenis_pengujian) {
+                // Reject request & log audit violation
+                $this->catat_audit('INVALID_TESTING_SESSION', 'Pengujian', array(
+                    'sample_id'       => $sample_id,
+                    'jenis_pengujian' => $jenis_pengujian,
+                    'invalid_form_id' => $tid,
+                    'invalid_kategori'=> $tpl ? $tpl['kategori'] : 'UNKNOWN',
+                    'alasan'          => 'Terdeteksi pencampuran form Kimia & Mikrobiologi dalam 1 sesi.'
                 ));
 
-                $this->session->set_flashdata('pesan_sukses', 'Hasil pengujian berhasil disimpan. Status sampel diperbarui menjadi "Menunggu Verifikasi" dan Laporan PDF telah terbentuk.');
-                redirect('pengujian/detail/' . $test_id);
-            } else {
-                $this->session->set_flashdata('pesan_gagal', 'Gagal menyimpan hasil pengujian.');
+                $this->session->set_flashdata('pesan_gagal', 'Permintaan ditolak: Form/parameter yang dipilih bertentangan dengan jenis pengujian yang dipilih. (Kimia & Mikrobiologi tidak boleh dicampur).');
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
             }
         }
 
-        $template_selected_id = $this->input->get('template_id', TRUE);
-        $template_selected    = NULL;
-        if ($template_selected_id) {
-            $template_selected = $this->Model_Template->ambil_by_id($template_selected_id);
+        $penguji_id = $this->session->userdata('user_id');
+
+        $session_id = $this->Model_Pengujian->buat_sesi_pengujian($sample_id, $penguji_id, $jenis_pengujian, $template_ids);
+
+        if ($session_id) {
+            $this->catat_audit('START_TESTING_SESSION', 'Pengujian', array(
+                'testing_session_id' => $session_id,
+                'sample_id'          => $sample_id,
+                'jenis_pengujian'    => $jenis_pengujian,
+                'form_count'         => count($template_ids),
+                'template_ids'       => implode(',', $template_ids),
+                'penguji_id'         => $penguji_id
+            ));
+
+            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian (' . $jenis_pengujian . ') berhasil dimulai dengan ' . count($template_ids) . ' form.');
+            redirect('pengujian/proses_sesi/' . $session_id);
+        } else {
+            $this->session->set_flashdata('pesan_gagal', 'Gagal membuat sesi pengujian.');
+            redirect('pengujian/antrean');
+        }
+    }
+
+    /**
+     * Halaman Pengisian Hasil Multiple Form Sesi Pengujian
+     * 
+     * @param int $session_id
+     */
+    public function proses_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_input');
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
         }
 
-        $this->data['halaman_aktif']      = 'pengujian_antrean';
-        $this->data['judul_halaman']      = 'Pelaksanaan Pengujian Sampel';
-        $this->data['breadcrumbs']        = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Proses Pengujian', 'url' => '#')
-        );
-        $this->data['sampel']             = $sampel;
-        $this->data['daftar_template']    = $this->Model_Template->ambil_aktif();
-        $this->data['daftar_metode']      = $this->Model_Metode->ambil_aktif();
-        $this->data['template_selected']  = $template_selected;
+        // Ownership & authorization check
+        if ($sesi['penguji_id'] != $this->session->userdata('user_id')) {
+            $this->session->set_flashdata('pesan_gagal', 'Anda tidak berhak mengakses sesi pengujian ini (ownership mismatch).');
+            redirect('pengujian/antrean');
+        }
 
-        $this->muat_tampilan('pengujian/proses');
+        $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        if ($this->input->method() === 'post') {
+            $forms_input = $this->input->post('forms', TRUE);
+            if (!is_array($forms_input)) {
+                $forms_input = array();
+            }
+
+            if ($this->Model_Pengujian->simpan_hasil_sesi($session_id, $forms_input)) {
+                $this->catat_audit('SAVE_SESSION_RESULTS', 'Pengujian', array(
+                    'testing_session_id' => $session_id,
+                    'sample_id'          => $sesi['sample_id'],
+                    'status'             => 'Menunggu Verifikasi'
+                ));
+
+                $this->session->set_flashdata('pesan_sukses', 'Seluruh hasil pengujian pada sesi ini berhasil disimpan dan diteruskan ke Penyelia (Menunggu Verifikasi).');
+                redirect('pengujian/detail_sesi/' . $session_id);
+            } else {
+                $this->session->set_flashdata('pesan_gagal', 'Gagal menyimpan hasil pengujian sesi.');
+            }
+        }
+
+        $this->data['halaman_aktif'] = 'pengujian_antrean';
+        $this->data['judul_halaman'] = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
+        $this->data['breadcrumbs']   = array(
+            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
+            array('label' => 'Proses Sesi Pengujian', 'url' => '#')
+        );
+        $this->data['sesi']          = $sesi;
+        $this->data['forms']         = $forms;
+        $this->data['hasil_forms']   = $forms;
+
+        $this->muat_tampilan('pengujian/proses_sesi');
+    }
+
+    /**
+     * Halaman Detail Sesi Pengujian
+     * 
+     * @param int $session_id
+     */
+    public function detail_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_view');
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        $this->data['halaman_aktif'] = 'pengujian_riwayat';
+        $this->data['judul_halaman'] = 'Detail Sesi Pengujian: ' . html_escape($sesi['nama_sampel']);
+        $this->data['breadcrumbs']   = array(
+            array('label' => 'Pengujian', 'url' => site_url('pengujian/riwayat')),
+            array('label' => 'Detail Sesi', 'url' => '#')
+        );
+        $this->data['sesi']          = $sesi;
+        $this->data['forms']         = $forms;
+
+        $this->muat_tampilan('pengujian/detail_sesi');
+    }
+
+    /**
+     * Halaman Pengisian Form Pengujian Dinamis (Legacy compatibility wrapper)
+     * 
+     * @param int $sample_id
+     */
+    public function proses($sample_id = NULL)
+    {
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_sample($sample_id);
+        if ($sesi) {
+            redirect('pengujian/proses_sesi/' . $sesi['id']);
+        }
+
+        $this->pilih_jenis($sample_id);
     }
 
     /**
@@ -201,7 +338,14 @@ class Pengujian extends MY_Controller
             array('label' => 'Riwayat Hasil Uji', 'url' => '#')
         );
 
-        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_semua_hasil();
+        $penguji_id = NULL;
+        // Jika user bukan Admin/SuperAdmin dan bukan Penyelia/MT, filter riwayat miliknya sendiri
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id == 3) { // Role Penguji (Petugas Uji)
+            $penguji_id = $this->session->userdata('user_id');
+        }
+
+        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_semua_hasil($penguji_id);
 
         $this->muat_tampilan('pengujian/riwayat');
     }
@@ -265,20 +409,46 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * FASE 4 — Halaman Queue Laporan "Menunggu Verifikasi" untuk Penyelia
+     * FASE 4 — Halaman Workspace Penyelia (Verifikasi Laporan)
      */
     public function verifikasi()
     {
         $this->cek_hak_akses('pengujian_verify');
 
         $this->data['halaman_aktif'] = 'pengujian_verifikasi';
-        $this->data['judul_halaman'] = 'Queue Verifikasi Laporan Pengujian';
+        $this->data['judul_halaman'] = 'Verifikasi Laporan';
         $this->data['breadcrumbs']   = array(
             array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Verifikasi', 'url' => '#')
+            array('label' => 'Verifikasi Laporan', 'url' => '#')
         );
 
-        $this->data['antrean_verifikasi'] = $this->Model_Pengujian->ambil_antrean_verifikasi();
+        $antrean = $this->Model_Pengujian->ambil_antrean_verifikasi();
+        
+        $session_id_selected = $this->input->get('session_id', TRUE);
+        $selected_item = NULL;
+        $selected_forms = array();
+
+        if (!empty($antrean)) {
+            if ($session_id_selected) {
+                foreach ($antrean as $item) {
+                    if ($item['id'] == $session_id_selected) {
+                        $selected_item = $item;
+                        break;
+                    }
+                }
+            }
+            if (!$selected_item) {
+                $selected_item = $antrean[0];
+            }
+
+            if ($selected_item) {
+                $selected_forms = $this->Model_Pengujian->ambil_hasil_by_session($selected_item['id']);
+            }
+        }
+
+        $this->data['antrean_verifikasi']  = $antrean;
+        $this->data['selected_item']       = $selected_item;
+        $this->data['selected_forms']      = $selected_forms;
 
         $this->muat_tampilan('pengujian/verifikasi');
     }
@@ -382,7 +552,198 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * FASE 4 — Form & Proses Revisi Hasil Pengujian oleh Penguji
+     * FASE 4 — Memproses Verifikasi Sesi Pengujian oleh Penyelia
+     */
+    public function verifikasi_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_verify');
+
+        if ($this->input->method() !== 'post') {
+            redirect('pengujian/verifikasi');
+        }
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        if ($sesi['status'] !== 'Menunggu Verifikasi') {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status "Menunggu Verifikasi".');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+
+        $verifier_id = $this->session->userdata('user_id');
+
+        if ($this->Model_Pengujian->verifikasi_sesi($session_id, $verifier_id)) {
+            $this->catat_audit('VERIFIKASI_SESI', 'Pengujian', array(
+                'testing_session_id' => $session_id,
+                'sample_id'          => $sesi['sample_id'],
+                'verifier_id'        => $verifier_id,
+                'status_sebelum'     => 'Menunggu Verifikasi',
+                'status_sesudah'     => 'Menunggu Approval'
+            ));
+
+            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian berhasil diverifikasi dan diteruskan ke Manajer Teknis (Menunggu Approval).');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        } else {
+            $this->session->set_flashdata('pesan_gagal', 'Gagal memproses verifikasi sesi.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+    }
+
+    /**
+     * FASE 4 — Memproses Penolakan Sesi Pengujian oleh Penyelia
+     */
+    public function tolak_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_verify');
+
+        if ($this->input->method() !== 'post') {
+            redirect('pengujian/verifikasi');
+        }
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        if ($sesi['status'] !== 'Menunggu Verifikasi') {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status "Menunggu Verifikasi".');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+
+        $alasan_penolakan = trim($this->input->post('alasan_penolakan', TRUE));
+        if (empty($alasan_penolakan)) {
+            $this->session->set_flashdata('pesan_gagal', 'Alasan penolakan WAJIB diisi.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+
+        $verifier_id = $this->session->userdata('user_id');
+
+        if ($this->Model_Pengujian->tolak_sesi($session_id, $verifier_id, $alasan_penolakan)) {
+            $this->catat_audit('PENOLAKAN_VERIFIKASI_SESI', 'Pengujian', array(
+                'testing_session_id' => $session_id,
+                'sample_id'          => $sesi['sample_id'],
+                'verifier_id'        => $verifier_id,
+                'alasan_penolakan'   => $alasan_penolakan,
+                'status_sebelum'     => 'Menunggu Verifikasi',
+                'status_sesudah'     => 'Ditolak'
+            ));
+
+            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian berhasil ditolak dan dikembalikan ke Penguji untuk revisi.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        } else {
+            $this->session->set_flashdata('pesan_gagal', 'Gagal memproses penolakan sesi.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+    }
+
+    /**
+     * FASE 5 — Memproses Approval Sesi Pengujian oleh Manajer Teknis
+     */
+    public function approve_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_approve');
+
+        if ($this->input->method() !== 'post') {
+            redirect('pengujian/approval');
+        }
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        if ($sesi['status'] !== 'Menunggu Approval') {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status "Menunggu Approval".');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+
+        $approver_id = $this->session->userdata('user_id');
+
+        if ($this->Model_Pengujian->approve_sesi($session_id, $approver_id)) {
+            $this->catat_audit('APPROVAL_SESI', 'Pengujian', array(
+                'testing_session_id' => $session_id,
+                'sample_id'          => $sesi['sample_id'],
+                'approver_id'        => $approver_id,
+                'status_sebelum'     => 'Menunggu Approval',
+                'status_sesudah'     => 'Approved / Final'
+            ));
+
+            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian berhasil di-approve (Approved / Final).');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        } else {
+            $this->session->set_flashdata('pesan_gagal', 'Gagal memproses approval sesi.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+    }
+
+    /**
+     * FASE 4 — Form & Proses Revisi Sesi Pengujian oleh Penguji
+     * Transisi: "Ditolak" -> "Menunggu Verifikasi"
+     * 
+     * @param int $session_id
+     */
+    public function revisi_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_input');
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        // Ownership validation: Penguji hanya boleh merevisi session miliknya
+        if ($sesi['penguji_id'] != $this->session->userdata('user_id')) {
+            $this->session->set_flashdata('pesan_gagal', 'Anda tidak berhak merevisi sesi pengujian ini (ownership mismatch).');
+            redirect('pengujian/riwayat');
+        }
+
+        // Status validation: Hanya session berstatus Ditolak yang dapat direvisi
+        if ($sesi['status'] !== 'Ditolak') {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi pengujian ini tidak dalam status "Ditolak" sehingga tidak dapat direvisi.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+        }
+
+        $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        if ($this->input->method() === 'post') {
+            $forms_input = $this->input->post('forms', TRUE);
+            if (!is_array($forms_input)) {
+                $forms_input = array();
+            }
+
+            if ($this->Model_Pengujian->revisi_sesi($session_id, $forms_input)) {
+                $this->catat_audit('REVISI_SESI', 'Pengujian', array(
+                    'testing_session_id' => $session_id,
+                    'sample_id'          => $sesi['sample_id'],
+                    'status_sebelum'     => 'Ditolak',
+                    'status_sesudah'     => 'Menunggu Verifikasi'
+                ));
+
+                $this->session->set_flashdata('pesan_sukses', 'Revisi hasil pengujian sesi berhasil disimpan dan dikirim kembali ke Penyelia (Menunggu Verifikasi).');
+                redirect('pengujian/detail_sesi/' . $session_id);
+            } else {
+                $this->session->set_flashdata('pesan_gagal', 'Gagal menyimpan revisi sesi pengujian.');
+            }
+        }
+
+        $this->data['halaman_aktif'] = 'pengujian_riwayat';
+        $this->data['judul_halaman'] = 'Revisi Hasil Pengujian Sesi: ' . html_escape($sesi['nama_sampel']);
+        $this->data['breadcrumbs']   = array(
+            array('label' => 'Pengujian', 'url' => site_url('pengujian/riwayat')),
+            array('label' => 'Detail Sesi', 'url' => site_url('pengujian/detail_sesi/' . $session_id)),
+            array('label' => 'Revisi Sesi', 'url' => '#')
+        );
+        $this->data['sesi']          = $sesi;
+        $this->data['forms']         = $forms;
+        $this->data['hasil_forms']   = $forms;
+
+        $this->muat_tampilan('pengujian/proses_sesi');
+    }
+
+    /**
+     * FASE 4 — Form & Proses Revisi Hasil Pengujian oleh Penguji (Legacy Single Form)
      * Transisi: "Ditolak" -> "Menunggu Verifikasi"
      * 
      * @param int $test_id

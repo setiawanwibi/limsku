@@ -19,6 +19,9 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
 
+        // Set default timezone Indonesia/Jakarta (WIB)
+        date_default_timezone_set('Asia/Jakarta');
+
         // Inisialisasi data dasar aplikasi
         $this->data['nama_aplikasi'] = 'LIMSKU';
         $this->data['judul_panjang'] = 'Laboratory Information Management System';

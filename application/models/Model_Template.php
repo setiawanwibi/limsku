@@ -51,6 +51,17 @@ class Model_Template extends CI_Model
     }
 
     /**
+     * Mengambil template form aktif berdasarkan Kategori (Kimia / Mikrobiologi)
+     * 
+     * @param string $kategori
+     * @return array
+     */
+    public function ambil_by_kategori($kategori)
+    {
+        return $this->ambil_aktif($kategori);
+    }
+
+    /**
      * Mengambil template form berdasarkan ID
      * 
      * @param int $id

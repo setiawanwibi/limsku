@@ -15,7 +15,8 @@ $route['masuk']  = 'autentikasi/masuk';
 $route['keluar'] = 'autentikasi/keluar';
 
 // Dasbor
-$route['dasbor'] = 'dasbor/index';
+$route['dasbor']                = 'dasbor/index';
+$route['dasbor/api_ringkasan']  = 'dasbor/api_ringkasan';
 
 // Pengguna (User Management)
 $route['pengguna']                  = 'pengguna/index';
@@ -74,11 +75,20 @@ $route['template/hapus/(:num)']     = 'template/hapus/$1';
 $route['pengujian']                         = 'pengujian/antrean';
 $route['pengujian/antrean']                 = 'pengujian/antrean';
 $route['pengujian/klaim/(:num)']            = 'pengujian/klaim/$1';
+$route['pengujian/pilih_jenis/(:num)']      = 'pengujian/pilih_jenis/$1';
+$route['pengujian/pilih_form/(:num)']       = 'pengujian/pilih_form/$1';
+$route['pengujian/mulai_sesi/(:num)']       = 'pengujian/mulai_sesi/$1';
+$route['pengujian/proses_sesi/(:num)']      = 'pengujian/proses_sesi/$1';
+$route['pengujian/revisi_sesi/(:num)']      = 'pengujian/revisi_sesi/$1';
+$route['pengujian/detail_sesi/(:num)']      = 'pengujian/detail_sesi/$1';
 $route['pengujian/proses/(:num)']           = 'pengujian/proses/$1';
 $route['pengujian/riwayat']                 = 'pengujian/riwayat';
 $route['pengujian/detail/(:num)']           = 'pengujian/detail/$1';
 $route['pengujian/pdf/(:num)']              = 'pengujian/download_pdf/$1';
 $route['pengujian/verifikasi']               = 'pengujian/verifikasi';
+$route['pengujian/verifikasi_sesi/(:num)']   = 'pengujian/verifikasi_sesi/$1';
+$route['pengujian/tolak_sesi/(:num)']        = 'pengujian/tolak_sesi/$1';
+$route['pengujian/approve_sesi/(:num)']      = 'pengujian/approve_sesi/$1';
 $route['pengujian/verifikasi/setujui/(:num)'] = 'pengujian/proses_verifikasi/$1';
 $route['pengujian/verifikasi/tolak/(:num)']   = 'pengujian/proses_penolakan/$1';
 $route['pengujian/revisi/(:num)']             = 'pengujian/revisi/$1';

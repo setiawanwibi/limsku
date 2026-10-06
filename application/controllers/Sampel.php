@@ -13,6 +13,7 @@ class Sampel extends MY_Controller
         parent::__construct();
         $this->load->model('Model_Sampel');
         $this->load->library('SimpleXLSX');
+        $this->load->library('Excel_Importer');
     }
 
     /**
@@ -286,11 +287,13 @@ class Sampel extends MY_Controller
                 redirect('sampel/import');
             }
 
-            // Membaca Header (Baris 0)
-            $header = array_map('trim', $rows[0]);
+            // Deteksi baris header (termasuk stacked header & sub-header) dan first data row secara dinamis
+            $header_info = Excel_Importer::detect_header_and_data_start($rows);
+            $header      = $header_info['header'];
+            $first_data  = $header_info['first_data_idx'];
 
-            // Pemetaan Kolom (31 fields)
-            $mapping = $this->_map_excel_header($header);
+            // Pemetaan Kolom (31 fields) menggunakan Excel_Importer
+            $mapping = Excel_Importer::map_headers($header);
 
             if ($mapping['status'] === FALSE) {
                 $this->session->set_flashdata('pesan_gagal', 'Header Excel tidak sesuai template: ' . $mapping['pesan']);
@@ -302,14 +305,14 @@ class Sampel extends MY_Controller
             $errors     = array();
             $user_id    = $this->session->userdata('user_id');
 
-            // Validasi baris data (mulai baris index 1)
-            for ($i = 1; $i < count($rows); $i++) {
+            // Validasi baris data (mulai baris data sampel pertama)
+            for ($i = $first_data; $i < count($rows); $i++) {
                 $row = $rows[$i];
                 if (empty(array_filter($row))) {
                     continue; // Skip baris kosong
                 }
 
-                $row_num = $i + 1;
+                $row_num  = $i + 1;
                 $row_data = array(
                     'status'     => 'Menunggu Pengujian',
                     'created_by' => $user_id
@@ -317,10 +320,21 @@ class Sampel extends MY_Controller
 
                 foreach ($field_map as $col_index => $db_field) {
                     $val = isset($row[$col_index]) ? trim($row[$col_index]) : NULL;
+
+                    // Konversi tanggal jika pada kolom tanggal_sampling atau kedaluwarsa
+                    if (($db_field === 'tanggal_sampling' || $db_field === 'kedaluwarsa') && $val !== NULL) {
+                        $val = Excel_Importer::convert_excel_date($val);
+                    }
+
                     $row_data[$db_field] = ($val !== '') ? $val : NULL;
                 }
 
-                // Validasi data wajib (misal: nama_sampel)
+                // Cek apakah baris ini adalah footer / tanda tangan / non-data
+                if (Excel_Importer::is_footer_or_non_data_row($row, $row_data)) {
+                    continue; // Skip footer / signature block tanpa memicu validation error
+                }
+
+                // Validasi data wajib (nama_sampel) untuk baris data sampel aktual
                 if (empty($row_data['nama_sampel'])) {
                     $errors[] = "Baris $row_num: Kolom 'Nama Sampel' wajib diisi.";
                 }
@@ -329,7 +343,7 @@ class Sampel extends MY_Controller
             }
 
             if (!empty($errors)) {
-                $this->session->set_flashdata('import_errors', $errors);
+                $this->session->set_flashdata('import_errors', array_slice($errors, 0, 20));
                 $this->session->set_flashdata('pesan_gagal', 'Import dibatalkan karena terdapat error validasi data.');
                 redirect('sampel/import');
             }
@@ -342,10 +356,11 @@ class Sampel extends MY_Controller
                     $this->catat_audit('IMPORT', 'Sampel', array(
                         'file_name'      => $_FILES['file_excel']['name'],
                         'total_imported' => $total_imported,
+                        'total_mapped'   => $mapping['total_mapped'],
                         'status'         => 'Menunggu Pengujian'
                     ));
 
-                    $this->session->set_flashdata('pesan_sukses', "Berhasil meng-import $total_imported data sampel ke dalam sistem (Status: Menunggu Pengujian).");
+                    $this->session->set_flashdata('pesan_sukses', "Berhasil meng-import $total_imported data sampel ke dalam sistem (Status: Menunggu Pengujian). Seluruh 31 field berhasil dipetakan.");
                     redirect('sampel');
                 } else {
                     $this->session->set_flashdata('pesan_gagal', 'Gagal meng-import data sampel. Transaksi database di-rollback.');
@@ -366,144 +381,13 @@ class Sampel extends MY_Controller
 
     /**
      * Memetakan header Excel (31 kolom) ke nama field database (snake_case)
-     * Menangani konteks 2 "Penandaan":
-     * - Penandaan (bagian jumlah) => jumlah_penandaan
-     * - Penandaan (field utama)  => penandaan
+     * Menggunakan Excel_Importer library
      * 
      * @param array $header
      * @return array
      */
     private function _map_excel_header($header)
     {
-        $field_map = array();
-        $penandaan_count = 0;
-
-        foreach ($header as $idx => $col_name) {
-            $normalized = strtolower(trim($col_name));
-
-            switch ($normalized) {
-                case 'no.':
-                case 'no':
-                    $field_map[$idx] = 'no';
-                    break;
-                case 'kategori sampel':
-                    $field_map[$idx] = 'kategori_sampel';
-                    break;
-                case 'sub kategori':
-                    $field_map[$idx] = 'sub_kategori';
-                    break;
-                case 'jenis/kelas terapi':
-                case 'jenis kelas terapi':
-                    $field_map[$idx] = 'jenis_kelas_terapi';
-                    break;
-                case 'kategori sarana':
-                    $field_map[$idx] = 'kategori_sarana';
-                    break;
-                case 'nama sarana':
-                    $field_map[$idx] = 'nama_sarana';
-                    break;
-                case 'kabupaten/kota':
-                case 'kabupaten kota':
-                    $field_map[$idx] = 'kabupaten_kota';
-                    break;
-                case 'tanggal sampling':
-                    $field_map[$idx] = 'tanggal_sampling';
-                    break;
-                case 'kode sampel manual':
-                    $field_map[$idx] = 'kode_sampel_manual';
-                    break;
-                case 'no sipt':
-                case 'no. sipt':
-                    $field_map[$idx] = 'no_sipt';
-                    break;
-                case 'nama sampel':
-                    $field_map[$idx] = 'nama_sampel';
-                    break;
-                case 'nomor izin edar':
-                    $field_map[$idx] = 'nomor_izin_edar';
-                    break;
-                case 'kondisi produk':
-                    $field_map[$idx] = 'kondisi_produk';
-                    break;
-                case 'no bets':
-                case 'no. bets':
-                    $field_map[$idx] = 'no_bets';
-                    break;
-                case 'kedaluwarsa':
-                    $field_map[$idx] = 'kedaluwarsa';
-                    break;
-                case 'kemasan':
-                    $field_map[$idx] = 'kemasan';
-                    break;
-                case 'nama dan alamat perusahaan':
-                    $field_map[$idx] = 'nama_alamat_perusahaan';
-                    break;
-                case 'komposisi':
-                    $field_map[$idx] = 'komposisi';
-                    break;
-                case 'kimia':
-                    $field_map[$idx] = 'jumlah_kimia';
-                    break;
-                case 'mikro':
-                    $field_map[$idx] = 'jumlah_mikro';
-                    break;
-                case 'arsip (di balai penguji)':
-                case 'arsip':
-                    $field_map[$idx] = 'jumlah_arsip';
-                    break;
-                case 'penandaan':
-                    $penandaan_count++;
-                    if ($penandaan_count === 1) {
-                        $field_map[$idx] = 'jumlah_penandaan';
-                    } else {
-                        $field_map[$idx] = 'penandaan';
-                    }
-                    break;
-                case 'jumlah penandaan':
-                    $field_map[$idx] = 'jumlah_penandaan';
-                    break;
-                case 'total':
-                case 'jumlah total':
-                    $field_map[$idx] = 'jumlah_total';
-                    break;
-                case 'penyimpanan':
-                    $field_map[$idx] = 'penyimpanan';
-                    break;
-                case 'harga':
-                    $field_map[$idx] = 'harga';
-                    break;
-                case 'tie':
-                    $field_map[$idx] = 'tie';
-                    break;
-                case 'mk':
-                    $field_map[$idx] = 'mk';
-                    break;
-                case 'tmk':
-                    $field_map[$idx] = 'tmk';
-                    break;
-                case 'surtug':
-                    $field_map[$idx] = 'surtug';
-                    break;
-                case 'balai penguji':
-                    $field_map[$idx] = 'balai_penguji';
-                    break;
-                default:
-                    // Jika kolom opsional/tidak dikenal, diabaikan secara aman
-                    break;
-            }
-        }
-
-        // Verifikasi bahwa kolom minimal (nama_sampel) terpetakan
-        if (!in_array('nama_sampel', $field_map)) {
-            return array(
-                'status' => FALSE,
-                'pesan'  => 'Kolom "Nama Sampel" tidak ditemukan pada header Excel.'
-            );
-        }
-
-        return array(
-            'status'    => TRUE,
-            'field_map' => $field_map
-        );
+        return Excel_Importer::map_headers($header);
     }
 }
