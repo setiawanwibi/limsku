@@ -1,0 +1,178 @@
+/**
+ * LIMSKU - Laboratory Information Management System
+ * BBPOM di Bandar Lampung
+ * Custom Styling
+ */
+
+:root {
+    --lims-primary: #003366;
+    --lims-primary-hover: #002244;
+    --lims-secondary: #0d9488;
+    --lims-dark: #0f172a;
+    --lims-sidebar-bg: #ffffff;
+    --lims-sidebar-text: #475569;
+    --lims-sidebar-active: #003366;
+    --lims-sidebar-hover-bg: #f1f5f9;
+    --lims-sidebar-active-bg: #e0ecf9;
+    --lims-sidebar-border: #e2e8f0;
+    --lims-bg: #f8fafc;
+    --lims-card-border: #e2e8f0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--lims-bg);
+    color: #334155;
+    min-height: 100vh;
+}
+
+/* Layout Wrapper */
+.lims-wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+#lims-sidebar {
+    min-width: 260px;
+    max-width: 260px;
+    background-color: var(--lims-sidebar-bg);
+    color: var(--lims-sidebar-text);
+    border-right: 1px solid var(--lims-sidebar-border);
+    box-shadow: 1px 0 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s;
+}
+
+#lims-sidebar .sidebar-header {
+    padding: 1.25rem 1.5rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--lims-sidebar-border);
+}
+
+#lims-sidebar .sidebar-header h5 {
+    color: var(--lims-primary);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+
+#lims-sidebar .sidebar-header small {
+    color: var(--lims-secondary);
+    font-size: 0.75rem;
+}
+
+#lims-sidebar ul.components {
+    padding: 1rem 0;
+    list-style: none;
+    margin: 0;
+}
+
+#lims-sidebar ul li a {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    display: block;
+    color: var(--lims-sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+#lims-sidebar ul li a:hover {
+    color: var(--lims-primary);
+    background-color: var(--lims-sidebar-hover-bg);
+    border-left-color: var(--lims-secondary);
+}
+
+#lims-sidebar ul li.active > a {
+    color: var(--lims-primary);
+    background-color: var(--lims-sidebar-active-bg);
+    border-left-color: var(--lims-sidebar-active);
+    font-weight: 600;
+}
+
+#lims-sidebar .nav-header {
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+/* Main Content Area */
+#lims-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--lims-bg);
+}
+
+/* Topbar Navbar */
+.lims-topbar {
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--lims-card-border);
+    padding: 0.75rem 1.5rem;
+}
+
+/* Content Body */
+.lims-main-body {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+/* Footer */
+.lims-footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--lims-card-border);
+    padding: 1rem 1.5rem;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* Cards */
+.card-lims {
+    border: 1px solid var(--lims-card-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+}
+
+.card-lims .card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--lims-card-border);
+    font-weight: 600;
+    color: var(--lims-dark);
+}
+
+/* Buttons */
+.btn-lims-primary {
+    background-color: var(--lims-primary);
+    border-color: var(--lims-primary);
+    color: #ffffff;
+}
+
+.btn-lims-primary:hover {
+    background-color: var(--lims-primary-hover);
+    border-color: var(--lims-primary-hover);
+    color: #ffffff;
+}
+
+/* Login Page Styling */
+.lims-login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #003366 100%);
+    padding: 1.5rem;
+}
+
+.lims-login-card {
+    max-width: 420px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    padding: 2.25rem;
+}

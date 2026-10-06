@@ -3,52 +3,87 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
-| URI ROUTING
+| URI ROUTING LIMSKU
 | -------------------------------------------------------------------------
-| This file lets you re-map URI requests to specific controller functions.
-|
-| Typically there is a one-to-one relationship between a URL string
-| and its corresponding controller class/method. The segments in a
-| URL normally follow this pattern:
-|
-|	example.com/class/method/id/
-|
-| In some instances, however, you may want to remap this relationship
-| so that a different class/function is called than the one
-| corresponding to the URL.
-|
-| Please see the user guide for complete details:
-|
-|	https://codeigniter.com/userguide3/general/routing.html
-|
-| -------------------------------------------------------------------------
-| RESERVED ROUTES
-| -------------------------------------------------------------------------
-|
-| There are three reserved routes:
-|
-|	$route['default_controller'] = 'welcome';
-|
-| This route indicates which controller class should be loaded if the
-| URI contains no data. In the above example, the "welcome" class
-| would be loaded.
-|
-|	$route['404_override'] = 'errors/page_missing';
-|
-| This route will tell the Router which controller/method to use if those
-| provided in the URL cannot be matched to a valid route.
-|
-|	$route['translate_uri_dashes'] = FALSE;
-|
-| This is not exactly a route, but allows you to automatically route
-| controller and method names that contain dashes. '-' isn't a valid
-| class or method name character, so it requires translation.
-| When you set this option to TRUE, it will replace ALL dashes in the
-| controller and method URI segments.
-|
-| Examples:	my-controller/index	-> my_controller/index
-|		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'welcome';
-$route['404_override'] = '';
+$route['default_controller'] = 'autentikasi';
+$route['404_override']        = '';
 $route['translate_uri_dashes'] = FALSE;
+
+// Autentikasi
+$route['masuk']  = 'autentikasi/masuk';
+$route['keluar'] = 'autentikasi/keluar';
+
+// Dasbor
+$route['dasbor'] = 'dasbor/index';
+
+// Pengguna (User Management)
+$route['pengguna']                  = 'pengguna/index';
+$route['pengguna/tambah']           = 'pengguna/tambah';
+$route['pengguna/edit/(:num)']      = 'pengguna/edit/$1';
+$route['pengguna/status/(:num)']    = 'pengguna/ubah_status/$1';
+$route['pengguna/password/(:num)']  = 'pengguna/ubah_password/$1';
+$route['pengguna/hapus/(:num)']     = 'pengguna/hapus/$1';
+
+// Peran (Role Management & Permission)
+$route['peran']                     = 'peran/index';
+$route['peran/tambah']              = 'peran/tambah';
+$route['peran/edit/(:num)']         = 'peran/edit/$1';
+$route['peran/hak-akses/(:num)']    = 'peran/hak_akses/$1';
+$route['peran/permission/tambah']   = 'peran/tambah_permission';
+$route['peran/hapus/(:num)']        = 'peran/hapus/$1';
+
+// Laboratorium (Laboratory Management)
+$route['laboratorium']              = 'laboratorium/index';
+$route['laboratorium/tambah']       = 'laboratorium/tambah';
+$route['laboratorium/edit/(:num)']  = 'laboratorium/edit/$1';
+$route['laboratorium/status/(:num)'] = 'laboratorium/ubah_status/$1';
+$route['laboratorium/hapus/(:num)'] = 'laboratorium/hapus/$1';
+
+// Sampel (Sample Management & Import Excel)
+$route['sampel']                    = 'sampel/index';
+$route['sampel/tambah']             = 'sampel/tambah';
+$route['sampel/import']             = 'sampel/import';
+$route['sampel/detail/(:num)']      = 'sampel/detail/$1';
+$route['sampel/edit/(:num)']        = 'sampel/edit/$1';
+$route['sampel/hapus/(:num)']       = 'sampel/hapus/$1';
+
+// Master Metode (Phase 3)
+$route['metode']                    = 'metode/index';
+$route['metode/tambah']             = 'metode/tambah';
+$route['metode/edit/(:num)']        = 'metode/edit/$1';
+$route['metode/status/(:num)']      = 'metode/status/$1';
+$route['metode/hapus/(:num)']       = 'metode/hapus/$1';
+
+// Master Parameter (Phase 3)
+$route['parameter']                 = 'parameter/index';
+$route['parameter/tambah']          = 'parameter/tambah';
+$route['parameter/edit/(:num)']     = 'parameter/edit/$1';
+$route['parameter/status/(:num)']   = 'parameter/status/$1';
+$route['parameter/hapus/(:num)']    = 'parameter/hapus/$1';
+
+// Master Template Form (Phase 3)
+$route['template']                  = 'template/index';
+$route['template/tambah']           = 'template/tambah';
+$route['template/preset']           = 'template/inisialisasi_preset';
+$route['template/edit/(:num)']      = 'template/edit/$1';
+$route['template/status/(:num)']    = 'template/status/$1';
+$route['template/hapus/(:num)']     = 'template/hapus/$1';
+
+// Pengujian Laboratorium (Phase 3 & Phase 4)
+$route['pengujian']                         = 'pengujian/antrean';
+$route['pengujian/antrean']                 = 'pengujian/antrean';
+$route['pengujian/klaim/(:num)']            = 'pengujian/klaim/$1';
+$route['pengujian/proses/(:num)']           = 'pengujian/proses/$1';
+$route['pengujian/riwayat']                 = 'pengujian/riwayat';
+$route['pengujian/detail/(:num)']           = 'pengujian/detail/$1';
+$route['pengujian/pdf/(:num)']              = 'pengujian/download_pdf/$1';
+$route['pengujian/verifikasi']               = 'pengujian/verifikasi';
+$route['pengujian/verifikasi/setujui/(:num)'] = 'pengujian/proses_verifikasi/$1';
+$route['pengujian/verifikasi/tolak/(:num)']   = 'pengujian/proses_penolakan/$1';
+$route['pengujian/revisi/(:num)']             = 'pengujian/revisi/$1';
+$route['pengujian/approval']                  = 'pengujian/approval';
+$route['pengujian/proses_approval/(:num)']    = 'pengujian/proses_approval/$1';
+
+// Audit Trail
+$route['audit']                     = 'audit/index';
