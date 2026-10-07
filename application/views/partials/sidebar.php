@@ -35,19 +35,21 @@ $ada_menu_sistem     = $bisa_audit;
         <!-- Dasbor: Tampil untuk semua authenticated user -->
         <li class="mb-1 <?php echo ($halaman_aktif === 'dasbor') ? 'active' : ''; ?>">
             <a href="<?php echo site_url('dasbor'); ?>" class="nav-link px-3 py-2 rounded">
+                <i class="bi bi-grid-1x2 me-2"></i>
                 <span>Dasbor Utama</span>
             </a>
         </li>
 
         <!-- Registrasi & Sampel -->
         <?php if ($ada_menu_registrasi): ?>
-            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">
+            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold">
                 Registrasi &amp; Sampel
             </li>
 
             <?php if ($bisa_sampel): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'sampel') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('sampel'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-box-seam me-2"></i>
                         <span>Data Sampel</span>
                     </a>
                 </li>
@@ -56,13 +58,14 @@ $ada_menu_sistem     = $bisa_audit;
 
         <!-- Pengujian Sampel & Laporan -->
         <?php if ($ada_menu_pengujian): ?>
-            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">
+            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold">
                 Pengujian Sampel
             </li>
 
             <?php if ($bisa_pengujian_antrean): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_antrean') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/antrean'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-list-task me-2"></i>
                         <span>Antrean Pengujian</span>
                     </a>
                 </li>
@@ -71,6 +74,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_verifikasi): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_verifikasi') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/verifikasi'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-check2-square me-2"></i>
                         <span>Verifikasi Laporan</span>
                     </a>
                 </li>
@@ -79,6 +83,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_approval): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_approval') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/approval'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-shield-check me-2"></i>
                         <span>Approval Laporan</span>
                     </a>
                 </li>
@@ -87,7 +92,8 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_laporan): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="nav-link px-3 py-2 rounded">
-                        <span>Riwayat Hasil Uji / Laporan</span>
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        <span>Riwayat Hasil Uji</span>
                     </a>
                 </li>
             <?php endif; ?>
@@ -95,13 +101,14 @@ $ada_menu_sistem     = $bisa_audit;
 
         <!-- Master Data -->
         <?php if ($ada_menu_master): ?>
-            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">
+            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold">
                 Master Data
             </li>
 
             <?php if ($bisa_metode): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'metode') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('metode'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-journal-bookmark me-2"></i>
                         <span>Master Metode</span>
                     </a>
                 </li>
@@ -110,6 +117,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_parameter): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'parameter') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('parameter'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-sliders me-2"></i>
                         <span>Master Parameter</span>
                     </a>
                 </li>
@@ -118,6 +126,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_template): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'template') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('template'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-file-earmark-code me-2"></i>
                         <span>Form Template</span>
                     </a>
                 </li>
@@ -126,6 +135,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_pengguna): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengguna') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengguna'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-people me-2"></i>
                         <span>Manajemen Pengguna</span>
                     </a>
                 </li>
@@ -134,6 +144,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_peran): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'peran') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('peran'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-shield-lock me-2"></i>
                         <span>Peran &amp; Hak Akses</span>
                     </a>
                 </li>
@@ -142,6 +153,7 @@ $ada_menu_sistem     = $bisa_audit;
             <?php if ($bisa_laboratorium): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'laboratorium') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('laboratorium'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-building me-2"></i>
                         <span>Laboratorium</span>
                     </a>
                 </li>
@@ -150,13 +162,14 @@ $ada_menu_sistem     = $bisa_audit;
 
         <!-- Sistem & Keamanan -->
         <?php if ($ada_menu_sistem): ?>
-            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">
+            <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold">
                 Sistem &amp; Keamanan
             </li>
 
             <?php if ($bisa_audit): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'audit') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('audit'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-activity me-2"></i>
                         <span>Audit Trail</span>
                     </a>
                 </li>

@@ -325,23 +325,30 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * Halaman Riwayat Hasil Pengujian
+     * Halaman Riwayat Hasil Pengujian / Laporan
+     * Dapat diakses oleh semua role dengan permission laporan_view.
+     * Penguji (pengujian_input) hanya melihat riwayat miliknya sendiri.
+     * Role lain dengan laporan_view melihat seluruh data.
      */
     public function riwayat()
     {
-        $this->cek_hak_akses('pengujian_view');
+        $this->cek_hak_akses('laporan_view');
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat';
-        $this->data['judul_halaman'] = 'Riwayat Hasil Pengujian';
+        $this->data['judul_halaman'] = 'Riwayat Hasil Uji';
         $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
+            array('label' => 'Laporan', 'url' => site_url('pengujian/riwayat')),
             array('label' => 'Riwayat Hasil Uji', 'url' => '#')
         );
 
+        // Filter: Penguji (permission pengujian_input) hanya melihat riwayat miliknya.
+        // Role dengan laporan_view tapi bukan penguji operasional melihat semua data.
         $penguji_id = NULL;
-        // Jika user bukan Admin/SuperAdmin dan bukan Penyelia/MT, filter riwayat miliknya sendiri
-        $role_id = $this->session->userdata('role_id');
-        if ($role_id == 3) { // Role Penguji (Petugas Uji)
+        $role_id    = $this->session->userdata('role_id');
+        $is_penguji = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input')
+                   && !$this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify')
+                   && !$this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve');
+        if ($is_penguji) {
             $penguji_id = $this->session->userdata('user_id');
         }
 

@@ -39,7 +39,7 @@
                                 <td><strong class="text-primary font-monospace"><?php echo html_escape($sd['kode_sampel_manual'] ?: ($sd['no'] ? 'NO-' . $sd['no'] : 'SMP-' . $sd['id'])); ?></strong></td>
                                 <td><strong class="text-dark"><?php echo html_escape($sd['nama_sampel']); ?></strong></td>
                                 <td><?php echo html_escape($sd['kategori_sampel'] ?: '-'); ?></td>
-                                <td><span class="badge bg-warning text-dark"><?php echo html_escape($sd['status']); ?></span></td>
+                                <td><span class="badge-status badge-sedang-diuji"><?php echo html_escape($sd['status']); ?></span></td>
                                 <td>
                                     <a href="<?php echo site_url('pengujian/proses/' . $sd['id']); ?>" class="btn btn-warning btn-sm fw-semibold">
                                         Lanjutkan Pengujian &rarr;

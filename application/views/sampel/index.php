@@ -63,7 +63,16 @@
                                 </td>
                                 <td><?php echo html_escape($s['nama_sarana'] ?: '-'); ?></td>
                                 <td>
-                                    <span class="badge bg-warning text-dark"><?php echo html_escape($s['status']); ?></span>
+                                    <?php
+                                        $st = $s['status'];
+                                        $b_class = 'badge-menunggu-pengujian';
+                                        if ($st === 'Sedang Diuji') $b_class = 'badge-sedang-diuji';
+                                        elseif ($st === 'Menunggu Verifikasi') $b_class = 'badge-menunggu-verifikasi';
+                                        elseif ($st === 'Menunggu Approval') $b_class = 'badge-menunggu-approval';
+                                        elseif ($st === 'Approved / Final') $b_class = 'badge-approved-final';
+                                        elseif ($st === 'Ditolak') $b_class = 'badge-ditolak';
+                                    ?>
+                                    <span class="badge-status <?php echo $b_class; ?>"><?php echo html_escape($st); ?></span>
                                 </td>
                                 <td>
                                     <small class="text-muted"><?php echo html_escape($s['nama_pembuat'] ?: 'Sistem'); ?></small>
