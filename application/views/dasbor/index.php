@@ -241,43 +241,6 @@
         font-weight: 700;
     }
 
-    /* Deferred alerts / items */
-    .deferred-alert-header {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .deferred-alert-header i {
-        color: #475569;
-    }
-
-    .deferred-count-label {
-        font-size: 0.82rem;
-        font-weight: 700;
-        margin-bottom: 0.65rem;
-    }
-
-    .deferred-count-amber { color: #d97706; }
-
-    .deferred-list-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.75rem;
-        color: #64748b;
-        margin-bottom: 0.4rem;
-    }
-
-    .deferred-list-item .item-val {
-        font-weight: 600;
-        color: #d97706;
-    }
-
     /* Donut Legend */
     .donut-legend-item {
         display: flex;
@@ -577,10 +540,10 @@
         </div>
     </div>
 
-    <!-- Row 3: Trend Line Chart + Alat & Reagen -->
-    <div class="row g-3 mb-4">
+    <!-- Row 3: Trend Line Chart -->
+<div class="row g-3 mb-4">
         <!-- Line Chart: Tren Sampel & Pengujian -->
-        <div class="col-12 col-lg-8">
+    <div class="col-12">
             <div class="dash-card">
                 <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
                     <h3 class="section-card-title mb-0">
@@ -599,50 +562,6 @@
                 <!-- Canvas Chart.js -->
                 <div style="height: 240px; position: relative;">
                     <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Alat Mendekati Kalibrasi & Reagen Mendekati Kedaluwarsa -->
-        <div class="col-12 col-lg-4">
-            <div class="dash-card d-flex flex-column justify-content-between">
-                <!-- Section Alat -->
-                <div class="mb-4">
-                    <div class="deferred-alert-header">
-                        <i class="bi bi-exclamation-triangle"></i> Alat Mendekati Kalibrasi
-                    </div>
-                    <div class="deferred-count-label deferred-count-amber">
-                        4 alat
-                    </div>
-                    <div class="deferred-list-item">
-                        <span>&bull; Spektrofotometer UV-01</span>
-                        <span class="item-val">3 hari</span>
-                    </div>
-                    <div class="deferred-list-item">
-                        <span>&bull; Timbangan Analitik-02</span>
-                        <span class="item-val">7 hari</span>
-                    </div>
-                    <div class="deferred-list-item">
-                        <span>&bull; HPLC-01</span>
-                        <span class="item-val">12 hari</span>
-                    </div>
-                    <div class="deferred-list-item">
-                        <span>&bull; Oven-03</span>
-                        <span class="item-val">15 hari</span>
-                    </div>
-                </div>
-
-                <!-- Section Reagen -->
-                <div class="border-top pt-3">
-                    <div class="deferred-alert-header">
-                        <i class="bi bi-exclamation-triangle"></i> Reagen Mendekati Kedaluwarsa
-                    </div>
-                    <div class="deferred-count-label deferred-count-amber">
-                        6 reagen
-                    </div>
-                    <div class="deferred-list-item">
-                        <span>&bull; Reagen A &bull; 5 hari lagi</span>
-                    </div>
                 </div>
             </div>
         </div>

@@ -25,9 +25,6 @@ class Sampel extends MY_Controller
 
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Daftar Sampel Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Sampel', 'url' => site_url('sampel'))
-        );
 
         $this->data['daftar_sampel'] = $this->Model_Sampel->ambil_semua();
 

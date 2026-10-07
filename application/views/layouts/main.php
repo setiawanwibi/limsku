@@ -37,7 +37,9 @@
         <!-- Main Body -->
         <main class="lims-main-body">
             <!-- Breadcrumbs -->
-            <?php $this->load->view('partials/breadcrumb'); ?>
+            <?php if (!isset($hide_breadcrumb) || !$hide_breadcrumb): ?>
+    <?php $this->load->view('partials/breadcrumb'); ?>
+<?php endif; ?>
 
             <!-- Konten Utama -->
             <?php if (isset($konten_utama)): ?>

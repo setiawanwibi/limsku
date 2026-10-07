@@ -35,10 +35,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_antrean';
         $this->data['judul_halaman'] = 'Antrean Pengujian Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Antrean', 'url' => '#')
-        );
 
         $this->data['antrean_sampel'] = $this->Model_Pengujian->ambil_antrean();
         $this->data['sedang_diuji']   = $this->Model_Pengujian->ambil_dalam_pengujian($this->session->userdata('user_id'));
