@@ -642,7 +642,7 @@
 
         <?php 
         $role_id_user = $this->session->userdata('role_id');
-        $bisa_tambah = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_input');
+        $bisa_tambah = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_create') || $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_input');
         $bisa_import = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_import');
         ?>
 
@@ -693,16 +693,17 @@
             <?php endif; ?>
 
 
-            <!-- TERIMA SAMPEL BARU -->
+            <!-- TERIMA SAMPEL BARU / INPUT MANUAL -->
             <?php if ($bisa_tambah): ?>
             <a
                 href="<?php echo site_url('sampel/tambah'); ?>"
                 class="btn-terima-sampel"
+                title="Form Registrasi Sampel Manual (31 Field)"
             >
 
                 <span class="btn-plus">+</span>
 
-                Terima Sampel Baru
+                Input Sampel Manual
 
             </a>
             <?php endif; ?>
