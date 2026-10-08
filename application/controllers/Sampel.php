@@ -47,10 +47,6 @@ class Sampel extends MY_Controller
 
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Detail Sampel: ' . html_escape($sampel['nama_sampel']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Sampel', 'url' => site_url('sampel')),
-            array('label' => 'Detail', 'url' => '#')
-        );
         $this->data['sampel']        = $sampel;
 
         $this->muat_tampilan('sampel/detail');
@@ -124,10 +120,6 @@ class Sampel extends MY_Controller
 
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Registrasi Sampel Manual';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Sampel', 'url' => site_url('sampel')),
-            array('label' => 'Registrasi Manual', 'url' => '#')
-        );
 
         $this->muat_tampilan('sampel/tambah');
     }
@@ -203,10 +195,6 @@ class Sampel extends MY_Controller
 
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Edit Sampel: ' . html_escape($sampel['nama_sampel']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Sampel', 'url' => site_url('sampel')),
-            array('label' => 'Edit', 'url' => '#')
-        );
         $this->data['sampel']        = $sampel;
 
         $this->muat_tampilan('sampel/edit');
@@ -368,10 +356,6 @@ class Sampel extends MY_Controller
 
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Import Sampel via Excel';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Sampel', 'url' => site_url('sampel')),
-            array('label' => 'Import Excel', 'url' => '#')
-        );
 
         $this->muat_tampilan('sampel/import');
     }

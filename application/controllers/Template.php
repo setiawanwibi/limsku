@@ -25,11 +25,6 @@ class Template extends MY_Controller
 
         $this->data['halaman_aktif'] = 'template';
         $this->data['judul_halaman'] = 'Master Template Form Pengujian (17 Form)';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Data', 'url' => '#'),
-            array('label' => 'Template Form', 'url' => site_url('template'))
-        );
-
         $this->data['daftar_template'] = $this->Model_Template->ambil_semua();
 
         $this->muat_tampilan('template/index');
@@ -160,10 +155,6 @@ class Template extends MY_Controller
 
         $this->data['halaman_aktif']    = 'template';
         $this->data['judul_halaman']    = 'Edit Template Form Pengujian';
-        $this->data['breadcrumbs']      = array(
-            array('label' => 'Template Form', 'url' => site_url('template')),
-            array('label' => 'Edit', 'url' => '#')
-        );
         $this->data['template']         = $tpl;
         $this->data['daftar_metode']    = $this->Model_Metode->ambil_aktif();
         $this->data['daftar_parameter'] = $this->Model_Parameter->ambil_aktif();

@@ -44,9 +44,6 @@ class Akun extends MY_Controller
         
         $this->data['halaman_aktif'] = 'akun';
         $this->data['judul_halaman'] = 'Profil & Akun Pengguna';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Akun Saya', 'url' => site_url('akun'))
-        );
 
         $this->data['user']           = $this->Model_Pengguna->ambil_by_id($user_id);
         $this->data['boleh_ttd']      = $this->boleh_kelola_ttd();

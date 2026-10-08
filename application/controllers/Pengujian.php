@@ -266,10 +266,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_antrean';
         $this->data['judul_halaman'] = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Proses Sesi Pengujian', 'url' => '#')
-        );
         $this->data['sesi']          = $sesi;
         $this->data['forms']         = $forms;
         $this->data['hasil_forms']   = $forms;
@@ -295,10 +291,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat';
         $this->data['judul_halaman'] = 'Detail Sesi Pengujian: ' . html_escape($sesi['nama_sampel']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian/riwayat')),
-            array('label' => 'Detail Sesi', 'url' => '#')
-        );
         $this->data['sesi']          = $sesi;
         $this->data['forms']         = $forms;
 
@@ -332,10 +324,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat';
         $this->data['judul_halaman'] = 'Riwayat Hasil Uji';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Laporan', 'url' => site_url('pengujian/riwayat')),
-            array('label' => 'Riwayat Hasil Uji', 'url' => '#')
-        );
 
         // Filter: Penguji (permission pengujian_input) hanya melihat riwayat miliknya.
         // Role dengan laporan_view tapi bukan penguji operasional melihat semua data.
@@ -496,11 +484,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_verifikasi';
         $this->data['judul_halaman'] = 'Verifikasi Laporan';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Verifikasi Laporan', 'url' => '#')
-        );
-
         $antrean = $this->Model_Pengujian->ambil_antrean_verifikasi();
         
         $session_id_selected = $this->input->get('session_id', TRUE);
@@ -957,10 +940,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_approval';
         $this->data['judul_halaman'] = 'Antrean Approval Laporan';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Approval', 'url' => '#')
-        );
 
         $this->data['antrean'] = $this->Model_Pengujian->ambil_antrean_approval();
 
@@ -976,10 +955,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat_verifikasi';
         $this->data['judul_halaman'] = 'Riwayat Verifikasi Laporan (Penyelia)';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Verifikasi Laporan', 'url' => site_url('pengujian/verifikasi')),
-            array('label' => 'Riwayat Verifikasi', 'url' => '#')
-        );
 
         $user_id = $this->session->userdata('user_id');
         $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_verifikasi_by_user($user_id);
@@ -996,10 +971,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat_approval';
         $this->data['judul_halaman'] = 'Riwayat Approval Laporan (Manajer Teknis)';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Approval Laporan', 'url' => site_url('pengujian/approval')),
-            array('label' => 'Riwayat Approval', 'url' => '#')
-        );
 
         $user_id = $this->session->userdata('user_id');
         $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id);
