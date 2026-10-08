@@ -67,7 +67,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="<?php echo site_url('pengujian/detail/' . $v['id']); ?>" class="btn btn-primary btn-sm fw-semibold">
+                                    <a href="<?php echo site_url('pengujian/detail_sesi/' . $v['id']); ?>" class="btn btn-primary btn-sm fw-semibold">
                                         <i class="bi bi-search me-1"></i> Periksa &amp; Approve
                                     </a>
                                 </td>

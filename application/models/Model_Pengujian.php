@@ -714,4 +714,42 @@ class Model_Pengujian extends CI_Model
         $this->db->trans_complete();
         return $this->db->trans_status();
     }
+
+    /**
+     * Mengambil riwayat pengujian/sesi yang telah diverifikasi oleh penyelia tertentu
+     */
+    public function ambil_riwayat_verifikasi_by_user($verifier_id)
+    {
+        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
+            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
+            (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
+            (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+        $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->where('ts.verifier_id', $verifier_id);
+        $this->db->order_by('ts.waktu_verifikasi', 'DESC');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Mengambil riwayat pengujian/sesi yang telah diapprove oleh manajer teknis tertentu
+     */
+    public function ambil_riwayat_approval_by_user($approver_id)
+    {
+        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
+            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
+            (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
+            (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+        $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->where('ts.approver_id', $approver_id);
+        $this->db->order_by('ts.waktu_approval', 'DESC');
+        return $this->db->get()->result_array();
+    }
 }

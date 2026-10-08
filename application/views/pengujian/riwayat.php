@@ -85,6 +85,7 @@ $user_id_login              = $this->session->userdata('user_id');
                             <th>Nama Sampel</th>
                             <th>Jenis Pengujian</th>
                             <th>Penguji</th>
+                            <th>Penyelia</th>
                             <th>Kesimpulan</th>
                             <th>Status</th>
                             <th class="text-center" width="18%">Aksi</th>
@@ -150,6 +151,9 @@ $user_id_login              = $this->session->userdata('user_id');
                                     <span class="text-dark small"><?php echo html_escape($h['nama_penguji'] ?: '-'); ?></span>
                                 </td>
                                 <td>
+                                    <span class="text-dark small"><?php echo html_escape(isset($h['nama_verifier']) && $h['nama_verifier'] ? $h['nama_verifier'] : '-'); ?></span>
+                                </td>
+                                <td>
                                     <span class="badge <?php echo $k_cls; ?> px-2 py-1 small">
                                         <?php echo html_escape($kes ?: 'Belum Disimpulkan'); ?>
                                     </span>
@@ -176,13 +180,13 @@ $user_id_login              = $this->session->userdata('user_id');
                                         <?php endif; ?>
 
                                         <?php
-                                        // Download PDF — hanya jika file_laporan tersedia
-                                        // Untuk sesi: cek melalui ambil_hasil_by_session (tidak tersedia di sini),
-                                        // gunakan kolom file_laporan jika ada (legacy) atau biarkan tidak tampil
-                                        $has_pdf = !empty($h['file_laporan']);
-                                        if ($has_pdf): ?>
-                                            <a href="<?php echo site_url('pengujian/download_pdf/' . $h['id']); ?>"
-                                               class="btn btn-outline-success btn-sm"
+                                        // Download PDF — jika status Approved / Final atau file_laporan tersedia
+                                        $has_pdf = ($st === 'Approved / Final' || !empty($h['file_laporan']));
+                                        if ($has_pdf):
+                                            $pdf_url = $is_sesi ? site_url('pengujian/pdf_sesi/' . $h['id']) : site_url('pengujian/download_pdf/' . $h['id']);
+                                        ?>
+                                            <a href="<?php echo $pdf_url; ?>"
+                                               class="btn btn-outline-danger btn-sm"
                                                title="Unduh PDF Laporan" target="_blank">
                                                 <i class="bi bi-file-earmark-pdf me-1"></i>PDF
                                             </a>
@@ -251,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 paginate: { previous: '&laquo;', next: '&raquo;' }
             },
             columnDefs: [
-                { orderable: false, targets: [7] }
+                { orderable: false, targets: [-1] }
             ]
         });
     }

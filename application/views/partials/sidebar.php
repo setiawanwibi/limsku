@@ -39,6 +39,12 @@ $ada_menu_sistem     = $bisa_audit;
                 <span>Dasbor Utama</span>
             </a>
         </li>
+        <li class="mb-1 <?php echo ($halaman_aktif === 'akun') ? 'active' : ''; ?>">
+            <a href="<?php echo site_url('akun'); ?>" class="nav-link px-3 py-2 rounded">
+                <i class="bi bi-person-circle me-2"></i>
+                <span>Profil &amp; TTD Digital</span>
+            </a>
+        </li>
 
         <!-- Registrasi & Sampel -->
         <?php if ($ada_menu_registrasi): ?>
@@ -78,6 +84,12 @@ $ada_menu_sistem     = $bisa_audit;
                         <span>Verifikasi Laporan</span>
                     </a>
                 </li>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_verifikasi') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('pengujian/riwayat_verifikasi'); ?>" class="nav-link px-3 py-2 rounded ps-4 small">
+                        <i class="bi bi-clock-history me-2"></i>
+                        <span>Riwayat Verifikasi</span>
+                    </a>
+                </li>
             <?php endif; ?>
 
             <?php if ($bisa_approval): ?>
@@ -85,6 +97,12 @@ $ada_menu_sistem     = $bisa_audit;
                     <a href="<?php echo site_url('pengujian/approval'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-shield-check me-2"></i>
                         <span>Approval Laporan</span>
+                    </a>
+                </li>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_approval') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="nav-link px-3 py-2 rounded ps-4 small">
+                        <i class="bi bi-file-earmark-check me-2"></i>
+                        <span>Riwayat Approval</span>
                     </a>
                 </li>
             <?php endif; ?>

@@ -284,7 +284,7 @@ class Pengujian extends MY_Controller
      */
     public function detail_sesi($session_id = NULL)
     {
-        $this->cek_hak_akses('pengujian_view');
+        $this->cek_hak_akses('laporan_view');
 
         $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
         if (!$sesi) {
@@ -360,7 +360,7 @@ class Pengujian extends MY_Controller
      */
     public function detail($test_id = NULL)
     {
-        $this->cek_hak_akses('pengujian_view');
+        $this->cek_hak_akses('laporan_view');
 
         $hasil = $this->Model_Pengujian->ambil_hasil_by_id($test_id);
         if (!$hasil) {
@@ -388,7 +388,17 @@ class Pengujian extends MY_Controller
         $this->cek_hak_akses('laporan_view');
 
         $hasil = $this->Model_Pengujian->ambil_hasil_by_id($test_id);
-        if (!$hasil || empty($hasil['file_laporan'])) {
+        if (!$hasil) {
+            show_404();
+        }
+
+        // Strict Status Audit: PDF final hanya dapat di-download jika status sudah Approved / Final
+        if ($hasil['status'] !== 'Approved / Final') {
+            $this->session->set_flashdata('pesan_gagal', 'Laporan PDF final hanya dapat diunduh untuk pengujian yang berstatus "Approved / Final".');
+            redirect('pengujian/riwayat');
+        }
+
+        if (empty($hasil['file_laporan'])) {
             $this->session->set_flashdata('pesan_gagal', 'File laporan PDF belum terbentuk atau tidak ditemukan.');
             redirect('pengujian/riwayat');
         }
@@ -402,6 +412,72 @@ class Pengujian extends MY_Controller
         $this->catat_audit('DOWNLOAD_REPORT', 'Pengujian', array(
             'test_id'   => $test_id,
             'file_name' => basename($full_path)
+        ));
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="' . basename($full_path) . '"');
+        header('Content-Length: ' . filesize($full_path));
+        readfile($full_path);
+        exit;
+    }
+
+    /**
+     * Unduh / Tampilkan File Laporan Hasil Uji PDF untuk Sesi Pengujian
+     * 
+     * @param int $session_id
+     */
+    public function download_pdf_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        if ($sesi['status'] !== 'Approved / Final') {
+            $this->session->set_flashdata('pesan_gagal', 'Laporan PDF final hanya dapat diunduh untuk sesi pengujian yang berstatus "Approved / Final".');
+            redirect('pengujian/riwayat');
+        }
+
+        $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+        $file_laporan = NULL;
+        foreach ($forms as $f) {
+            if (!empty($f['file_laporan'])) {
+                $file_laporan = $f['file_laporan'];
+                break;
+            }
+        }
+
+        if (empty($file_laporan) || !file_exists(FCPATH . $file_laporan)) {
+            $sampel_info   = $this->Model_Sampel->ambil_by_id($sesi['sample_id']);
+            $penguji_info  = $this->Model_Pengguna->ambil_by_id($sesi['penguji_id']);
+            $verifier_info = $this->Model_Pengguna->ambil_by_id($sesi['verifier_id']);
+            $approver_info = $this->Model_Pengguna->ambil_by_id($sesi['approver_id']);
+
+            $pdf_dir  = FCPATH . 'uploads/laporan/';
+            $pdf_name = 'LHU_FINAL_' . $sesi['sample_id'] . '_SESI' . $session_id . '_' . time() . '.pdf';
+            $pdf_path = $pdf_dir . $pdf_name;
+
+            try {
+                $pdf_gen = new Laporan_PDF();
+                $pdf_gen->buat_laporan_sesi($sampel_info, $sesi, $forms, $penguji_info, $verifier_info, $approver_info, $pdf_path);
+                $file_laporan = 'uploads/laporan/' . $pdf_name;
+                $this->Model_Pengujian->update_file_laporan_sesi($session_id, $file_laporan);
+            } catch (Exception $e) {
+                log_message('error', 'Gagal membuat PDF sesi: ' . $e->getMessage());
+            }
+        }
+
+        $full_path = FCPATH . $file_laporan;
+        if (!file_exists($full_path)) {
+            $this->session->set_flashdata('pesan_gagal', 'File PDF tidak ditemukan di server.');
+            redirect('pengujian/riwayat');
+        }
+
+        $this->catat_audit('DOWNLOAD_REPORT_SESSION', 'Pengujian', array(
+            'session_id' => $session_id,
+            'file_name'  => basename($full_path)
         ));
 
         header('Content-Type: application/pdf');
@@ -665,6 +741,28 @@ class Pengujian extends MY_Controller
         $approver_id = $this->session->userdata('user_id');
 
         if ($this->Model_Pengujian->approve_sesi($session_id, $approver_id)) {
+            // Generate official multi-form LHU PDF
+            $sampel_info   = $this->Model_Sampel->ambil_by_id($sesi['sample_id']);
+            $sesi_info     = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+            $forms_info    = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+            $penguji_info  = $this->Model_Pengguna->ambil_by_id($sesi['penguji_id']);
+            $verifier_info = $this->Model_Pengguna->ambil_by_id($sesi['verifier_id']);
+            $approver_info = $this->Model_Pengguna->ambil_by_id($approver_id);
+
+            $pdf_dir  = FCPATH . 'uploads/laporan/';
+            $pdf_name = 'LHU_FINAL_' . $sesi['sample_id'] . '_SESI' . $session_id . '_' . time() . '.pdf';
+            $pdf_path = $pdf_dir . $pdf_name;
+
+            try {
+                $pdf_gen = new Laporan_PDF();
+                $pdf_gen->buat_laporan_sesi($sampel_info, $sesi_info, $forms_info, $penguji_info, $verifier_info, $approver_info, $pdf_path);
+                
+                $rel_path = 'uploads/laporan/' . $pdf_name;
+                $this->Model_Pengujian->update_file_laporan_sesi($session_id, $rel_path);
+            } catch (Exception $e) {
+                log_message('error', 'Gagal membuat PDF LHU Sesi: ' . $e->getMessage());
+            }
+
             $this->catat_audit('APPROVAL_SESI', 'Pengujian', array(
                 'testing_session_id' => $session_id,
                 'sample_id'          => $sesi['sample_id'],
@@ -673,7 +771,7 @@ class Pengujian extends MY_Controller
                 'status_sesudah'     => 'Approved / Final'
             ));
 
-            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian berhasil di-approve (Approved / Final).');
+            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian berhasil di-approve (Approved / Final) dan Laporan PDF Final (LHU) telah diterbitkan.');
             redirect('pengujian/detail_sesi/' . $session_id);
         } else {
             $this->session->set_flashdata('pesan_gagal', 'Gagal memproses approval sesi.');
@@ -867,6 +965,46 @@ class Pengujian extends MY_Controller
         $this->data['antrean'] = $this->Model_Pengujian->ambil_antrean_approval();
 
         $this->muat_tampilan('pengujian/approval');
+    }
+
+    /**
+     * Historical Laporan yang Telah Diverifikasi oleh Penyelia
+     */
+    public function riwayat_verifikasi()
+    {
+        $this->cek_hak_akses('pengujian_verify');
+
+        $this->data['halaman_aktif'] = 'pengujian_riwayat_verifikasi';
+        $this->data['judul_halaman'] = 'Riwayat Verifikasi Laporan (Penyelia)';
+        $this->data['breadcrumbs']   = array(
+            array('label' => 'Verifikasi Laporan', 'url' => site_url('pengujian/verifikasi')),
+            array('label' => 'Riwayat Verifikasi', 'url' => '#')
+        );
+
+        $user_id = $this->session->userdata('user_id');
+        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_verifikasi_by_user($user_id);
+
+        $this->muat_tampilan('pengujian/riwayat');
+    }
+
+    /**
+     * Historical Laporan yang Telah Diapprove oleh Manajer Teknis
+     */
+    public function riwayat_approval()
+    {
+        $this->cek_hak_akses('pengujian_approve');
+
+        $this->data['halaman_aktif'] = 'pengujian_riwayat_approval';
+        $this->data['judul_halaman'] = 'Riwayat Approval Laporan (Manajer Teknis)';
+        $this->data['breadcrumbs']   = array(
+            array('label' => 'Approval Laporan', 'url' => site_url('pengujian/approval')),
+            array('label' => 'Riwayat Approval', 'url' => '#')
+        );
+
+        $user_id = $this->session->userdata('user_id');
+        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id);
+
+        $this->muat_tampilan('pengujian/riwayat');
     }
 
     /**

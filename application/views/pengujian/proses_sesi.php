@@ -60,12 +60,28 @@
                                     $data_hasil = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : array();
                                 ?>
 
-                                <?php if (!empty($schema)): ?>
+                                <?php if (!empty($schema) && is_array($schema)): ?>
                                     <div class="row g-3 mb-4">
                                         <?php foreach ($schema as $key => $label): ?>
+                                            <?php 
+                                                // Handle label as array/object or string safely
+                                                if (is_array($label)) {
+                                                    $lbl_text = isset($label['label']) ? $label['label'] : (isset($label['title']) ? $label['title'] : ucwords(str_replace('_', ' ', $key)));
+                                                } else {
+                                                    $lbl_text = (string)$label;
+                                                }
+
+                                                // Handle data_hasil value safely
+                                                $raw_val = isset($data_hasil[$key]) ? $data_hasil[$key] : '';
+                                                if (is_array($raw_val)) {
+                                                    $val_text = json_encode($raw_val, JSON_UNESCAPED_UNICODE);
+                                                } else {
+                                                    $val_text = (string)$raw_val;
+                                                }
+                                            ?>
                                             <div class="col-md-6">
-                                                <label for="f_<?php echo $f['id']; ?>_<?php echo $key; ?>" class="form-label fw-semibold small"><?php echo html_escape($label); ?></label>
-                                                <input type="text" class="form-control form-control-sm" id="f_<?php echo $f['id']; ?>_<?php echo $key; ?>" name="forms[<?php echo $f['id']; ?>][hasil][<?php echo $key; ?>]" value="<?php echo html_escape(isset($data_hasil[$key]) ? $data_hasil[$key] : ''); ?>" placeholder="Input hasil <?php echo html_escape($label); ?>">
+                                                <label for="f_<?php echo $f['id']; ?>_<?php echo $key; ?>" class="form-label fw-semibold small"><?php echo html_escape($lbl_text); ?></label>
+                                                <input type="text" class="form-control form-control-sm" id="f_<?php echo $f['id']; ?>_<?php echo $key; ?>" name="forms[<?php echo $f['id']; ?>][hasil][<?php echo $key; ?>]" value="<?php echo html_escape($val_text); ?>" placeholder="Input hasil <?php echo html_escape($lbl_text); ?>">
                                             </div>
                                         <?php endforeach; ?>
                                     </div>

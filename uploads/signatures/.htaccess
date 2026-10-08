@@ -1,0 +1,7 @@
+# Disable PHP script execution in signature upload directory
+<FilesMatch "\.(php|php3|php4|php5|php7|phtml|pl|py|cgi|asp|js|sh)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+Options -Indexes

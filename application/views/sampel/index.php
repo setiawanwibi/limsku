@@ -640,10 +640,17 @@
         </p>
 
 
+        <?php 
+        $role_id_user = $this->session->userdata('role_id');
+        $bisa_tambah = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_input');
+        $bisa_import = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_import');
+        ?>
+
+        <?php if ($bisa_tambah || $bisa_import): ?>
         <div class="sampel-top-actions">
 
             <!-- IMPORT EXCEL -->
-
+            <?php if ($bisa_import): ?>
             <a
                 href="<?php echo site_url('sampel/import'); ?>"
                 class="btn-import-excel"
@@ -683,10 +690,11 @@
                 Import Excel
 
             </a>
+            <?php endif; ?>
 
 
             <!-- TERIMA SAMPEL BARU -->
-
+            <?php if ($bisa_tambah): ?>
             <a
                 href="<?php echo site_url('sampel/tambah'); ?>"
                 class="btn-terima-sampel"
@@ -697,8 +705,10 @@
                 Terima Sampel Baru
 
             </a>
+            <?php endif; ?>
 
         </div>
+        <?php endif; ?>
 
     </div>
 
@@ -995,36 +1005,38 @@
 
 
                                             <!-- EDIT -->
+                                            <?php if ($this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_edit')): ?>
+                                             <li>
 
-                                            <li>
+                                                 <a
+                                                     class="dropdown-item"
+                                                     href="<?php echo site_url('sampel/edit/' . $s['id']); ?>"
+                                                 >
 
-                                                <a
-                                                    class="dropdown-item"
-                                                    href="<?php echo site_url('sampel/edit/' . $s['id']); ?>"
-                                                >
+                                                     Edit Sampel
 
-                                                    Edit Sampel
+                                                 </a>
 
-                                                </a>
-
-                                            </li>
+                                             </li>
+                                            <?php endif; ?>
 
 
-                                            <!-- HAPUS -->
+                                             <!-- HAPUS -->
+                                            <?php if ($this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_delete')): ?>
+                                             <li>
 
-                                            <li>
+                                                 <a
+                                                     class="dropdown-item text-danger"
+                                                     href="<?php echo site_url('sampel/hapus/' . $s['id']); ?>"
+                                                     onclick="return confirm('Apakah Anda yakin ingin menghapus data sampel ini?');"
+                                                 >
 
-                                                <a
-                                                    class="dropdown-item text-danger"
-                                                    href="<?php echo site_url('sampel/hapus/' . $s['id']); ?>"
-                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus data sampel ini?');"
-                                                >
+                                                     Hapus Sampel
 
-                                                    Hapus Sampel
+                                                 </a>
 
-                                                </a>
-
-                                            </li>
+                                             </li>
+                                            <?php endif; ?>
 
 
                                         </ul>

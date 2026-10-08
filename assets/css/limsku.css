@@ -29,22 +29,41 @@ body {
 
 /* Layout Wrapper */
 .lims-wrapper {
-    display: flex;
+    display: block;
     width: 100%;
-    align-items: stretch;
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* Sidebar — Fixed: selalu tampil di kiri saat scroll */
 #lims-sidebar {
-    min-width: 260px;
-    max-width: 260px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     background-color: var(--lims-sidebar-bg);
     color: var(--lims-sidebar-text);
     border-right: 1px solid var(--lims-sidebar-border);
-    box-shadow: 1px 0 4px rgba(0, 0, 0, 0.03);
-    transition: all 0.25s ease-in-out;
-    z-index: 1020;
+    box-shadow: 1px 0 6px rgba(0, 0, 0, 0.05);
+    z-index: 1030;
+    /* Scrollbar tipis agar tidak mengambil ruang terlalu banyak */
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+}
+
+#lims-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+#lims-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#lims-sidebar::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 4px;
 }
 
 #lims-sidebar .sidebar-header {
@@ -105,22 +124,30 @@ body {
     font-size: 0.7rem !important;
 }
 
-/* Main Content Area */
+/* Main Content Area — diberi margin-left dan padding-top untuk fixed sidebar & topbar */
 #lims-content {
-    width: 100%;
+    margin-left: 260px;
+    padding-top: 57px;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     background-color: var(--lims-bg);
-    overflow-x: hidden;
 }
 
-/* Topbar Navbar */
+/* Topbar Navbar — Fixed: selalu menempel di paling atas saat scroll */
 .lims-topbar {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
+    height: 57px;
+    z-index: 1020;
     background-color: #ffffff;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
     border-bottom: 1px solid var(--lims-card-border);
     padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
 }
 
 /* Content Body */

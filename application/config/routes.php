@@ -26,6 +26,11 @@ $route['pengguna/status/(:num)']    = 'pengguna/ubah_status/$1';
 $route['pengguna/password/(:num)']  = 'pengguna/ubah_password/$1';
 $route['pengguna/hapus/(:num)']     = 'pengguna/hapus/$1';
 
+// Profil & Akun User Logged-In
+$route['akun']                      = 'akun/index';
+$route['akun/upload_ttd']           = 'akun/upload_ttd';
+$route['akun/hapus_ttd']            = 'akun/hapus_ttd';
+
 // Peran (Role Management & Permission)
 $route['peran']                     = 'peran/index';
 $route['peran/tambah']              = 'peran/tambah';
@@ -85,6 +90,7 @@ $route['pengujian/proses/(:num)']           = 'pengujian/proses/$1';
 $route['pengujian/riwayat']                 = 'pengujian/riwayat';
 $route['pengujian/detail/(:num)']           = 'pengujian/detail/$1';
 $route['pengujian/pdf/(:num)']              = 'pengujian/download_pdf/$1';
+$route['pengujian/pdf_sesi/(:num)']         = 'pengujian/download_pdf_sesi/$1';
 $route['pengujian/verifikasi']               = 'pengujian/verifikasi';
 $route['pengujian/verifikasi_sesi/(:num)']   = 'pengujian/verifikasi_sesi/$1';
 $route['pengujian/tolak_sesi/(:num)']        = 'pengujian/tolak_sesi/$1';

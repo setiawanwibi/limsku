@@ -44,6 +44,12 @@
                     </button>
                 </form>
             <?php endif; ?>
+
+            <?php if ($sesi['status'] === 'Approved / Final'): ?>
+                <a href="<?php echo site_url('pengujian/pdf_sesi/' . $sesi['id']); ?>" class="btn btn-danger btn-sm fw-bold ms-1" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh LHU PDF
+                </a>
+            <?php endif; ?>
             <?php if ($sesi['penguji_id'] == $this->session->userdata('user_id') && $sesi['status'] === 'Ditolak'): ?>
                 <a href="<?php echo site_url('pengujian/revisi_sesi/' . $sesi['id']); ?>" class="btn btn-warning btn-sm fw-bold">
                     <i class="bi bi-pencil-square me-1"></i> Perbaiki &amp; Revisi Hasil Sesi
@@ -141,7 +147,10 @@
                                 <td><?php echo $no++; ?></td>
                                 <td><span class="font-monospace fw-bold text-primary"><?php echo html_escape($f['kode_template']); ?></span></td>
                                 <td><strong class="text-dark"><?php echo html_escape($f['nama_template']); ?></strong></td>
-                                <td><span class="badge bg-light text-dark border"><?php echo html_escape($f['kategori']); ?></span></td>
+                                <td>
+                                    <?php $kat = isset($f['kategori_template']) ? $f['kategori_template'] : (isset($f['kategori']) ? $f['kategori'] : (isset($sesi['jenis_pengujian']) ? $sesi['jenis_pengujian'] : '-')); ?>
+                                    <span class="badge bg-light text-dark border"><?php echo html_escape($kat); ?></span>
+                                </td>
                                 <td>
                                     <?php if (!empty($f['data_hasil'])): ?>
                                         <span class="badge bg-success">Sudah Diisi</span>
