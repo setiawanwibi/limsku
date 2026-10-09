@@ -23,11 +23,6 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif'] = 'metode';
         $this->data['judul_halaman'] = 'Master Metode Pengujian';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Data', 'url' => '#'),
-            array('label' => 'Metode', 'url' => site_url('metode'))
-        );
-
         $this->data['daftar_metode'] = $this->Model_Metode->ambil_semua();
 
         $this->muat_tampilan('metode/index');
@@ -78,10 +73,6 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif'] = 'metode';
         $this->data['judul_halaman'] = 'Tambah Metode Pengujian';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Metode', 'url' => site_url('metode')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
 
         $this->muat_tampilan('metode/tambah');
     }

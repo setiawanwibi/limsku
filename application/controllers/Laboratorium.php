@@ -23,11 +23,6 @@ class Laboratorium extends MY_Controller
 
         $this->data['halaman_aktif'] = 'laboratorium';
         $this->data['judul_halaman'] = 'Manajemen Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Data', 'url' => '#'),
-            array('label' => 'Laboratorium', 'url' => site_url('laboratorium'))
-        );
-
         $daftar_lab = $this->Model_Laboratorium->ambil_semua();
         foreach ($daftar_lab as &$lab) {
             $lab['total_pengguna'] = $this->Model_Laboratorium->hitung_pengguna($lab['id']);
@@ -81,10 +76,6 @@ class Laboratorium extends MY_Controller
 
         $this->data['halaman_aktif'] = 'laboratorium';
         $this->data['judul_halaman'] = 'Tambah Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Laboratorium', 'url' => site_url('laboratorium')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
 
         $this->muat_tampilan('laboratorium/tambah');
     }

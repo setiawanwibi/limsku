@@ -25,10 +25,6 @@ class Pengguna extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengguna';
         $this->data['judul_halaman'] = 'Manajemen Pengguna';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Data', 'url' => '#'),
-            array('label' => 'Pengguna', 'url' => site_url('pengguna'))
-        );
 
         $this->data['daftar_pengguna'] = $this->Model_Pengguna->ambil_semua();
 
@@ -89,10 +85,6 @@ class Pengguna extends MY_Controller
 
         $this->data['halaman_aktif']      = 'pengguna';
         $this->data['judul_halaman']      = 'Tambah Pengguna';
-        $this->data['breadcrumbs']        = array(
-            array('label' => 'Pengguna', 'url' => site_url('pengguna')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
         $this->data['daftar_role']        = $this->Model_Peran->ambil_semua();
         $this->data['daftar_laboratorium'] = $this->Model_Laboratorium->ambil_aktif();
 
@@ -160,10 +152,6 @@ class Pengguna extends MY_Controller
 
         $this->data['halaman_aktif']       = 'pengguna';
         $this->data['judul_halaman']       = 'Edit Pengguna';
-        $this->data['breadcrumbs']         = array(
-            array('label' => 'Pengguna', 'url' => site_url('pengguna')),
-            array('label' => 'Edit', 'url' => '#')
-        );
         $this->data['user']                = $user;
         $this->data['daftar_role']         = $this->Model_Peran->ambil_semua();
         $this->data['daftar_laboratorium'] = $this->Model_Laboratorium->ambil_aktif();
@@ -246,10 +234,6 @@ class Pengguna extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengguna';
         $this->data['judul_halaman'] = 'Ubah Kata Sandi Pengguna';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengguna', 'url' => site_url('pengguna')),
-            array('label' => 'Ubah Kata Sandi', 'url' => '#')
-        );
         $this->data['user']          = $user;
 
         $this->muat_tampilan('pengguna/ubah_password');

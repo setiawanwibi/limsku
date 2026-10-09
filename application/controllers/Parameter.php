@@ -23,10 +23,6 @@ class Parameter extends MY_Controller
 
         $this->data['halaman_aktif'] = 'parameter';
         $this->data['judul_halaman'] = 'Master Parameter Pengujian';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Data', 'url' => '#'),
-            array('label' => 'Parameter', 'url' => site_url('parameter'))
-        );
 
         $this->data['daftar_parameter'] = $this->Model_Parameter->ambil_semua();
 
@@ -78,10 +74,6 @@ class Parameter extends MY_Controller
 
         $this->data['halaman_aktif'] = 'parameter';
         $this->data['judul_halaman'] = 'Tambah Parameter Pengujian';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Parameter', 'url' => site_url('parameter')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
 
         $this->muat_tampilan('parameter/tambah');
     }

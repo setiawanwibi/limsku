@@ -24,10 +24,6 @@ class Peran extends MY_Controller
 
         $this->data['halaman_aktif'] = 'peran';
         $this->data['judul_halaman'] = 'Manajemen Peran & Hak Akses';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Data', 'url' => '#'),
-            array('label' => 'Peran', 'url' => site_url('peran'))
-        );
 
         $daftar_peran = $this->Model_Peran->ambil_semua();
         foreach ($daftar_peran as &$role) {
@@ -76,10 +72,6 @@ class Peran extends MY_Controller
 
         $this->data['halaman_aktif'] = 'peran';
         $this->data['judul_halaman'] = 'Tambah Peran';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Peran', 'url' => site_url('peran')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
 
         $this->muat_tampilan('peran/tambah');
     }
@@ -128,10 +120,6 @@ class Peran extends MY_Controller
 
         $this->data['halaman_aktif'] = 'peran';
         $this->data['judul_halaman'] = 'Edit Peran';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Peran', 'url' => site_url('peran')),
-            array('label' => 'Edit', 'url' => '#')
-        );
         $this->data['role']          = $role;
 
         $this->muat_tampilan('peran/edit');
@@ -183,10 +171,6 @@ class Peran extends MY_Controller
 
         $this->data['halaman_aktif']            = 'peran';
         $this->data['judul_halaman']            = 'Hak Akses Peran: ' . $role['nama_role'];
-        $this->data['breadcrumbs']              = array(
-            array('label' => 'Peran', 'url' => site_url('peran')),
-            array('label' => 'Hak Akses', 'url' => '#')
-        );
         $this->data['role']                     = $role;
         $this->data['permissions_by_kategori'] = $permissions_by_kategori;
         $this->data['assigned_ids']             = $assigned_ids;
