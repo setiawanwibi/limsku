@@ -26,9 +26,17 @@ $ada_menu_master     = ($bisa_metode || $bisa_parameter || $bisa_template || $bi
 $ada_menu_sistem     = $bisa_audit;
 ?>
 <nav id="lims-sidebar">
-    <div class="sidebar-header p-3 border-bottom">
-        <h5 class="fw-bold mb-0">LIMSKU</h5>
-        <small>BBPOM Bandar Lampung</small>
+    <div class="sidebar-header border-bottom">
+        <a href="<?php echo site_url('dasbor'); ?>" class="limsku-brand">
+            <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-logo">
+            <div>
+                <h5 class="fw-bold mb-0">LIMSKU</h5>
+                <small>BBPOM Bandar Lampung</small>
+            </div>
+        </a>
+        <button type="button" id="sidebar-toggle-close" class="sidebar-toggle-btn ms-1" title="Tutup Sidebar" aria-label="Tutup Sidebar">
+            <i class="bi bi-list fs-4"></i>
+        </button>
     </div>
 
     <ul class="components list-unstyled px-2 py-3">

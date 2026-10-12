@@ -77,17 +77,22 @@
         }
 
         .hero-logo-box {
-            width: 44px;
-            height: 44px;
-            background: rgba(20, 184, 166, 0.2);
-            border: 1px solid rgba(20, 184, 166, 0.4);
-            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #2dd4bf;
-            font-size: 1.35rem;
-            backdrop-filter: blur(8px);
+            padding: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .hero-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .hero-brand-text h4 {
@@ -404,7 +409,7 @@
         <div class="hero-top">
             <div class="hero-brand">
                 <div class="hero-logo-box">
-                    <i class="bi bi-flask"></i>
+                    <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-logo">
                 </div>
                 <div class="hero-brand-text">
                     <h4><?php echo html_escape($nama_aplikasi); ?></h4>
@@ -459,7 +464,10 @@
     <!-- Right Form Section -->
     <div class="login-form-pane">
         <div class="form-content-box">
-            <span class="portal-label">PORTAL INTERNAL BBPOM</span>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-icon" style="height: 30px; width: 30px; object-fit: contain;">
+                <span class="portal-label" style="margin-bottom: 0;">PORTAL INTERNAL BBPOM</span>
+            </div>
             <h2 class="form-main-title">Selamat datang kembali</h2>
             <p class="form-sub-title">
                 Masuk menggunakan akun yang telah terdaftar untuk melanjutkan ke ruang kerja Anda.
@@ -538,7 +546,7 @@
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn-lims-submit">
-                    <span>Masuk ke LIMS</span>
+                    <span>Masuk ke LIMSKU</span>
                     <i class="bi bi-arrow-right"></i>
                 </button>
 

@@ -22,6 +22,11 @@
     <link rel="stylesheet" href="<?php echo base_url('assets/css/limsku.css?v=' . filemtime(FCPATH . 'assets/css/limsku.css')); ?>">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        if (localStorage.getItem('limsku_sidebar_collapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-collapsed');
+        }
+    </script>
 </head>
 <body>
 
@@ -219,6 +224,38 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
     }, true);
+
+    // Sidebar Toggle Handler
+    var toggleClose = document.getElementById('sidebar-toggle-close');
+    var toggleOpen = document.getElementById('sidebar-toggle-open');
+
+    if (document.documentElement.classList.contains('sidebar-collapsed')) {
+        document.body.classList.add('sidebar-collapsed');
+    }
+
+    function setSidebarState(collapsed) {
+        if (collapsed) {
+            document.body.classList.add('sidebar-collapsed');
+            document.documentElement.classList.add('sidebar-collapsed');
+            localStorage.setItem('limsku_sidebar_collapsed', 'true');
+        } else {
+            document.body.classList.remove('sidebar-collapsed');
+            document.documentElement.classList.remove('sidebar-collapsed');
+            localStorage.setItem('limsku_sidebar_collapsed', 'false');
+        }
+    }
+
+    if (toggleClose) {
+        toggleClose.addEventListener('click', function() {
+            setSidebarState(true);
+        });
+    }
+
+    if (toggleOpen) {
+        toggleOpen.addEventListener('click', function() {
+            setSidebarState(false);
+        });
+    }
 });
 </script>
 </body>

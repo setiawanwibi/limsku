@@ -39,7 +39,11 @@ if ($this->session->userdata('logged_in')) {
 }
 ?>
 <nav class="navbar navbar-expand-lg lims-topbar bg-white border-bottom px-3 py-2">
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0 d-flex align-items-center">
+        <button type="button" id="sidebar-toggle-open" class="sidebar-toggle-btn me-3" title="Buka Sidebar" aria-label="Buka Sidebar">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+
         <span class="navbar-text fw-semibold text-dark fs-6">
             <?php echo isset($judul_halaman) && !empty($judul_halaman) ? html_escape($judul_halaman) : 'Laboratory Information Management System'; ?>
         </span>
