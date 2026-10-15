@@ -12,6 +12,7 @@ class SimpleXLSX
     private $sheets = array();
     private $sharedstrings = array();
     private $error = '';
+    private static $lastError = '';
 
     public static function parse($filename)
     {
@@ -19,12 +20,41 @@ class SimpleXLSX
         if ($xlsx->_parse($filename)) {
             return $xlsx;
         }
+        self::$lastError = $xlsx->getError();
         return false;
+    }
+
+    public static function parseError()
+    {
+        return self::$lastError;
     }
 
     public function getError()
     {
         return $this->error;
+    }
+
+    /**
+     * Konversi huruf kolom Excel (A, B, ..., Z, AA, AB, ...) menjadi indeks numerik 0-based
+     *
+     * @param string $col
+     * @return int
+     */
+    public static function columnIndex($col)
+    {
+        $col = strtoupper(trim((string)$col));
+        $len = strlen($col);
+        if ($len === 0) {
+            return 0;
+        }
+        $idx = 0;
+        for ($i = 0; $i < $len; $i++) {
+            $c = ord($col[$i]);
+            if ($c >= 65 && $c <= 90) { // A-Z
+                $idx = $idx * 26 + ($c - 64);
+            }
+        }
+        return max(0, $idx - 1);
     }
 
     public function rows($sheetIndex = 0)
@@ -34,27 +64,59 @@ class SimpleXLSX
         }
 
         $xml = simplexml_load_string($this->sheets[$sheetIndex]);
-        if (!$xml) {
+        if (!$xml || !isset($xml->sheetData)) {
             return array();
         }
 
         $rows = array();
         foreach ($xml->sheetData->row as $row) {
-            $r = array();
-            foreach ($row->c as $cell) {
-                $v = (string) $cell->v;
-                $t = (string) $cell['r']; // cell reference e.g. A1
-                $type = (string) $cell['t'];
+            $rowCells = array();
+            $maxCol   = -1;
+            $curCol   = 0;
 
-                if ($type === 's') { // shared string
-                    $v = isset($this->sharedstrings[(int)$v]) ? $this->sharedstrings[(int)$v] : $v;
-                } elseif ($type === 'b') { // boolean
-                    $v = ($v === '1') ? 'TRUE' : 'FALSE';
+            if (isset($row->c)) {
+                foreach ($row->c as $cell) {
+                    $colIdx = $curCol;
+                    if (isset($cell['r']) && preg_match('/^([A-Z]+)\d*$/i', (string)$cell['r'], $matches)) {
+                        $colIdx = self::columnIndex($matches[1]);
+                    }
+
+                    $v    = (string) $cell->v;
+                    $type = isset($cell['t']) ? (string) $cell['t'] : '';
+
+                    if ($type === 's') { // shared string
+                        $v = isset($this->sharedstrings[(int)$v]) ? $this->sharedstrings[(int)$v] : $v;
+                    } elseif ($type === 'b') { // boolean
+                        $v = ($v === '1') ? 'TRUE' : 'FALSE';
+                    } elseif ($type === 'inlineStr' && isset($cell->is)) {
+                        if (isset($cell->is->t)) {
+                            $v = (string) $cell->is->t;
+                        } elseif (isset($cell->is->r)) {
+                            $str = '';
+                            foreach ($cell->is->r as $rPart) {
+                                $str .= (string) $rPart->t;
+                            }
+                            $v = $str;
+                        }
+                    }
+
+                    $rowCells[$colIdx] = trim((string)$v);
+                    if ($colIdx > $maxCol) {
+                        $maxCol = $colIdx;
+                    }
+                    $curCol = $colIdx + 1;
                 }
-
-                $r[] = trim($v);
             }
-            $rows[] = $r;
+
+            if ($maxCol >= 0) {
+                $r = array();
+                for ($c = 0; $c <= $maxCol; $c++) {
+                    $r[$c] = isset($rowCells[$c]) ? $rowCells[$c] : '';
+                }
+                $rows[] = $r;
+            } else {
+                $rows[] = array();
+            }
         }
 
         return $rows;

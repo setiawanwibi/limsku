@@ -1003,6 +1003,71 @@
                                     <span class="detail-sesi-template-name">
                                         <?php echo html_escape($f['nama_template']); ?>
                                     </span>
+                                    <?php if (!empty($f['parameter_uji'])): ?>
+                                        <div class="small text-primary fw-semibold mt-1">
+                                            <i class="bi bi-tag me-1"></i><?php echo html_escape($f['parameter_uji']); ?>
+                                            <?php if (!empty($f['nama_zat_aktif'])): ?>
+                                                <span class="text-muted fw-normal">(<?php echo html_escape($f['nama_zat_aktif']); ?>)</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <!-- Informasi Master Metode Terhubung -->
+                                    <div class="mt-2 p-2 bg-light rounded border small">
+                                        <div class="row g-1 text-secondary" style="font-size: 0.72rem;">
+                                            <?php if (!empty($f['pustaka_acuan'])): ?>
+                                                <div class="col-12">
+                                                    <i class="bi bi-book text-muted me-1"></i>Pustaka: <strong class="text-dark"><?php echo html_escape($f['pustaka_acuan']); ?></strong>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($f['persyaratan'])): ?>
+                                                <div class="col-12">
+                                                    <i class="bi bi-check2-square text-danger me-1"></i>Syarat: <strong class="text-danger"><?php echo html_escape($f['persyaratan']); ?></strong>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($f['metode_analisa'])): ?>
+                                                <div class="col-12">
+                                                    <i class="bi bi-gear text-secondary me-1"></i>Metode: <?php echo html_escape($f['metode_analisa']); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <?php
+                                            // Tampilkan Alat & Reagen yang Digunakan jika ada dalam data_hasil
+                                            $parsed_hasil = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : array();
+                                            $f_alat_ids = isset($parsed_hasil['alat_ids']) && is_array($parsed_hasil['alat_ids']) ? $parsed_hasil['alat_ids'] : array();
+                                            $f_reagen_ids = isset($parsed_hasil['reagen_ids']) && is_array($parsed_hasil['reagen_ids']) ? $parsed_hasil['reagen_ids'] : array();
+                                        ?>
+                                        <?php if (!empty($f_alat_ids) || !empty($f_reagen_ids)): ?>
+                                            <div class="pt-2 mt-2 border-top">
+                                                <?php if (!empty($f_alat_ids) && !empty($daftar_alat)): ?>
+                                                    <div class="mb-1">
+                                                        <span class="text-muted"><i class="bi bi-tools text-primary me-1"></i>Alat:</span>
+                                                        <?php foreach ($daftar_alat as $al): ?>
+                                                            <?php if (in_array($al['id'], $f_alat_ids)): ?>
+                                                                <span class="badge bg-white text-dark border me-1" title="Merk: <?php echo html_escape($al['merk_tipe'] ?: '-'); ?>">
+                                                                    [<?php echo html_escape($al['kode_barang']); ?>] <?php echo html_escape($al['nama_barang']); ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php if (!empty($f_reagen_ids) && !empty($daftar_reagen)): ?>
+                                                    <div>
+                                                        <span class="text-muted"><i class="bi bi-droplet-half text-info me-1"></i>Reagen:</span>
+                                                        <?php foreach ($daftar_reagen as $rg): ?>
+                                                            <?php if (in_array($rg['id'], $f_reagen_ids)): ?>
+                                                                <span class="badge bg-white text-info border border-info-subtle me-1" title="Merk: <?php echo html_escape($rg['merk'] ?: '-'); ?> | Stok: <?php echo html_escape($rg['stok'] ?: '-'); ?>">
+                                                                    <?php echo html_escape(!empty($rg['nama_barang']) ? $rg['nama_barang'] : $rg['nama_reagen']); ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
 
                                 <td>

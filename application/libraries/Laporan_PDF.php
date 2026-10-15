@@ -60,7 +60,8 @@ class Laporan_PDF extends FPDF
         $sig = $ci->Model_User_Signature->ambil_by_user_id($user_id);
 
         if ($sig && !empty($sig['signature_file'])) {
-            $full_path = FCPATH . $sig['signature_file'];
+            $base_dir = defined('FCPATH') ? FCPATH : dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR;
+            $full_path = $base_dir . $sig['signature_file'];
             if (file_exists($full_path)) {
                 return $full_path;
             }
@@ -92,7 +93,9 @@ class Laporan_PDF extends FPDF
         $this->SetFont('helvetica', 'B', 12);
         $this->Cell(0, 6, $judul_doc, 0, 1, 'C');
         $this->SetFont('helvetica', '', 9);
-        $this->Cell(0, 4, 'Jenis Pengujian: ' . ($sesi['jenis_pengujian'] ?: '-') . ' | Status: ' . $sesi['status'], 0, 1, 'C');
+        $jenis_uji = !empty($sesi['jenis_pengujian']) ? $sesi['jenis_pengujian'] : '-';
+        $status_uji = !empty($sesi['status']) ? $sesi['status'] : '-';
+        $this->Cell(0, 4, 'Jenis Pengujian: ' . $jenis_uji . ' | Status: ' . $status_uji, 0, 1, 'C');
         $this->Ln(4);
 
         // Bagian I: Identitas Sampel
@@ -101,10 +104,11 @@ class Laporan_PDF extends FPDF
         $this->Cell(0, 6, ' I. IDENTITAS SAMPEL', 1, 1, 'L', true);
         $this->SetFont('helvetica', '', 8.5);
 
+        $kd_smp = !empty($sampel['kode_sampel_manual']) ? $sampel['kode_sampel_manual'] : (!empty($sampel['no']) ? 'NO-' . $sampel['no'] : (!empty($sampel['id']) ? 'SMP-' . $sampel['id'] : '-'));
         $identitas = array(
-            'Kode / No. Sampel'     => ($sampel['kode_sampel_manual'] ?: ($sampel['no'] ? 'NO-' . $sampel['no'] : 'SMP-' . $sampel['id'])),
-            'Nama Sampel'           => $sampel['nama_sampel'],
-            'Kategori / Sub'        => ($sampel['kategori_sampel'] ?: '-') . ' / ' . (isset($sampel['sub_kategori']) ? $sampel['sub_kategori'] : '-'),
+            'Kode / No. Sampel'     => $kd_smp,
+            'Nama Sampel'           => isset($sampel['nama_sampel']) ? $sampel['nama_sampel'] : '-',
+            'Kategori / Sub'        => (!empty($sampel['kategori_sampel']) ? $sampel['kategori_sampel'] : '-') . ' / ' . (isset($sampel['sub_kategori']) ? $sampel['sub_kategori'] : '-'),
             'Nomor Izin Edar'       => isset($sampel['nomor_izin_edar']) ? $sampel['nomor_izin_edar'] : '-',
             'No. Bets / Kedaluwarsa' => (isset($sampel['no_bets']) ? $sampel['no_bets'] : '-') . ' / ' . (isset($sampel['kedaluwarsa']) ? $sampel['kedaluwarsa'] : '-'),
             'Sarana / Asal'         => (isset($sampel['nama_sarana']) ? $sampel['nama_sarana'] : '-') . ' (' . (isset($sampel['kabupaten_kota']) ? $sampel['kabupaten_kota'] : '-') . ')',
@@ -128,7 +132,9 @@ class Laporan_PDF extends FPDF
         foreach ($forms as $f) {
             $this->SetFont('helvetica', 'B', 8.5);
             $this->SetFillColor(250, 250, 250);
-            $form_title = $form_num++ . '. ' . ($f['nama_template'] ?: 'Form Pengujian') . ' (' . ($f['nama_metode'] ?: (isset($f['nama_parameter']) ? $f['nama_parameter'] : '-')) . ')';
+            $nm_tpl = !empty($f['nama_template']) ? $f['nama_template'] : 'Form Pengujian';
+            $nm_mtd = !empty($f['nama_metode']) ? $f['nama_metode'] : (!empty($f['nama_parameter']) ? $f['nama_parameter'] : '-');
+            $form_title = $form_num++ . '. ' . $nm_tpl . ' (' . $nm_mtd . ')';
             $this->Cell(0, 5.5, '  ' . $form_title, 1, 1, 'L', true);
 
             // Dynamic fields
@@ -198,7 +204,24 @@ class Laporan_PDF extends FPDF
         $this->Cell(63, 4, 'Diverifikasi: ' . $tgl_verify, 0, 0, 'C');
         $this->Cell(64, 4, 'Disetujui: ' . $tgl_approve, 0, 1, 'C');
 
-        $this->Ln(12);
+        // Tanda Tangan Digital Workflow (Visual Pengesahan Digital)
+        $sig_p = !empty($penguji['id']) ? $this->getUserSignature($penguji['id']) : (!empty($sesi['penguji_id']) ? $this->getUserSignature($sesi['penguji_id']) : NULL);
+        $sig_v = !empty($verifier['id']) ? $this->getUserSignature($verifier['id']) : (!empty($sesi['verifier_id']) ? $this->getUserSignature($sesi['verifier_id']) : NULL);
+        $sig_a = !empty($approver['id']) ? $this->getUserSignature($approver['id']) : (!empty($sesi['approver_id']) ? $this->getUserSignature($sesi['approver_id']) : NULL);
+
+        $this->Ln(2);
+        $this->SetFont('helvetica', 'B', 7);
+        $label_sig_p = $sig_p ? '[SIGNED DIGITAL]' : '[TERVERIFIKASI SISTEM]';
+        $label_sig_v = $sig_v ? '[VERIFIED DIGITAL]' : '[TERVERIFIKASI SISTEM]';
+        $label_sig_a = $sig_a ? '[APPROVED DIGITAL]' : '[TERVALIDASI SISTEM]';
+
+        $this->SetTextColor(40, 80, 160);
+        $this->Cell(63, 4, $label_sig_p, 0, 0, 'C');
+        $this->Cell(63, 4, $label_sig_v, 0, 0, 'C');
+        $this->Cell(64, 4, $label_sig_a, 0, 1, 'C');
+        $this->SetTextColor(0, 0, 0);
+
+        $this->Ln(8);
 
         $this->SetFont('helvetica', 'B', 8.5);
         $nama_p = isset($penguji['nama_lengkap']) ? $penguji['nama_lengkap'] : (isset($sesi['nama_penguji']) ? $sesi['nama_penguji'] : '-');

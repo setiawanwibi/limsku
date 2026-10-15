@@ -223,47 +223,7 @@ class Template extends MY_Controller
     public function inisialisasi_preset()
     {
         $this->cek_hak_akses('template_create');
-
-        $presets = array(
-            // 12 Form Kimia
-            array('KIM-01', 'Form 1: Penetapan Kadar Obat (Kimia)', 'Kimia', array('kadar_zat_aktif' => array('label' => 'Kadar Zat Aktif (%)', 'type' => 'number', 'unit' => '%', 'required' => true), 'pembacaan_serapan' => array('label' => 'Serapan Absorbansi', 'type' => 'number', 'unit' => 'Abs', 'required' => true))),
-            array('KIM-02', 'Form 2: Uji Disolusi (Kimia)', 'Kimia', array('kecepatan_putaran' => array('label' => 'Kecepatan Putaran (rpm)', 'type' => 'number', 'unit' => 'rpm', 'required' => true), 'persen_terlarut' => array('label' => '% Terlarut (Q)', 'type' => 'number', 'unit' => '%', 'required' => true))),
-            array('KIM-03', 'Form 3: Uji Keseragaman Bobot / Ukuran (Kimia)', 'Kimia', array('bobot_rata_rata' => array('label' => 'Bobot Rata-rata (mg)', 'type' => 'number', 'unit' => 'mg', 'required' => true), 'penyimpangan_bobot' => array('label' => '% Penyimpangan', 'type' => 'number', 'unit' => '%', 'required' => true))),
-            array('KIM-04', 'Form 4: Uji pH / Derajat Keasaman (Kimia)', 'Kimia', array('nilai_ph' => array('label' => 'Nilai pH Pengukuran', 'type' => 'number', 'unit' => 'pH', 'required' => true), 'suhu_pengukuran' => array('label' => 'Suhu Pengukuran (C)', 'type' => 'number', 'unit' => 'C', 'required' => true))),
-            array('KIM-05', 'Form 5: Uji Kejernihan & Warna Larutan (Kimia)', 'Kimia', array('kejernihan' => array('label' => 'Hasil Kejernihan', 'type' => 'text', 'required' => true), 'warna_larutan' => array('label' => 'Pemeriksaan Warna', 'type' => 'text', 'required' => true))),
-            array('KIM-06', 'Form 6: Uji Kadar Air / Susut Pengeringan (Kimia)', 'Kimia', array('susut_pengeringan' => array('label' => 'Susut Pengeringan (%)', 'type' => 'number', 'unit' => '%', 'required' => true))),
-            array('KIM-07', 'Form 7: Uji Identifikasi Kualitatif (Kimia)', 'Kimia', array('metode_identifikasi' => array('label' => 'Metode Identifikasi (KLT/HPLC/Reaksi Warna)', 'type' => 'text', 'required' => true), 'hasil_identifikasi' => array('label' => 'Hasil Pengamatan Warna/Rf', 'type' => 'text', 'required' => true))),
-            array('KIM-08', 'Form 8: Uji Kebocoran Kemasan (Kimia)', 'Kimia', array('metode_vakum' => array('label' => 'Tekanan Vakum (mmHg)', 'type' => 'number', 'unit' => 'mmHg'), 'kebocoran' => array('label' => 'Pengamatan Kebocoran', 'type' => 'text', 'required' => true))),
-            array('KIM-09', 'Form 9: Uji Waktu Hancur Tablet (Kimia)', 'Kimia', array('waktu_hancur' => array('label' => 'Waktu Hancur (Menit)', 'type' => 'number', 'unit' => 'menit', 'required' => true), 'media_hancur' => array('label' => 'Media Hancur', 'type' => 'text'))),
-            array('KIM-10', 'Form 10: Uji Viskositas & Bobot Jenis (Kimia)', 'Kimia', array('viskositas' => array('label' => 'Viskositas (cPoise)', 'type' => 'number', 'unit' => 'cP'), 'bobot_jenis' => array('label' => 'Bobot Jenis (g/mL)', 'type' => 'number', 'unit' => 'g/mL', 'required' => true))),
-            array('KIM-11', 'Form 11: Uji Titik Lebur / Didih (Kimia)', 'Kimia', array('titik_lebur' => array('label' => 'Rentang Titik Lebur (C)', 'type' => 'text', 'required' => true))),
-            array('KIM-12', 'Form 12: Uji Senyawa Sejenis / Impurities (Kimia)', 'Kimia', array('total_impurities' => array('label' => 'Total Impurities (%)', 'type' => 'number', 'unit' => '%', 'required' => true))),
-
-            // 5 Form Mikrobiologi
-            array('MIK-01', 'Form 13: Uji Sterilitas (Mikrobiologi)', 'Mikrobiologi', array('pengamatan_hari_7' => array('label' => 'Pengamatan Hari Ke-7', 'type' => 'text', 'required' => true), 'pengamatan_hari_14' => array('label' => 'Pengamatan Hari Ke-14', 'type' => 'text', 'required' => true), 'hasil_sterilitas' => array('label' => 'Hasil Uji Sterilitas', 'type' => 'text', 'required' => true))),
-            array('MIK-02', 'Form 14: Uji Batas Mikroba / ALT & AKK (Mikrobiologi)', 'Mikrobiologi', array('alt_bakteri' => array('label' => 'Angka Lempeng Total / ALT (koloni/g)', 'type' => 'number', 'unit' => 'CFU/g', 'required' => true), 'akk_kapang' => array('label' => 'Angka Kapang Kamir / AKK (koloni/g)', 'type' => 'number', 'unit' => 'CFU/g', 'required' => true))),
-            array('MIK-03', 'Form 15: Uji Potensi Antibiotik (Mikrobiologi)', 'Mikrobiologi', array('diameter_hambatan' => array('label' => 'Diameter Zona Hambat (mm)', 'type' => 'number', 'unit' => 'mm', 'required' => true), 'potensi_persen' => array('label' => 'Potensi Antibiotik (%)', 'type' => 'number', 'unit' => '%', 'required' => true))),
-            array('MIK-04', 'Form 16: Uji Efektivitas Pengawet Antimikroba (Mikrobiologi)', 'Mikrobiologi', array('penurunan_log' => array('label' => 'Penurunan Log Koloni Mikroba', 'type' => 'number', 'required' => true))),
-            array('MIK-05', 'Form 17: Uji Endotoksin Bakteri / LAL Test (Mikrobiologi)', 'Mikrobiologi', array('sensitivitas_lal' => array('label' => 'Sensitivitas Reagen LAL (EU/mL)', 'type' => 'number', 'unit' => 'EU/mL', 'required' => true), 'hasil_gelation' => array('label' => 'Hasil Pembentukan Gel (Positif/Negatif)', 'type' => 'text', 'required' => true)))
-        );
-
-        $inserted = 0;
-        foreach ($presets as $p) {
-            $existing = $this->db->get_where('form_templates', array('kode_template' => $p[0]))->row_array();
-            if (!$existing) {
-                $this->Model_Template->tambah(array(
-                    'kode_template' => $p[0],
-                    'nama_template' => $p[1],
-                    'kategori'      => $p[2],
-                    'skema_form'    => json_encode($p[3], JSON_UNESCAPED_UNICODE),
-                    'status'        => 'Aktif'
-                ));
-                $inserted++;
-            }
-        }
-
-        $this->catat_audit('INITIALIZE_PRESETS', 'Template', array('total_inserted' => $inserted));
-        $this->session->set_flashdata('pesan_sukses', "Inisialisasi 17 Preset Template Form berhasil dilakukan ($inserted template baru ditambahkan).");
+        $this->session->set_flashdata('pesan_error', 'Fitur inisialisasi preset prototype lama telah dinonaktifkan.');
         redirect('template');
     }
 }

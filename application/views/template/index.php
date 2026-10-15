@@ -908,17 +908,6 @@
             <!-- Header Actions -->
             <div class="template-header-actions">
 
-                <a
-                    href="<?php echo site_url('template/preset'); ?>"
-                    class="template-preset-btn"
-                    onclick="return confirm('Inisialisasi 17 Preset Form Pengujian (12 Kimia + 5 Mikrobiologi)?');"
-                >
-
-                    <i class="bi bi-stars"></i>
-
-                    Inisialisasi 17 Preset Form
-
-                </a>
 
 
                 <a

@@ -11,8 +11,10 @@ $bisa_approval           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pen
 $bisa_laporan            = $this->Model_Hak_Akses->memiliki_akses($role_id, 'laporan_view');
 
 $bisa_metode             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'metode_view');
-$bisa_parameter          = $this->Model_Hak_Akses->memiliki_akses($role_id, 'parameter_view');
+$bisa_kelas_terapi       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'kelas_terapi_view');
 $bisa_template           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'template_view');
+$bisa_alat               = $this->Model_Hak_Akses->memiliki_akses($role_id, 'alat_view') || $this->Model_Hak_Akses->memiliki_akses($role_id, 'laboratorium_view');
+$bisa_reagen             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'reagen_view');
 $bisa_pengguna           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengguna_view');
 $bisa_peran              = $this->Model_Hak_Akses->memiliki_akses($role_id, 'peran_view');
 $bisa_laboratorium       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'laboratorium_view');
@@ -22,7 +24,7 @@ $bisa_audit              = $this->Model_Hak_Akses->memiliki_akses($role_id, 'aud
 // Parent Header Visibility Flags
 $ada_menu_registrasi = $bisa_sampel;
 $ada_menu_pengujian  = ($bisa_pengujian_antrean || $bisa_verifikasi || $bisa_approval || $bisa_laporan);
-$ada_menu_master     = ($bisa_metode || $bisa_parameter || $bisa_template || $bisa_pengguna || $bisa_peran || $bisa_laboratorium);
+$ada_menu_master     = ($bisa_metode || $bisa_kelas_terapi || $bisa_template || $bisa_alat || $bisa_reagen || $bisa_pengguna || $bisa_peran);
 $ada_menu_sistem     = $bisa_audit;
 ?>
 <nav id="lims-sidebar">
@@ -140,14 +142,16 @@ $ada_menu_sistem     = $bisa_audit;
                 </li>
             <?php endif; ?>
 
-            <?php if ($bisa_parameter): ?>
-                <li class="mb-1 <?php echo ($halaman_aktif === 'parameter') ? 'active' : ''; ?>">
-                    <a href="<?php echo site_url('parameter'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-sliders me-2"></i>
-                        <span>Master Parameter</span>
+            <?php if ($bisa_kelas_terapi): ?>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'kelas_terapi') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('kelas-terapi'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-diagram-3 me-2"></i>
+                        <span>Master Kelas Terapi</span>
                     </a>
                 </li>
             <?php endif; ?>
+
+
 
             <?php if ($bisa_template): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'template') ? 'active' : ''; ?>">
@@ -176,11 +180,20 @@ $ada_menu_sistem     = $bisa_audit;
                 </li>
             <?php endif; ?>
 
-            <?php if ($bisa_laboratorium): ?>
-                <li class="mb-1 <?php echo ($halaman_aktif === 'laboratorium') ? 'active' : ''; ?>">
-                    <a href="<?php echo site_url('laboratorium'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-building me-2"></i>
-                        <span>Laboratorium</span>
+            <?php if ($bisa_alat): ?>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'alat') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('alat'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-tools me-2"></i>
+                        <span>Alat Laboratorium</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
+            <?php if ($bisa_reagen): ?>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'reagen') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('reagen'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-eyedropper me-2"></i>
+                        <span>Master Reagen</span>
                     </a>
                 </li>
             <?php endif; ?>

@@ -17,6 +17,8 @@ class Pengujian extends MY_Controller
         $this->load->model('Model_Metode');
         $this->load->model('Model_Template');
         $this->load->model('Model_Pengguna');
+        $this->load->model('Model_Alat');
+        $this->load->model('Model_Reagen');
         $this->load->library('Laporan_PDF');
     }
 
@@ -120,6 +122,12 @@ class Pengujian extends MY_Controller
      * 
      * @param int $sample_id
      */
+    /**
+     * STEP 5 — Pemilihan Zat Aktif Monografi & Parameter Uji Kritis Sesuai Monografi
+     * Workflow: Sampel -> Bidang (Kimia/Mikro) -> Tepat Satu Zat Aktif -> Pilih Parameter Valid Ber-LCP
+     *
+     * @param int $sample_id
+     */
     public function pilih_form($sample_id = NULL)
     {
         $this->cek_hak_akses('pengujian_input');
@@ -135,23 +143,39 @@ class Pengujian extends MY_Controller
             redirect('pengujian/pilih_jenis/' . $sample_id);
         }
 
-        $daftar_template = $this->Model_Template->ambil_by_kategori($jenis_pengujian);
+        // Ambil daftar unik Zat Aktif monografi untuk bidang ini
+        $daftar_zat_aktif = $this->Model_Metode->ambil_daftar_zat_aktif($jenis_pengujian);
 
-        $this->data['halaman_aktif']    = 'pengujian_antrean';
-        $this->data['judul_halaman']    = 'Pilih Form / Parameter Pengujian (' . $jenis_pengujian . ')';
-        $this->data['breadcrumbs']      = array(
+        // Ambil zat aktif terpilih dari query string jika ada
+        $zat_aktif_terpilih = $this->input->get('zat_aktif', TRUE);
+        $parameter_monografi = array();
+
+        if (!empty($zat_aktif_terpilih)) {
+            $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian);
+        }
+
+        $this->load->model('Model_Template');
+        $daftar_template_bidang = $this->Model_Template->ambil_aktif($jenis_pengujian);
+
+        $this->data['halaman_aktif']          = 'pengujian_antrean';
+        $this->data['judul_halaman']          = 'Pilih Zat Aktif & Parameter Monografi (' . $jenis_pengujian . ')';
+        $this->data['breadcrumbs']            = array(
             array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Pilih Form', 'url' => '#')
+            array('label' => 'Pilih Parameter', 'url' => '#')
         );
-        $this->data['sampel']           = $sampel;
-        $this->data['jenis_pengujian']  = $jenis_pengujian;
-        $this->data['daftar_template']  = $daftar_template;
+        $this->data['sampel']                 = $sampel;
+        $this->data['jenis_pengujian']        = $jenis_pengujian;
+        $this->data['daftar_zat_aktif']       = $daftar_zat_aktif;
+        $this->data['zat_aktif_terpilih']     = $zat_aktif_terpilih;
+        $this->data['parameter_monografi']    = $parameter_monografi;
+        $this->data['daftar_template_bidang'] = $daftar_template_bidang;
 
         $this->muat_tampilan('pengujian/pilih_form');
     }
 
     /**
-     * STEP 6 & 7 — Inisialisasi Sesi Pengujian & Prevent Mixing Validation
+     * STEP 6 & 7 — Inisialisasi Sesi Pengujian Berdasarkan Parameter Monografi Terpilih
+     * Memastikan 1 sesi = 1 Zat Aktif utama, dan setiap parameter terpilih memiliki template LCP yang valid.
      * 
      * @param int $sample_id
      */
@@ -168,53 +192,93 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        $jenis_pengujian = $this->input->post('jenis_pengujian', TRUE);
-        $template_ids    = $this->input->post('template_ids', TRUE);
+        $jenis_pengujian   = $this->input->post('jenis_pengujian', TRUE);
+        $nama_zat_aktif    = $this->input->post('nama_zat_aktif', TRUE);
+        $selected_methods  = $this->input->post('method_ids', TRUE);
 
-        // Validation 1: Mandatory Selection
+        // 1. Validasi Bidang Pengujian
         if (empty($jenis_pengujian) || !in_array($jenis_pengujian, array('Kimia', 'Mikrobiologi'), TRUE)) {
             $this->session->set_flashdata('pesan_gagal', 'Jenis pengujian wajib dipilih secara valid.');
             redirect('pengujian/pilih_jenis/' . $sample_id);
         }
 
-        if (empty($template_ids) || !is_array($template_ids)) {
-            $this->session->set_flashdata('pesan_gagal', 'Anda wajib memilih minimal 1 form/parameter pengujian.');
+        // 2. Validasi Tepat Satu Zat Aktif Per Sesi
+        if (empty($nama_zat_aktif)) {
+            $this->session->set_flashdata('pesan_gagal', 'Satu sampel wajib memilih tepat satu zat aktif utama per sesi pengujian.');
             redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
         }
 
-        // Validation 2: STEP 6 BACKEND PREVENT MIXING VALIDATION
-        foreach ($template_ids as $tid) {
-            $tpl = $this->Model_Template->ambil_by_id($tid);
-            if (!$tpl || $tpl['kategori'] !== $jenis_pengujian) {
-                // Reject request & log audit violation
-                $this->catat_audit('INVALID_TESTING_SESSION', 'Pengujian', array(
-                    'sample_id'       => $sample_id,
-                    'jenis_pengujian' => $jenis_pengujian,
-                    'invalid_form_id' => $tid,
-                    'invalid_kategori'=> $tpl ? $tpl['kategori'] : 'UNKNOWN',
-                    'alasan'          => 'Terdeteksi pencampuran form Kimia & Mikrobiologi dalam 1 sesi.'
-                ));
+        // 3. Validasi Minimal 1 Parameter Dipilih
+        if (empty($selected_methods) || !is_array($selected_methods)) {
+            $this->session->set_flashdata('pesan_gagal', 'Anda wajib memilih minimal 1 parameter uji kritis monografi.');
+            redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
+        }
 
-                $this->session->set_flashdata('pesan_gagal', 'Permintaan ditolak: Form/parameter yang dipilih bertentangan dengan jenis pengujian yang dipilih. (Kimia & Mikrobiologi tidak boleh dicampur).');
-                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
+        $custom_template_ids = $this->input->post('custom_template_ids', TRUE);
+        if (!is_array($custom_template_ids)) {
+            $custom_template_ids = array();
+        }
+
+        // 4. Validasi Eksplisit: Setiap parameter wajib cocok dengan Zat Aktif, Bidang, dan memiliki mapping LCP valid
+        $valid_items_to_create = array();
+
+        foreach ($selected_methods as $m_id) {
+            $metode_item = $this->Model_Metode->ambil_by_id($m_id);
+
+            if (!$metode_item) {
+                $this->session->set_flashdata('pesan_gagal', 'Metode tidak ditemukan dalam database.');
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
             }
+
+            // Validasi konsistensi Zat Aktif
+            if ($metode_item['nama_zat_aktif'] !== $nama_zat_aktif) {
+                $this->session->set_flashdata('pesan_gagal', 'Seluruh parameter dalam 1 sesi harus berasal dari zat aktif yang sama (' . html_escape($nama_zat_aktif) . ').');
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
+            }
+
+            // Validasi kecocokan bidang
+            if ($metode_item['bidang_pengujian'] !== $jenis_pengujian) {
+                $this->session->set_flashdata('pesan_gagal', 'Parameter bertentangan dengan bidang pengujian sesi (' . html_escape($jenis_pengujian) . ').');
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
+            }
+
+            // Dapatkan template_id: gunakan template bawaan metode atau custom yang dipilih analis
+            $chosen_template_id = !empty($metode_item['template_id']) ? $metode_item['template_id'] : (isset($custom_template_ids[$m_id]) ? (int)$custom_template_ids[$m_id] : NULL);
+
+            if (empty($chosen_template_id)) {
+                $this->session->set_flashdata('pesan_gagal', 'Parameter "' . html_escape($metode_item['parameter_uji']) . '" belum memiliki form LCP. Silakan pilih form LCP yang sesuai.');
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
+            }
+
+            // Validasi keamanan: pastikan template valid, aktif, dan cocok dengan kategori bidang
+            $this->load->model('Model_Template');
+            $tpl_check = $this->Model_Template->ambil_by_id($chosen_template_id);
+            if (!$tpl_check || $tpl_check['status'] !== 'Aktif' || $tpl_check['kategori'] !== $jenis_pengujian) {
+                $this->session->set_flashdata('pesan_gagal', 'Template LCP yang dipilih untuk parameter "' . html_escape($metode_item['parameter_uji']) . '" tidak valid atau tidak cocok dengan bidang ' . html_escape($jenis_pengujian) . '.');
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
+            }
+
+            $valid_items_to_create[] = array(
+                'method_id'   => $metode_item['id'],
+                'template_id' => $chosen_template_id
+            );
         }
 
         $penguji_id = $this->session->userdata('user_id');
 
-        $session_id = $this->Model_Pengujian->buat_sesi_pengujian($sample_id, $penguji_id, $jenis_pengujian, $template_ids);
+        $session_id = $this->Model_Pengujian->buat_sesi_pengujian($sample_id, $penguji_id, $jenis_pengujian, $valid_items_to_create);
 
         if ($session_id) {
             $this->catat_audit('START_TESTING_SESSION', 'Pengujian', array(
                 'testing_session_id' => $session_id,
                 'sample_id'          => $sample_id,
                 'jenis_pengujian'    => $jenis_pengujian,
-                'form_count'         => count($template_ids),
-                'template_ids'       => implode(',', $template_ids),
+                'nama_zat_aktif'     => $nama_zat_aktif,
+                'parameter_count'    => count($valid_items_to_create),
                 'penguji_id'         => $penguji_id
             ));
 
-            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian (' . $jenis_pengujian . ') berhasil dimulai dengan ' . count($template_ids) . ' form.');
+            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian (' . $jenis_pengujian . ' - ' . html_escape($nama_zat_aktif) . ') berhasil dimulai dengan ' . count($valid_items_to_create) . ' parameter monografi.');
             redirect('pengujian/proses_sesi/' . $session_id);
         } else {
             $this->session->set_flashdata('pesan_gagal', 'Gagal membuat sesi pengujian.');
@@ -223,7 +287,8 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * Halaman Pengisian Hasil Multiple Form Sesi Pengujian
+     * Halaman Pengisian Hasil Multiple Form Sesi Pengujian (LCP)
+     * Terintegrasi dengan Master Alat Laboratorium & Master Reagen
      * 
      * @param int $session_id
      */
@@ -257,18 +322,24 @@ class Pengujian extends MY_Controller
                     'status'             => 'Menunggu Verifikasi'
                 ));
 
-                $this->session->set_flashdata('pesan_sukses', 'Seluruh hasil pengujian pada sesi ini berhasil disimpan dan diteruskan ke Penyelia (Menunggu Verifikasi).');
+                $this->session->set_flashdata('pesan_sukses', 'Seluruh lembar LCP parameter monografi berhasil disimpan beserta pencatatan alat & reagen, dan diteruskan ke Penyelia (Menunggu Verifikasi).');
                 redirect('pengujian/detail_sesi/' . $session_id);
             } else {
                 $this->session->set_flashdata('pesan_gagal', 'Gagal menyimpan hasil pengujian sesi.');
             }
         }
 
+        // Master Alat & Reagen aktif untuk dipilih pada LCP
+        $daftar_alat   = $this->Model_Alat->ambil_semua();
+        $daftar_reagen = $this->Model_Reagen->ambil_aktif();
+
         $this->data['halaman_aktif'] = 'pengujian_antrean';
         $this->data['judul_halaman'] = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
         $this->data['sesi']          = $sesi;
         $this->data['forms']         = $forms;
         $this->data['hasil_forms']   = $forms;
+        $this->data['daftar_alat']   = $daftar_alat;
+        $this->data['daftar_reagen'] = $daftar_reagen;
 
         $this->muat_tampilan('pengujian/proses_sesi');
     }
@@ -293,6 +364,8 @@ class Pengujian extends MY_Controller
         $this->data['judul_halaman'] = 'Detail Sesi Pengujian: ' . html_escape($sesi['nama_sampel']);
         $this->data['sesi']          = $sesi;
         $this->data['forms']         = $forms;
+        $this->data['daftar_alat']   = $this->Model_Alat->ambil_semua();
+        $this->data['daftar_reagen'] = $this->Model_Reagen->ambil_semua();
 
         $this->muat_tampilan('pengujian/detail_sesi');
     }
@@ -511,6 +584,8 @@ class Pengujian extends MY_Controller
         $this->data['antrean_verifikasi']  = $antrean;
         $this->data['selected_item']       = $selected_item;
         $this->data['selected_forms']      = $selected_forms;
+        $this->data['daftar_alat']         = $this->Model_Alat->ambil_semua();
+        $this->data['daftar_reagen']       = $this->Model_Reagen->ambil_semua();
 
         $this->muat_tampilan('pengujian/verifikasi');
     }
@@ -822,6 +897,8 @@ class Pengujian extends MY_Controller
         $this->data['sesi']          = $sesi;
         $this->data['forms']         = $forms;
         $this->data['hasil_forms']   = $forms;
+        $this->data['daftar_alat']   = $this->Model_Alat->ambil_semua();
+        $this->data['daftar_reagen'] = $this->Model_Reagen->ambil_semua();
 
         $this->muat_tampilan('pengujian/proses_sesi');
     }

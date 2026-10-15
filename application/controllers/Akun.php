@@ -23,6 +23,7 @@ class Akun extends MY_Controller
      * 
      * @return bool
      */
+
     private function boleh_kelola_ttd()
     {
         $role_id = $this->session->userdata('role_id');

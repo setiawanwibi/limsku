@@ -82,15 +82,15 @@ class Model_Pengujian extends CI_Model
     }
 
     /**
-     * Membuat Sesi Pengujian Baru dengan Multiple Form
+     * Membuat Sesi Pengujian Baru Berdasarkan Parameter Monografi Terpilih
      * 
      * @param int $sample_id
      * @param int $penguji_id
      * @param string $jenis_pengujian 'Kimia' / 'Mikrobiologi'
-     * @param array $template_ids Array ID form_template
+     * @param array $items_metode Array associative/list dari method_id yang memiliki template_id valid
      * @return int|bool ID testing_session baru
      */
-    public function buat_sesi_pengujian($sample_id, $penguji_id, $jenis_pengujian, $template_ids)
+    public function buat_sesi_pengujian($sample_id, $penguji_id, $jenis_pengujian, $items_metode)
     {
         $this->db->trans_start();
 
@@ -105,14 +105,24 @@ class Model_Pengujian extends CI_Model
         $this->db->insert('testing_sessions', $session_data);
         $session_id = $this->db->insert_id();
 
-        // 2. Insert ke test_results untuk setiap form_template yang dipilih
-        foreach ($template_ids as $tid) {
-            $tmpl = $this->db->get_where('form_templates', array('id' => $tid))->row_array();
+        // 2. Insert ke test_results untuk setiap item parameter monografi terpilih
+        foreach ($items_metode as $item) {
+            $m_id = is_array($item) ? $item['method_id'] : $item;
+            $t_id = is_array($item) ? $item['template_id'] : NULL;
+
+            // Ambil data metode jika t_id belum diketahui
+            if (!$t_id) {
+                $met = $this->db->get_where('methods', array('id' => $m_id))->row_array();
+                if ($met && !empty($met['template_id'])) {
+                    $t_id = $met['template_id'];
+                }
+            }
+
             $test_data = array(
                 'session_id'  => $session_id,
                 'sample_id'   => $sample_id,
-                'method_id'   => isset($tmpl['method_id']) ? $tmpl['method_id'] : NULL,
-                'template_id' => $tid,
+                'method_id'   => $m_id,
+                'template_id' => $t_id,
                 'penguji_id'  => $penguji_id,
                 'data_hasil'  => '[]',
                 'kesimpulan'  => 'Belum Disimpulkan',
@@ -154,13 +164,15 @@ class Model_Pengujian extends CI_Model
 
     /**
      * Mengambil daftar hasil uji yang terhubung dengan suatu Sesi Pengujian
+     * Mengikutsertakan informasi monografi obat lengkap
      */
     public function ambil_hasil_by_session($session_id)
     {
-        $this->db->select('tr.*, m.nama_metode, m.kode_metode, t.nama_template, t.kode_template, t.skema_form, t.kategori as kategori_template, p.nama_parameter, p.kode_parameter');
+        $this->db->select('tr.*, m.nama_metode, m.kode_metode, m.nama_zat_aktif, m.parameter_uji, m.jenis_sediaan, m.bentuk_sediaan, m.pustaka_acuan, m.metode_analisa, m.persyaratan, tc.nama_kelas_terapi, t.nama_template, t.kode_template, t.skema_form, t.kategori as kategori_template, p.nama_parameter, p.kode_parameter');
         $this->db->from('test_results tr');
         $this->db->join('form_templates t', 't.id = tr.template_id', 'left');
         $this->db->join('methods m', 'm.id = tr.method_id', 'left');
+        $this->db->join('therapeutic_classes tc', 'tc.id = m.kelas_terapi_id', 'left');
         $this->db->join('parameters p', 'p.id = t.parameter_id', 'left');
         $this->db->where('tr.session_id', $session_id);
         $this->db->order_by('tr.id', 'ASC');
@@ -179,6 +191,7 @@ class Model_Pengujian extends CI_Model
 
     /**
      * Menyimpan hasil pengujian untuk seluruh form dalam satu Sesi Pengujian
+     * Menyimpan data parameter uji, instrumen alat, dan reagen terstruktur
      */
     public function simpan_hasil_sesi($session_id, $hasil_forms)
     {
@@ -193,8 +206,25 @@ class Model_Pengujian extends CI_Model
 
         // Update masing-masing form di test_results
         foreach ($hasil_forms as $test_id => $f_data) {
+            $raw_hasil = isset($f_data['hasil']) && is_array($f_data['hasil']) ? $f_data['hasil'] : array();
+
+            // Simpan ID instrumen & reagen terstruktur di dalam payload hasil
+            $alat_ids = isset($f_data['alat_ids']) && is_array($f_data['alat_ids']) ? array_filter(array_map('intval', $f_data['alat_ids'])) : array();
+            $reagen_ids = isset($f_data['reagen_ids']) && is_array($f_data['reagen_ids']) ? array_filter(array_map('intval', $f_data['reagen_ids'])) : array();
+
+            $payload_hasil = array(
+                'parameter_values' => $raw_hasil,
+                'alat_ids'         => array_values($alat_ids),
+                'reagen_ids'       => array_values($reagen_ids)
+            );
+
+            // Kompatibilitas skema lama: merge parameter_values langsung ke top level agar view legacy tetap membaca key
+            foreach ($raw_hasil as $k => $v) {
+                $payload_hasil[$k] = $v;
+            }
+
             $update_data = array(
-                'data_hasil'    => json_encode(isset($f_data['hasil']) ? $f_data['hasil'] : array(), JSON_UNESCAPED_UNICODE),
+                'data_hasil'    => json_encode($payload_hasil, JSON_UNESCAPED_UNICODE),
                 'kesimpulan'    => isset($f_data['kesimpulan']) && !empty($f_data['kesimpulan']) ? $f_data['kesimpulan'] : 'Belum Disimpulkan',
                 'catatan'       => isset($f_data['catatan']) ? $f_data['catatan'] : NULL,
                 'status'        => 'Menunggu Verifikasi',
@@ -646,8 +676,25 @@ class Model_Pengujian extends CI_Model
         }
 
         foreach ($data_revisi_forms as $test_id => $f_data) {
+            $raw_hasil = isset($f_data['hasil']) && is_array($f_data['hasil']) ? $f_data['hasil'] : array();
+
+            // Simpan ID instrumen & reagen terstruktur di dalam payload hasil
+            $alat_ids = isset($f_data['alat_ids']) && is_array($f_data['alat_ids']) ? array_filter(array_map('intval', $f_data['alat_ids'])) : array();
+            $reagen_ids = isset($f_data['reagen_ids']) && is_array($f_data['reagen_ids']) ? array_filter(array_map('intval', $f_data['reagen_ids'])) : array();
+
+            $payload_hasil = array(
+                'parameter_values' => $raw_hasil,
+                'alat_ids'         => array_values($alat_ids),
+                'reagen_ids'       => array_values($reagen_ids)
+            );
+
+            // Kompatibilitas skema: merge parameter_values ke top level
+            foreach ($raw_hasil as $k => $v) {
+                $payload_hasil[$k] = $v;
+            }
+
             $update_data = array(
-                'data_hasil'       => json_encode(isset($f_data['hasil']) ? $f_data['hasil'] : array(), JSON_UNESCAPED_UNICODE),
+                'data_hasil'       => json_encode($payload_hasil, JSON_UNESCAPED_UNICODE),
                 'kesimpulan'       => isset($f_data['kesimpulan']) && !empty($f_data['kesimpulan']) ? $f_data['kesimpulan'] : 'Belum Disimpulkan',
                 'catatan'          => isset($f_data['catatan']) ? $f_data['catatan'] : NULL,
                 'status'           => 'Menunggu Verifikasi',

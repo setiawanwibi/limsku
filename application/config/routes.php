@@ -54,9 +54,35 @@ $route['sampel/detail/(:num)']      = 'sampel/detail/$1';
 $route['sampel/edit/(:num)']        = 'sampel/edit/$1';
 $route['sampel/hapus/(:num)']       = 'sampel/hapus/$1';
 
-// Master Metode (Phase 3)
+// Master Alat Laboratorium (Phase 3 & Inventory)
+$route['alat']                      = 'alat/index';
+$route['alat/tambah']               = 'alat/tambah';
+$route['alat/import']               = 'alat/import';
+$route['alat/konfirmasi_import']    = 'alat/konfirmasi_import';
+$route['alat/detail/(:num)']        = 'alat/detail/$1';
+$route['alat/edit/(:num)']          = 'alat/edit/$1';
+$route['alat/status/(:num)']        = 'alat/status/$1';
+// Master Reagen (Phase 3 & Inventory)
+$route['reagen']                    = 'reagen/index';
+$route['reagen/tambah']             = 'reagen/tambah';
+$route['reagen/detail/(:num)']      = 'reagen/detail/$1';
+$route['reagen/edit/(:num)']        = 'reagen/edit/$1';
+$route['reagen/status/(:num)']      = 'reagen/status/$1';
+$route['reagen/hapus/(:num)']       = 'reagen/hapus/$1';
+
+// Master Kelas Terapi (Admin TI)
+$route['kelas-terapi']              = 'kelas_terapi/index';
+$route['kelas-terapi/tambah']       = 'kelas_terapi/tambah';
+$route['kelas-terapi/edit/(:num)']  = 'kelas_terapi/edit/$1';
+$route['kelas-terapi/status/(:num)']= 'kelas_terapi/status/$1';
+$route['kelas-terapi/hapus/(:num)'] = 'kelas_terapi/hapus/$1';
+
+// Master Metode (Phase 3 & Monografi)
 $route['metode']                    = 'metode/index';
 $route['metode/tambah']             = 'metode/tambah';
+$route['metode/import']             = 'metode/import';
+$route['metode/konfirmasi_import']  = 'metode/konfirmasi_import';
+$route['metode/mapping/(:num)']     = 'metode/mapping/$1';
 $route['metode/edit/(:num)']        = 'metode/edit/$1';
 $route['metode/status/(:num)']      = 'metode/status/$1';
 $route['metode/hapus/(:num)']       = 'metode/hapus/$1';
@@ -71,7 +97,7 @@ $route['parameter/hapus/(:num)']    = 'parameter/hapus/$1';
 // Master Template Form (Phase 3)
 $route['template']                  = 'template/index';
 $route['template/tambah']           = 'template/tambah';
-$route['template/preset']           = 'template/inisialisasi_preset';
+// $route['template/preset']           = 'template/inisialisasi_preset'; // Dinonaktifkan: Preset prototype 17 form sudah direset
 $route['template/edit/(:num)']      = 'template/edit/$1';
 $route['template/status/(:num)']    = 'template/status/$1';
 $route['template/hapus/(:num)']     = 'template/hapus/$1';

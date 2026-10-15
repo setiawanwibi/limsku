@@ -1,0 +1,1946 @@
+{
+    "shifted_records": [
+        {
+            "id": 8,
+            "kode": "34022294",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 4,
+            "old": {
+                "id": "8",
+                "kode_barang": "34022294",
+                "nama_barang": "3 VIAL",
+                "katalog": "Asam Aminobenzoat (2070051)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 4,
+                "kode_barang": "34022294",
+                "katalog": "",
+                "nama_barang": "Asam Aminobenzoat (2070051)",
+                "merk": "",
+                "stok": "3 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 9,
+            "kode": "21443077",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 5,
+            "old": {
+                "id": "9",
+                "kode_barang": "21443077",
+                "nama_barang": "1 VIAL",
+                "katalog": "Asam Folat (B0314004)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 5,
+                "kode_barang": "21443077",
+                "katalog": "",
+                "nama_barang": "Asam Folat (B0314004)",
+                "merk": "",
+                "stok": "1 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 10,
+            "kode": "11679155",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 6,
+            "old": {
+                "id": "10",
+                "kode_barang": "11679155",
+                "nama_barang": "2 VIAL",
+                "katalog": "Acidum nicotinicum (100015)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 6,
+                "kode_barang": "11679155",
+                "katalog": "",
+                "nama_barang": "Acidum nicotinicum (100015)",
+                "merk": "",
+                "stok": "2 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 11,
+            "kode": "54344487",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 10,
+            "old": {
+                "id": "11",
+                "kode_barang": "54344487",
+                "nama_barang": "4 VIAL",
+                "katalog": "Alfa Tokoferol Asetat (2083321)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 10,
+                "kode_barang": "54344487",
+                "katalog": "",
+                "nama_barang": "Alfa Tokoferol Asetat (2083321)",
+                "merk": "",
+                "stok": "4 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 12,
+            "kode": "35446903",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 12,
+            "old": {
+                "id": "12",
+                "kode_barang": "35446903",
+                "nama_barang": "0 VIAL",
+                "katalog": "Alopurinol (208028)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 12,
+                "kode_barang": "35446903",
+                "katalog": "",
+                "nama_barang": "Alopurinol (208028)",
+                "merk": "",
+                "stok": "0 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 14,
+            "kode": "44720835",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 68,
+            "old": {
+                "id": "14",
+                "kode_barang": "44720835",
+                "nama_barang": "5 VIAL",
+                "katalog": "Buthylis Parabenum (205068)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 68,
+                "kode_barang": "44720835",
+                "katalog": "",
+                "nama_barang": "Buthylis Parabenum (205068)",
+                "merk": "",
+                "stok": "5 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 15,
+            "kode": "94151222",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 169,
+            "old": {
+                "id": "15",
+                "kode_barang": "94151222",
+                "nama_barang": "6 VIAL",
+                "katalog": "Hexachlorophenum (207165)",
+                "merk": "Baku Pembanding",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 169,
+                "kode_barang": "94151222",
+                "katalog": "",
+                "nama_barang": "Hexachlorophenum (207165)",
+                "merk": "",
+                "stok": "6 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 16,
+            "kode": "51531441",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 408,
+            "old": {
+                "id": "16",
+                "kode_barang": "51531441",
+                "nama_barang": "Zink Pirition (B0114350)",
+                "katalog": null,
+                "merk": "-",
+                "stok": "4 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": "0000-00-00"
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 408,
+                "kode_barang": "51531441",
+                "katalog": "0",
+                "nama_barang": "Zink Pirition (B0114350)",
+                "merk": "-",
+                "stok": "4 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": "0000-00-00"
+            }
+        },
+        {
+            "id": 18,
+            "kode": "76185601",
+            "src_file": "Data Baku Pembanding.xlsx",
+            "src_row": 429,
+            "old": {
+                "id": "18",
+                "kode_barang": "76185601",
+                "nama_barang": "Propil paraben\/Nipasol (B0314174)",
+                "katalog": null,
+                "merk": null,
+                "stok": "1 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": "0000-00-00"
+            },
+            "new": {
+                "file": "Data Baku Pembanding.xlsx",
+                "excel_row": 429,
+                "kode_barang": "76185601",
+                "katalog": "0",
+                "nama_barang": "Propil paraben\/Nipasol (B0314174)",
+                "merk": "0",
+                "stok": "1 VIAL",
+                "jenis_barang": "Baku Pembanding",
+                "expired_date": null,
+                "expired_raw": "0000-00-00"
+            }
+        },
+        {
+            "id": 37,
+            "kode": "72464452",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 21,
+            "old": {
+                "id": "37",
+                "kode_barang": "72464452",
+                "nama_barang": "Merck",
+                "katalog": "Urea agar (base) (1.08492.0500)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 21,
+                "kode_barang": "72464452",
+                "katalog": "",
+                "nama_barang": "Urea agar (base) (1.08492.0500)",
+                "merk": "Merck",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 46,
+            "kode": "31406226",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 30,
+            "old": {
+                "id": "46",
+                "kode_barang": "31406226",
+                "nama_barang": "sigma",
+                "katalog": "Corn Meal Agar (42347-500G-F)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 30,
+                "kode_barang": "31406226",
+                "katalog": "",
+                "nama_barang": "Corn Meal Agar (42347-500G-F)",
+                "merk": "sigma",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 48,
+            "kode": "74490778",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 33,
+            "old": {
+                "id": "48",
+                "kode_barang": "74490778",
+                "nama_barang": "HIMEDIA",
+                "katalog": "Letheen Broth (M165-500G)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "46234",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 33,
+                "kode_barang": "74490778",
+                "katalog": "",
+                "nama_barang": "Letheen Broth (M165-500G)",
+                "merk": "HIMEDIA",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2026-07-31",
+                "expired_raw": "46234"
+            }
+        },
+        {
+            "id": 50,
+            "kode": "23427054",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 35,
+            "old": {
+                "id": "50",
+                "kode_barang": "23427054",
+                "nama_barang": "Millipore",
+                "katalog": "Palcam Listeria selective agar (75977-500G)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "45948",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 35,
+                "kode_barang": "23427054",
+                "katalog": "",
+                "nama_barang": "Palcam Listeria selective agar (75977-500G)",
+                "merk": "Millipore",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2025-10-18",
+                "expired_raw": "45948"
+            }
+        },
+        {
+            "id": 51,
+            "kode": "71703036",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 37,
+            "old": {
+                "id": "51",
+                "kode_barang": "71703036",
+                "nama_barang": "sigma millipore",
+                "katalog": "Enterobacteria enrichment Broth (1.05403.0500)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "46295",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 37,
+                "kode_barang": "71703036",
+                "katalog": "",
+                "nama_barang": "Enterobacteria enrichment Broth (1.05403.0500)",
+                "merk": "sigma millipore",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2026-09-30",
+                "expired_raw": "46295"
+            }
+        },
+        {
+            "id": 56,
+            "kode": "19424412",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 42,
+            "old": {
+                "id": "56",
+                "kode_barang": "19424412",
+                "nama_barang": "Remel",
+                "katalog": "RapID Inoculation Fluid 2ml.",
+                "merk": "0 PAC",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 42,
+                "kode_barang": "19424412",
+                "katalog": "",
+                "nama_barang": "RapID Inoculation Fluid 2ml.",
+                "merk": "Remel",
+                "stok": "0 PAC",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 58,
+            "kode": "31648922",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 44,
+            "old": {
+                "id": "58",
+                "kode_barang": "31648922",
+                "nama_barang": "Sigma-Millipore",
+                "katalog": "XLD agar (1.05287.0500)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "46691",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 44,
+                "kode_barang": "31648922",
+                "katalog": "",
+                "nama_barang": "XLD agar (1.05287.0500)",
+                "merk": "Sigma-Millipore",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2027-10-31",
+                "expired_raw": "46691"
+            }
+        },
+        {
+            "id": 66,
+            "kode": "19550384",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 60,
+            "old": {
+                "id": "66",
+                "kode_barang": "19550384",
+                "nama_barang": "Millipore, Sigma-Aldrich",
+                "katalog": "2,3,5-Triphenyltetrazoliumchloride for microbiology (1.08380.0010)",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "45808",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 60,
+                "kode_barang": "19550384",
+                "katalog": "",
+                "nama_barang": "2,3,5-Triphenyltetrazoliumchloride for microbiology (1.08380.0010)",
+                "merk": "Millipore, Sigma-Aldrich",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2025-05-31",
+                "expired_raw": "45808"
+            }
+        },
+        {
+            "id": 67,
+            "kode": "87298069",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 61,
+            "old": {
+                "id": "67",
+                "kode_barang": "87298069",
+                "nama_barang": "Millipore",
+                "katalog": "Bactident Coagulase Rabbit (1.13306.0001)",
+                "merk": "8 PAC",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "46387",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 61,
+                "kode_barang": "87298069",
+                "katalog": "",
+                "nama_barang": "Bactident Coagulase Rabbit (1.13306.0001)",
+                "merk": "Millipore",
+                "stok": "8 PAC",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2026-12-31",
+                "expired_raw": "46387"
+            }
+        },
+        {
+            "id": 69,
+            "kode": "17538933",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 63,
+            "old": {
+                "id": "69",
+                "kode_barang": "17538933",
+                "nama_barang": "Millipore",
+                "katalog": "Bactident Oxidase (1.00181.0001)",
+                "merk": "0 PAC",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "45596",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 63,
+                "kode_barang": "17538933",
+                "katalog": "",
+                "nama_barang": "Bactident Oxidase (1.00181.0001)",
+                "merk": "Millipore",
+                "stok": "0 PAC",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2024-10-31",
+                "expired_raw": "45596"
+            }
+        },
+        {
+            "id": 72,
+            "kode": "32997799",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 66,
+            "old": {
+                "id": "72",
+                "kode_barang": "32997799",
+                "nama_barang": "One Med",
+                "katalog": "Kapas Berlemak 500 gram",
+                "merk": "19 PCS",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 66,
+                "kode_barang": "32997799",
+                "katalog": "",
+                "nama_barang": "Kapas Berlemak 500 gram",
+                "merk": "One Med",
+                "stok": "19 PCS",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 75,
+            "kode": "53309530",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 73,
+            "old": {
+                "id": "75",
+                "kode_barang": "53309530",
+                "nama_barang": "Himedia",
+                "katalog": "Bile Esculin Azide Agar (M493l-500G)",
+                "merk": "1 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 73,
+                "kode_barang": "53309530",
+                "katalog": "",
+                "nama_barang": "Bile Esculin Azide Agar (M493l-500G)",
+                "merk": "Himedia",
+                "stok": "1 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 80,
+            "kode": "67294277",
+            "src_file": "Data Media Mikrobiologi.xlsx",
+            "src_row": 78,
+            "old": {
+                "id": "80",
+                "kode_barang": "67294277",
+                "nama_barang": "Triple Sugar Iron agar (M021-500G)",
+                "katalog": "M021-500G",
+                "merk": "0 BOTOL",
+                "stok": "Media Mikrobiologi",
+                "jenis_barang": "46903",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Media Mikrobiologi.xlsx",
+                "excel_row": 78,
+                "kode_barang": "67294277",
+                "katalog": "M021-500G",
+                "nama_barang": "Triple Sugar Iron agar (M021-500G)",
+                "merk": "",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Media Mikrobiologi",
+                "expired_date": "2028-05-30",
+                "expired_raw": "46903"
+            }
+        },
+        {
+            "id": 183,
+            "kode": "22592547",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 32,
+            "old": {
+                "id": "183",
+                "kode_barang": "22592547",
+                "nama_barang": "PT. Brataco",
+                "katalog": "Aqua DM 20L, Non AMDK",
+                "merk": "0 DIRIGEN",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 32,
+                "kode_barang": "22592547",
+                "katalog": "",
+                "nama_barang": "Aqua DM 20L, Non AMDK",
+                "merk": "PT. Brataco",
+                "stok": "0 DIRIGEN",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 184,
+            "kode": "41178184",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 33,
+            "old": {
+                "id": "184",
+                "kode_barang": "41178184",
+                "nama_barang": "PT. Widatra Bhakti",
+                "katalog": "Sterile Water for Irrigation 1000 mL",
+                "merk": "0 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 33,
+                "kode_barang": "41178184",
+                "katalog": "",
+                "nama_barang": "Sterile Water for Irrigation 1000 mL",
+                "merk": "PT. Widatra Bhakti",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 186,
+            "kode": "50611487",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 35,
+            "old": {
+                "id": "186",
+                "kode_barang": "50611487",
+                "nama_barang": "Smart Lab. Indonesia",
+                "katalog": "Toluene p.a (A.1075)",
+                "merk": "0 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "46785",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 35,
+                "kode_barang": "50611487",
+                "katalog": "",
+                "nama_barang": "Toluene p.a (A.1075)",
+                "merk": "Smart Lab. Indonesia",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": "2028-02-02",
+                "expired_raw": "46785"
+            }
+        },
+        {
+            "id": 188,
+            "kode": "57033654",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 37,
+            "old": {
+                "id": "188",
+                "kode_barang": "57033654",
+                "nama_barang": "Merck",
+                "katalog": "Dimethyl Sulfoxide ( 1.02952.1000)",
+                "merk": "1 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 37,
+                "kode_barang": "57033654",
+                "katalog": "",
+                "nama_barang": "Dimethyl Sulfoxide ( 1.02952.1000)",
+                "merk": "Merck",
+                "stok": "1 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 191,
+            "kode": "85966351",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 41,
+            "old": {
+                "id": "191",
+                "kode_barang": "85966351",
+                "nama_barang": "Smart Lab. Indonesia",
+                "katalog": "N,N Dimetil Formamid (A.1094)",
+                "merk": "1 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "46639",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 41,
+                "kode_barang": "85966351",
+                "katalog": "",
+                "nama_barang": "N,N Dimetil Formamid (A.1094)",
+                "merk": "Smart Lab. Indonesia",
+                "stok": "1 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": "2027-09-09",
+                "expired_raw": "46639"
+            }
+        },
+        {
+            "id": 193,
+            "kode": "17029669",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 44,
+            "old": {
+                "id": "193",
+                "kode_barang": "17029669",
+                "nama_barang": "Agilent",
+                "katalog": "Quechers Extract tube ,EN Method w\/CH (5982-5650 CH))",
+                "merk": "0 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 44,
+                "kode_barang": "17029669",
+                "katalog": "",
+                "nama_barang": "Quechers Extract tube ,EN Method w\/CH (5982-5650 CH))",
+                "merk": "Agilent",
+                "stok": "0 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 194,
+            "kode": "11835386",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 48,
+            "old": {
+                "id": "194",
+                "kode_barang": "11835386",
+                "nama_barang": "Sigma Aldrich",
+                "katalog": "Zinc Standard Solution ( 1.19806.0100)",
+                "merk": "0 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 48,
+                "kode_barang": "11835386",
+                "katalog": "",
+                "nama_barang": "Zinc Standard Solution ( 1.19806.0100)",
+                "merk": "Sigma Aldrich",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 198,
+            "kode": "29103970",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 52,
+            "old": {
+                "id": "198",
+                "kode_barang": "29103970",
+                "nama_barang": "Vicam",
+                "katalog": "Aflatoxin Standard mix kit (5x1ml) (G1040)",
+                "merk": "0 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 52,
+                "kode_barang": "29103970",
+                "katalog": "",
+                "nama_barang": "Aflatoxin Standard mix kit (5x1ml) (G1040)",
+                "merk": "Vicam",
+                "stok": "0 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 199,
+            "kode": "90023374",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 53,
+            "old": {
+                "id": "199",
+                "kode_barang": "90023374",
+                "nama_barang": "Vicam",
+                "katalog": "Afla M1 toxin Standard (10ug\/ml) 1x1ml (G1043)",
+                "merk": "0 PCS",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 53,
+                "kode_barang": "90023374",
+                "katalog": "",
+                "nama_barang": "Afla M1 toxin Standard (10ug\/ml) 1x1ml (G1043)",
+                "merk": "Vicam",
+                "stok": "0 PCS",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 202,
+            "kode": "38051612",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 57,
+            "old": {
+                "id": "202",
+                "kode_barang": "38051612",
+                "nama_barang": "Merck",
+                "katalog": "Diisopropilamine (1.03646.0100)",
+                "merk": "0 PCS",
+                "stok": "Reagen Cair",
+                "jenis_barang": "45291",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 57,
+                "kode_barang": "38051612",
+                "katalog": "",
+                "nama_barang": "Diisopropilamine (1.03646.0100)",
+                "merk": "Merck",
+                "stok": "0 PCS",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": "2023-12-31",
+                "expired_raw": "45291"
+            }
+        },
+        {
+            "id": 203,
+            "kode": "68962228",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 58,
+            "old": {
+                "id": "203",
+                "kode_barang": "68962228",
+                "nama_barang": "Agilent",
+                "katalog": "Quechers Extract Poucher, AOAC Method (5982-6755)",
+                "merk": "0 KTK",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 58,
+                "kode_barang": "68962228",
+                "katalog": "",
+                "nama_barang": "Quechers Extract Poucher, AOAC Method (5982-6755)",
+                "merk": "Agilent",
+                "stok": "0 KTK",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 210,
+            "kode": "71174163",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 72,
+            "old": {
+                "id": "210",
+                "kode_barang": "71174163",
+                "nama_barang": "sigma",
+                "katalog": "Dimethyl sulfoxide (D5879-100ML)",
+                "merk": "1 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 72,
+                "kode_barang": "71174163",
+                "katalog": "",
+                "nama_barang": "Dimethyl sulfoxide (D5879-100ML)",
+                "merk": "sigma",
+                "stok": "1 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 212,
+            "kode": "42637019",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 86,
+            "old": {
+                "id": "212",
+                "kode_barang": "42637019",
+                "nama_barang": "waters",
+                "katalog": "SPE HLB Cartridges 3 cc, Waters (WAT 094226)",
+                "merk": "2 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 86,
+                "kode_barang": "42637019",
+                "katalog": "",
+                "nama_barang": "SPE HLB Cartridges 3 cc, Waters (WAT 094226)",
+                "merk": "waters",
+                "stok": "2 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 213,
+            "kode": "86032311",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 87,
+            "old": {
+                "id": "213",
+                "kode_barang": "86032311",
+                "nama_barang": "waters",
+                "katalog": "SPE MCX Cartridges 3cc, Waters (186000254)",
+                "merk": "0 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 87,
+                "kode_barang": "86032311",
+                "katalog": "",
+                "nama_barang": "SPE MCX Cartridges 3cc, Waters (186000254)",
+                "merk": "waters",
+                "stok": "0 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 215,
+            "kode": "62236183",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 89,
+            "old": {
+                "id": "215",
+                "kode_barang": "62236183",
+                "nama_barang": "whatman",
+                "katalog": "Filter Papers (1443-090)",
+                "merk": "0 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 89,
+                "kode_barang": "62236183",
+                "katalog": "",
+                "nama_barang": "Filter Papers (1443-090)",
+                "merk": "whatman",
+                "stok": "0 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 222,
+            "kode": "62056165",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 99,
+            "old": {
+                "id": "222",
+                "kode_barang": "62056165",
+                "nama_barang": "grade",
+                "katalog": "Grade 91 Sheet, Whatman (1.091.930)",
+                "merk": "0 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 99,
+                "kode_barang": "62056165",
+                "katalog": "",
+                "nama_barang": "Grade 91 Sheet, Whatman (1.091.930)",
+                "merk": "grade",
+                "stok": "0 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 223,
+            "kode": "15390340",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 100,
+            "old": {
+                "id": "223",
+                "kode_barang": "15390340",
+                "nama_barang": "grade",
+                "katalog": "Grade 93 Sheet, Whatman (1.093.930)",
+                "merk": "3 PAC",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 100,
+                "kode_barang": "15390340",
+                "katalog": "",
+                "nama_barang": "Grade 93 Sheet, Whatman (1.093.930)",
+                "merk": "grade",
+                "stok": "3 PAC",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 227,
+            "kode": "61421202",
+            "src_file": "Data Reagen Cair.xlsx",
+            "src_row": 107,
+            "old": {
+                "id": "227",
+                "kode_barang": "61421202",
+                "nama_barang": "Smart Lab.",
+                "katalog": "Dichloromethane (A-1031)",
+                "merk": "1 BOTOL",
+                "stok": "Reagen Cair",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Cair.xlsx",
+                "excel_row": 107,
+                "kode_barang": "61421202",
+                "katalog": "",
+                "nama_barang": "Dichloromethane (A-1031)",
+                "merk": "Smart Lab.",
+                "stok": "1 BOTOL",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 320,
+            "kode": "70030122",
+            "src_file": "Data Reagen Padat.xlsx",
+            "src_row": 19,
+            "old": {
+                "id": "320",
+                "kode_barang": "70030122",
+                "nama_barang": "Smart Lab.",
+                "katalog": "Ammonium Bicarbonate (A.2011)",
+                "merk": "0 BOTOL",
+                "stok": "Reagen Padat",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Padat.xlsx",
+                "excel_row": 19,
+                "kode_barang": "70030122",
+                "katalog": "",
+                "nama_barang": "Ammonium Bicarbonate (A.2011)",
+                "merk": "Smart Lab.",
+                "stok": "0 BOTOL",
+                "jenis_barang": "Reagen Padat",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 323,
+            "kode": "40941111",
+            "src_file": "Data Reagen Padat.xlsx",
+            "src_row": 23,
+            "old": {
+                "id": "323",
+                "kode_barang": "40941111",
+                "nama_barang": "0",
+                "katalog": null,
+                "merk": null,
+                "stok": "0 PCS",
+                "jenis_barang": "Reagen Padat",
+                "expired_date": "0000-00-00"
+            },
+            "new": {
+                "file": "Data Reagen Padat.xlsx",
+                "excel_row": 23,
+                "kode_barang": "40941111",
+                "katalog": "0",
+                "nama_barang": "0",
+                "merk": "0",
+                "stok": "0 PCS",
+                "jenis_barang": "Reagen Padat",
+                "expired_date": null,
+                "expired_raw": "0000-00-00"
+            }
+        },
+        {
+            "id": 325,
+            "kode": "69823651",
+            "src_file": "Data Reagen Padat.xlsx",
+            "src_row": 46,
+            "old": {
+                "id": "325",
+                "kode_barang": "69823651",
+                "nama_barang": "USP",
+                "katalog": "Penicilin V Potassium (150453.200mg)",
+                "merk": "0 VIAL",
+                "stok": "Reagen Padat",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Padat.xlsx",
+                "excel_row": 46,
+                "kode_barang": "69823651",
+                "katalog": "",
+                "nama_barang": "Penicilin V Potassium (150453.200mg)",
+                "merk": "USP",
+                "stok": "0 VIAL",
+                "jenis_barang": "Reagen Padat",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 326,
+            "kode": "93561385",
+            "src_file": "Data Reagen Padat.xlsx",
+            "src_row": 47,
+            "old": {
+                "id": "326",
+                "kode_barang": "93561385",
+                "nama_barang": "Sigma",
+                "katalog": "Pyrogalol Acs Reagents (2540002.10G)",
+                "merk": "0 VIAL",
+                "stok": "Reagen Padat",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Padat.xlsx",
+                "excel_row": 47,
+                "kode_barang": "93561385",
+                "katalog": "",
+                "nama_barang": "Pyrogalol Acs Reagents (2540002.10G)",
+                "merk": "Sigma",
+                "stok": "0 VIAL",
+                "jenis_barang": "Reagen Padat",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        },
+        {
+            "id": 327,
+            "kode": "63407330",
+            "src_file": "Data Reagen Padat.xlsx",
+            "src_row": 51,
+            "old": {
+                "id": "327",
+                "kode_barang": "63407330",
+                "nama_barang": "Smart Lab",
+                "katalog": "Potassium Chloride (A-2038)",
+                "merk": "1 BOTOL",
+                "stok": "Reagen Padat",
+                "jenis_barang": "Reagen Cair",
+                "expired_date": null
+            },
+            "new": {
+                "file": "Data Reagen Padat.xlsx",
+                "excel_row": 51,
+                "kode_barang": "63407330",
+                "katalog": "",
+                "nama_barang": "Potassium Chloride (A-2038)",
+                "merk": "Smart Lab",
+                "stok": "1 BOTOL",
+                "jenis_barang": "Reagen Padat",
+                "expired_date": null,
+                "expired_raw": null
+            }
+        }
+    ],
+    "zero_date_records": [
+        {
+            "id": "13",
+            "kode_barang": "60554154",
+            "nama_barang": "CI 76520 2-Aminofenol (B0117547)",
+            "katalog": "-",
+            "merk": "-",
+            "stok": "0 VIAL",
+            "jenis_barang": "Baku Pembanding",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "16",
+            "kode_barang": "51531441",
+            "nama_barang": "Zink Pirition (B0114350)",
+            "katalog": null,
+            "merk": "-",
+            "stok": "4 VIAL",
+            "jenis_barang": "Baku Pembanding",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "17",
+            "kode_barang": "82250842",
+            "nama_barang": "Omeprazole 200 mg (1478505)",
+            "katalog": "1478505",
+            "merk": "Sigma",
+            "stok": "0 VIAL",
+            "jenis_barang": "Baku Pembanding",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "18",
+            "kode_barang": "76185601",
+            "nama_barang": "Propil paraben\/Nipasol (B0314174)",
+            "katalog": null,
+            "merk": null,
+            "stok": "1 VIAL",
+            "jenis_barang": "Baku Pembanding",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "40",
+            "kode_barang": "47297499",
+            "nama_barang": "Kapas Pembalut @ 1 Kg. (Lokal)",
+            "katalog": "Lokal",
+            "merk": "Ananda & KK \/ Mutiara",
+            "stok": "0 ROL",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "98",
+            "kode_barang": "18833535",
+            "nama_barang": "Propoxyphenyl hydroxyhomosildenafil (S-0656-TLC Lot.1427.092A2)",
+            "katalog": "S-0656-TLC Lot.1427.092A2",
+            "merk": "TLC Pharmaceutical Standards",
+            "stok": "0 PCS",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "103",
+            "kode_barang": "43170643",
+            "nama_barang": "Clostridium Perfringens Selective Suplement (1.00888.0010)",
+            "katalog": "1.00888.0010",
+            "merk": "Merck",
+            "stok": "0 PAC",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "118",
+            "kode_barang": "49230691",
+            "nama_barang": "Cetrinix Supplemen (FD029-5VL)",
+            "katalog": "FD029-5VL",
+            "merk": "Himedia",
+            "stok": "0 PAC",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "119",
+            "kode_barang": "38557655",
+            "nama_barang": "100 nm Prime Time MGB Probe 5,6-FAM (111315969)",
+            "katalog": "111315969",
+            "merk": "Taqman MGB Probe",
+            "stok": "0 VIAL",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "152",
+            "kode_barang": "16935870",
+            "nama_barang": "STEC millipore TM plus agar base (67447)",
+            "katalog": "67447",
+            "merk": "Merck",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "153",
+            "kode_barang": "93066086",
+            "nama_barang": "Salmonella H antiserum poly 3ml (224061)",
+            "katalog": "224061",
+            "merk": "Difco",
+            "stok": "0 PCS",
+            "jenis_barang": "Media Mikrobiologi",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "156",
+            "kode_barang": "55922520",
+            "nama_barang": "Kertas Timbang",
+            "katalog": "Timbang",
+            "merk": "Lokal",
+            "stok": "3 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "160",
+            "kode_barang": "18553328",
+            "nama_barang": "Econo Filter Nylon 25mm 0,2 mm(5190-5271)",
+            "katalog": "5190-5271",
+            "merk": "Agilen",
+            "stok": "499 PCS",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "170",
+            "kode_barang": "19947366",
+            "nama_barang": "Boron trifluoride-methanol solution (15716-100ML) 100mL",
+            "katalog": "15716-100ML",
+            "merk": "Sigma-Aldrich",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "187",
+            "kode_barang": "30388597",
+            "nama_barang": "1-Octanol (1.00991.1000)",
+            "katalog": "1.00991.1000",
+            "merk": "Merck",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "214",
+            "kode_barang": "20299215",
+            "nama_barang": "SPE MAX Cartridges 3cc, Waters (186000367)",
+            "katalog": "186000367",
+            "merk": "waters",
+            "stok": "1 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "216",
+            "kode_barang": "24775394",
+            "nama_barang": "Membran Filter PTFE 0,5 (7585-004)",
+            "katalog": "7585-004",
+            "merk": "whatman",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "217",
+            "kode_barang": "24138905",
+            "nama_barang": "Membrane Filtter Millipore (HVLPO1300)",
+            "katalog": "HVLPO1300",
+            "merk": "millipore",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "218",
+            "kode_barang": "45537494",
+            "nama_barang": "Spritus Teknis ( 45537494 )",
+            "katalog": "45537494",
+            "merk": "lokal",
+            "stok": "5 DIRIGEN",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "219",
+            "kode_barang": "31204293",
+            "nama_barang": "ALKOHOL Teknis 70% ( 31204293 )",
+            "katalog": "31204293",
+            "merk": "lokal",
+            "stok": "5 DIRIGEN",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "226",
+            "kode_barang": "95761946",
+            "nama_barang": "N-Hexan (A-1045)",
+            "katalog": "A-1045",
+            "merk": "Smart Lab",
+            "stok": "1 BOTOL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "243",
+            "kode_barang": "12806473",
+            "nama_barang": "Ocra Test WB Columns, for HPLC 25\/box (G1033)",
+            "katalog": "G1033",
+            "merk": "Waters",
+            "stok": "0 KTK",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "244",
+            "kode_barang": "28177435",
+            "nama_barang": "9P Bond Elut C-18 6cc  500mg (12102052)",
+            "katalog": "12102052",
+            "merk": "Agilent Technologies",
+            "stok": "6 PCS",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "245",
+            "kode_barang": "49622555",
+            "nama_barang": "Econofilter PTFE 25mm 0,45um (5190-5268)",
+            "katalog": "5190-5268",
+            "merk": "Agilent",
+            "stok": "0 PCS",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "253",
+            "kode_barang": "42742828",
+            "nama_barang": "Phenomenex Membrane Filter Hydrophilic (00803.12203.100)",
+            "katalog": "00803.12203.100",
+            "merk": "Welch",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "255",
+            "kode_barang": "80405903",
+            "nama_barang": "Ethanol standard for GC, 5 mL (02483-5ML)",
+            "katalog": "02483-5ML",
+            "merk": "Sigma Aldrich",
+            "stok": "0 VIAL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "257",
+            "kode_barang": "72540110",
+            "nama_barang": "n-Heptane AR (A-1046)",
+            "katalog": "A-1046",
+            "merk": "Smart Lab.",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "260",
+            "kode_barang": "92314625",
+            "nama_barang": "Nylon Membrane Filter, Pore Size : 0,22 um, Diameter; 47mm, non-sterile (MFNY047022) 100pcs\/pack",
+            "katalog": "MFNY047022",
+            "merk": "Carslton Technologis",
+            "stok": "8 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "271",
+            "kode_barang": "12436115",
+            "nama_barang": "Deoxynivalenol (DON) HPLC Standard (1x1mL) (100000186)",
+            "katalog": "100000186",
+            "merk": "VICAM",
+            "stok": "0 PCS",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "272",
+            "kode_barang": "44176975",
+            "nama_barang": "Ammonium hydroxide Solution 25 mL. (221228-25ML-A)",
+            "katalog": "221228-25ML-A",
+            "merk": "Sigma-Aldrich",
+            "stok": "1 BOTOL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "276",
+            "kode_barang": "26694042",
+            "nama_barang": "Ensure Touch Instrument ( PK E HG ETOUCH )",
+            "katalog": "PK E HG ETOUCH",
+            "merk": "Hygiene Ensure Touch",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "283",
+            "kode_barang": "15390327",
+            "nama_barang": "Bayclin Reg  4 L",
+            "katalog": "Regular",
+            "merk": "SC Johnson",
+            "stok": "0 DIRIGEN",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "287",
+            "kode_barang": "47377212",
+            "nama_barang": "PTFE Syringe Filter,Hydropilic Diam,25mm,Pore.0,45 (FE25451) 100pcs\/pack",
+            "katalog": "FE25451",
+            "merk": "Aijiren",
+            "stok": "26 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "288",
+            "kode_barang": "88170419",
+            "nama_barang": "PTFE Syringe Filter,Hydropilic Diam,25mm,Pore.0,22 (FE25221) 100pcs\/pack",
+            "katalog": "FE25221",
+            "merk": "Aijiren",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "289",
+            "kode_barang": "94429868",
+            "nama_barang": "Syringe Filter,PVDF,Hydrophilic, Pore.0,45,Diam,13mm,(SP-2008) 100pcs\/pack",
+            "katalog": "SP-2008",
+            "merk": "Thermo Scientific",
+            "stok": "1 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "290",
+            "kode_barang": "15983661",
+            "nama_barang": "Membran Circles,Cellulose Nitrate,White Plain 0,45um, 47mm (7184-004) 100pcs\/pack",
+            "katalog": "7184-004",
+            "merk": "Whatman",
+            "stok": "2 PAC",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "291",
+            "kode_barang": "96692915",
+            "nama_barang": "Test Kit  Sianida (1.14417.00001)",
+            "katalog": "1.14417.00001",
+            "merk": "Merck",
+            "stok": "0 KTK",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "292",
+            "kode_barang": "34349733",
+            "nama_barang": "Acetaldehyde solution Natural, 50 wt. in ethanol 5 mL. (36392-5ML)",
+            "katalog": "36392-5ML",
+            "merk": "Sigma-Aldrich",
+            "stok": "1 VIAL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "297",
+            "kode_barang": "70163223",
+            "nama_barang": "Azenta Life Science Probe Oligo Flex DNA Synthesis-EAE Pr (7307.5)",
+            "katalog": "7307.5",
+            "merk": "Made in China",
+            "stok": "1 VIAL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "298",
+            "kode_barang": "32549191",
+            "nama_barang": "Azenta Life Science Primer Oligo Flex DNA Synthesis-Primer EAE R (6037)",
+            "katalog": "6037",
+            "merk": "Made in China",
+            "stok": "1 VIAL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "299",
+            "kode_barang": "18719372",
+            "nama_barang": "Azenta Life Science Primer Oligo Flex DNA Synthesis-Primer EAE F (6077)",
+            "katalog": "6077",
+            "merk": "Made in Chine",
+            "stok": "1 VIAL",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "302",
+            "kode_barang": "18684005",
+            "nama_barang": "Nucleasae-Free Water (10x50mL) (129114)",
+            "katalog": "129114",
+            "merk": "Qiagen",
+            "stok": "1 PCS",
+            "jenis_barang": "Reagen Cair",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "313",
+            "kode_barang": "33110547",
+            "nama_barang": "Sodium Chloride ( A-2049 )",
+            "katalog": "A-2049",
+            "merk": "Smart Lab Indonesia",
+            "stok": "1 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "316",
+            "kode_barang": "83826830",
+            "nama_barang": "Di-Sodium Hydrogen Phosphate Anhydrate \/ Na2HPO4 (A.2143)",
+            "katalog": "A.2143",
+            "merk": "Smart Lab. Indonesia",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "318",
+            "kode_barang": "18860819",
+            "nama_barang": "Ammonium Format (156264-1KG)",
+            "katalog": "156264-1KG",
+            "merk": "Sigma",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "323",
+            "kode_barang": "40941111",
+            "nama_barang": "0",
+            "katalog": null,
+            "merk": null,
+            "stok": "0 PCS",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "329",
+            "kode_barang": "28949497",
+            "nama_barang": "Boric Acid (A-2013)",
+            "katalog": "A-2013",
+            "merk": "Smart Lab.",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "338",
+            "kode_barang": "55987513",
+            "nama_barang": "Phosphate Buffered Saline Tab. (P4417-100TAB)",
+            "katalog": "P4417-100TAB",
+            "merk": "SigmaAldrich",
+            "stok": "1 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "340",
+            "kode_barang": "94087819",
+            "nama_barang": "Sodium Dihydrogen Phosphate Dihydrate (1.06342.0250)",
+            "katalog": "1.06342.0250",
+            "merk": "SigmaAldrich",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "341",
+            "kode_barang": "27049553",
+            "nama_barang": "Bovine Serum Albumin (A2153-10G)",
+            "katalog": "A2153-10G",
+            "merk": "SigmaAldrich",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "346",
+            "kode_barang": "81553973",
+            "nama_barang": "Chloramphenicol (C252)",
+            "katalog": "C252",
+            "merk": "Phytotech",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "348",
+            "kode_barang": "79328672",
+            "nama_barang": "Di-Potassium Hydrogen Phosphate anhydrate (K2HPO4) (A.3136)",
+            "katalog": "A.3136",
+            "merk": "SmartLab",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "349",
+            "kode_barang": "31012902",
+            "nama_barang": "Natrium thiosulfate pentahydrate (A.2056)",
+            "katalog": "A.2056",
+            "merk": "SmartLab",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "350",
+            "kode_barang": "47459447",
+            "nama_barang": "Potassium dihydrogen phosphate (KH2PO4) (A.2131)",
+            "katalog": "A.2131",
+            "merk": "SmartLab",
+            "stok": "8 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "352",
+            "kode_barang": "67448137",
+            "nama_barang": "Acid Yellow II (R325066-1G)",
+            "katalog": "R325066-1G",
+            "merk": "-",
+            "stok": "0 VIAL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "356",
+            "kode_barang": "56535772",
+            "nama_barang": "Nyilon Syringe Filter, 25mm, 0,46um,100\/pk (SP-2016)",
+            "katalog": "SP-2016",
+            "merk": "Carslton Technologis",
+            "stok": "15 PAC",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "357",
+            "kode_barang": "86927142",
+            "nama_barang": "PTFE Syringe Filter, Hidrophilic 25mm, 0,2um, 100\/pk (SP-2025)",
+            "katalog": "SP-2025",
+            "merk": "Carslton Technologis",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "358",
+            "kode_barang": "59439997",
+            "nama_barang": "PTFE Syringe Filter, Hydrophilic 25mm, 0,45um, 100\/pk (SP-2026)",
+            "katalog": "SP-2026",
+            "merk": "Carslton Technologis",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "359",
+            "kode_barang": "76764270",
+            "nama_barang": "Nylon Syringe Filter, 25mm, 0,2um, 100\/pk (SP-2015)",
+            "katalog": "SP-2015",
+            "merk": "Carslton Technologis",
+            "stok": "11 PAC",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "362",
+            "kode_barang": "12382936",
+            "nama_barang": "Zinc sulfate heptahydrate, for analysis  ( 1.08883.0500 )",
+            "katalog": "1.08883.0500",
+            "merk": "Merck",
+            "stok": "1 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "370",
+            "kode_barang": "58884083",
+            "nama_barang": "L-Ascorbic acid, 99% 100 gram ( A92902-100G )",
+            "katalog": "A92902-100G",
+            "merk": "Sigma-Aldrich",
+            "stok": "1 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "385",
+            "kode_barang": "92274376",
+            "nama_barang": "Potassium Dichromate 500 gram (A-2035)",
+            "katalog": "A-2035",
+            "merk": "Samrtlabs",
+            "stok": "0 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "387",
+            "kode_barang": "52301474",
+            "nama_barang": "Object Glass  (7101)",
+            "katalog": "7101",
+            "merk": "Sail Brand",
+            "stok": "1 PAC",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "388",
+            "kode_barang": "56199165",
+            "nama_barang": "Glass Bead 5,0-6,0mm  (030.60.006) 1 Kg.",
+            "katalog": "030.60.006",
+            "merk": "ISOLAB",
+            "stok": "0 PAC",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "391",
+            "kode_barang": "24880823",
+            "nama_barang": "Dexamethasone 100MG (265005-100MGCN)",
+            "katalog": "265005-100MGCN",
+            "merk": "Merck-Millipore",
+            "stok": "1 VIAL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "392",
+            "kode_barang": "79491099",
+            "nama_barang": "L-Glutathione reduced (G4251-1G) 1 gram",
+            "katalog": "G4251-1G",
+            "merk": "Sigma-Aldrich",
+            "stok": "1 PCS",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "393",
+            "kode_barang": "57679723",
+            "nama_barang": "Sodium phosphate-96% (342483-500G) 500 gram",
+            "katalog": "342483-500G",
+            "merk": "Sigma-Aldrich",
+            "stok": "5 BOTOL",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        },
+        {
+            "id": "394",
+            "kode_barang": "24876997",
+            "nama_barang": "N-(1-Naphtyl) Ethylen-Diamine-dihydrochloride (1.06237.0005) 5gram",
+            "katalog": "1.06237.0005",
+            "merk": "Sigma-Aldrich",
+            "stok": "1 PCS",
+            "jenis_barang": "Reagen Padat",
+            "expired_date": "0000-00-00"
+        }
+    ]
+}
