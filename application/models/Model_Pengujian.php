@@ -308,11 +308,11 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_hasil_by_id($test_id)
     {
-        $this->db->select('tr.*, m.nama_metode, m.kode_metode, p.nama_parameter, p.kode_parameter, t.nama_template, t.skema_form, u.nama_lengkap as nama_penguji, u.nip as nip_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.status as status_sampel, s.kategori_sampel, l.nama_lab');
+        $this->db->select('tr.*, m.nama_metode, m.kode_metode, m.nama_zat_aktif, m.parameter_uji, m.jenis_sediaan, m.bentuk_sediaan, m.pustaka_acuan, m.metode_analisa, m.persyaratan, tc.nama_kelas_terapi, t.nama_template, t.kode_template, t.skema_form, t.kategori as kategori_template, p.nama_parameter, p.kode_parameter, u.nama_lengkap as nama_penguji, u.nip as nip_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.status as status_sampel, s.kategori_sampel');
         $this->db->from($this->tabel_hasil . ' tr');
         $this->db->join('samples s', 's.id = tr.sample_id', 'inner');
-        $this->db->join('laboratories l', 'l.id = s.lab_id', 'left');
         $this->db->join('methods m', 'm.id = tr.method_id', 'left');
+        $this->db->join('therapeutic_classes tc', 'tc.id = m.kelas_terapi_id', 'left');
         $this->db->join('form_templates t', 't.id = tr.template_id', 'left');
         $this->db->join('parameters p', 'p.id = t.parameter_id', 'left');
         $this->db->join('users u', 'u.id = tr.penguji_id', 'left');
@@ -798,5 +798,866 @@ class Model_Pengujian extends CI_Model
         $this->db->where('ts.approver_id', $approver_id);
         $this->db->order_by('ts.waktu_approval', 'DESC');
         return $this->db->get()->result_array();
+    }
+
+    /**
+     * Mengevaluasi kebutuhan jenis pengujian dari nilai string kuantitas (jumlah_kimia / jumlah_mikro).
+     *
+     * Aturan parsing konservatif:
+     * - NULL, string kosong, whitespace, '-' dianggap 0 (tidak wajib).
+     * - Nilai numerik atau string angka (misal '0', '0.0', '1', '30.0') diparsing secara ketat.
+     * - Teks satuan (misal '1 sampel', '250 gram', '10 tablet') diparsing dengan regex numerik di awal.
+     * - Jika mengandung angka nol (misal '0 sampel', '0 gram') dianggap 0 (tidak wajib).
+     * - Jika ada teks tak berpola / ambigu tanpa angka valid (misal 'ada', 'perlu', 'ya', '?')
+     *   maka status adalah AMBIGUOUS (fail-closed, tidak boleh diasumsikan selesai).
+     *
+     * @param mixed $raw_val
+     * @return array ['is_wajib' => bool, 'is_ambiguous' => bool, 'qty' => float, 'raw' => mixed, 'message' => string]
+     */
+    public function evaluasi_kebutuhan_pengujian($raw_val)
+    {
+        if ($raw_val === NULL) {
+            return [
+                'is_wajib'     => FALSE,
+                'is_ambiguous' => FALSE,
+                'qty'          => 0.0,
+                'raw'          => NULL,
+                'message'      => 'Nilai kosong / NULL'
+            ];
+        }
+
+        $str = trim((string)$raw_val);
+
+        if ($str === '' || $str === '-' || $str === '--') {
+            return [
+                'is_wajib'     => FALSE,
+                'is_ambiguous' => FALSE,
+                'qty'          => 0.0,
+                'raw'          => $raw_val,
+                'message'      => 'Kuantitas kosong atau tanda strip'
+            ];
+        }
+
+        // Cek jika murni angka desimal atau integer
+        if (is_numeric($str)) {
+            $val = (float)$str;
+            return [
+                'is_wajib'     => ($val > 0),
+                'is_ambiguous' => FALSE,
+                'qty'          => $val,
+                'raw'          => $raw_val,
+                'message'      => ($val > 0) ? 'Kuantitas numerik valid' : 'Kuantitas nol'
+            ];
+        }
+
+        // Teks dengan satuan di belakang, misal: "1 sampel", "250 gram", "10 tablet", "0.5 liter", "0 botol"
+        if (preg_match('/^\s*([0-9]+(?:[\.,][0-9]+)?)\s*([a-zA-Z\/]+.*)?$/', $str, $matches)) {
+            $num_str = str_replace(',', '.', $matches[1]);
+            $val = (float)$num_str;
+            return [
+                'is_wajib'     => ($val > 0),
+                'is_ambiguous' => FALSE,
+                'qty'          => $val,
+                'raw'          => $raw_val,
+                'message'      => ($val > 0) ? 'Kuantitas satuan valid' : 'Kuantitas satuan bernilai nol'
+            ];
+        }
+
+        // Nilai tidak dapat dipastikan secara aman (ambigu) -> fail-closed
+        return [
+            'is_wajib'     => FALSE,
+            'is_ambiguous' => TRUE,
+            'qty'          => 0.0,
+            'raw'          => $raw_val,
+            'message'      => 'Kuantitas ambigu / tidak dapat dipastikan secara otomatis'
+        ];
+    }
+
+    /**
+     * Memeriksa kelengkapan sesi wajib per sampel untuk pengajuan LHU ke Manajer Teknis (MT).
+     *
+     * Logika murni (pure evaluator): dapat menerima data array sampel & daftar sesi secara mandiri
+     * (untuk automated unit testing) atau menarik langsung dari database jika hanya ID sampel diberikan.
+     *
+     * @param array $sampel Data baris tabel samples (harus memuat id, jumlah_kimia, jumlah_mikro)
+     * @param array $sesi_list List associative array dari testing_sessions terkait sample_id tersebut
+     * @return array
+     */
+    public function evaluasi_kelengkapan_sesi_sampel($sampel, $sesi_list = [])
+    {
+        if (empty($sampel) || !is_array($sampel)) {
+            return [
+                'siap_mt'          => FALSE,
+                'status_agregat'   => 'INVALID_SAMPLE',
+                'alasan'           => 'Data sampel tidak valid atau tidak ditemukan',
+                'is_ambigu'        => FALSE,
+                'wajib_kimia'      => FALSE,
+                'wajib_mikro'      => FALSE,
+                'detail_kebutuhan' => [],
+                'status_sesi'      => []
+            ];
+        }
+
+        $sample_id = isset($sampel['id']) ? $sampel['id'] : NULL;
+        $eval_kimia = $this->evaluasi_kebutuhan_pengujian(isset($sampel['jumlah_kimia']) ? $sampel['jumlah_kimia'] : NULL);
+        $eval_mikro = $this->evaluasi_kebutuhan_pengujian(isset($sampel['jumlah_mikro']) ? $sampel['jumlah_mikro'] : NULL);
+
+        $detail_kebutuhan = [
+            'Kimia'        => $eval_kimia,
+            'Mikrobiologi' => $eval_mikro
+        ];
+
+        // Fail-closed jika salah satu kuantitas berstatus ambigu
+        if ($eval_kimia['is_ambiguous'] || $eval_mikro['is_ambiguous']) {
+            $alasan_ambigu = [];
+            if ($eval_kimia['is_ambiguous']) {
+                $alasan_ambigu[] = 'jumlah_kimia ambigu (' . var_export($eval_kimia['raw'], TRUE) . ')';
+            }
+            if ($eval_mikro['is_ambiguous']) {
+                $alasan_ambigu[] = 'jumlah_mikro ambigu (' . var_export($eval_mikro['raw'], TRUE) . ')';
+            }
+
+            return [
+                'siap_mt'          => FALSE,
+                'status_agregat'   => 'KUANTITAS_AMBIGU',
+                'alasan'           => 'Kebutuhan pengujian tidak dapat dipastikan: ' . implode(', ', $alasan_ambigu),
+                'is_ambigu'        => TRUE,
+                'wajib_kimia'      => $eval_kimia['is_wajib'],
+                'wajib_mikro'      => $eval_mikro['is_wajib'],
+                'detail_kebutuhan' => $detail_kebutuhan,
+                'status_sesi'      => []
+            ];
+        }
+
+        $wajib_kimia = $eval_kimia['is_wajib'];
+        $wajib_mikro = $eval_mikro['is_wajib'];
+
+        // Jika kedua kolom 0 atau kosong, tidak ada kewajiban pengujian terdefinisi
+        if (!$wajib_kimia && !$wajib_mikro) {
+            return [
+                'siap_mt'          => FALSE,
+                'status_agregat'   => 'TIDAK_ADA_PENGUJIAN_WAJIB',
+                'alasan'           => 'Tidak ada alokasi pengujian Kimia maupun Mikrobiologi yang diwajibkan untuk sampel ini',
+                'is_ambigu'        => FALSE,
+                'wajib_kimia'      => FALSE,
+                'wajib_mikro'      => FALSE,
+                'detail_kebutuhan' => $detail_kebutuhan,
+                'status_sesi'      => []
+            ];
+        }
+
+        // Petakan sesi per jenis pengujian
+        // Format sesi: ['id' => ..., 'sample_id' => ..., 'jenis_pengujian' => 'Kimia'|'Mikrobiologi', 'status' => ...]
+        $sesi_per_jenis = [
+            'Kimia'        => [],
+            'Mikrobiologi' => []
+        ];
+
+        foreach ($sesi_list as $sesi) {
+            $jp = isset($sesi['jenis_pengujian']) ? trim($sesi['jenis_pengujian']) : '';
+            if (isset($sesi_per_jenis[$jp])) {
+                $sesi_per_jenis[$jp][] = $sesi;
+            }
+        }
+
+        $wajib_jenis = [];
+        if ($wajib_kimia) $wajib_jenis[] = 'Kimia';
+        if ($wajib_mikro) $wajib_jenis[] = 'Mikrobiologi';
+
+        // Sertakan juga jenis pengujian yang memiliki sesi aktual pada sampel ini
+        foreach (['Kimia', 'Mikrobiologi'] as $jp_cek) {
+            if (!empty($sesi_per_jenis[$jp_cek]) && !in_array($jp_cek, $wajib_jenis, TRUE)) {
+                $wajib_jenis[] = $jp_cek;
+            }
+        }
+
+        $status_per_jenis = [];
+        $semua_wajib_terpenuhi = TRUE;
+        $alasan_kendala = [];
+
+        foreach ($wajib_jenis as $jenis) {
+            $daftar = $sesi_per_jenis[$jenis];
+
+            if (empty($daftar)) {
+                $status_per_jenis[$jenis] = [
+                    'lengkap' => FALSE,
+                    'status'  => 'BELUM_DIBUAT',
+                    'sesi_id' => NULL,
+                    'catatan' => 'Sesi ' . $jenis . ' belum dibuat'
+                ];
+                $semua_wajib_terpenuhi = FALSE;
+                $alasan_kendala[] = 'Sesi ' . $jenis . ' belum dibuat';
+                continue;
+            }
+
+            // Pisahkan sesi historis final dengan sesi non-final (aktif)
+            $sesi_aktif = [];
+            $sesi_final = [];
+            foreach ($daftar as $s) {
+                $st = isset($s['status']) ? trim($s['status']) : '';
+                if ($st === 'Approved / Final') {
+                    $sesi_final[] = $s;
+                } else {
+                    $sesi_aktif[] = $s;
+                }
+            }
+
+            // Aturan Konservatif Sesi Ganda:
+            // Jika terdapat lebih dari 1 sesi non-final untuk jenis pengujian yang sama,
+            // sistem tidak boleh menebak sesi mana yang otoritatif -> fail-closed (SESI_GANDA_AMBIGU).
+            if (count($sesi_aktif) > 1) {
+                $status_per_jenis[$jenis] = [
+                    'lengkap' => FALSE,
+                    'status'  => 'SESI_GANDA_AMBIGU',
+                    'sesi_id' => NULL,
+                    'catatan' => 'Terdapat lebih dari satu sesi aktif (' . count($sesi_aktif) . ' sesi) untuk ' . $jenis . ' yang belum final. Membutuhkan klarifikasi administratif.'
+                ];
+                $semua_wajib_terpenuhi = FALSE;
+                $alasan_kendala[] = 'Konflik sesi ganda pada ' . $jenis;
+                continue;
+            }
+
+            // Jika tidak ada sesi aktif, tapi ada sesi final historis
+            if (empty($sesi_aktif) && !empty($sesi_final)) {
+                $sesi_terakhir_final = end($sesi_final);
+                $status_per_jenis[$jenis] = [
+                    'lengkap' => TRUE,
+                    'status'  => 'Approved / Final',
+                    'sesi_id' => $sesi_terakhir_final['id'],
+                    'catatan' => 'Sesi ' . $jenis . ' telah disetujui sebelumnya (Historis Final)'
+                ];
+                continue;
+            }
+
+            // Jika tepat 1 sesi aktif
+            $s_tunggal = $sesi_aktif[0];
+            $st_tunggal = isset($s_tunggal['status']) ? trim($s_tunggal['status']) : '';
+
+            if ($st_tunggal === 'Menunggu Approval') {
+                $status_per_jenis[$jenis] = [
+                    'lengkap' => TRUE,
+                    'status'  => 'Menunggu Approval',
+                    'sesi_id' => $s_tunggal['id'],
+                    'catatan' => 'Sesi ' . $jenis . ' telah disetujui Penyelia dan siap diajukan ke MT'
+                ];
+            } elseif ($st_tunggal === 'Ditolak') {
+                $status_per_jenis[$jenis] = [
+                    'lengkap' => FALSE,
+                    'status'  => 'Ditolak',
+                    'sesi_id' => $s_tunggal['id'],
+                    'catatan' => 'Sesi ' . $jenis . ' berstatus Ditolak oleh Penyelia'
+                ];
+                $semua_wajib_terpenuhi = FALSE;
+                $alasan_kendala[] = 'Sesi ' . $jenis . ' ditolak Penyelia';
+            } else {
+                $status_per_jenis[$jenis] = [
+                    'lengkap' => FALSE,
+                    'status'  => $st_tunggal,
+                    'sesi_id' => $s_tunggal['id'],
+                    'catatan' => 'Sesi ' . $jenis . ' masih berstatus ' . $st_tunggal
+                ];
+                $semua_wajib_terpenuhi = FALSE;
+                $alasan_kendala[] = 'Sesi ' . $jenis . ' masih berstatus ' . $st_tunggal;
+            }
+        }
+
+        // Hitung sesi yang siap diapprove MT dan sesi yang sedang bermasalah / pending
+        $jumlah_sesi_siap = 0;
+        $ada_sesi_berjalan_atau_konflik = FALSE;
+
+        foreach ($status_per_jenis as $jenis => $info) {
+            if ($info['status'] === 'Menunggu Approval' || $info['status'] === 'Approved / Final') {
+                $jumlah_sesi_siap++;
+            } elseif ($info['status'] === 'SESI_GANDA_AMBIGU' || $info['status'] === 'Ditolak' || $info['status'] === 'Sedang Diuji' || $info['status'] === 'Menunggu Verifikasi') {
+                $ada_sesi_berjalan_atau_konflik = TRUE;
+            }
+        }
+
+        // Syarat Sampel Siap Ditinjau / Diapprove MT:
+        // 1. Terdapat minimal 1 sesi yang siap (status 'Menunggu Approval' atau 'Approved / Final').
+        // 2. Tidak ada sesi yang sedang konflik (SESI_GANDA_AMBIGU), ditolak, atau masih berjalan ('Sedang Diuji' / 'Menunggu Verifikasi').
+        // Ketiadaan sesi pada jenis pengujian lain ('BELUM_DIBUAT') tidak lagi memblokir approval, karena sampel bisa saja hanya diuji salah satu (Kimia saja atau Mikro saja).
+        if ($jumlah_sesi_siap > 0 && !$ada_sesi_berjalan_atau_konflik) {
+            $jenis_siap = [];
+            foreach ($status_per_jenis as $jenis => $info) {
+                if ($info['status'] === 'Menunggu Approval' || $info['status'] === 'Approved / Final') {
+                    $jenis_siap[] = $jenis;
+                }
+            }
+
+            return [
+                'siap_mt'          => TRUE,
+                'status_agregat'   => 'SIAP_APPROVAL_MT',
+                'alasan'           => 'Sesi pengujian (' . implode(', ', $jenis_siap) . ') telah selesai dan disetujui Penyelia, siap ditinjau/diapprove Manajer Teknis',
+                'is_ambigu'        => FALSE,
+                'wajib_kimia'      => $wajib_kimia,
+                'wajib_mikro'      => $wajib_mikro,
+                'detail_kebutuhan' => $detail_kebutuhan,
+                'status_sesi'      => $status_per_jenis
+            ];
+        }
+
+        return [
+            'siap_mt'          => FALSE,
+            'status_agregat'   => 'BELUM_LENGKAP',
+            'alasan'           => 'Belum siap diajukan ke MT: ' . (!empty($alasan_kendala) ? implode('; ', $alasan_kendala) : 'Belum ada sesi pengujian yang berstatus Menunggu Approval'),
+            'is_ambigu'        => FALSE,
+            'wajib_kimia'      => $wajib_kimia,
+            'wajib_mikro'      => $wajib_mikro,
+            'detail_kebutuhan' => $detail_kebutuhan,
+            'status_sesi'      => $status_per_jenis
+        ];
+    }
+
+    /**
+     * Memeriksa kelengkapan sesi wajib untuk satu sample_id langsung dari database.
+     *
+     * @param int $sample_id
+     * @return array
+     */
+    public function cek_kelengkapan_sesi_sampel($sample_id)
+    {
+        $sampel = $this->db->get_where('samples', ['id' => $sample_id])->row_array();
+        if (!$sampel) {
+            return [
+                'siap_mt'          => FALSE,
+                'status_agregat'   => 'SAMPEL_TIDAK_DITEMUKAN',
+                'alasan'           => 'Sampel ID ' . $sample_id . ' tidak ditemukan di database',
+                'is_ambigu'        => FALSE,
+                'wajib_kimia'      => FALSE,
+                'wajib_mikro'      => FALSE,
+                'detail_kebutuhan' => [],
+                'status_sesi'      => []
+            ];
+        }
+
+        $sesi_list = $this->db->get_where('testing_sessions', ['sample_id' => $sample_id])->result_array();
+        return $this->evaluasi_kelengkapan_sesi_sampel($sampel, $sesi_list);
+    }
+
+    /**
+     * Mengelompokkan dan menyaring antrean approval MT berbasis sampel (Tahap 2).
+     *
+     * Logika murni:
+     * - Menerima daftar sampel kandidat dan seluruh testing_sessions terkait.
+     * - Untuk setiap sampel, memanggil evaluasi_kelengkapan_sesi_sampel().
+     * - Hanya meloloskan sampel yang siap_mt === TRUE.
+     * - Menggabungkan metadata sesi (Kimia dan/atau Mikro), penguji, verifier, dan kesimpulan.
+     *
+     * @param array $daftar_sampel
+     * @param array $daftar_sesi
+     * @return array
+     */
+    public function filter_antrean_approval_sampel($daftar_sampel, $daftar_sesi)
+    {
+        // Petakan sesi berdasarkan sample_id
+        $sesi_by_sample = [];
+        foreach ($daftar_sesi as $sesi) {
+            $s_id = isset($sesi['sample_id']) ? (int)$sesi['sample_id'] : 0;
+            if ($s_id > 0) {
+                if (!isset($sesi_by_sample[$s_id])) {
+                    $sesi_by_sample[$s_id] = [];
+                }
+                $sesi_by_sample[$s_id][] = $sesi;
+            }
+        }
+
+        $antrean_siap = [];
+
+        foreach ($daftar_sampel as $s) {
+            $sample_id = (int)$s['id'];
+            $sesi_sampel = isset($sesi_by_sample[$sample_id]) ? $sesi_by_sample[$sample_id] : [];
+
+            $eval = $this->evaluasi_kelengkapan_sesi_sampel($s, $sesi_sampel);
+
+            if ($eval['siap_mt']) {
+                // Kumpulkan informasi penguji, verifier, kesimpulan, dan daftar sesi yang siap
+                $penguji_list = [];
+                $verifier_list = [];
+                $kesimpulan_list = [];
+                $sesi_ids = [];
+                $daftar_sesi_siap = [];
+
+                foreach ($sesi_sampel as $sesi) {
+                    if (isset($sesi['status']) && $sesi['status'] === 'Menunggu Approval') {
+                        $sesi_ids[] = (int)$sesi['id'];
+                        $daftar_sesi_siap[] = $sesi;
+
+                        if (!empty($sesi['nama_penguji']) && !in_array($sesi['nama_penguji'], $penguji_list, TRUE)) {
+                            $penguji_list[] = $sesi['nama_penguji'];
+                        }
+                        if (!empty($sesi['nama_verifier']) && !in_array($sesi['nama_verifier'], $verifier_list, TRUE)) {
+                            $verifier_list[] = $sesi['nama_verifier'];
+                        }
+                        if (!empty($sesi['kesimpulan'])) {
+                            $kesimpulan_list[] = trim($sesi['kesimpulan']);
+                        }
+                    }
+                }
+
+                $s['kelengkapan']        = $eval;
+                $s['sesi_ids']            = $sesi_ids;
+                $s['daftar_sesi_siap']    = $daftar_sesi_siap;
+                $s['nama_penguji_gabung'] = !empty($penguji_list) ? implode('; ', $penguji_list) : '-';
+                $s['nama_verifier_gabung']= !empty($verifier_list) ? implode('; ', $verifier_list) : '-';
+                $s['kesimpulan_gabung']   = !empty($kesimpulan_list) ? implode(' | ', array_unique($kesimpulan_list)) : '-';
+                $s['jumlah_sesi_siap']    = count($daftar_sesi_siap);
+
+                $antrean_siap[] = $s;
+            }
+        }
+
+        return $antrean_siap;
+    }
+
+    /**
+     * Mengambil antrean approval MT berbasis sampel langsung dari database.
+     *
+     * @return array
+     */
+    public function ambil_antrean_approval_sampel()
+    {
+        // 1. Ambil kandidat sampel yang memiliki sesi berstatus 'Menunggu Approval'
+        $this->db->select('s.*');
+        $this->db->from('samples s');
+        $this->db->join('testing_sessions ts', 'ts.sample_id = s.id', 'inner');
+        $this->db->where('ts.status', 'Menunggu Approval');
+        $this->db->group_by('s.id');
+        $this->db->order_by('s.id', 'ASC');
+        $daftar_sampel = $this->db->get()->result_array();
+
+        if (empty($daftar_sampel)) {
+            return [];
+        }
+
+        $sample_ids = array_map(function($row) {
+            return (int)$row['id'];
+        }, $daftar_sampel);
+
+        // 2. Ambil seluruh sesi terkait sampel-sampel tersebut (termasuk detail user)
+        $this->db->select('ts.*, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier,
+            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
+            (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
+            (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+        $this->db->where_in('ts.sample_id', $sample_ids);
+        $this->db->order_by('ts.id', 'ASC');
+        $daftar_sesi = $this->db->get()->result_array();
+
+        return $this->filter_antrean_approval_sampel($daftar_sampel, $daftar_sesi);
+    }
+
+    /**
+     * Mengambil seluruh data tinjauan LHU komprehensif per sampel untuk Manajer Teknis (MT).
+     *
+     * Mengumpulkan:
+     * - Data profil fisik sampel
+     * - Hasil evaluasi kelengkapan sesi sampel
+     * - Seluruh sesi pengujian terkait sampel beserta rincian lembar LCP dan form masing-masing sesi
+     *
+     * @param int $sample_id
+     * @return array|false
+     */
+    public function ambil_tinjauan_lhu_sampel($sample_id)
+    {
+        $sampel = $this->db->get_where('samples', ['id' => $sample_id])->row_array();
+        if (!$sampel) {
+            return FALSE;
+        }
+
+        $kelengkapan = $this->cek_kelengkapan_sesi_sampel($sample_id);
+
+        // Ambil seluruh sesi terkait sampel ini
+        $this->db->select('ts.*, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+        $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->where('ts.sample_id', $sample_id);
+        $this->db->order_by('ts.id', 'ASC');
+        $sesi_list = $this->db->get()->result_array();
+
+        // Ambil seluruh form LCP per sesi
+        $sesi_dengan_forms = [];
+        foreach ($sesi_list as $sesi) {
+            $forms = $this->ambil_hasil_by_session($sesi['id']);
+            $sesi['forms'] = $forms;
+            $sesi_dengan_forms[] = $sesi;
+        }
+
+        return [
+            'sampel'      => $sampel,
+            'kelengkapan' => $kelengkapan,
+            'sesi_list'   => $sesi_dengan_forms
+        ];
+    }
+
+    /**
+     * FASE 5 (Tahap 3) — Memproses Approval Seluruh Sesi Wajib Sampel oleh Manajer Teknis (MT).
+     *
+     * Menjalankan validasi ulang server-side:
+     * 1. Sampel harus ada.
+     * 2. Evaluasi kelengkapan sesi wajib harus SIAP_APPROVAL_MT (siap_mt === TRUE).
+     * 3. Sesi yang diproses harus benar-benar berstatus 'Menunggu Approval' dan milik sample_id tersebut.
+     * 4. Pembaruan seluruh sesi, test_results, sampel, dan penulisan audit log berada dalam SATU transaksi database.
+     * 5. Jika satu bagian gagal, rollback penuh dijalankan.
+     *
+     * Catatan Integritas Status LHU:
+     * - Sesi-sesi wajib diubah statusnya menjadi 'Approved / Final' (approval sah oleh MT).
+     * - Sampel diubah statusnya menjadi 'Approved / Final'.
+     * - Nomor LHU dan file laporan gabungan TIDAK diterbitkan di sini (menunggu generator gabungan Tahap 4).
+     *
+     * @param int $sample_id
+     * @param int $approver_id
+     * @param string|null $username
+     * @return array ['sukses' => bool, 'pesan' => string, 'sesi_ids' => array]
+     */
+    public function approve_sampel_mt($sample_id, $approver_id, $username = NULL)
+    {
+        $sample_id = (int)$sample_id;
+        $approver_id = (int)$approver_id;
+
+        $sampel = $this->db->get_where('samples', ['id' => $sample_id])->row_array();
+        if (!$sampel) {
+            return ['sukses' => FALSE, 'pesan' => 'Data sampel tidak ditemukan di database.'];
+        }
+
+        // Panggil ulang evaluator kelengkapan sesi sampel (baca ulang state terkini dari database)
+        $eval = $this->cek_kelengkapan_sesi_sampel($sample_id);
+        if (!$eval['siap_mt']) {
+            return [
+                'sukses' => FALSE,
+                'pesan'  => 'Sampel belum memenuhi syarat approval MT: ' . $eval['alasan']
+            ];
+        }
+
+        // Kumpulkan ID sesi wajib yang siap diapprove (status 'Menunggu Approval')
+        $target_sesi_ids = [];
+        foreach ($eval['status_sesi'] as $jenis => $info) {
+            $st = isset($info['status']) ? trim($info['status']) : '';
+            if (!empty($info['sesi_id']) && ($st === 'Menunggu Approval' || ($st === '' && !empty($info['lengkap'])))) {
+                $target_sesi_ids[] = (int)$info['sesi_id'];
+            }
+        }
+
+        if (empty($target_sesi_ids)) {
+            return ['sukses' => FALSE, 'pesan' => 'Tidak ditemukan sesi yang siap diapprove (berstatus Menunggu Approval).'];
+        }
+
+        $waktu_sekarang = date('Y-m-d H:i:s');
+
+        // =========================================================================
+        // FASE 4 — GATE KETAT VALIDASI TANDA TANGAN & GENERATOR PDF LHU FINAL GABUNGAN
+        // =========================================================================
+        // Ambil data lengkap approver (MT)
+        $approver_user = $this->db->get_where('users', ['id' => $approver_id])->row_array();
+        if (!$approver_user) {
+            return ['sukses' => FALSE, 'pesan' => 'Data pengguna Manajer Teknis tidak ditemukan di database.'];
+        }
+
+        // Ambil data sesi lengkap beserta user dan form test_results
+        $sesi_lengkap_list = [];
+        foreach ($target_sesi_ids as $sid) {
+            $this->db->select('ts.*, u.nama_lengkap as nama_penguji, u.nip as nip_penguji, uv.nama_lengkap as nama_verifier, uv.nip as nip_verifier');
+            $this->db->from('testing_sessions ts');
+            $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+            $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+            $this->db->where('ts.id', $sid);
+            $this->db->where('ts.sample_id', $sample_id);
+            $s_row = $this->db->get()->row_array();
+            if (!$s_row) {
+                return ['sukses' => FALSE, 'pesan' => 'Data sesi ID ' . $sid . ' tidak valid atau bukan milik sampel ini.'];
+            }
+            $s_row['forms'] = $this->ambil_hasil_by_session($sid);
+            $sesi_lengkap_list[] = $s_row;
+        }
+
+        // Siapkan nama dan path berkas PDF
+        $kd_clean = preg_replace('/[^A-Za-z0-9_\-]/', '_', (!empty($sampel['kode_sampel_manual']) ? $sampel['kode_sampel_manual'] : 'SMP_' . $sample_id));
+        $pdf_name = 'LHU_FINAL_' . $kd_clean . '_SMP' . $sample_id . '_' . time() . '.pdf';
+        $pdf_rel_path = 'uploads/laporan/' . $pdf_name;
+        $base_fpath = defined('FCPATH') ? FCPATH : dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR;
+        $pdf_abs_path = $base_fpath . $pdf_rel_path;
+
+        // Inisialisasi dan jalankan generator PDF gabungan dengan gate tanda tangan digital ketat
+        require_once APPPATH . 'libraries/Laporan_PDF.php';
+        $pdf_gen = new Laporan_PDF();
+
+        try {
+            $pdf_gen->buat_laporan_sampel($sampel, $sesi_lengkap_list, $approver_user, $pdf_abs_path, 'F');
+        } catch (Exception $e) {
+            return [
+                'sukses' => FALSE,
+                'pesan'  => 'Finalisasi LHU dibatalkan: ' . $e->getMessage()
+            ];
+        }
+
+        // Verifikasi fisik berkas PDF di server
+        if (!file_exists($pdf_abs_path) || filesize($pdf_abs_path) === 0) {
+            return [
+                'sukses' => FALSE,
+                'pesan'  => 'Pembuatan berkas LHU PDF final gagal atau berkas kosong di server. Status belum diperbarui.'
+            ];
+        }
+
+        // Buka Transaksi Database
+        $this->db->trans_start();
+
+        // 1. Verifikasi kepemilikan dan status terkini seluruh sesi di dalam transaksi
+        $this->db->where_in('id', $target_sesi_ids);
+        $this->db->where('sample_id', $sample_id);
+        $this->db->where('status', 'Menunggu Approval');
+        $sesi_rows = $this->db->get('testing_sessions')->result_array();
+
+        if (count($sesi_rows) !== count($target_sesi_ids)) {
+            $this->db->trans_rollback();
+            if (file_exists($pdf_abs_path)) {
+                @unlink($pdf_abs_path);
+            }
+            return [
+                'sukses' => FALSE,
+                'pesan'  => 'Status sesi telah berubah atau kepemilikan sesi tidak valid. Approval dibatalkan.'
+            ];
+        }
+
+        // 2. Update status testing_sessions
+        $this->db->where_in('id', $target_sesi_ids);
+        $this->db->where('sample_id', $sample_id);
+        $up_sesi = $this->db->update('testing_sessions', [
+            'status'         => 'Approved / Final',
+            'approver_id'    => $approver_id,
+            'waktu_approval' => $waktu_sekarang,
+            'updated_at'     => $waktu_sekarang
+        ]);
+
+        if (!$up_sesi) {
+            $this->db->trans_rollback();
+            if (file_exists($pdf_abs_path)) {
+                @unlink($pdf_abs_path);
+            }
+            return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status sesi pengujian.'];
+        }
+
+        // 3. Update status test_results dan simpan path file_laporan gabungan
+        $this->db->where_in('session_id', $target_sesi_ids);
+        $this->db->where('sample_id', $sample_id);
+        $up_results = $this->db->update('test_results', [
+            'status'         => 'Approved / Final',
+            'file_laporan'   => $pdf_rel_path,
+            'approver_id'    => $approver_id,
+            'waktu_approval' => $waktu_sekarang,
+            'updated_at'     => $waktu_sekarang
+        ]);
+
+        if (!$up_results) {
+            $this->db->trans_rollback();
+            if (file_exists($pdf_abs_path)) {
+                @unlink($pdf_abs_path);
+            }
+            return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status parameter hasil pengujian.'];
+        }
+
+        // 4. Update status samples
+        $this->db->where('id', $sample_id);
+        $up_sampel = $this->db->update('samples', [
+            'status'     => 'Approved / Final',
+            'updated_by' => $approver_id,
+            'updated_at' => $waktu_sekarang
+        ]);
+
+        if (!$up_sampel) {
+            $this->db->trans_rollback();
+            if (file_exists($pdf_abs_path)) {
+                @unlink($pdf_abs_path);
+            }
+            return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status sampel.'];
+        }
+
+        // 5. Pencatatan Audit Log di dalam transaksi
+        $detail_audit = [
+            'sample_id'        => $sample_id,
+            'kode_sampel'      => $sampel['kode_sampel_manual'],
+            'sesi_ids'         => $target_sesi_ids,
+            'status_sebelum'   => 'Menunggu Approval',
+            'status_sesudah'   => 'Approved / Final',
+            'file_pdf'         => $pdf_rel_path,
+            'approver_id'      => $approver_id,
+            'waktu_keputusan'  => $waktu_sekarang
+        ];
+
+        $audit_sukses = $this->db->insert('audit_logs', [
+            'user_id'    => $approver_id,
+            'username'   => $username ?: 'MT',
+            'aksi'       => 'APPROVAL_MT_SAMPEL',
+            'modul'      => 'Pengujian',
+            'detail'     => json_encode($detail_audit, JSON_UNESCAPED_UNICODE),
+            'ip_address' => $this->input->ip_address(),
+            'user_agent' => substr((string)$this->input->user_agent(), 0, 255),
+            'created_at' => $waktu_sekarang
+        ]);
+
+        if (!$audit_sukses) {
+            $this->db->trans_rollback();
+            if (file_exists($pdf_abs_path)) {
+                @unlink($pdf_abs_path);
+            }
+            return ['sukses' => FALSE, 'pesan' => 'Gagal menulis jejak audit log. Transaksi approval dibatalkan.'];
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            if (file_exists($pdf_abs_path)) {
+                @unlink($pdf_abs_path);
+            }
+            return ['sukses' => FALSE, 'pesan' => 'Terjadi kesalahan sistem saat menyimpan approval ke database.'];
+        }
+
+        return [
+            'sukses'   => TRUE,
+            'pesan'    => 'Seluruh sesi pengujian sampel berhasil disetujui oleh Manajer Teknis dan LHU PDF Final telah diterbitkan.',
+            'sesi_ids' => $target_sesi_ids,
+            'file_pdf' => $pdf_rel_path
+        ];
+    }
+
+    /**
+     * FASE 5 (Tahap 3) — Memproses Penolakan Pengujian Sampel oleh Manajer Teknis (MT).
+     *
+     * Validasi:
+     * 1. Alasan penolakan wajib terisi (minimal 5 karakter, trimmed).
+     * 2. Sampel harus ada.
+     * 3. Sesi yang ditolak harus merupakan sesi berstatus 'Menunggu Approval' milik sample_id tersebut.
+     * 4. Seluruh pembaruan sesi, form LCP, sampel, dan audit log dieksekusi dalam SATU transaksi atomik.
+     *
+     * @param int $sample_id
+     * @param int $approver_id
+     * @param string $alasan_penolakan
+     * @param string|null $username
+     * @return array ['sukses' => bool, 'pesan' => string, 'sesi_ids' => array]
+     */
+    public function tolak_sampel_mt($sample_id, $approver_id, $alasan_penolakan, $username = NULL)
+    {
+        $sample_id = (int)$sample_id;
+        $approver_id = (int)$approver_id;
+        $alasan = trim((string)$alasan_penolakan);
+
+        if (mb_strlen($alasan) < 5) {
+            return ['sukses' => FALSE, 'pesan' => 'Alasan penolakan wajib diisi dengan jelas (minimal 5 karakter).'];
+        }
+
+        $sampel = $this->db->get_where('samples', ['id' => $sample_id])->row_array();
+        if (!$sampel) {
+            return ['sukses' => FALSE, 'pesan' => 'Data sampel tidak ditemukan di database.'];
+        }
+
+        // Ambil seluruh sesi milik sampel ini yang sedang berstatus 'Menunggu Approval'
+        $this->db->where('sample_id', $sample_id);
+        $this->db->where('status', 'Menunggu Approval');
+        $sesi_list = $this->db->get('testing_sessions')->result_array();
+
+        if (empty($sesi_list)) {
+            return [
+                'sukses' => FALSE,
+                'pesan'  => 'Tidak ada sesi dengan status "Menunggu Approval" pada sampel ini untuk ditolak.'
+            ];
+        }
+
+        $target_sesi_ids = array_map(function($s) {
+            return (int)$s['id'];
+        }, $sesi_list);
+
+        $waktu_sekarang = date('Y-m-d H:i:s');
+
+        // Buka Transaksi Database
+        $this->db->trans_start();
+
+        // 1. Update status dan alasan pada testing_sessions
+        $this->db->where_in('id', $target_sesi_ids);
+        $this->db->where('sample_id', $sample_id);
+        $up_sesi = $this->db->update('testing_sessions', [
+            'status'           => 'Ditolak',
+            'approver_id'      => $approver_id,
+            'catatan_approver' => $alasan,
+            'alasan_penolakan' => $alasan,
+            'waktu_approval'   => $waktu_sekarang,
+            'updated_at'       => $waktu_sekarang
+        ]);
+
+        if (!$up_sesi) {
+            $this->db->trans_rollback();
+            return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui penolakan pada sesi pengujian.'];
+        }
+
+        // 2. Update status test_results
+        $this->db->where_in('session_id', $target_sesi_ids);
+        $this->db->where('sample_id', $sample_id);
+        $up_results = $this->db->update('test_results', [
+            'status'           => 'Ditolak',
+            'approver_id'      => $approver_id,
+            'alasan_penolakan' => $alasan,
+            'waktu_approval'   => $waktu_sekarang,
+            'updated_at'       => $waktu_sekarang
+        ]);
+
+        if (!$up_results) {
+            $this->db->trans_rollback();
+            return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status parameter hasil pengujian.'];
+        }
+
+        // 3. Update status samples
+        $this->db->where('id', $sample_id);
+        $up_sampel = $this->db->update('samples', [
+            'status'     => 'Ditolak',
+            'updated_by' => $approver_id,
+            'updated_at' => $waktu_sekarang
+        ]);
+
+        if (!$up_sampel) {
+            $this->db->trans_rollback();
+            return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status sampel.'];
+        }
+
+        // 4. Pencatatan Audit Log di dalam transaksi
+        $detail_audit = [
+            'sample_id'        => $sample_id,
+            'kode_sampel'      => $sampel['kode_sampel_manual'],
+            'sesi_ids'         => $target_sesi_ids,
+            'status_sebelum'   => 'Menunggu Approval',
+            'status_sesudah'   => 'Ditolak',
+            'alasan_penolakan' => $alasan,
+            'approver_id'      => $approver_id,
+            'waktu_keputusan'  => $waktu_sekarang
+        ];
+
+        $audit_sukses = $this->db->insert('audit_logs', [
+            'user_id'    => $approver_id,
+            'username'   => $username ?: 'MT',
+            'aksi'       => 'PENOLAKAN_MT_SAMPEL',
+            'modul'      => 'Pengujian',
+            'detail'     => json_encode($detail_audit, JSON_UNESCAPED_UNICODE),
+            'ip_address' => $this->input->ip_address(),
+            'user_agent' => substr((string)$this->input->user_agent(), 0, 255),
+            'created_at' => $waktu_sekarang
+        ]);
+
+        if (!$audit_sukses) {
+            $this->db->trans_rollback();
+            return ['sukses' => FALSE, 'pesan' => 'Gagal menulis jejak audit log penolakan. Transaksi dibatalkan.'];
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            return ['sukses' => FALSE, 'pesan' => 'Terjadi kesalahan sistem saat menyimpan penolakan ke database.'];
+        }
+
+        return [
+            'sukses'   => TRUE,
+            'pesan'    => 'Pengujian sampel berhasil ditolak dan dikembalikan untuk revisi.',
+            'sesi_ids' => $target_sesi_ids
+        ];
     }
 }

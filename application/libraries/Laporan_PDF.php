@@ -40,34 +40,552 @@ class Laporan_PDF extends FPDF
     }
 
     /**
-     * Helper Preparation: Mengambil path file TTD Digital aktif berbasis user_id.
-     * Mengembalikan absolute path file TTD jika valid dan ada di disk, atau NULL.
-     * 
+     * Memeriksa dan memvalidasi keabsahan file digital signature.
+     * Memastikan file ada, berada di direktori aman yang diizinkan (uploads/signatures/),
+     * dan merupakan gambar PNG atau JPEG yang valid serta dapat dibaca.
+     *
      * @param int $user_id
-     * @return string|null
+     * @return array [bool $valid, string|null $path, string|null $error_msg]
      */
-    public function getUserSignature($user_id)
+    public function validateUserSignature($user_id)
     {
         if (empty($user_id)) {
-            return NULL;
+            return [false, null, 'ID pengguna tanda tangan tidak ditentukan.'];
         }
 
-        $ci =& get_instance();
+        if (!function_exists('get_instance')) {
+            return [false, null, 'Instance sistem tidak tersedia.'];
+        }
+
+        $ci = get_instance();
+        if (!$ci) {
+            return [false, null, 'Instance sistem tidak tersedia.'];
+        }
         if (!isset($ci->Model_User_Signature)) {
             $ci->load->model('Model_User_Signature');
         }
 
         $sig = $ci->Model_User_Signature->ambil_by_user_id($user_id);
+        if (!$sig || empty($sig['signature_file'])) {
+            return [false, null, 'Tanda tangan digital belum diunggah di profil akun (User ID: ' . $user_id . ').'];
+        }
 
-        if ($sig && !empty($sig['signature_file'])) {
-            $base_dir = defined('FCPATH') ? FCPATH : dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR;
-            $full_path = $base_dir . $sig['signature_file'];
-            if (file_exists($full_path)) {
-                return $full_path;
+        $base_dir = defined('FCPATH') ? FCPATH : dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR;
+
+        // Bersihkan path untuk mencegah traversal directory
+        $clean_rel = str_replace(array('../', '..\\'), '', $sig['signature_file']);
+        $full_path = $base_dir . $clean_rel;
+
+        // Validasi direktori yang diizinkan (uploads/signatures/)
+        $real_path = realpath($full_path);
+        $allowed_dir = realpath($base_dir . 'uploads/signatures');
+
+        if (!$real_path || !$allowed_dir || strpos($real_path, $allowed_dir) !== 0) {
+            return [false, null, 'Lokasi berkas tanda tangan tidak sah atau di luar direktori aman (User ID: ' . $user_id . ').'];
+        }
+
+        if (!is_file($real_path) || !is_readable($real_path)) {
+            return [false, null, 'Berkas tanda tangan digital tidak dapat dibaca di server (User ID: ' . $user_id . ').'];
+        }
+
+        // Validasi format gambar nyata melalui getimagesize
+        $img_info = @getimagesize($real_path);
+        if ($img_info === false) {
+            return [false, null, 'Berkas tanda tangan rusak atau bukan file gambar valid (User ID: ' . $user_id . ').'];
+        }
+
+        $allowed_types = [IMAGETYPE_PNG, IMAGETYPE_JPEG];
+        if (!in_array($img_info[2], $allowed_types, true)) {
+            return [false, null, 'Format berkas tanda tangan tidak didukung (wajib PNG atau JPG/JPEG).'];
+        }
+
+        return [true, $real_path, null];
+    }
+
+    /**
+     * Helper Preparation: Mengambil path file TTD Digital aktif berbasis user_id.
+     * Mengembalikan absolute path file TTD jika lolos validasi keamanan ketat, atau NULL.
+     *
+     * @param int $user_id
+     * @return string|null
+     */
+    public function getUserSignature($user_id)
+    {
+        $val = $this->validateUserSignature($user_id);
+        return $val[0] ? $val[1] : NULL;
+    }
+
+    /**
+     * Helper Cell dengan Auto-Wrapping (MultiCell) untuk baris tabel yang dapat berpindah halaman rapi.
+     */
+    public function RowTabelLHU($data_cells, $widths, $aligns, $h_line = 5, $fill = false)
+    {
+        // Hitung tinggi maksimum baris
+        $max_lines = 1;
+        $total_cols = count($widths);
+        for ($i = 0; $i < $total_cols; $i++) {
+            $txt = isset($data_cells[$i]) ? (string)$data_cells[$i] : '';
+            $w = $widths[$i];
+            $lines = $this->NbLines($w, $txt);
+            if ($lines > $max_lines) {
+                $max_lines = $lines;
             }
         }
 
-        return NULL;
+        $row_height = $h_line * $max_lines;
+
+        // Cek page break
+        if ($this->GetY() + $row_height > $this->PageBreakTrigger) {
+            $this->AddPage($this->CurOrientation);
+            // Gambar ulang header tabel di halaman baru
+            return true; // Menandakan page break terjadi
+        }
+
+        $x = $this->GetX();
+        $y = $this->GetY();
+
+        for ($i = 0; $i < $total_cols; $i++) {
+            $w = $widths[$i];
+            $a = isset($aligns[$i]) ? $aligns[$i] : 'L';
+            $txt = isset($data_cells[$i]) ? (string)$data_cells[$i] : '';
+
+            // Draw border box
+            $this->Rect($x, $y, $w, $row_height, $fill ? 'DF' : 'D');
+
+            // Draw text
+            $this->SetXY($x, $y + 0.5);
+            $this->MultiCell($w, $h_line, $txt, 0, $a);
+
+            $x += $w;
+        }
+
+        $this->SetXY(10, $y + $row_height);
+        return false;
+    }
+
+    /**
+     * Menghitung jumlah baris text untuk lebar kolom tertentu
+     */
+    public function NbLines($w, $txt)
+    {
+        $cw =& $this->CurrentFont['cw'];
+        if ($w == 0) {
+            $w = $this->w - $this->rMargin - $this->x;
+        }
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', (string)$txt);
+        $nb = strlen($s);
+        if ($nb > 0 && $s[$nb - 1] == "\n") {
+            $nb--;
+        }
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c == "\n") {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if ($c == ' ') {
+                $sep = $i;
+            }
+            $l += isset($cw[$c]) ? $cw[$c] : 500;
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j) {
+                        $i++;
+                    }
+                } else {
+                    $i = $sep + 1;
+                }
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            } else {
+                $i++;
+            }
+        }
+        return $nl;
+    }
+
+    /**
+     * FASE 4 — Generator Laporan Hasil Uji (LHU) Final Gabungan Tingkat Sampel.
+     * Menggabungkan seluruh hasil pengujian dari sesi-sesi yang diwajibkan (Kimia & Mikrobiologi).
+     *
+     * GATE VALIDASI TANDA TANGAN DIGITAL:
+     * - Memeriksa tanda tangan Penguji dan Penyelia dari setiap sesi wajib.
+     * - Memeriksa tanda tangan Manajer Teknis (MT).
+     * - Jika ada tanda tangan yang hilang/rusak/tidak valid, melempar Exception dan menghentikan proses.
+     *
+     * @param array $sampel Data sampel dari tabel samples
+     * @param array $sesi_list_dengan_forms Daftar sesi wajib beserta 'forms' (test_results)
+     * @param array $approver_info Data user MT (id, nama_lengkap, nip)
+     * @param string|null $save_path Path penyimpanan file PDF jika disimpan ke disk
+     * @param string $mode 'F' untuk simpan file, 'I' untuk inline browser, 'D' untuk download
+     * @return string Path file yang berhasil dibuat
+     * @throws Exception Jika validasi data atau signature gate gagal
+     */
+    public function buat_laporan_sampel($sampel, $sesi_list_dengan_forms, $approver_info, $save_path = null, $mode = 'F')
+    {
+        if (empty($sampel) || empty($sampel['id'])) {
+            throw new Exception('Data sampel tidak valid untuk pembuatan LHU gabungan.');
+        }
+
+        if (empty($sesi_list_dengan_forms)) {
+            throw new Exception('Daftar sesi pengujian kosong. Tidak dapat membuat LHU gabungan.');
+        }
+
+        if (empty($approver_info) || empty($approver_info['id'])) {
+            throw new Exception('Data Manajer Teknis (Approver) wajib terisi.');
+        }
+
+        // =========================================================================
+        // 1. GATE KETAT VALIDASI TANDA TANGAN DIGITAL SELURUH PIHAK TERKAIT
+        // =========================================================================
+        // Validasi MT
+        $val_mt = $this->validateUserSignature($approver_info['id']);
+        if (!$val_mt[0]) {
+            throw new Exception('Tanda Tangan Digital Manajer Teknis (' . ($approver_info['nama_lengkap'] ?: 'MT') . ') tidak valid: ' . $val_mt[2]);
+        }
+        $sig_mt_path = $val_mt[1];
+
+        // Validasi Penguji dan Penyelia untuk setiap sesi wajib
+        $signers_per_sesi = [];
+        foreach ($sesi_list_dengan_forms as $sesi) {
+            $s_id = $sesi['id'];
+            $j_uji = !empty($sesi['jenis_pengujian']) ? $sesi['jenis_pengujian'] : 'Pengujian';
+
+            // Validasi Penguji
+            if (empty($sesi['penguji_id'])) {
+                throw new Exception("Sesi $j_uji (ID $s_id) tidak memiliki record Penguji yang sah.");
+            }
+            $val_p = $this->validateUserSignature($sesi['penguji_id']);
+            if (!$val_p[0]) {
+                $nm_p = !empty($sesi['nama_penguji']) ? $sesi['nama_penguji'] : 'User #' . $sesi['penguji_id'];
+                throw new Exception("Tanda Tangan Digital Penguji $nm_p pada Sesi $j_uji tidak valid: " . $val_p[2]);
+            }
+
+            // Validasi Penyelia
+            if (empty($sesi['verifier_id'])) {
+                throw new Exception("Sesi $j_uji (ID $s_id) belum diverifikasi atau tidak memiliki Penyelia yang sah.");
+            }
+            $val_v = $this->validateUserSignature($sesi['verifier_id']);
+            if (!$val_v[0]) {
+                $nm_v = !empty($sesi['nama_verifier']) ? $sesi['nama_verifier'] : 'User #' . $sesi['verifier_id'];
+                throw new Exception("Tanda Tangan Digital Penyelia $nm_v pada Sesi $j_uji tidak valid: " . $val_v[2]);
+            }
+
+            $signers_per_sesi[$s_id] = [
+                'sesi'      => $sesi,
+                'penguji'   => [
+                    'id'   => $sesi['penguji_id'],
+                    'nama' => !empty($sesi['nama_penguji']) ? $sesi['nama_penguji'] : '-',
+                    'nip'  => !empty($sesi['nip_penguji']) ? $sesi['nip_penguji'] : '-',
+                    'path' => $val_p[1],
+                    'tgl'  => !empty($sesi['waktu_selesai']) ? date('d/m/Y', strtotime($sesi['waktu_selesai'])) : date('d/m/Y')
+                ],
+                'penyelia'  => [
+                    'id'   => $sesi['verifier_id'],
+                    'nama' => !empty($sesi['nama_verifier']) ? $sesi['nama_verifier'] : '-',
+                    'nip'  => !empty($sesi['nip_verifier']) ? $sesi['nip_verifier'] : '-',
+                    'path' => $val_v[1],
+                    'tgl'  => !empty($sesi['waktu_verifikasi']) ? date('d/m/Y', strtotime($sesi['waktu_verifikasi'])) : '-'
+                ]
+            ];
+        }
+
+        // =========================================================================
+        // 2. PEMBUATAN STRUKTUR DOKUMEN PDF
+        // =========================================================================
+        $this->AddPage('P', 'A4');
+
+        // Judul Dokumen
+        $this->SetFont('helvetica', 'B', 12);
+        $this->Cell(0, 6, 'LAPORAN HASIL PENGUJIAN (LHU)', 0, 1, 'C');
+        $this->SetFont('helvetica', '', 9);
+
+        // Kumpulkan jenis pengujian yang digabungkan
+        $daftar_jenis = [];
+        foreach ($sesi_list_dengan_forms as $s) {
+            $daftar_jenis[] = !empty($s['jenis_pengujian']) ? $s['jenis_pengujian'] : 'Umum';
+        }
+        $daftar_jenis = array_unique($daftar_jenis);
+        $jenis_teks = implode(' & ', $daftar_jenis);
+
+        $this->Cell(0, 4, 'Pengujian Gabungan: ' . $jenis_teks . ' | Status: Approved / Final', 0, 1, 'C');
+        $this->Ln(3);
+
+        // =========================================================================
+        // BAGIAN I: IDENTITAS SAMPEL
+        // =========================================================================
+        $this->SetFillColor(240, 240, 240);
+        $this->SetFont('helvetica', 'B', 8.5);
+        $this->Cell(0, 5.5, ' I. IDENTITAS SAMPEL', 1, 1, 'L', true);
+        $this->SetFont('helvetica', '', 8);
+
+        $kd_smp = !empty($sampel['kode_sampel_manual']) ? $sampel['kode_sampel_manual'] : (!empty($sampel['no']) ? 'NO-' . $sampel['no'] : 'SMP-' . $sampel['id']);
+        $identitas = array(
+            'Kode / No. Sampel'      => $kd_smp,
+            'Nama Sampel'            => isset($sampel['nama_sampel']) ? $sampel['nama_sampel'] : '-',
+            'Kategori / Sub'         => (!empty($sampel['kategori_sampel']) ? $sampel['kategori_sampel'] : '-') . ' / ' . (isset($sampel['sub_kategori']) ? $sampel['sub_kategori'] : '-'),
+            'Nomor Izin Edar (NIE)'  => isset($sampel['nomor_izin_edar']) ? $sampel['nomor_izin_edar'] : '-',
+            'No. Bets / Kedaluwarsa' => (isset($sampel['no_bets']) ? $sampel['no_bets'] : '-') . ' / ' . (isset($sampel['kedaluwarsa']) ? $sampel['kedaluwarsa'] : '-'),
+            'Sarana / Asal Sampel'   => (isset($sampel['nama_sarana']) ? $sampel['nama_sarana'] : '-') . ' (' . (isset($sampel['kabupaten_kota']) ? $sampel['kabupaten_kota'] : '-') . ')',
+            'Kemasan & Jumlah Total' => (isset($sampel['kemasan']) ? $sampel['kemasan'] : '-') . ' / ' . (isset($sampel['jumlah_total']) ? $sampel['jumlah_total'] : '-'),
+            'Alokasi Pengujian'      => 'Kimia: ' . (!empty($sampel['jumlah_kimia']) ? $sampel['jumlah_kimia'] : '-') . ' | Mikro: ' . (!empty($sampel['jumlah_mikro']) ? $sampel['jumlah_mikro'] : '-')
+        );
+
+        foreach ($identitas as $k => $v) {
+            $this->Cell(45, 4.5, '  ' . $k, 'L', 0, 'L');
+            $this->Cell(4, 4.5, ':', 0, 0, 'C');
+            $this->Cell(0, 4.5, $v, 'R', 1, 'L');
+        }
+        $this->Cell(0, 0, '', 'T', 1);
+        $this->Ln(3);
+
+        // =========================================================================
+        // BAGIAN II: TABEL HASIL PENGUJIAN GABUNGAN LINTAS SESI
+        // =========================================================================
+        $this->SetFont('helvetica', 'B', 8.5);
+        $this->Cell(0, 5.5, ' II. HASIL PENGUJIAN LABORATORIUM', 1, 1, 'L', true);
+        $this->Ln(1.5);
+
+        // Lebar kolom tabel
+        // Total lebar A4 margin 10mm kiri-kanan: 190mm
+        // No: 8mm, Parameter: 45mm, Metode/Pustaka: 42mm, Persyaratan: 35mm, Hasil: 35mm, Kesimpulan: 25mm = 190mm
+        $widths = [8, 45, 42, 35, 35, 25];
+        $aligns = ['C', 'L', 'L', 'L', 'L', 'C'];
+
+        $cetak_header_tabel = function() use ($widths) {
+            $this->SetFont('helvetica', 'B', 7.5);
+            $this->SetFillColor(230, 235, 240);
+            $this->Cell($widths[0], 6, 'No', 1, 0, 'C', true);
+            $this->Cell($widths[1], 6, 'Parameter Uji', 1, 0, 'C', true);
+            $this->Cell($widths[2], 6, 'Metode / Acuan', 1, 0, 'C', true);
+            $this->Cell($widths[3], 6, 'Persyaratan', 1, 0, 'C', true);
+            $this->Cell($widths[4], 6, 'Hasil Uji', 1, 0, 'C', true);
+            $this->Cell($widths[5], 6, 'Kesimpulan', 1, 1, 'C', true);
+            $this->SetFont('helvetica', '', 7.5);
+        };
+
+        $cetak_header_tabel();
+
+        $no_item = 1;
+        $semua_ms = true;
+        $ada_tms = false;
+
+        foreach ($sesi_list_dengan_forms as $sesi) {
+            $j_uji = !empty($sesi['jenis_pengujian']) ? $sesi['jenis_pengujian'] : 'Pengujian';
+
+            // Sub-header sesi pengujian
+            $this->SetFont('helvetica', 'B', 7.5);
+            $this->SetFillColor(245, 247, 250);
+            $this->Cell(0, 5, '  Bidang / Sesi: ' . $j_uji . ' (Kode Sesi: ' . (!empty($sesi['kode_sesi']) ? $sesi['kode_sesi'] : 'SESI-' . $sesi['id']) . ')', 1, 1, 'L', true);
+            $this->SetFont('helvetica', '', 7.5);
+
+            $forms = !empty($sesi['forms']) ? $sesi['forms'] : [];
+            if (empty($forms)) {
+                $this->Cell(0, 5, 'Tidak ada parameter uji pada sesi ini.', 1, 1, 'C');
+                continue;
+            }
+
+            foreach ($forms as $f) {
+                // Parameter Uji
+                $param_nama = !empty($f['parameter_uji']) ? $f['parameter_uji'] : (!empty($f['nama_parameter']) ? $f['nama_parameter'] : (!empty($f['nama_template']) ? $f['nama_template'] : '-'));
+
+                // Metode & Pustaka
+                $metode_txt = !empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['nama_metode']) ? $f['nama_metode'] : '-');
+                if (!empty($f['pustaka_acuan'])) {
+                    $metode_txt .= "\n(" . $f['pustaka_acuan'] . ')';
+                }
+
+                // Persyaratan
+                $syarat_txt = !empty($f['persyaratan']) ? $f['persyaratan'] : '-';
+
+                // Parsing Nilai Hasil Uji
+                $raw_hasil = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : [];
+                $hasil_lines = [];
+                if (is_array($raw_hasil)) {
+                    // Ambil nilai bermakna
+                    foreach ($raw_hasil as $rk => $rv) {
+                        if ($rk === 'csrf_token' || $rk === 'alat_ids' || $rk === 'reagen_ids' || $rk === 'parameter_values') {
+                            continue;
+                        }
+                        if (is_scalar($rv) && (string)$rv !== '') {
+                            $label_k = ucwords(str_replace('_', ' ', $rk));
+                            $hasil_lines[] = $label_k . ': ' . (string)$rv;
+                        }
+                    }
+                }
+                $hasil_txt = !empty($hasil_lines) ? implode("\n", array_slice($hasil_lines, 0, 4)) : '-';
+
+                // Kesimpulan
+                $kesimpulan_item = !empty($f['kesimpulan']) ? $f['kesimpulan'] : 'Belum Disimpulkan';
+                if (stripos($kesimpulan_item, 'tidak memenuhi') !== false) {
+                    $ada_tms = true;
+                    $semua_ms = false;
+                } elseif (stripos($kesimpulan_item, 'memenuhi') === false) {
+                    $semua_ms = false;
+                }
+
+                $cells = [
+                    $no_item++,
+                    $param_nama,
+                    $metode_txt,
+                    $syarat_txt,
+                    $hasil_txt,
+                    $kesimpulan_item
+                ];
+
+                $did_break = $this->RowTabelLHU($cells, $widths, $aligns, 4.5, false);
+                if ($did_break) {
+                    $cetak_header_tabel();
+                    // Cetak ulang baris yang terputus di halaman baru
+                    $this->RowTabelLHU($cells, $widths, $aligns, 4.5, false);
+                }
+            }
+        }
+
+        $this->Ln(3);
+
+        // =========================================================================
+        // BAGIAN III: KESIMPULAN UMUM SAMPEL
+        // =========================================================================
+        // Cek sisa tinggi halaman, jika kurang dari 55mm, buka halaman baru untuk kesimpulan & ttd
+        if ($this->GetY() > 220) {
+            $this->AddPage('P', 'A4');
+        }
+
+        $this->SetFillColor(240, 240, 240);
+        $this->SetFont('helvetica', 'B', 8.5);
+        $this->Cell(0, 5.5, ' III. KESIMPULAN AKHIR LHU', 1, 1, 'L', true);
+        $this->SetFont('helvetica', '', 8);
+
+        if ($ada_tms) {
+            $kesimpulan_final = 'TIDAK MEMENUHI SYARAT (TMS)';
+            $penjelasan_kes = 'Berdasarkan hasil pengujian laboratorium pada parameter-parameter di atas, sampel dinyatakan TIDAK MEMENUHI SYARAT.';
+        } elseif ($semua_ms) {
+            $kesimpulan_final = 'MEMENUHI SYARAT (MS)';
+            $penjelasan_kes = 'Berdasarkan hasil pengujian laboratorium pada seluruh parameter yang diuji, sampel dinyatakan MEMENUHI SYARAT.';
+        } else {
+            $kesimpulan_final = 'SELESAI DIUJI';
+            $penjelasan_kes = 'Pengujian laboratorium telah selesai dilaksanakan sesuai metode dan parameter yang ditentukan.';
+        }
+
+        $this->Cell(45, 5, '  Status Akhir Pengujian', 'L', 0, 'L');
+        $this->Cell(4, 5, ':', 0, 0, 'C');
+        $this->SetFont('helvetica', 'B', 8);
+        $this->Cell(0, 5, $kesimpulan_final, 'R', 1, 'L');
+
+        $this->SetFont('helvetica', '', 8);
+        $this->Cell(45, 5, '  Keterangan Kesimpulan', 'L', 0, 'L');
+        $this->Cell(4, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 5, $penjelasan_kes, 'R', 1, 'L');
+        $this->Cell(0, 0, '', 'T', 1);
+        $this->Ln(4);
+
+        // =========================================================================
+        // BAGIAN IV: LEMBAR PENGESAHAN & TANDA TANGAN DIGITAL
+        // =========================================================================
+        if ($this->GetY() > 230) {
+            $this->AddPage('P', 'A4');
+        }
+
+        $this->SetFont('helvetica', 'B', 8.5);
+        $this->Cell(0, 5.5, ' IV. LEMBAR PENGESAHAN & TANDA TANGAN DIGITAL', 1, 1, 'L', true);
+        $this->Ln(2);
+
+        $tgl_lhu = date('d F Y');
+        $this->SetFont('helvetica', '', 7.5);
+        $this->Cell(0, 4, 'Bandar Lampung, ' . $tgl_lhu, 0, 1, 'R');
+        $this->Ln(1);
+
+        // Cetak blok tanda tangan per sesi (Penguji & Penyelia)
+        foreach ($signers_per_sesi as $s_id => $actors) {
+            $j_name = !empty($actors['sesi']['jenis_pengujian']) ? $actors['sesi']['jenis_pengujian'] : 'Pengujian';
+
+            $this->SetFont('helvetica', 'B', 7.5);
+            $this->Cell(0, 4.5, 'Tim Penguji Bidang ' . $j_name . ':', 0, 1, 'L');
+
+            $y_before_sig = $this->GetY();
+            if ($y_before_sig > 240) {
+                $this->AddPage('P', 'A4');
+                $y_before_sig = $this->GetY();
+            }
+
+            // Kolom 1: Penguji (Lebar 95mm), Kolom 2: Penyelia (Lebar 95mm)
+            $this->SetFont('helvetica', '', 7.5);
+            $this->Cell(95, 4, 'Penguji / Analis,', 0, 0, 'C');
+            $this->Cell(95, 4, 'Penyelia / Verifier,', 0, 1, 'C');
+
+            $this->SetFont('helvetica', 'I', 7);
+            $this->Cell(95, 3.5, 'Tanggal Selesai: ' . $actors['penguji']['tgl'], 0, 0, 'C');
+            $this->Cell(95, 3.5, 'Tanggal Verifikasi: ' . $actors['penyelia']['tgl'], 0, 1, 'C');
+
+            $y_img = $this->GetY() + 0.5;
+            $sig_w = 24;
+            $sig_h = 11;
+
+            // Embed Real Signature Penguji
+            $this->Image($actors['penguji']['path'], 45.5, $y_img, $sig_w, $sig_h);
+
+            // Embed Real Signature Penyelia
+            $this->Image($actors['penyelia']['path'], 140.5, $y_img, $sig_w, $sig_h);
+
+            $this->SetY($y_img + $sig_h + 1);
+
+            $this->SetFont('helvetica', 'B', 8);
+            $this->Cell(95, 4, $actors['penguji']['nama'], 0, 0, 'C');
+            $this->Cell(95, 4, $actors['penyelia']['nama'], 0, 1, 'C');
+
+            $this->SetFont('helvetica', '', 7.5);
+            $this->Cell(95, 3.5, 'NIP. ' . $actors['penguji']['nip'], 0, 0, 'C');
+            $this->Cell(95, 3.5, 'NIP. ' . $actors['penyelia']['nip'], 0, 1, 'C');
+            $this->Ln(3);
+        }
+
+        // Tanda Tangan Manajer Teknis (MT)
+        if ($this->GetY() > 245) {
+            $this->AddPage('P', 'A4');
+        }
+
+        $this->Ln(1);
+        $this->SetFont('helvetica', 'B', 8);
+        $this->Cell(0, 4, 'Menyetujui & Mengesahkan,', 0, 1, 'C');
+        $this->SetFont('helvetica', '', 7.5);
+        $this->Cell(0, 3.5, 'Manajer Teknis (Approver LHU)', 0, 1, 'C');
+
+        $y_mt = $this->GetY() + 0.5;
+        $this->Image($sig_mt_path, 93, $y_mt, 24, 11);
+
+        $this->SetY($y_mt + 12);
+        $this->SetFont('helvetica', 'B', 8);
+        $this->Cell(0, 4, $approver_info['nama_lengkap'], 0, 1, 'C');
+        $this->SetFont('helvetica', '', 7.5);
+        $this->Cell(0, 3.5, 'NIP. ' . (!empty($approver_info['nip']) ? $approver_info['nip'] : '-'), 0, 1, 'C');
+
+        // =========================================================================
+        // OUTPUT FILE PDF
+        // =========================================================================
+        if ($save_path) {
+            $dir = dirname($save_path);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $this->Output('F', $save_path);
+        } elseif ($mode !== 'F') {
+            $this->Output($mode, 'LHU_Final_' . $kd_smp . '.pdf');
+        }
+
+        return $save_path;
     }
 
     /**
@@ -204,24 +722,44 @@ class Laporan_PDF extends FPDF
         $this->Cell(63, 4, 'Diverifikasi: ' . $tgl_verify, 0, 0, 'C');
         $this->Cell(64, 4, 'Disetujui: ' . $tgl_approve, 0, 1, 'C');
 
-        // Tanda Tangan Digital Workflow (Visual Pengesahan Digital)
+        // Tanda Tangan Digital Workflow (Embed Gambar Tanda Tangan Nyata Jika Ada)
         $sig_p = !empty($penguji['id']) ? $this->getUserSignature($penguji['id']) : (!empty($sesi['penguji_id']) ? $this->getUserSignature($sesi['penguji_id']) : NULL);
         $sig_v = !empty($verifier['id']) ? $this->getUserSignature($verifier['id']) : (!empty($sesi['verifier_id']) ? $this->getUserSignature($sesi['verifier_id']) : NULL);
         $sig_a = !empty($approver['id']) ? $this->getUserSignature($approver['id']) : (!empty($sesi['approver_id']) ? $this->getUserSignature($sesi['approver_id']) : NULL);
 
-        $this->Ln(2);
-        $this->SetFont('helvetica', 'B', 7);
-        $label_sig_p = $sig_p ? '[SIGNED DIGITAL]' : '[TERVERIFIKASI SISTEM]';
-        $label_sig_v = $sig_v ? '[VERIFIED DIGITAL]' : '[TERVERIFIKASI SISTEM]';
-        $label_sig_a = $sig_a ? '[APPROVED DIGITAL]' : '[TERVALIDASI SISTEM]';
+        $y_sig = $this->GetY() + 1;
+        $sig_h = 12;
+        $sig_w = 26;
 
-        $this->SetTextColor(40, 80, 160);
-        $this->Cell(63, 4, $label_sig_p, 0, 0, 'C');
-        $this->Cell(63, 4, $label_sig_v, 0, 0, 'C');
-        $this->Cell(64, 4, $label_sig_a, 0, 1, 'C');
+        if ($sig_p && file_exists($sig_p)) {
+            $this->Image($sig_p, 28.5, $y_sig, $sig_w, $sig_h);
+        } else {
+            $this->SetTextColor(40, 80, 160);
+            $this->SetFont('helvetica', 'B', 7);
+            $this->SetXY(10, $y_sig + 4);
+            $this->Cell(63, 4, '[SIGNED DIGITAL]', 0, 0, 'C');
+        }
+
+        if ($sig_v && file_exists($sig_v)) {
+            $this->Image($sig_v, 91.5, $y_sig, $sig_w, $sig_h);
+        } else {
+            $this->SetTextColor(40, 80, 160);
+            $this->SetFont('helvetica', 'B', 7);
+            $this->SetXY(73, $y_sig + 4);
+            $this->Cell(63, 4, '[VERIFIED DIGITAL]', 0, 0, 'C');
+        }
+
+        if ($sig_a && file_exists($sig_a)) {
+            $this->Image($sig_a, 155, $y_sig, $sig_w, $sig_h);
+        } else {
+            $this->SetTextColor(40, 80, 160);
+            $this->SetFont('helvetica', 'B', 7);
+            $this->SetXY(136, $y_sig + 4);
+            $this->Cell(64, 4, '[APPROVED DIGITAL]', 0, 0, 'C');
+        }
+
         $this->SetTextColor(0, 0, 0);
-
-        $this->Ln(8);
+        $this->SetY($y_sig + $sig_h + 2);
 
         $this->SetFont('helvetica', 'B', 8.5);
         $nama_p = isset($penguji['nama_lengkap']) ? $penguji['nama_lengkap'] : (isset($sesi['nama_penguji']) ? $sesi['nama_penguji'] : '-');

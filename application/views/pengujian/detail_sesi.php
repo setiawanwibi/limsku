@@ -756,20 +756,11 @@
 
                         <?php if ($sesi['status'] === 'Menunggu Approval' && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve')): ?>
 
-                            <form action="<?php echo site_url('pengujian/approve_sesi/' . $sesi['id']); ?>"
-                                  method="post"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin melakukan Approval final pada seluruh hasil pengujian sesi ini?');">
-
-                                <input type="hidden"
-                                       name="<?php echo $this->security->get_csrf_token_name(); ?>"
-                                       value="<?php echo $this->security->get_csrf_hash(); ?>">
-
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-shield-check me-1"></i>
-                                    Approve Final Sesi
-                                </button>
-                            </form>
+                            <a href="<?php echo site_url('pengujian/tinjauan_lhu/' . $sesi['sample_id']); ?>"
+                               class="btn btn-success">
+                                <i class="bi bi-shield-check me-1"></i>
+                                Tinjau & Sahkan LHU Sampel
+                            </a>
 
                         <?php endif; ?>
 
@@ -782,6 +773,20 @@
                                 Unduh LHU PDF
                             </a>
 
+                        <?php endif; ?>
+
+                        <?php if (isset($sesi['jenis_pengujian']) && $sesi['jenis_pengujian'] === 'Mikrobiologi' && in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE)): ?>
+                            <a href="<?php echo site_url('pengujian/cp_mikro/' . $sesi['id']); ?>"
+                               class="btn btn-info text-white"
+                               target="_blank">
+                                <i class="bi bi-journal-check me-1"></i>
+                                Unduh CP Mikrobiologi
+                            </a>
+                            <a href="#daftar-lcp"
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-file-earmark-ruled me-1"></i>
+                                Lembar LCP Form (<?php echo count($forms); ?>)
+                            </a>
                         <?php endif; ?>
 
                         <?php if ($sesi['penguji_id'] == $this->session->userdata('user_id') && $sesi['status'] === 'Ditolak'): ?>
@@ -950,7 +955,7 @@
     <!-- =========================
          FORM & PARAMETER
     ========================== -->
-    <div class="detail-sesi-form-card">
+    <div class="detail-sesi-form-card" id="daftar-lcp">
 
         <div class="detail-sesi-form-header">
 
@@ -976,6 +981,7 @@
                         <th>Kategori</th>
                         <th>Status Hasil</th>
                         <th>Kesimpulan</th>
+                        <th width="12%" class="text-center">Aksi / LCP</th>
                     </tr>
                 </thead>
 
@@ -1118,6 +1124,22 @@
                                     </span>
                                 </td>
 
+                                <td class="text-center text-nowrap">
+                                    <?php if (in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE)): ?>
+                                        <a href="<?php echo site_url('pengujian/lcp_pdf/' . $f['id']); ?>"
+                                           class="btn btn-sm btn-outline-primary py-1 px-2"
+                                           title="Lihat / Unduh Lembar Catatan Pengujian (LCP) Form Ini"
+                                           target="_blank"
+                                           style="font-size: 0.72rem;">
+                                            <i class="bi bi-file-earmark-ruled me-1"></i>Unduh LCP
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted small" style="font-size: 0.68rem;" title="LCP tersedia setelah diverifikasi Penyelia">
+                                            <i class="bi bi-hourglass-split me-1"></i>Menunggu Verifikasi
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+
                             </tr>
 
                         <?php endforeach; ?>
@@ -1125,7 +1147,7 @@
                     <?php else: ?>
 
                         <tr>
-                            <td colspan="6" class="detail-sesi-empty">
+                            <td colspan="7" class="detail-sesi-empty">
 
                                 <div class="detail-sesi-empty-icon">
                                     <i class="bi bi-clipboard-x"></i>

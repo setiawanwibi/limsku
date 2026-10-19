@@ -1337,55 +1337,63 @@
                                     <?php foreach ($selected_forms as $form): ?>
 
                                         <tr>
-
                                             <td class="ps-3">
-
                                                 <strong class="report-form-name">
-                                                    <?php echo html_escape($form['nama_template']); ?>
+                                                    <?php echo html_escape($form['nama_template'] ?: 'Form Pengujian'); ?>
                                                 </strong>
-
-                                                <small class="report-form-code">
-                                                    <?php echo html_escape($form['kode_template']); ?>
-                                                </small>
-
+                                                <div class="d-flex align-items-center gap-2 mt-1">
+                                                    <span class="badge bg-light text-dark border font-monospace" style="font-size:0.65rem;">
+                                                        <?php echo html_escape($form['kode_template'] ?: '-'); ?>
+                                                    </span>
+                                                    <?php if (!empty($form['parameter_uji']) || !empty($form['nama_metode'])): ?>
+                                                        <span class="text-primary fw-semibold" style="font-size:0.70rem;">
+                                                            <i class="bi bi-tag me-1"></i><?php echo html_escape($form['parameter_uji'] ?: $form['nama_metode']); ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
 
 
                                             <td>
 
                                                 <small class="report-result">
-
                                                     <?php
-
                                                         $dh = !empty($form['data_hasil'])
                                                             ? json_decode($form['data_hasil'], true)
                                                             : array();
 
+                                                        $hasil_ringkas = array();
                                                         if (!empty($dh) && is_array($dh)) {
-
-                                                            echo html_escape(
-                                                                implode(', ', array_slice($dh, 0, 2))
-                                                            );
-
-                                                        } else {
-
-                                                            echo 'Tercatat';
-
+                                                            $pv = isset($dh['parameter_values']) && is_array($dh['parameter_values'])
+                                                                ? $dh['parameter_values']
+                                                                : $dh;
+                                                            foreach ($pv as $k => $v) {
+                                                                if (in_array($k, array('alat_ids', 'reagen_ids', 'parameter_values'))) continue;
+                                                                $val_str = is_array($v) ? json_encode($v) : (string)$v;
+                                                                if ($val_str !== '') {
+                                                                    $hasil_ringkas[] = ucwords(str_replace('_', ' ', $k)) . ': ' . $val_str;
+                                                                }
+                                                                if (count($hasil_ringkas) >= 2) break;
+                                                            }
                                                         }
 
+                                                        if (!empty($hasil_ringkas)) {
+                                                            echo html_escape(implode(' | ', $hasil_ringkas));
+                                                        } else {
+                                                            echo '<span class="text-muted">Tercatat di form</span>';
+                                                        }
                                                     ?>
-
                                                 </small>
-
                                             </td>
 
-
                                             <td>
-
                                                 <small class="report-requirement">
-                                                    Sesuai Syarat
+                                                    <?php
+                                                        echo !empty($form['persyaratan'])
+                                                            ? html_escape($form['persyaratan'])
+                                                            : 'Sesuai Monografi / Acuan';
+                                                    ?>
                                                 </small>
-
                                             </td>
 
 

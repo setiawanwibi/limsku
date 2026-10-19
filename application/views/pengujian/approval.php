@@ -767,6 +767,10 @@
                             </th>
 
                             <th>
+                                Jenis Pengujian
+                            </th>
+
+                            <th>
                                 Penguji / Analis
                             </th>
 
@@ -775,11 +779,11 @@
                             </th>
 
                             <th>
-                                Kesimpulan
+                                Status Kesiapan MT
                             </th>
 
-                            <th width="12%">
-                                Aksi Approval
+                            <th width="14%">
+                                Aksi Tinjauan
                             </th>
 
                         </tr>
@@ -814,9 +818,9 @@
                                                 echo html_escape(
                                                     $v['kode_sampel_manual']
                                                     ?: (
-                                                        $v['no_sampel']
-                                                        ? 'NO-' . $v['no_sampel']
-                                                        : 'SMP-' . $v['sample_id']
+                                                        !empty($v['no'])
+                                                        ? 'NO-' . $v['no']
+                                                        : 'SMP-' . $v['id']
                                                     )
                                                 );
                                             ?>
@@ -836,11 +840,39 @@
                                     </td>
 
 
+                                    <!-- Jenis Pengujian -->
+                                    <td>
+
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <?php
+                                                $ada_jp = false;
+                                                if (!empty($v['daftar_sesi_siap'])) {
+                                                    foreach ($v['daftar_sesi_siap'] as $ds) {
+                                                        $jp = $ds['jenis_pengujian'];
+                                                        $cls = ($jp === 'Mikrobiologi' ? 'info' : 'primary');
+                                                        echo '<span class="badge bg-' . $cls . '-subtle text-' . $cls . '-emphasis border border-' . $cls . '-subtle" style="font-size: 0.65rem;">' . html_escape($jp) . '</span>';
+                                                        $ada_jp = true;
+                                                    }
+                                                }
+                                                if (!$ada_jp) {
+                                                    if (!empty($v['kelengkapan']['wajib_kimia'])) {
+                                                        echo '<span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">Kimia</span>';
+                                                    }
+                                                    if (!empty($v['kelengkapan']['wajib_mikro'])) {
+                                                        echo '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.65rem;">Mikrobiologi</span>';
+                                                    }
+                                                }
+                                            ?>
+                                        </div>
+
+                                    </td>
+
+
                                     <!-- Penguji -->
                                     <td>
 
                                         <small class="approval-user">
-                                            <?php echo html_escape($v['nama_penguji'] ?: '-'); ?>
+                                            <?php echo html_escape(!empty($v['nama_penguji_gabung']) ? $v['nama_penguji_gabung'] : (!empty($v['nama_penguji']) ? $v['nama_penguji'] : '-')); ?>
                                         </small>
 
                                     </td>
@@ -850,47 +882,21 @@
                                     <td>
 
                                         <small class="approval-user verifier">
-                                            <?php echo html_escape($v['nama_verifier'] ?: '-'); ?>
+                                            <?php echo html_escape(!empty($v['nama_verifier_gabung']) ? $v['nama_verifier_gabung'] : (!empty($v['nama_verifier']) ? $v['nama_verifier'] : '-')); ?>
                                         </small>
 
                                     </td>
 
 
-                                    <!-- Kesimpulan -->
+                                    <!-- Status Kesiapan MT -->
                                     <td>
 
-                                        <?php
-
-                                            $kes = $v['kesimpulan'];
-
-                                            $b_cls = 'secondary';
-
-                                            if (
-                                                stripos($kes, 'memenuhi') !== false
-                                                &&
-                                                stripos($kes, 'tidak') === false
-                                            ) {
-
-                                                $b_cls = 'success';
-
-                                            } elseif (
-                                                stripos($kes, 'tidak memenuhi') !== false
-                                            ) {
-
-                                                $b_cls = 'danger';
-
-                                            }
-
-                                        ?>
-
-
-                                        <span
-                                            class="approval-conclusion <?php echo $b_cls === 'success' ? 'success' : ($b_cls === 'danger' ? 'danger' : 'secondary'); ?>"
-                                        >
-
-                                            <?php echo html_escape($kes); ?>
-
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                            <i class="bi bi-check-circle me-1"></i>Siap Approval MT
                                         </span>
+                                        <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">
+                                            <?php echo count($v['sesi_ids']); ?> Sesi Siap
+                                        </div>
 
                                     </td>
 
@@ -899,13 +905,13 @@
                                     <td>
 
                                         <a
-                                            href="<?php echo site_url('pengujian/detail_sesi/' . $v['id']); ?>"
+                                            href="<?php echo site_url('pengujian/tinjauan_lhu/' . $v['id']); ?>"
                                             class="approval-action-btn"
                                         >
 
-                                            <i class="bi bi-search"></i>
+                                            <i class="bi bi-eye"></i>
 
-                                            Periksa &amp; Approve
+                                            Tinjau LHU
 
                                         </a>
 

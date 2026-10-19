@@ -549,6 +549,301 @@ class Pengujian extends MY_Controller
     }
 
     /**
+     * FASE 4 — Unduh / Tampilkan File Laporan Hasil Uji (LHU) PDF Final Gabungan Tingkat Sampel
+     *
+     * @param int $sample_id
+     * @param string $mode 'inline' (preview) atau 'download' (unduh file)
+     */
+    public function download_pdf_sampel($sample_id = NULL, $mode = 'inline')
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $sample_id = (int)$sample_id;
+        if ($sample_id <= 0) {
+            show_404();
+        }
+
+        $allowed_modes = array('inline', 'download');
+        if (!in_array($mode, $allowed_modes, TRUE)) {
+            $mode = 'inline';
+        }
+
+        $sampel = $this->Model_Sampel->ambil_by_id($sample_id);
+        if (!$sampel) {
+            show_404();
+        }
+
+        if ($sampel['status'] !== 'Approved / Final') {
+            $this->session->set_flashdata('pesan_gagal', 'LHU PDF Final hanya dapat diakses setelah sampel disetujui Manajer Teknis (status "Approved / Final").');
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        }
+
+        // Cari file LHU dari test_results milik sampel
+        $this->db->select('file_laporan');
+        $this->db->from('test_results');
+        $this->db->where('sample_id', $sample_id);
+        $this->db->where('file_laporan IS NOT NULL', NULL, FALSE);
+        $this->db->order_by('id', 'DESC');
+        $row_laporan = $this->db->get()->row_array();
+
+        $file_laporan = !empty($row_laporan['file_laporan']) ? $row_laporan['file_laporan'] : NULL;
+        $full_path = !empty($file_laporan) ? FCPATH . $file_laporan : NULL;
+
+        if (!$full_path || !file_exists($full_path) || filesize($full_path) === 0) {
+            $this->session->set_flashdata('pesan_gagal', 'Berkas LHU PDF final belum tersedia di server. Silakan hubungi Administrator.');
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        }
+
+        $this->catat_audit('DOWNLOAD_LHU_FINAL_SAMPEL', 'Pengujian', array(
+            'sample_id' => $sample_id,
+            'file_name' => basename($full_path),
+            'mode'      => $mode
+        ));
+
+        $disposition = ($mode === 'download') ? 'attachment' : 'inline';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: ' . $disposition . '; filename="' . basename($full_path) . '"');
+        header('Content-Length: ' . filesize($full_path));
+        readfile($full_path);
+        exit;
+    }
+
+    /**
+     * Preview / Unduh Catatan Pengujian (CP) Mikrobiologi PDF
+     * Sesuai format workbook resmi "CP mikro.xlsx" BBPOM di Bandar Lampung
+     *
+     * @param int $session_id
+     * @param string $mode 'inline' (preview) atau 'attachment' (unduh)
+     */
+    public function cp_mikro($session_id = NULL, $mode = 'inline')
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $session_id = (int)$session_id;
+        if ($session_id <= 0) {
+            show_404();
+        }
+
+        // Whitelist mode parameter: hanya 'inline' atau 'download'
+        $allowed_modes = array('inline', 'download');
+        if (!in_array($mode, $allowed_modes, TRUE)) {
+            $mode = 'inline';
+        }
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            show_404();
+        }
+
+        // Validasi jenis pengujian harus Mikrobiologi
+        if (isset($sesi['jenis_pengujian']) && $sesi['jenis_pengujian'] !== 'Mikrobiologi') {
+            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) khusus hanya tersedia untuk jenis pengujian Mikrobiologi.');
+            redirect('pengujian/riwayat');
+        }
+
+        // Syarat CP Mikrobiologi: harus telah diverifikasi oleh Penyelia (status 'Menunggu Approval' atau 'Approved / Final')
+        $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if (!in_array($sesi['status'], $allowed_statuses, TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            redirect('pengujian/riwayat');
+        }
+
+        // Ambil data terkait dari database
+        $sampel_info   = $this->Model_Sampel->ambil_by_id($sesi['sample_id']);
+        if (!$sampel_info) {
+            $this->session->set_flashdata('pesan_gagal', 'Data sampel terkait tidak ditemukan.');
+            redirect('pengujian/riwayat');
+        }
+
+        $forms         = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+        $penguji_info  = $this->Model_Pengguna->ambil_by_id($sesi['penguji_id']);
+        $verifier_info = $this->Model_Pengguna->ambil_by_id($sesi['verifier_id']);
+
+        // GATE KETAT TANDA TANGAN DIGITAL:
+        // CP final harus otomatis memuat TTD Penguji dan Penyelia yang sah.
+        // Validasi keberadaan file, keterbacaan, format gambar, dan path yang diizinkan.
+        require_once APPPATH . 'libraries/CP_Mikrobiologi_PDF.php';
+        $cp_gen = new CP_Mikrobiologi_PDF();
+
+        $val_penguji  = $cp_gen->validateUserSignature($sesi['penguji_id']);
+        $val_penyelia = $cp_gen->validateUserSignature($sesi['verifier_id']);
+
+        $err_penguji  = !$val_penguji[0];
+        $err_penyelia = !$val_penyelia[0];
+
+        if ($err_penguji || $err_penyelia) {
+            if ($err_penguji && $err_penyelia) {
+                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
+            } elseif ($err_penguji) {
+                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
+            } else {
+                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+            }
+
+            $this->catat_audit('CP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
+                'session_id'   => $session_id,
+                'penguji_id'   => $sesi['penguji_id'],
+                'verifier_id'  => $sesi['verifier_id'],
+                'err_penguji'  => $err_penguji,
+                'err_penyelia' => $err_penyelia
+            ));
+
+            $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
+            redirect('pengujian/riwayat');
+        }
+
+        // Sanitasi kode sampel untuk nama file
+        $kd_clean = preg_replace('/[^A-Za-z0-9_\-]/', '_', (!empty($sampel_info['kode_sampel_manual']) ? $sampel_info['kode_sampel_manual'] : 'SMP_' . $sesi['sample_id']));
+        $pdf_name = 'CP_Mikrobiologi_' . $kd_clean . '_SESI' . $session_id . '.pdf';
+        $pdf_dir  = FCPATH . 'uploads/laporan/';
+        $pdf_path = $pdf_dir . $pdf_name;
+
+        // Generate / Update file CP PDF
+        try {
+            $cp_gen->buat_cp($sampel_info, $sesi, $forms, $penguji_info, $verifier_info, $pdf_path);
+        } catch (Exception $e) {
+            log_message('error', 'Gagal membuat CP Mikrobiologi PDF: ' . $e->getMessage());
+            $this->session->set_flashdata('pesan_gagal', 'Terjadi kesalahan saat memproses Catatan Pengujian (CP).');
+            redirect('pengujian/riwayat');
+        }
+
+        if (!file_exists($pdf_path)) {
+            $this->session->set_flashdata('pesan_gagal', 'File CP PDF gagal dibuat di server.');
+            redirect('pengujian/riwayat');
+        }
+
+        $this->catat_audit('DOWNLOAD_CP_MIKRO', 'Pengujian', array(
+            'session_id' => $session_id,
+            'file_name'  => $pdf_name,
+            'mode'       => $mode
+        ));
+
+        $disposition = ($mode === 'download') ? 'attachment' : 'inline';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: ' . $disposition . '; filename="' . $pdf_name . '"');
+        header('Content-Length: ' . filesize($pdf_path));
+        readfile($pdf_path);
+        exit;
+    }
+
+    /**
+     * Preview / Unduh Lembar Catatan Pengujian (LCP) Form Spesifik PDF
+     *
+     * @param int $test_id
+     * @param string $mode 'inline' atau 'download'
+     */
+    public function lcp_pdf($test_id = NULL, $mode = 'inline')
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $test_id = (int)$test_id;
+        if ($test_id <= 0) {
+            show_404();
+        }
+
+        $allowed_modes = array('inline', 'download');
+        if (!in_array($mode, $allowed_modes, TRUE)) {
+            $mode = 'inline';
+        }
+
+        $hasil = $this->Model_Pengujian->ambil_hasil_by_id($test_id);
+        if (!$hasil) {
+            show_404();
+        }
+
+        $session_id = !empty($hasil['session_id']) ? (int)$hasil['session_id'] : 0;
+        $sesi = $session_id > 0 ? $this->Model_Pengujian->ambil_sesi_by_id($session_id) : array();
+
+        $status_uji = !empty($sesi['status']) ? $sesi['status'] : $hasil['status'];
+        $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if (!in_array($status_uji, $allowed_statuses, TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Lembar Catatan Pengujian (LCP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            redirect('pengujian/riwayat');
+        }
+
+        $sampel_info   = $this->Model_Sampel->ambil_by_id($hasil['sample_id']);
+        if (!$sampel_info) {
+            $this->session->set_flashdata('pesan_gagal', 'Data sampel terkait tidak ditemukan.');
+            redirect('pengujian/riwayat');
+        }
+
+        $penguji_id    = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : $hasil['penguji_id'];
+        $verifier_id   = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : $hasil['verifier_id'];
+
+        $penguji_info  = $this->Model_Pengguna->ambil_by_id($penguji_id);
+        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : null;
+
+        require_once APPPATH . 'libraries/LCP_Mikrobiologi_PDF.php';
+        $lcp_gen = new LCP_Mikrobiologi_PDF();
+
+        // Validasi Tanda Tangan Digital Penguji & Penyelia
+        $val_penguji  = $lcp_gen->validateUserSignature($penguji_id);
+        $val_penyelia = $verifier_id ? $lcp_gen->validateUserSignature($verifier_id) : [false, null, 'Penyelia belum ditentukan'];
+
+        $err_penguji  = !$val_penguji[0];
+        $err_penyelia = !$val_penyelia[0];
+
+        if ($err_penguji || $err_penyelia) {
+            if ($err_penguji && $err_penyelia) {
+                $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
+            } elseif ($err_penguji) {
+                $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
+            } else {
+                $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+            }
+
+            $this->catat_audit('LCP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
+                'test_id'      => $test_id,
+                'session_id'   => $session_id,
+                'penguji_id'   => $penguji_id,
+                'verifier_id'  => $verifier_id,
+                'err_penguji'  => $err_penguji,
+                'err_penyelia' => $err_penyelia
+            ));
+
+            $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
+            redirect('pengujian/riwayat');
+        }
+
+        $daftar_alat   = $this->Model_Alat->ambil_semua();
+        $daftar_reagen = $this->Model_Reagen->ambil_semua();
+
+        $kd_clean = preg_replace('/[^A-Za-z0-9_\-]/', '_', (!empty($sampel_info['kode_sampel_manual']) ? $sampel_info['kode_sampel_manual'] : 'SMP_' . $hasil['sample_id']));
+        $tpl_clean = preg_replace('/[^A-Za-z0-9_\-]/', '_', (!empty($hasil['kode_template']) ? $hasil['kode_template'] : 'LCP'));
+        $pdf_name = 'LCP_' . $tpl_clean . '_' . $kd_clean . '_T' . $test_id . '.pdf';
+        $pdf_dir  = FCPATH . 'uploads/laporan/';
+        $pdf_path = $pdf_dir . $pdf_name;
+
+        try {
+            $lcp_gen->buat_lcp($hasil, $sampel_info, $sesi, $penguji_info, $verifier_info, $daftar_alat, $daftar_reagen, $pdf_path);
+        } catch (Exception $e) {
+            log_message('error', 'Gagal membuat LCP Mikrobiologi PDF: ' . $e->getMessage());
+            $this->session->set_flashdata('pesan_gagal', 'Terjadi kesalahan saat memproses Lembar Catatan Pengujian (LCP).');
+            redirect('pengujian/riwayat');
+        }
+
+        if (!file_exists($pdf_path)) {
+            $this->session->set_flashdata('pesan_gagal', 'File LCP PDF gagal dibuat di server.');
+            redirect('pengujian/riwayat');
+        }
+
+        $this->catat_audit('DOWNLOAD_LCP_MIKRO', 'Pengujian', array(
+            'test_id'    => $test_id,
+            'session_id' => $session_id,
+            'file_name'  => $pdf_name,
+            'mode'       => $mode
+        ));
+
+        $disposition = ($mode === 'download') ? 'attachment' : 'inline';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: ' . $disposition . '; filename="' . $pdf_name . '"');
+        header('Content-Length: ' . filesize($pdf_path));
+        readfile($pdf_path);
+        exit;
+    }
+
+
+    /**
      * FASE 4 — Halaman Workspace Penyelia (Verifikasi Laporan)
      */
     public function verifikasi()
@@ -782,59 +1077,15 @@ class Pengujian extends MY_Controller
     {
         $this->cek_hak_akses('pengujian_approve');
 
-        if ($this->input->method() !== 'post') {
-            redirect('pengujian/approval');
-        }
-
         $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
         if (!$sesi) {
             show_404();
         }
 
-        if ($sesi['status'] !== 'Menunggu Approval') {
-            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status "Menunggu Approval".');
-            redirect('pengujian/detail_sesi/' . $session_id);
-        }
-
-        $approver_id = $this->session->userdata('user_id');
-
-        if ($this->Model_Pengujian->approve_sesi($session_id, $approver_id)) {
-            // Generate official multi-form LHU PDF
-            $sampel_info   = $this->Model_Sampel->ambil_by_id($sesi['sample_id']);
-            $sesi_info     = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
-            $forms_info    = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
-            $penguji_info  = $this->Model_Pengguna->ambil_by_id($sesi['penguji_id']);
-            $verifier_info = $this->Model_Pengguna->ambil_by_id($sesi['verifier_id']);
-            $approver_info = $this->Model_Pengguna->ambil_by_id($approver_id);
-
-            $pdf_dir  = FCPATH . 'uploads/laporan/';
-            $pdf_name = 'LHU_FINAL_' . $sesi['sample_id'] . '_SESI' . $session_id . '_' . time() . '.pdf';
-            $pdf_path = $pdf_dir . $pdf_name;
-
-            try {
-                $pdf_gen = new Laporan_PDF();
-                $pdf_gen->buat_laporan_sesi($sampel_info, $sesi_info, $forms_info, $penguji_info, $verifier_info, $approver_info, $pdf_path);
-                
-                $rel_path = 'uploads/laporan/' . $pdf_name;
-                $this->Model_Pengujian->update_file_laporan_sesi($session_id, $rel_path);
-            } catch (Exception $e) {
-                log_message('error', 'Gagal membuat PDF LHU Sesi: ' . $e->getMessage());
-            }
-
-            $this->catat_audit('APPROVAL_SESI', 'Pengujian', array(
-                'testing_session_id' => $session_id,
-                'sample_id'          => $sesi['sample_id'],
-                'approver_id'        => $approver_id,
-                'status_sebelum'     => 'Menunggu Approval',
-                'status_sesudah'     => 'Approved / Final'
-            ));
-
-            $this->session->set_flashdata('pesan_sukses', 'Sesi pengujian berhasil di-approve (Approved / Final) dan Laporan PDF Final (LHU) telah diterbitkan.');
-            redirect('pengujian/detail_sesi/' . $session_id);
-        } else {
-            $this->session->set_flashdata('pesan_gagal', 'Gagal memproses approval sesi.');
-            redirect('pengujian/detail_sesi/' . $session_id);
-        }
+        // Pencegahan Bypass: Keputusan persetujuan akhir MT diproses di tingkat sampel
+        // agar seluruh sesi wajib (Kimia & Mikrobiologi) dievaluasi kelengkapannya secara komprehensif.
+        $this->session->set_flashdata('pesan_gagal', 'Persetujuan Manajer Teknis harus dilakukan di tingkat sampel untuk memastikan kelengkapan seluruh sesi pengujian wajib.');
+        redirect('pengujian/tinjauan_lhu/' . $sesi['sample_id']);
     }
 
     /**
@@ -1009,7 +1260,7 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * FASE 5 — Menampilkan daftar laporan yang menunggu approval Manajer Teknis
+     * FASE 5 — Menampilkan daftar laporan yang menunggu approval Manajer Teknis (Berbasis Sampel)
      */
     public function approval()
     {
@@ -1018,9 +1269,94 @@ class Pengujian extends MY_Controller
         $this->data['halaman_aktif'] = 'pengujian_approval';
         $this->data['judul_halaman'] = 'Antrean Approval Laporan';
 
-        $this->data['antrean'] = $this->Model_Pengujian->ambil_antrean_approval();
+        $this->data['antrean'] = $this->Model_Pengujian->ambil_antrean_approval_sampel();
 
         $this->muat_tampilan('pengujian/approval');
+    }
+
+    /**
+     * FASE 5 — Halaman Tinjauan LHU Komprehensif Lintas Sesi untuk Manajer Teknis (MT)
+     *
+     * Menampilkan seluruh hasil pengujian per sampel (Kimia, Mikrobiologi, atau keduanya)
+     * secara transparan beserta evaluasi kelengkapan sesi wajib sebelum persetujuan final.
+     *
+     * @param int $sample_id
+     */
+    public function tinjauan_lhu($sample_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_approve');
+
+        if (empty($sample_id)) {
+            show_404();
+        }
+
+        $tinjauan = $this->Model_Pengujian->ambil_tinjauan_lhu_sampel($sample_id);
+        if (!$tinjauan) {
+            show_404();
+        }
+
+        $this->data['halaman_aktif'] = 'pengujian_approval';
+        $this->data['judul_halaman'] = 'Tinjauan LHU Sampel: ' . html_escape($tinjauan['sampel']['nama_sampel']);
+        $this->data['sampel']        = $tinjauan['sampel'];
+        $this->data['kelengkapan']   = $tinjauan['kelengkapan'];
+        $this->data['sesi_list']     = $tinjauan['sesi_list'];
+
+        $this->muat_tampilan('pengujian/tinjauan_lhu');
+    }
+
+    /**
+     * FASE 5 (Tahap 3) — Memproses Approval MT untuk Seluruh Sesi Wajib Sampel
+     *
+     * @param int $sample_id
+     */
+    public function proses_approval_sampel($sample_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_approve');
+
+        if ($this->input->method() !== 'post') {
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        }
+
+        $approver_id = (int)$this->session->userdata('user_id');
+        $username    = (string)$this->session->userdata('username');
+
+        $hasil = $this->Model_Pengujian->approve_sampel_mt($sample_id, $approver_id, $username);
+
+        if ($hasil['sukses']) {
+            $this->session->set_flashdata('pesan_sukses', $hasil['pesan'] . ' Laporan kini dapat dilihat di Riwayat Approval.');
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        } else {
+            $this->session->set_flashdata('pesan_gagal', $hasil['pesan']);
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        }
+    }
+
+    /**
+     * FASE 5 (Tahap 3) — Memproses Penolakan Pengujian Sampel oleh MT dengan Alasan Wajib
+     *
+     * @param int $sample_id
+     */
+    public function proses_penolakan_sampel($sample_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_approve');
+
+        if ($this->input->method() !== 'post') {
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        }
+
+        $alasan = $this->input->post('alasan_penolakan', TRUE);
+        $approver_id = (int)$this->session->userdata('user_id');
+        $username    = (string)$this->session->userdata('username');
+
+        $hasil = $this->Model_Pengujian->tolak_sampel_mt($sample_id, $approver_id, $alasan, $username);
+
+        if ($hasil['sukses']) {
+            $this->session->set_flashdata('pesan_sukses', $hasil['pesan']);
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        } else {
+            $this->session->set_flashdata('pesan_gagal', $hasil['pesan']);
+            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+        }
     }
 
     /**

@@ -389,6 +389,30 @@
         color: #ad4141;
     }
 
+    .riwayat-action-cp {
+        border: 1px solid #c2e0dc;
+        background: #fff;
+        color: #0f7a75;
+    }
+
+    .riwayat-action-cp:hover {
+        background: #edf8f7;
+        border-color: #159b98;
+        color: #0c5d59;
+    }
+
+    .riwayat-action-lcp {
+        border: 1px solid #bce1f5;
+        background: #fff;
+        color: #1a7bb9;
+    }
+
+    .riwayat-action-lcp:hover {
+        background: #f0f7fc;
+        border-color: #2e9cdb;
+        color: #125e91;
+    }
+
     .riwayat-action-revisi {
         border: 1px solid #eed39c;
         background: #fff8e8;
@@ -862,28 +886,31 @@
     <div class="riwayat-header">
 
         <div>
-
             <p class="riwayat-description">
                 Melihat riwayat dan hasil pengujian sampel yang telah diproses.
             </p>
-
         </div>
 
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve')): ?>
+                <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-shield-check me-1"></i> Antrean Approval MT
+                </a>
+                <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-file-earmark-check me-1"></i> Riwayat Approval MT
+                </a>
+            <?php endif; ?>
 
-        <?php if ($bisa_pengujian_operasional): ?>
-
-            <a
-                href="<?php echo site_url('pengujian/antrean'); ?>"
-                class="riwayat-btn-antrean"
-            >
-
-                <i class="bi bi-list-task me-1"></i>
-
-                Antrean Pengujian
-
-            </a>
-
-        <?php endif; ?>
+            <?php if ($bisa_pengujian_operasional): ?>
+                <a
+                    href="<?php echo site_url('pengujian/antrean'); ?>"
+                    class="riwayat-btn-antrean"
+                >
+                    <i class="bi bi-list-task me-1"></i>
+                    Antrean Pengujian
+                </a>
+            <?php endif; ?>
+        </div>
 
     </div>
 
@@ -1386,6 +1413,21 @@
 
                                             </a>
 
+                                            <?php if ($st === 'Menunggu Approval' && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve') && !empty($h['sample_id'])): ?>
+                                                <a
+                                                    href="<?php echo site_url('pengujian/tinjauan_lhu/' . $h['sample_id']); ?>"
+                                                    class="
+                                                        riwayat-action-btn
+                                                        btn-outline-success
+                                                    "
+                                                    style="border: 1px solid #159b98; background: #eef8f8; color: #128986;"
+                                                    title="Tinjau & Sahkan LHU di Menu Approval MT"
+                                                >
+                                                    <i class="bi bi-shield-check me-1"></i>
+                                                    Tinjau LHU
+                                                </a>
+                                            <?php endif; ?>
+
                                         <?php else: ?>
 
                                             <a
@@ -1426,18 +1468,22 @@
 
                                         if ($has_pdf):
 
-                                            $pdf_url =
-                                                $is_sesi
+                                            if ($st === 'Approved / Final' && !empty($h['sample_id'])) {
+                                                $pdf_url = site_url('pengujian/pdf_sampel/' . $h['sample_id']);
+                                            } else {
+                                                $pdf_url =
+                                                    $is_sesi
 
-                                                ? site_url(
-                                                    'pengujian/pdf_sesi/'
-                                                    . $h['id']
-                                                )
+                                                    ? site_url(
+                                                        'pengujian/pdf_sesi/'
+                                                        . $h['id']
+                                                    )
 
-                                                : site_url(
-                                                    'pengujian/download_pdf/'
-                                                    . $h['id']
-                                                );
+                                                    : site_url(
+                                                        'pengujian/download_pdf/'
+                                                        . $h['id']
+                                                    );
+                                            }
 
                                         ?>
 
@@ -1460,6 +1506,53 @@
                                                 ></i>
 
                                                 PDF
+
+                                            </a>
+
+                                        <?php endif; ?>
+
+                                        <?php if ($is_sesi && isset($h['jenis_pengujian']) && $h['jenis_pengujian'] === 'Mikrobiologi' && in_array($st, array('Menunggu Approval', 'Approved / Final'), TRUE)): ?>
+
+                                            <a
+                                                href="<?php echo site_url('pengujian/cp_mikro/' . $h['id']); ?>"
+                                                class="
+                                                    riwayat-action-btn
+                                                    riwayat-action-cp
+                                                "
+                                                title="Lihat / Unduh Catatan Pengujian (CP) Mikrobiologi"
+                                                target="_blank"
+                                            >
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-journal-check
+                                                        me-1
+                                                    "
+                                                ></i>
+
+                                                CP
+
+                                            </a>
+
+                                            <a
+                                                href="<?php echo site_url('pengujian/detail_sesi/' . $h['id'] . '#daftar-lcp'); ?>"
+                                                class="
+                                                    riwayat-action-btn
+                                                    riwayat-action-lcp
+                                                "
+                                                title="Lihat / Unduh Lembar Catatan Pengujian (LCP) Form Spesifik"
+                                            >
+
+                                                <i
+                                                    class="
+                                                        bi
+                                                        bi-file-earmark-ruled
+                                                        me-1
+                                                    "
+                                                ></i>
+
+                                                LCP
 
                                             </a>
 
