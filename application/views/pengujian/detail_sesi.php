@@ -775,13 +775,22 @@
 
                         <?php endif; ?>
 
-                        <?php if (isset($sesi['jenis_pengujian']) && $sesi['jenis_pengujian'] === 'Mikrobiologi' && in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE)): ?>
-                            <a href="<?php echo site_url('pengujian/cp_mikro/' . $sesi['id']); ?>"
-                               class="btn btn-info text-white"
-                               target="_blank">
-                                <i class="bi bi-journal-check me-1"></i>
-                                Unduh CP Mikrobiologi
-                            </a>
+                        <?php if (in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE)): ?>
+                            <?php if (isset($sesi['jenis_pengujian']) && $sesi['jenis_pengujian'] === 'Kimia'): ?>
+                                <a href="<?php echo site_url('pengujian/cp_kimia/' . $sesi['id']); ?>"
+                                   class="btn btn-info text-white"
+                                   target="_blank">
+                                    <i class="bi bi-journal-check me-1"></i>
+                                    Unduh CP Kimia
+                                </a>
+                            <?php else: ?>
+                                <a href="<?php echo site_url('pengujian/cp_mikro/' . $sesi['id']); ?>"
+                                   class="btn btn-info text-white"
+                                   target="_blank">
+                                    <i class="bi bi-journal-check me-1"></i>
+                                    Unduh CP Mikrobiologi
+                                </a>
+                            <?php endif; ?>
                             <a href="#daftar-lcp"
                                class="btn btn-outline-primary">
                                 <i class="bi bi-file-earmark-ruled me-1"></i>

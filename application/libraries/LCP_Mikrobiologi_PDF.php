@@ -372,8 +372,22 @@ class LCP_Mikrobiologi_PDF extends FPDF
             $this->AddPage('P', 'A4');
         }
 
-        $val_p = $this->validateUserSignature($sesi['penguji_id']);
-        $val_v = !empty($sesi['verifier_id']) ? $this->validateUserSignature($sesi['verifier_id']) : [false, null, null];
+        $ci =& get_instance();
+        $pid = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;
+        if (!$pid) {
+            $u3 = $ci->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+            $pid = $u3['id'] ?? null;
+            if ($u3 && empty($penguji)) $penguji = $u3;
+        }
+        $vid = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : null;
+        if (!$vid) {
+            $u4 = $ci->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+            $vid = $u4['id'] ?? null;
+            if ($u4 && empty($verifier)) $verifier = $u4;
+        }
+
+        $val_p = $pid ? $this->validateUserSignature($pid) : [false, null, null];
+        $val_v = $vid ? $this->validateUserSignature($vid) : [false, null, null];
 
         $sig_p = $val_p[0] ? $val_p[1] : null;
         $sig_v = $val_v[0] ? $val_v[1] : null;

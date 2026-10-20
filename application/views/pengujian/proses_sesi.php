@@ -457,7 +457,7 @@
     <div class="proses-sesi-card">
         <div class="proses-sesi-body">
 
-            <form action="<?php echo site_url('pengujian/proses_sesi/' . $sesi['id']); ?>" method="post">
+            <form action="<?php echo site_url('pengujian/proses_sesi/' . $sesi['id']); ?>" method="post" enctype="multipart/form-data">
 
                 <input
                     type="hidden"
@@ -873,6 +873,35 @@
                                                                                 }
                                                                             ?>
                                                                         </div>
+                                                                    </div>
+
+                                                                <?php elseif ($fld_type === 'file'): ?>
+                                                                    <div class="col-md-6">
+                                                                        <label for="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>" class="form-label">
+                                                                            <?php echo html_escape($fld_label); ?>
+                                                                            <?php if ($fld_req): ?><span class="text-danger">*</span><?php endif; ?>
+                                                                        </label>
+                                                                        <input
+                                                                            type="file"
+                                                                            class="form-control"
+                                                                            id="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>"
+                                                                            name="file_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>"
+                                                                            accept="<?php echo html_escape(isset($fld['accept']) ? $fld['accept'] : 'image/*'); ?>"
+                                                                        >
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name="forms[<?php echo $f['id']; ?>][hasil][<?php echo $fld_id; ?>]"
+                                                                            value="<?php echo html_escape($val_text); ?>"
+                                                                        >
+                                                                        <?php if (!empty($val_text)): ?>
+                                                                            <div class="mt-2 small d-flex align-items-center gap-2">
+                                                                                <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> File:</span>
+                                                                                <a href="<?php echo base_url($val_text); ?>" target="_blank" class="text-primary text-decoration-underline"><?php echo html_escape(basename($val_text)); ?></a>
+                                                                            </div>
+                                                                        <?php endif; ?>
+                                                                        <?php if (!empty($fld['keterangan'])): ?>
+                                                                            <small class="text-muted d-block mt-1"><?php echo html_escape($fld['keterangan']); ?></small>
+                                                                        <?php endif; ?>
                                                                     </div>
 
                                                                 <?php else: ?>

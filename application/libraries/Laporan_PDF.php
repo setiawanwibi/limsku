@@ -308,150 +308,182 @@ class Laporan_PDF extends FPDF
         $this->AddPage('P', 'A4');
 
         // Judul Dokumen
-        $this->SetFont('helvetica', 'B', 12);
-        $this->Cell(0, 6, 'LAPORAN HASIL PENGUJIAN (LHU)', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 9);
+        $this->SetFont('times', 'B', 12);
+        $this->Cell(0, 5, 'Laporan Hasil Uji', 0, 1, 'C');
+        $nomor_lhu = !empty($sampel['no_sipt']) ? 'LHU.' . $sampel['no_sipt'] : (!empty($sampel['nomor_lhu']) ? $sampel['nomor_lhu'] : 'LHU.090.K.01.01.26.' . str_pad($sampel['id'], 4, '0', STR_PAD_LEFT));
+        $this->SetFont('times', 'B', 10);
+        $this->Cell(0, 5, 'Nomor : ' . $nomor_lhu, 0, 1, 'C');
+        $this->Ln(2);
 
-        // Kumpulkan jenis pengujian yang digabungkan
-        $daftar_jenis = [];
-        foreach ($sesi_list_dengan_forms as $s) {
-            $daftar_jenis[] = !empty($s['jenis_pengujian']) ? $s['jenis_pengujian'] : 'Umum';
-        }
-        $daftar_jenis = array_unique($daftar_jenis);
-        $jenis_teks = implode(' & ', $daftar_jenis);
-
-        $this->Cell(0, 4, 'Pengujian Gabungan: ' . $jenis_teks . ' | Status: Approved / Final', 0, 1, 'C');
-        $this->Ln(3);
+        // Garis Pembatas 1
+        $this->SetLineWidth(0.3);
+        $this->Line(10, $this->GetY(), 200, $this->GetY());
+        $this->Ln(2);
 
         // =========================================================================
-        // BAGIAN I: IDENTITAS SAMPEL
+        // BLOK METADATA 1
         // =========================================================================
-        $this->SetFillColor(240, 240, 240);
-        $this->SetFont('helvetica', 'B', 8.5);
-        $this->Cell(0, 5.5, ' I. IDENTITAS SAMPEL', 1, 1, 'L', true);
-        $this->SetFont('helvetica', '', 8);
-
-        $kd_smp = !empty($sampel['kode_sampel_manual']) ? $sampel['kode_sampel_manual'] : (!empty($sampel['no']) ? 'NO-' . $sampel['no'] : 'SMP-' . $sampel['id']);
-        $identitas = array(
-            'Kode / No. Sampel'      => $kd_smp,
-            'Nama Sampel'            => isset($sampel['nama_sampel']) ? $sampel['nama_sampel'] : '-',
-            'Kategori / Sub'         => (!empty($sampel['kategori_sampel']) ? $sampel['kategori_sampel'] : '-') . ' / ' . (isset($sampel['sub_kategori']) ? $sampel['sub_kategori'] : '-'),
-            'Nomor Izin Edar (NIE)'  => isset($sampel['nomor_izin_edar']) ? $sampel['nomor_izin_edar'] : '-',
-            'No. Bets / Kedaluwarsa' => (isset($sampel['no_bets']) ? $sampel['no_bets'] : '-') . ' / ' . (isset($sampel['kedaluwarsa']) ? $sampel['kedaluwarsa'] : '-'),
-            'Sarana / Asal Sampel'   => (isset($sampel['nama_sarana']) ? $sampel['nama_sarana'] : '-') . ' (' . (isset($sampel['kabupaten_kota']) ? $sampel['kabupaten_kota'] : '-') . ')',
-            'Kemasan & Jumlah Total' => (isset($sampel['kemasan']) ? $sampel['kemasan'] : '-') . ' / ' . (isset($sampel['jumlah_total']) ? $sampel['jumlah_total'] : '-'),
-            'Alokasi Pengujian'      => 'Kimia: ' . (!empty($sampel['jumlah_kimia']) ? $sampel['jumlah_kimia'] : '-') . ' | Mikro: ' . (!empty($sampel['jumlah_mikro']) ? $sampel['jumlah_mikro'] : '-')
+        $this->SetFont('times', '', 9);
+        $tgl_spu = !empty($sampel['tanggal_sampling']) ? $sampel['tanggal_sampling'] : (!empty($sampel['created_at']) ? date('Y-m-d', strtotime($sampel['created_at'])) : date('Y-m-d'));
+        $meta1 = array(
+            'Nama Sampel'                  => !empty($sampel['nama_sampel']) ? $sampel['nama_sampel'] : '-',
+            'No. Kode Sampel'              => !empty($sampel['no_sipt']) ? $sampel['no_sipt'] : (!empty($sampel['kode_sampel_manual']) ? $sampel['kode_sampel_manual'] : '-'),
+            'Tempat Sampling'              => !empty($sampel['nama_sarana']) ? $sampel['nama_sarana'] : (!empty($sampel['kabupaten_kota']) ? $sampel['kabupaten_kota'] : '-'),
+            'Tanggal Sampling'             => !empty($sampel['tanggal_sampling']) ? date('d F Y', strtotime($sampel['tanggal_sampling'])) : '-',
+            'Nomor Surat Permintaan Uji'   => !empty($sampel['surtug']) ? $sampel['surtug'] : 'SPU.090.01.26.' . date('m.d', strtotime($tgl_spu)) . '.0001',
+            'Tanggal Surat Permintaan Uji' => date('d F Y', strtotime($tgl_spu))
         );
 
-        foreach ($identitas as $k => $v) {
-            $this->Cell(45, 4.5, '  ' . $k, 'L', 0, 'L');
-            $this->Cell(4, 4.5, ':', 0, 0, 'C');
-            $this->Cell(0, 4.5, $v, 'R', 1, 'L');
+        foreach ($meta1 as $k => $v) {
+            $this->Cell(65, 4.5, $k, 0, 0, 'L');
+            $this->Cell(5, 4.5, ':', 0, 0, 'C');
+            $this->Cell(0, 4.5, $v, 0, 1, 'L');
         }
-        $this->Cell(0, 0, '', 'T', 1);
+
+        $this->Ln(1);
+        $this->Line(10, $this->GetY(), 200, $this->GetY());
+        $this->Ln(2);
+
+        // =========================================================================
+        // BLOK METADATA 2
+        // =========================================================================
+        $pabrik = !empty($sampel['nama_alamat_perusahaan']) ? $sampel['nama_alamat_perusahaan'] : (!empty($sampel['nama_sarana']) ? $sampel['nama_sarana'] : '-');
+        $meta2 = array(
+            'Nama Pabrik / Distributor / Importir' => $pabrik,
+            'No. Registrasi'                      => !empty($sampel['nomor_izin_edar']) ? $sampel['nomor_izin_edar'] : '-',
+            'No. Bets / Lot'                      => !empty($sampel['no_bets']) ? $sampel['no_bets'] : '-',
+            'Tanggal Kadaluarsa'                  => !empty($sampel['kedaluwarsa']) ? $sampel['kedaluwarsa'] : '-',
+            'Kemasan'                             => !empty($sampel['kemasan']) ? $sampel['kemasan'] : '-',
+            'Jumlah Sampel'                       => !empty($sampel['jumlah_total']) ? $sampel['jumlah_total'] : '-',
+            'Tanggal Mulai Pengujian'             => !empty($sampel['created_at']) ? date('d F Y', strtotime($sampel['created_at'])) : date('d F Y'),
+            'Tanggal Selesai Pengujian'           => date('d F Y')
+        );
+
+        foreach ($meta2 as $k => $v) {
+            $this->Cell(65, 4.5, $k, 0, 0, 'L');
+            $this->Cell(5, 4.5, ':', 0, 0, 'C');
+            $this->Cell(0, 4.5, $v, 0, 1, 'L');
+        }
+
         $this->Ln(3);
 
         // =========================================================================
-        // BAGIAN II: TABEL HASIL PENGUJIAN GABUNGAN LINTAS SESI
+        // BAGIAN II: TABEL HASIL PENGUJIAN GABUNGAN (KIMIA & MIKRO)
         // =========================================================================
-        $this->SetFont('helvetica', 'B', 8.5);
-        $this->Cell(0, 5.5, ' II. HASIL PENGUJIAN LABORATORIUM', 1, 1, 'L', true);
-        $this->Ln(1.5);
+        // Kelompokkan sesi berdasarkan jenis_pengujian
+        $sesi_by_jenis = [];
+        foreach ($sesi_list_dengan_forms as $s) {
+            $j = !empty($s['jenis_pengujian']) ? trim($s['jenis_pengujian']) : 'Umum';
+            $sesi_by_jenis[$j][] = $s;
+        }
 
-        // Lebar kolom tabel
-        // Total lebar A4 margin 10mm kiri-kanan: 190mm
-        // No: 8mm, Parameter: 45mm, Metode/Pustaka: 42mm, Persyaratan: 35mm, Hasil: 35mm, Kesimpulan: 25mm = 190mm
-        $widths = [8, 45, 42, 35, 35, 25];
-        $aligns = ['C', 'L', 'L', 'L', 'L', 'C'];
+        $urutan_jenis = ['Kimia', 'Mikrobiologi'];
+        foreach (array_keys($sesi_by_jenis) as $jk) {
+            if (!in_array($jk, $urutan_jenis, true)) {
+                $urutan_jenis[] = $jk;
+            }
+        }
+
+        // Lebar kolom tabel (Total 190mm pada A4 dengan margin 10mm)
+        $widths = [42, 38, 36, 26, 20, 28];
+        $aligns = ['L', 'L', 'L', 'L', 'L', 'L'];
 
         $cetak_header_tabel = function() use ($widths) {
-            $this->SetFont('helvetica', 'B', 7.5);
-            $this->SetFillColor(230, 235, 240);
-            $this->Cell($widths[0], 6, 'No', 1, 0, 'C', true);
-            $this->Cell($widths[1], 6, 'Parameter Uji', 1, 0, 'C', true);
-            $this->Cell($widths[2], 6, 'Metode / Acuan', 1, 0, 'C', true);
-            $this->Cell($widths[3], 6, 'Persyaratan', 1, 0, 'C', true);
-            $this->Cell($widths[4], 6, 'Hasil Uji', 1, 0, 'C', true);
-            $this->Cell($widths[5], 6, 'Kesimpulan', 1, 1, 'C', true);
-            $this->SetFont('helvetica', '', 7.5);
+            $this->SetFont('times', 'B', 8.5);
+            $this->SetFillColor(255, 255, 255);
+            $this->Cell(190, 5.5, ' Hasil Pengujian Balai Regional :', 1, 1, 'L', true);
+            $this->Cell($widths[0], 6, 'Uji yang dilakukan', 1, 0, 'L', true);
+            $this->Cell($widths[1], 6, 'Hasil', 1, 0, 'L', true);
+            $this->Cell($widths[2], 6, 'Syarat', 1, 0, 'L', true);
+            $this->Cell($widths[3], 6, 'Pustaka', 1, 0, 'L', true);
+            $this->Cell($widths[4], 6, 'Metode', 1, 0, 'L', true);
+            $this->Cell($widths[5], 6, 'Balai Penguji', 1, 1, 'L', true);
+            $this->SetFont('times', '', 8);
         };
 
-        $cetak_header_tabel();
-
-        $no_item = 1;
         $semua_ms = true;
         $ada_tms = false;
+        $nama_balai = !empty($sampel['balai_penguji']) ? 'BALAI BESAR POM DI ' . strtoupper($sampel['balai_penguji']) : 'BALAI BESAR POM DI PEKANBARU';
 
-        foreach ($sesi_list_dengan_forms as $sesi) {
-            $j_uji = !empty($sesi['jenis_pengujian']) ? $sesi['jenis_pengujian'] : 'Pengujian';
+        foreach ($urutan_jenis as $jenis) {
+            if (empty($sesi_by_jenis[$jenis])) continue;
 
-            // Sub-header sesi pengujian
-            $this->SetFont('helvetica', 'B', 7.5);
-            $this->SetFillColor(245, 247, 250);
-            $this->Cell(0, 5, '  Bidang / Sesi: ' . $j_uji . ' (Kode Sesi: ' . (!empty($sesi['kode_sesi']) ? $sesi['kode_sesi'] : 'SESI-' . $sesi['id']) . ')', 1, 1, 'L', true);
-            $this->SetFont('helvetica', '', 7.5);
+            $judul_seksi = ($jenis === 'Mikrobiologi') ? 'PENGUJIAN MIKRO' : 'PENGUJIAN ' . strtoupper($jenis);
 
-            $forms = !empty($sesi['forms']) ? $sesi['forms'] : [];
-            if (empty($forms)) {
-                $this->Cell(0, 5, 'Tidak ada parameter uji pada sesi ini.', 1, 1, 'C');
-                continue;
+            // Periksa sisa halaman sebelum mencetak section title & header
+            if ($this->GetY() > 230) {
+                $this->AddPage('P', 'A4');
             }
 
-            foreach ($forms as $f) {
-                // Parameter Uji
-                $param_nama = !empty($f['parameter_uji']) ? $f['parameter_uji'] : (!empty($f['nama_parameter']) ? $f['nama_parameter'] : (!empty($f['nama_template']) ? $f['nama_template'] : '-'));
+            $this->SetFont('times', 'B', 9);
+            $this->Cell(0, 6, $judul_seksi, 0, 1, 'L');
 
-                // Metode & Pustaka
-                $metode_txt = !empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['nama_metode']) ? $f['nama_metode'] : '-');
-                if (!empty($f['pustaka_acuan'])) {
-                    $metode_txt .= "\n(" . $f['pustaka_acuan'] . ')';
-                }
+            $cetak_header_tabel();
 
-                // Persyaratan
-                $syarat_txt = !empty($f['persyaratan']) ? $f['persyaratan'] : '-';
+            foreach ($sesi_by_jenis[$jenis] as $sesi) {
+                $forms = !empty($sesi['forms']) ? $sesi['forms'] : [];
 
-                // Parsing Nilai Hasil Uji
-                $raw_hasil = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : [];
-                $hasil_lines = [];
-                if (is_array($raw_hasil)) {
-                    // Ambil nilai bermakna
-                    foreach ($raw_hasil as $rk => $rv) {
-                        if ($rk === 'csrf_token' || $rk === 'alat_ids' || $rk === 'reagen_ids' || $rk === 'parameter_values') {
-                            continue;
+                foreach ($forms as $f) {
+                    $param_nama = !empty($f['parameter_uji']) ? $f['parameter_uji'] : (!empty($f['nama_parameter']) ? $f['nama_parameter'] : (!empty($f['nama_template']) ? $f['nama_template'] : '-'));
+                    $metode_txt = !empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['nama_metode']) ? $f['nama_metode'] : '-');
+                    $pustaka_txt = !empty($f['pustaka_acuan']) ? $f['pustaka_acuan'] : (!empty($f['pustaka_metode']) ? $f['pustaka_metode'] : '-');
+                    $syarat_txt = !empty($f['persyaratan']) ? $f['persyaratan'] : '-';
+
+                    // Kesimpulan
+                    $kesimpulan_item = !empty($f['kesimpulan']) ? $f['kesimpulan'] : '-';
+                    if (stripos($kesimpulan_item, 'tidak memenuhi') !== false) {
+                        $ada_tms = true;
+                        $semua_ms = false;
+                        $tag_kes = 'TMS';
+                    } elseif (stripos($kesimpulan_item, 'memenuhi') !== false) {
+                        $tag_kes = 'MS';
+                    } else {
+                        $tag_kes = $kesimpulan_item;
+                    }
+
+                    // Parsing Data Hasil
+                    $raw_hasil = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : [];
+                    $hasil_lines = [];
+                    if (is_array($raw_hasil)) {
+                        if (isset($raw_hasil['parameter_values']) && is_array($raw_hasil['parameter_values'])) {
+                            $raw_hasil = array_merge($raw_hasil, $raw_hasil['parameter_values']);
                         }
-                        if (is_scalar($rv) && (string)$rv !== '') {
-                            $label_k = ucwords(str_replace('_', ' ', $rk));
-                            $hasil_lines[] = $label_k . ': ' . (string)$rv;
+                        if (!empty($raw_hasil['hasil_uji'])) {
+                            $hasil_lines[] = $raw_hasil['hasil_uji'];
+                        } elseif (!empty($raw_hasil['kadar_rata_rata'])) {
+                            $hasil_lines[] = 'Kadar: ' . $raw_hasil['kadar_rata_rata'] . '%';
+                        } elseif (!empty($raw_hasil['pengamatan'])) {
+                            $hasil_lines[] = $raw_hasil['pengamatan'];
+                        } elseif (!empty($raw_hasil['tabel_reaksi']) && is_array($raw_hasil['tabel_reaksi'])) {
+                            foreach ($raw_hasil['tabel_reaksi'] as $tr_item) {
+                                if (!empty($tr_item['pengamatan'])) {
+                                    $hasil_lines[] = $tr_item['pengamatan'] . (!empty($tr_item['hasil']) ? ' (' . $tr_item['hasil'] . ')' : '');
+                                }
+                            }
                         }
                     }
-                }
-                $hasil_txt = !empty($hasil_lines) ? implode("\n", array_slice($hasil_lines, 0, 4)) : '-';
 
-                // Kesimpulan
-                $kesimpulan_item = !empty($f['kesimpulan']) ? $f['kesimpulan'] : 'Belum Disimpulkan';
-                if (stripos($kesimpulan_item, 'tidak memenuhi') !== false) {
-                    $ada_tms = true;
-                    $semua_ms = false;
-                } elseif (stripos($kesimpulan_item, 'memenuhi') === false) {
-                    $semua_ms = false;
-                }
+                    $hasil_detail = !empty($hasil_lines) ? implode("\n", array_slice($hasil_lines, 0, 3)) : '-';
+                    $hasil_cell = $tag_kes . "\n-\n" . $hasil_detail;
 
-                $cells = [
-                    $no_item++,
-                    $param_nama,
-                    $metode_txt,
-                    $syarat_txt,
-                    $hasil_txt,
-                    $kesimpulan_item
-                ];
+                    $cells = [
+                        $param_nama,
+                        $hasil_cell,
+                        $syarat_txt,
+                        $pustaka_txt,
+                        $metode_txt,
+                        $nama_balai
+                    ];
 
-                $did_break = $this->RowTabelLHU($cells, $widths, $aligns, 4.5, false);
-                if ($did_break) {
-                    $cetak_header_tabel();
-                    // Cetak ulang baris yang terputus di halaman baru
-                    $this->RowTabelLHU($cells, $widths, $aligns, 4.5, false);
+                    $did_break = $this->RowTabelLHU($cells, $widths, $aligns, 4.5, false);
+                    if ($did_break) {
+                        $cetak_header_tabel();
+                        $this->RowTabelLHU($cells, $widths, $aligns, 4.5, false);
+                    }
                 }
             }
+
+            $this->Ln(3);
         }
 
         $this->Ln(3);
@@ -509,68 +541,29 @@ class Laporan_PDF extends FPDF
         $this->Ln(1);
 
         // Cetak blok tanda tangan per sesi (Penguji & Penyelia)
-        foreach ($signers_per_sesi as $s_id => $actors) {
-            $j_name = !empty($actors['sesi']['jenis_pengujian']) ? $actors['sesi']['jenis_pengujian'] : 'Pengujian';
-
-            $this->SetFont('helvetica', 'B', 7.5);
-            $this->Cell(0, 4.5, 'Tim Penguji Bidang ' . $j_name . ':', 0, 1, 'L');
-
-            $y_before_sig = $this->GetY();
-            if ($y_before_sig > 240) {
-                $this->AddPage('P', 'A4');
-                $y_before_sig = $this->GetY();
-            }
-
-            // Kolom 1: Penguji (Lebar 95mm), Kolom 2: Penyelia (Lebar 95mm)
-            $this->SetFont('helvetica', '', 7.5);
-            $this->Cell(95, 4, 'Penguji / Analis,', 0, 0, 'C');
-            $this->Cell(95, 4, 'Penyelia / Verifier,', 0, 1, 'C');
-
-            $this->SetFont('helvetica', 'I', 7);
-            $this->Cell(95, 3.5, 'Tanggal Selesai: ' . $actors['penguji']['tgl'], 0, 0, 'C');
-            $this->Cell(95, 3.5, 'Tanggal Verifikasi: ' . $actors['penyelia']['tgl'], 0, 1, 'C');
-
-            $y_img = $this->GetY() + 0.5;
-            $sig_w = 24;
-            $sig_h = 11;
-
-            // Embed Real Signature Penguji
-            $this->Image($actors['penguji']['path'], 45.5, $y_img, $sig_w, $sig_h);
-
-            // Embed Real Signature Penyelia
-            $this->Image($actors['penyelia']['path'], 140.5, $y_img, $sig_w, $sig_h);
-
-            $this->SetY($y_img + $sig_h + 1);
-
-            $this->SetFont('helvetica', 'B', 8);
-            $this->Cell(95, 4, $actors['penguji']['nama'], 0, 0, 'C');
-            $this->Cell(95, 4, $actors['penyelia']['nama'], 0, 1, 'C');
-
-            $this->SetFont('helvetica', '', 7.5);
-            $this->Cell(95, 3.5, 'NIP. ' . $actors['penguji']['nip'], 0, 0, 'C');
-            $this->Cell(95, 3.5, 'NIP. ' . $actors['penyelia']['nip'], 0, 1, 'C');
-            $this->Ln(3);
-        }
-
-        // Tanda Tangan Manajer Teknis (MT)
-        if ($this->GetY() > 245) {
+        // =========================================================================
+        // LEMBAR PENGESAHAN: HANYA MANAJER TEKNIS DI SISI KIRI
+        // =========================================================================
+        if ($this->GetY() > 240) {
             $this->AddPage('P', 'A4');
         }
 
-        $this->Ln(1);
-        $this->SetFont('helvetica', 'B', 8);
-        $this->Cell(0, 4, 'Menyetujui & Mengesahkan,', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 7.5);
-        $this->Cell(0, 3.5, 'Manajer Teknis (Approver LHU)', 0, 1, 'C');
+        $this->Ln(3);
+        $this->SetFont('helvetica', '', 8.5);
+        $this->Cell(80, 4, 'Bandar Lampung, ' . $this->formatTanggalIndo(date('Y-m-d')), 0, 1, 'L');
+        $this->SetFont('helvetica', 'B', 8.5);
+        $this->Cell(80, 4, 'MT Pengujian,', 0, 1, 'L');
 
         $y_mt = $this->GetY() + 0.5;
-        $this->Image($sig_mt_path, 93, $y_mt, 24, 11);
+        if (!empty($sig_mt_path) && file_exists($sig_mt_path)) {
+            $this->Image($sig_mt_path, 15, $y_mt, 26, 12);
+        }
 
-        $this->SetY($y_mt + 12);
-        $this->SetFont('helvetica', 'B', 8);
-        $this->Cell(0, 4, $approver_info['nama_lengkap'], 0, 1, 'C');
-        $this->SetFont('helvetica', '', 7.5);
-        $this->Cell(0, 3.5, 'NIP. ' . (!empty($approver_info['nip']) ? $approver_info['nip'] : '-'), 0, 1, 'C');
+        $this->SetY($y_mt + 13);
+        $this->SetFont('helvetica', 'BU', 8.5);
+        $this->Cell(80, 4, $approver_info['nama_lengkap'], 0, 1, 'L');
+        $this->SetFont('helvetica', '', 8);
+        $this->Cell(80, 3.5, 'NIP. ' . (!empty($approver_info['nip']) ? $approver_info['nip'] : '-'), 0, 1, 'L');
 
         // =========================================================================
         // OUTPUT FILE PDF

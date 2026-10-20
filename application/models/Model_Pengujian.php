@@ -332,27 +332,39 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_semua_hasil($penguji_id = NULL, $limit = 1000, $offset = 0)
     {
-        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
-            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
-            (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
-            (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
+        $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt,
+            COALESCE(NULLIF(s.status, ""), MAX(ts.status)) as status,
+            GROUP_CONCAT(DISTINCT ts.jenis_pengujian ORDER BY ts.jenis_pengujian ASC SEPARATOR " & ") as jenis_pengujian,
+            GROUP_CONCAT(DISTINCT u.nama_lengkap SEPARATOR "; ") as nama_penguji,
+            GROUP_CONCAT(DISTINCT uv.nama_lengkap SEPARATOR "; ") as nama_verifier,
+            GROUP_CONCAT(DISTINCT ua.nama_lengkap SEPARATOR "; ") as nama_approver,
+            MAX(ts.waktu_approval) as waktu_approval,
+            MAX(ts.updated_at) as updated_at,
+            COUNT(DISTINCT ts.id) as jumlah_sesi,
+            COUNT(DISTINCT tr.id) as jumlah_form,
+            GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") as kesimpulan,
+            MAX(CASE WHEN ts.jenis_pengujian = "Kimia" THEN ts.id ELSE NULL END) as sesi_kimia_id,
+            MAX(CASE WHEN ts.jenis_pengujian = "Mikrobiologi" THEN ts.id ELSE NULL END) as sesi_mikro_id,
+            MIN(ts.id) as first_session_id');
         $this->db->from('testing_sessions ts');
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->join('test_results tr', 'tr.session_id = ts.id', 'left');
 
         if ($penguji_id) {
-            $this->db->where('ts.penguji_id', $penguji_id);
+            $this->db->where('EXISTS (SELECT 1 FROM testing_sessions ts_p JOIN samples s_p ON s_p.id = ts_p.sample_id WHERE (s_p.kode_sampel_manual = s.kode_sampel_manual OR s_p.no_sipt = s.no_sipt) AND ts_p.penguji_id = ' . (int)$penguji_id . ')', NULL, FALSE);
         }
 
-        $this->db->order_by('ts.id', 'DESC');
+        $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
+        $this->db->order_by('MAX(ts.id)', 'DESC');
         $this->db->limit($limit, $offset);
         $res = $this->db->get()->result_array();
 
         if (empty($res)) {
             // Fallback ke test_results jika belum ada testing_sessions
-            $this->db->select('tr.*, m.nama_metode, t.nama_template, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, 1 as jumlah_form');
+            $this->db->select('tr.sample_id, s.id, tr.id as test_id, m.nama_metode, t.nama_template, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.status, 1 as jumlah_sesi, 1 as jumlah_form, tr.kesimpulan, "Kimia" as jenis_pengujian');
             $this->db->from($this->tabel_hasil . ' tr');
             $this->db->join('samples s', 's.id = tr.sample_id', 'inner');
             $this->db->join('methods m', 'm.id = tr.method_id', 'left');
@@ -786,17 +798,28 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_riwayat_approval_by_user($approver_id)
     {
-        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
-            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
-            (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
-            (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
+        $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt,
+            GROUP_CONCAT(DISTINCT ts.jenis_pengujian SEPARATOR " & ") as jenis_pengujian,
+            GROUP_CONCAT(DISTINCT u.nama_lengkap SEPARATOR "; ") as nama_penguji,
+            GROUP_CONCAT(DISTINCT uv.nama_lengkap SEPARATOR "; ") as nama_verifier,
+            ua.nama_lengkap as nama_approver,
+            MAX(ts.waktu_approval) as waktu_approval,
+            "Approved / Final" as status,
+            COUNT(DISTINCT ts.id) as jumlah_sesi,
+            COUNT(DISTINCT tr.id) as jumlah_form,
+            GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") as kesimpulan,
+            MAX(CASE WHEN ts.jenis_pengujian = "Kimia" THEN ts.id ELSE NULL END) as sesi_kimia_id,
+            MAX(CASE WHEN ts.jenis_pengujian = "Mikrobiologi" THEN ts.id ELSE NULL END) as sesi_mikro_id,
+            MIN(ts.id) as first_session_id');
         $this->db->from('testing_sessions ts');
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->join('test_results tr', 'tr.session_id = ts.id', 'left');
         $this->db->where('ts.approver_id', $approver_id);
-        $this->db->order_by('ts.waktu_approval', 'DESC');
+        $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
+        $this->db->order_by('MAX(ts.waktu_approval)', 'DESC');
         return $this->db->get()->result_array();
     }
 
@@ -1115,6 +1138,51 @@ class Model_Pengujian extends CI_Model
      * @param int $sample_id
      * @return array
      */
+    /**
+     * Mengambil seluruh sample_id yang serumpun berdasarkan kesamaan kode_sampel_manual atau no_sipt
+     *
+     * @param int $sample_id
+     * @return array Array of sample IDs
+     */
+    public function ambil_sample_ids_serumpun($sample_id)
+    {
+        $sample_id = (int)$sample_id;
+        if ($sample_id <= 0) return [];
+
+        $s0 = $this->db->get_where('samples', ['id' => $sample_id])->row_array();
+        if (!$s0) return [$sample_id];
+
+        $kd = !empty($s0['kode_sampel_manual']) ? trim($s0['kode_sampel_manual']) : '';
+        $sipt = !empty($s0['no_sipt']) ? trim($s0['no_sipt']) : '';
+
+        $this->db->select('id');
+        $this->db->from('samples');
+        
+        $where_clauses = ['id = ' . $sample_id];
+        if ($kd !== '' && $kd !== '-') {
+            $where_clauses[] = 'kode_sampel_manual = ' . $this->db->escape($kd);
+        }
+        if ($sipt !== '' && $sipt !== '-') {
+            $where_clauses[] = 'no_sipt = ' . $this->db->escape($sipt);
+        }
+
+        $this->db->where('(' . implode(' OR ', $where_clauses) . ')', NULL, FALSE);
+        $rows = $this->db->get()->result_array();
+
+        $ids = [];
+        foreach ($rows as $r) {
+            $ids[] = (int)$r['id'];
+        }
+        return !empty($ids) ? array_unique($ids) : [$sample_id];
+    }
+
+    /**
+     * Memeriksa kelengkapan sesi wajib untuk satu sample_id langsung dari database.
+     * Menggabungkan seluruh sesi dari sampel serumpun (kode sampel yang sama).
+     *
+     * @param int $sample_id
+     * @return array
+     */
     public function cek_kelengkapan_sesi_sampel($sample_id)
     {
         $sampel = $this->db->get_where('samples', ['id' => $sample_id])->row_array();
@@ -1131,7 +1199,9 @@ class Model_Pengujian extends CI_Model
             ];
         }
 
-        $sesi_list = $this->db->get_where('testing_sessions', ['sample_id' => $sample_id])->result_array();
+        $serumpun_ids = $this->ambil_sample_ids_serumpun($sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
+        $sesi_list = $this->db->get('testing_sessions')->result_array();
         return $this->evaluasi_kelengkapan_sesi_sampel($sampel, $sesi_list);
     }
 
@@ -1150,23 +1220,19 @@ class Model_Pengujian extends CI_Model
      */
     public function filter_antrean_approval_sampel($daftar_sampel, $daftar_sesi)
     {
-        // Petakan sesi berdasarkan sample_id
-        $sesi_by_sample = [];
-        foreach ($daftar_sesi as $sesi) {
-            $s_id = isset($sesi['sample_id']) ? (int)$sesi['sample_id'] : 0;
-            if ($s_id > 0) {
-                if (!isset($sesi_by_sample[$s_id])) {
-                    $sesi_by_sample[$s_id] = [];
-                }
-                $sesi_by_sample[$s_id][] = $sesi;
-            }
-        }
-
         $antrean_siap = [];
 
         foreach ($daftar_sampel as $s) {
             $sample_id = (int)$s['id'];
-            $sesi_sampel = isset($sesi_by_sample[$sample_id]) ? $sesi_by_sample[$sample_id] : [];
+            $serumpun_ids = $this->ambil_sample_ids_serumpun($sample_id);
+
+            // Kumpulkan seluruh sesi milik semua sampel serumpun
+            $sesi_sampel = [];
+            foreach ($daftar_sesi as $sesi) {
+                if (in_array((int)$sesi['sample_id'], $serumpun_ids, true)) {
+                    $sesi_sampel[] = $sesi;
+                }
+            }
 
             $eval = $this->evaluasi_kelengkapan_sesi_sampel($s, $sesi_sampel);
 
@@ -1211,18 +1277,19 @@ class Model_Pengujian extends CI_Model
     }
 
     /**
-     * Mengambil antrean approval MT berbasis sampel langsung dari database.
+     * Mengambil antrean approval MT berbasis kode sampel langsung dari database.
+     * Mengelompokkan seluruh pengujian dengan kode sampel yang sama menjadi 1 baris antrean LHU.
      *
      * @return array
      */
     public function ambil_antrean_approval_sampel()
     {
-        // 1. Ambil kandidat sampel yang memiliki sesi berstatus 'Menunggu Approval'
+        // 1. Ambil kandidat sampel unik berdasarkan kode sampel yang memiliki sesi 'Menunggu Approval'
         $this->db->select('s.*');
         $this->db->from('samples s');
         $this->db->join('testing_sessions ts', 'ts.sample_id = s.id', 'inner');
         $this->db->where('ts.status', 'Menunggu Approval');
-        $this->db->group_by('s.id');
+        $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
         $this->db->order_by('s.id', 'ASC');
         $daftar_sampel = $this->db->get()->result_array();
 
@@ -1230,11 +1297,15 @@ class Model_Pengujian extends CI_Model
             return [];
         }
 
-        $sample_ids = array_map(function($row) {
-            return (int)$row['id'];
-        }, $daftar_sampel);
+        // Kumpulkan seluruh sample_ids serumpun
+        $all_sample_ids = [];
+        foreach ($daftar_sampel as $row) {
+            $serumpun = $this->ambil_sample_ids_serumpun($row['id']);
+            $all_sample_ids = array_merge($all_sample_ids, $serumpun);
+        }
+        $all_sample_ids = array_unique($all_sample_ids);
 
-        // 2. Ambil seluruh sesi terkait sampel-sampel tersebut (termasuk detail user)
+        // 2. Ambil seluruh sesi terkait sampel-sampel tersebut
         $this->db->select('ts.*, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
             (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
@@ -1242,7 +1313,7 @@ class Model_Pengujian extends CI_Model
         $this->db->from('testing_sessions ts');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
-        $this->db->where_in('ts.sample_id', $sample_ids);
+        $this->db->where_in('ts.sample_id', $all_sample_ids);
         $this->db->order_by('ts.id', 'ASC');
         $daftar_sesi = $this->db->get()->result_array();
 
@@ -1251,11 +1322,7 @@ class Model_Pengujian extends CI_Model
 
     /**
      * Mengambil seluruh data tinjauan LHU komprehensif per sampel untuk Manajer Teknis (MT).
-     *
-     * Mengumpulkan:
-     * - Data profil fisik sampel
-     * - Hasil evaluasi kelengkapan sesi sampel
-     * - Seluruh sesi pengujian terkait sampel beserta rincian lembar LCP dan form masing-masing sesi
+     * Otomatis menggabungkan seluruh sesi Kimia dan Mikrobiologi yang berkode sampel sama.
      *
      * @param int $sample_id
      * @return array|false
@@ -1267,15 +1334,16 @@ class Model_Pengujian extends CI_Model
             return FALSE;
         }
 
+        $serumpun_ids = $this->ambil_sample_ids_serumpun($sample_id);
         $kelengkapan = $this->cek_kelengkapan_sesi_sampel($sample_id);
 
-        // Ambil seluruh sesi terkait sampel ini
+        // Ambil seluruh sesi terkait seluruh sampel serumpun
         $this->db->select('ts.*, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver');
         $this->db->from('testing_sessions ts');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
-        $this->db->where('ts.sample_id', $sample_id);
+        $this->db->where_in('ts.sample_id', $serumpun_ids);
         $this->db->order_by('ts.id', 'ASC');
         $sesi_list = $this->db->get()->result_array();
 
@@ -1357,6 +1425,8 @@ class Model_Pengujian extends CI_Model
             return ['sukses' => FALSE, 'pesan' => 'Data pengguna Manajer Teknis tidak ditemukan di database.'];
         }
 
+        $serumpun_ids = $this->ambil_sample_ids_serumpun($sample_id);
+
         // Ambil data sesi lengkap beserta user dan form test_results
         $sesi_lengkap_list = [];
         foreach ($target_sesi_ids as $sid) {
@@ -1365,7 +1435,7 @@ class Model_Pengujian extends CI_Model
             $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
             $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
             $this->db->where('ts.id', $sid);
-            $this->db->where('ts.sample_id', $sample_id);
+            $this->db->where_in('ts.sample_id', $serumpun_ids);
             $s_row = $this->db->get()->row_array();
             if (!$s_row) {
                 return ['sukses' => FALSE, 'pesan' => 'Data sesi ID ' . $sid . ' tidak valid atau bukan milik sampel ini.'];
@@ -1407,7 +1477,7 @@ class Model_Pengujian extends CI_Model
 
         // 1. Verifikasi kepemilikan dan status terkini seluruh sesi di dalam transaksi
         $this->db->where_in('id', $target_sesi_ids);
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $this->db->where('status', 'Menunggu Approval');
         $sesi_rows = $this->db->get('testing_sessions')->result_array();
 
@@ -1424,7 +1494,7 @@ class Model_Pengujian extends CI_Model
 
         // 2. Update status testing_sessions
         $this->db->where_in('id', $target_sesi_ids);
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $up_sesi = $this->db->update('testing_sessions', [
             'status'         => 'Approved / Final',
             'approver_id'    => $approver_id,
@@ -1442,7 +1512,7 @@ class Model_Pengujian extends CI_Model
 
         // 3. Update status test_results dan simpan path file_laporan gabungan
         $this->db->where_in('session_id', $target_sesi_ids);
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $up_results = $this->db->update('test_results', [
             'status'         => 'Approved / Final',
             'file_laporan'   => $pdf_rel_path,
@@ -1459,8 +1529,8 @@ class Model_Pengujian extends CI_Model
             return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status parameter hasil pengujian.'];
         }
 
-        // 4. Update status samples
-        $this->db->where('id', $sample_id);
+        // 4. Update status samples (seluruh sampel serumpun)
+        $this->db->where_in('id', $serumpun_ids);
         $up_sampel = $this->db->update('samples', [
             'status'     => 'Approved / Final',
             'updated_by' => $approver_id,
@@ -1553,8 +1623,10 @@ class Model_Pengujian extends CI_Model
             return ['sukses' => FALSE, 'pesan' => 'Data sampel tidak ditemukan di database.'];
         }
 
+        $serumpun_ids = $this->ambil_sample_ids_serumpun($sample_id);
+
         // Ambil seluruh sesi milik sampel ini yang sedang berstatus 'Menunggu Approval'
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $this->db->where('status', 'Menunggu Approval');
         $sesi_list = $this->db->get('testing_sessions')->result_array();
 
@@ -1576,7 +1648,7 @@ class Model_Pengujian extends CI_Model
 
         // 1. Update status dan alasan pada testing_sessions
         $this->db->where_in('id', $target_sesi_ids);
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $up_sesi = $this->db->update('testing_sessions', [
             'status'           => 'Ditolak',
             'approver_id'      => $approver_id,
@@ -1593,7 +1665,7 @@ class Model_Pengujian extends CI_Model
 
         // 2. Update status test_results
         $this->db->where_in('session_id', $target_sesi_ids);
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $up_results = $this->db->update('test_results', [
             'status'           => 'Ditolak',
             'approver_id'      => $approver_id,
@@ -1608,7 +1680,7 @@ class Model_Pengujian extends CI_Model
         }
 
         // 3. Update status samples
-        $this->db->where('id', $sample_id);
+        $this->db->where_in('id', $serumpun_ids);
         $up_sampel = $this->db->update('samples', [
             'status'     => 'Ditolak',
             'updated_by' => $approver_id,

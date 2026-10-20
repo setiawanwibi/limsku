@@ -166,8 +166,11 @@
 
             <div class="d-flex align-items-center gap-2">
                 <?php if ($sampel['status'] === 'Approved / Final'): ?>
+                    <a href="<?php echo site_url('pengujian/lhu/' . $sampel['id']); ?>" class="btn btn-primary btn-sm" target="_blank">
+                        <i class="bi bi-printer me-1"></i> Cetak LHU Final
+                    </a>
                     <a href="<?php echo site_url('pengujian/pdf_sampel/' . $sampel['id']); ?>" class="btn btn-danger btn-sm" target="_blank">
-                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh LHU PDF Final
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh LHU PDF
                     </a>
                     <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm">
                         <i class="bi bi-file-earmark-check me-1"></i> Ke Riwayat Approval
@@ -239,114 +242,209 @@
                 </div>
             </div>
 
-            <!-- Rincian Sesi-Sesi Pengujian -->
-            <h6 class="fw-bold mb-3 text-secondary">
-                <i class="bi bi-collection me-1"></i> Rincian Seluruh Sesi Pengujian Terkait Sampel
-            </h6>
+            <!-- ========================================================================= -->
+            <!-- TABEL LHU FINAL GABUNGAN (SATU SAMPEL SATU LHU RESMI)                     -->
+            <!-- ========================================================================= -->
+            <div class="card border-0 shadow-sm mb-4" style="border: 1px solid #cbd5e1 !important; border-radius: 9px; overflow: hidden;">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-ruled-fill text-primary fs-5"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">Tabel LHU Final Gabungan (Satu Kode Sampel = Satu LHU)</h6>
+                            <small class="text-muted">Data seluruh pengujian Kimia & Mikrobiologi digabung menjadi satu laporan hasil uji resmi untuk disahkan MT</small>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                            <i class="bi bi-layers-fill me-1"></i> <?php echo count($sesi_list); ?> Sesi Digabung
+                        </span>
+                    </div>
+                </div>
 
-            <?php if (!empty($sesi_list)): ?>
-                <?php foreach ($sesi_list as $sesi): ?>
-                    <div class="sesi-section">
-                        <div class="sesi-section-header">
-                            <div class="sesi-section-title">
-                                <span class="badge <?php echo ($sesi['jenis_pengujian'] === 'Mikrobiologi' ? 'bg-info text-white' : 'bg-primary text-white'); ?>">
-                                    <?php echo html_escape($sesi['jenis_pengujian']); ?>
-                                </span>
-                                <span>Sesi #<?php echo $sesi['id']; ?> (<?php echo html_escape(!empty($sesi['kode_sesi']) ? $sesi['kode_sesi'] : 'SESI-' . $sesi['id']); ?>)</span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-secondary-subtle text-secondary border">
-                                    Penguji: <?php echo html_escape(!empty($sesi['nama_penguji']) ? $sesi['nama_penguji'] : '-'); ?>
-                                </span>
-                                <span class="badge bg-secondary-subtle text-secondary border">
-                                    Penyelia: <?php echo html_escape(!empty($sesi['nama_verifier']) ? $sesi['nama_verifier'] : '-'); ?>
-                                </span>
-                                <span class="badge <?php echo ($sesi['status'] === 'Menunggu Approval' ? 'bg-success' : 'bg-warning text-dark'); ?>">
-                                    <?php echo html_escape($sesi['status']); ?>
-                                </span>
-                                <a href="<?php echo site_url('pengujian/detail_sesi/' . $sesi['id']); ?>" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" target="_blank">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i>Detail Sesi
-                                </a>
-                            </div>
+                <div class="card-body p-4">
+                    <?php
+                    // Kelompokkan seluruh sesi berdasarkan jenis_pengujian (Kimia & Mikrobiologi)
+                    $sesi_by_jenis = [];
+                    foreach ($sesi_list as $s) {
+                        $j = !empty($s['jenis_pengujian']) ? trim($s['jenis_pengujian']) : 'Umum';
+                        $sesi_by_jenis[$j][] = $s;
+                    }
+
+                    // Urutan: Kimia lebih dahulu, lalu Mikrobiologi
+                    $urutan_jenis = ['Kimia', 'Mikrobiologi'];
+                    foreach (array_keys($sesi_by_jenis) as $jk) {
+                        if (!in_array($jk, $urutan_jenis, true)) {
+                            $urutan_jenis[] = $jk;
+                        }
+                    }
+
+                    $total_param_count = 0;
+                    $ada_tms = false;
+                    ?>
+
+                    <?php foreach ($urutan_jenis as $jenis): ?>
+                        <?php if (empty($sesi_by_jenis[$jenis])) continue; ?>
+                        <?php
+                            $judul_seksi = ($jenis === 'Mikrobiologi') ? 'PENGUJIAN MIKRO' : 'PENGUJIAN ' . strtoupper($jenis);
+                            $badge_class = ($jenis === 'Mikrobiologi') ? 'bg-info' : 'bg-primary';
+                        ?>
+
+                        <div class="d-flex align-items-center gap-2 mt-3 mb-2">
+                            <span class="badge <?php echo $badge_class; ?> px-2 py-1" style="font-size: .75rem;">
+                                <?php echo html_escape($jenis); ?>
+                            </span>
+                            <span class="fw-bold text-dark" style="font-size: .95rem; letter-spacing: .5px;">
+                                <?php echo html_escape($judul_seksi); ?>
+                            </span>
                         </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle sesi-table">
-                                <thead>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered align-middle mb-0" style="font-size: .82rem; border-color: #cbd5e1;">
+                                <thead style="background: #f8fafc;">
                                     <tr>
-                                        <th width="5%">#</th>
-                                        <th>Parameter Uji</th>
-                                        <th>Metode / Pustaka</th>
-                                        <th>Syarat Keberterimaan</th>
-                                        <th>Hasil Analisis</th>
-                                        <th>Kesimpulan</th>
+                                        <th colspan="6" class="py-2 px-3 fw-bold text-secondary" style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                                            Hasil Pengujian Balai Regional :
+                                        </th>
+                                    </tr>
+                                    <tr class="text-uppercase text-secondary" style="font-size: .74rem;">
+                                        <th style="width: 24%;">Uji yang dilakukan</th>
+                                        <th style="width: 22%;">Hasil</th>
+                                        <th style="width: 20%;">Syarat</th>
+                                        <th style="width: 12%;">Pustaka</th>
+                                        <th style="width: 10%;">Metode</th>
+                                        <th style="width: 12%;">Balai Penguji</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (!empty($sesi['forms'])): ?>
-                                        <?php $no_f = 1; foreach ($sesi['forms'] as $form): ?>
-                                            <tr>
-                                                <td><?php echo $no_f++; ?></td>
-                                                <td>
-                                                    <strong><?php echo html_escape(!empty($form['parameter_uji']) ? $form['parameter_uji'] : (!empty($form['nama_parameter']) ? $form['nama_parameter'] : '-')); ?></strong>
-                                                    <div class="text-muted" style="font-size: 0.68rem;">
-                                                        Form: <?php echo html_escape(!empty($form['nama_template']) ? $form['nama_template'] : 'Form LCP'); ?>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <?php echo html_escape(!empty($form['metode_analisa']) ? $form['metode_analisa'] : (!empty($form['nama_metode']) ? $form['nama_metode'] : '-')); ?>
-                                                    <div class="text-muted" style="font-size: 0.68rem;">
-                                                        <?php echo html_escape(!empty($form['pustaka_acuan']) ? $form['pustaka_acuan'] : '-'); ?>
-                                                    </div>
-                                                </td>
-                                                <td><?php echo html_escape(!empty($form['persyaratan']) ? $form['persyaratan'] : '-'); ?></td>
-                                                <td>
-                                                    <?php
-                                                        $raw_data = !empty($form['data_hasil']) ? json_decode($form['data_hasil'], true) : [];
-                                                        $ringkasan_hasil = [];
-                                                        if (is_array($raw_data)) {
-                                                            foreach ($raw_data as $k => $val) {
-                                                                if (is_scalar($val) && $val !== '' && $k !== 'csrf_token') {
-                                                                    $ringkasan_hasil[] = html_escape($k) . ': <strong>' . html_escape((string)$val) . '</strong>';
-                                                                }
-                                                            }
-                                                        }
-                                                        echo !empty($ringkasan_hasil) ? implode(', ', array_slice($ringkasan_hasil, 0, 3)) : '-';
-                                                    ?>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                        $kes = !empty($form['kesimpulan']) ? $form['kesimpulan'] : '';
-                                                        $cls = 'secondary';
-                                                        if (stripos($kes, 'memenuhi') !== false && stripos($kes, 'tidak') === false) {
-                                                            $cls = 'success';
-                                                        } elseif (stripos($kes, 'tidak memenuhi') !== false) {
-                                                            $cls = 'danger';
-                                                        }
-                                                    ?>
-                                                    <span class="badge bg-<?php echo $cls; ?>-subtle text-<?php echo $cls; ?> border border-<?php echo $cls; ?>-subtle">
-                                                        <?php echo html_escape($kes ?: '-'); ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
+                                    <?php
+                                    $ada_item_jenis = false;
+                                    foreach ($sesi_by_jenis[$jenis] as $sesi_item):
+                                        $forms = !empty($sesi_item['forms']) ? $sesi_item['forms'] : [];
+
+                                        foreach ($forms as $f):
+                                            $ada_item_jenis = true;
+                                            $total_param_count++;
+
+                                            $param_nama = !empty($f['parameter_uji']) ? $f['parameter_uji'] : (!empty($f['nama_template']) ? $f['nama_template'] : 'Parameter');
+                                            $kesimpulan_item = !empty($f['kesimpulan']) ? $f['kesimpulan'] : '-';
+
+                                            if (stripos($kesimpulan_item, 'tidak memenuhi') !== false) {
+                                                $ada_tms = true;
+                                                $badge_kes_class = 'danger';
+                                                $tag_kes = 'TMS';
+                                            } elseif (stripos($kesimpulan_item, 'memenuhi') !== false) {
+                                                $badge_kes_class = 'success';
+                                                $tag_kes = 'MS';
+                                            } else {
+                                                $badge_kes_class = 'secondary';
+                                                $tag_kes = $kesimpulan_item;
+                                            }
+
+                                            $pustaka_item = !empty($f['pustaka_acuan']) ? $f['pustaka_acuan'] : (!empty($f['pustaka_metode']) ? $f['pustaka_metode'] : '-');
+                                            $metode_item  = !empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['nama_metode']) ? $f['nama_metode'] : '-');
+                                            $syarat_item  = !empty($f['persyaratan']) ? $f['persyaratan'] : '-';
+                                            $balai_item   = !empty($sampel['balai_penguji']) ? 'Balai Besar POM di ' . ucwords(strtolower($sampel['balai_penguji'])) : 'Balai Besar POM di Bandar Lampung';
+
+                                            // Ringkasan data hasil
+                                            $raw_data = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : [];
+                                            $ringkasan_hasil = [];
+                                            if (is_array($raw_data)) {
+                                                foreach ($raw_data as $k => $val) {
+                                                    if (is_scalar($val) && $val !== '' && $k !== 'csrf_token') {
+                                                        $ringkasan_hasil[] = html_escape($k) . ': ' . html_escape((string)$val);
+                                                    }
+                                                }
+                                            }
+                                            $teks_hasil = !empty($ringkasan_hasil) ? implode(', ', array_slice($ringkasan_hasil, 0, 2)) : '-';
+                                    ?>
+                                        <tr>
+                                            <td>
+                                                <strong class="text-dark"><?php echo html_escape($param_nama); ?></strong>
+                                                <div class="text-muted" style="font-size: .70rem;">
+                                                    Form: <?php echo html_escape(!empty($f['nama_template']) ? $f['nama_template'] : 'Form LCP'); ?> (Sesi #<?php echo $sesi_item['id']; ?>)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div><?php echo $teks_hasil; ?></div>
+                                                <span class="badge bg-<?php echo $badge_kes_class; ?>-subtle text-<?php echo $badge_kes_class; ?> border border-<?php echo $badge_kes_class; ?>-subtle mt-1" style="font-size: .70rem;">
+                                                    <?php echo html_escape($kesimpulan_item); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo nl2br(html_escape($syarat_item)); ?></td>
+                                            <td><?php echo html_escape($pustaka_item); ?></td>
+                                            <td><?php echo html_escape($metode_item); ?></td>
+                                            <td style="font-size: .74rem;"><?php echo html_escape($balai_item); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    <?php endforeach; ?>
+
+                                    <?php if (!$ada_item_jenis): ?>
                                         <tr>
                                             <td colspan="6" class="text-center text-muted py-3">
-                                                Belum ada form parameter pada sesi ini.
+                                                Belum ada form parameter pada pengujian <?php echo html_escape($jenis); ?>.
                                             </td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="alert alert-secondary text-center py-4">
-                    Belum ada sesi pengujian yang tercatat untuk sampel ini.
+                    <?php endforeach; ?>
+
+                    <?php if (empty($sesi_list)): ?>
+                        <div class="alert alert-secondary text-center py-4">
+                            Belum ada sesi pengujian yang tercatat untuk sampel ini.
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            </div>
+
+            <!-- Rincian CP / LCP Sesi Pengujian (Detail Analis & Penyelia) -->
+            <div class="card border-0 shadow-sm mb-4" style="border: 1px solid #e2e8f0 !important; border-radius: 9px;">
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h6 class="fw-bold mb-0 text-secondary">
+                        <i class="bi bi-collection me-1"></i> Rincian CP / LCP Sesi Pengujian & Tanda Tangan Digital
+                    </h6>
+                    <small class="text-muted">Klik Detail Sesi untuk melihat data pengamatan, foto, atau pustaka acuan tiap form</small>
+                </div>
+                <div class="card-body p-4">
+                    <?php if (!empty($sesi_list)): ?>
+                        <div class="row g-3">
+                            <?php foreach ($sesi_list as $sesi): ?>
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge <?php echo ($sesi['jenis_pengujian'] === 'Mikrobiologi' ? 'bg-info text-white' : 'bg-primary text-white'); ?>">
+                                                    <?php echo html_escape($sesi['jenis_pengujian']); ?>
+                                                </span>
+                                                <strong class="text-dark">Sesi #<?php echo $sesi['id']; ?></strong>
+                                            </div>
+                                            <span class="badge <?php echo ($sesi['status'] === 'Menunggu Approval' ? 'bg-success' : 'bg-warning text-dark'); ?>">
+                                                <?php echo html_escape($sesi['status']); ?>
+                                            </span>
+                                        </div>
+
+                                        <div class="small text-muted mb-2">
+                                            <div><strong>Penguji:</strong> <?php echo html_escape(!empty($sesi['nama_penguji']) ? $sesi['nama_penguji'] : '-'); ?></div>
+                                            <div><strong>Penyelia:</strong> <?php echo html_escape(!empty($sesi['nama_verifier']) ? $sesi['nama_verifier'] : '-'); ?></div>
+                                            <div><strong>Jumlah Form:</strong> <?php echo count(!empty($sesi['forms']) ? $sesi['forms'] : []); ?> form LCP</div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                                            <span class="text-muted small">
+                                                <?php echo !empty($sesi['kode_sesi']) ? html_escape($sesi['kode_sesi']) : 'SESI-' . $sesi['id']; ?>
+                                            </span>
+                                            <a href="<?php echo site_url('pengujian/detail_sesi/' . $sesi['id']); ?>" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i>Detail Sesi & CP
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <!-- Panel Keputusan Manajer Teknis (MT) Tingkat Sampel -->
             <div class="card border-0 shadow-sm mt-4" style="background: #f8fafc; border: 1px solid #e2e8f0 !important; border-radius: 9px;">
@@ -365,8 +463,11 @@
                                 <strong>LHU Sampel Telah Disahkan:</strong> Seluruh sesi pengujian telah disetujui Manajer Teknis dan berkas LHU PDF final resmi telah diterbitkan. Laporan tersimpan di <strong>Riwayat Approval</strong>.
                             </div>
                             <div class="d-flex gap-2">
+                                <a href="<?php echo site_url('pengujian/lhu/' . $sampel['id']); ?>" class="btn btn-primary btn-sm px-3" target="_blank">
+                                    <i class="bi bi-printer me-1"></i> Cetak LHU Final
+                                </a>
                                 <a href="<?php echo site_url('pengujian/pdf_sampel/' . $sampel['id']); ?>" class="btn btn-danger btn-sm px-3" target="_blank">
-                                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Buka LHU PDF
+                                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh LHU PDF
                                 </a>
                                 <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm px-3">
                                     <i class="bi bi-file-earmark-check me-1"></i> Buka Riwayat Approval

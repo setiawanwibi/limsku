@@ -112,7 +112,7 @@
                                                         <option value="">-- Pilih Form LCP <?php echo html_escape($jenis_pengujian); ?> --</option>
                                                         <?php if (!empty($daftar_template_bidang)): ?>
                                                             <?php foreach ($daftar_template_bidang as $tpl_b): ?>
-                                                                <option value="<?php echo $tpl_b['id']; ?>" <?php echo ($tpl_b['kode_template'] === 'MIK-04' ? 'selected' : ''); ?>>
+                                                                <option value="<?php echo $tpl_b['id']; ?>" <?php echo (($jenis_pengujian === 'Mikrobiologi' && $tpl_b['kode_template'] === 'MIK-04') || ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01')) ? 'selected' : ''; ?>>
                                                                     [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?>
                                                                 </option>
                                                             <?php endforeach; ?>

@@ -315,6 +315,40 @@ class Pengujian extends MY_Controller
                 $forms_input = array();
             }
 
+            // Tangani upload file pengujian (misal: foto hasil pengamatan reaksi warna)
+            if (!empty($_FILES)) {
+                $upload_dir = FCPATH . 'uploads/pengujian/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, TRUE);
+                }
+
+                foreach ($_FILES as $file_field => $file_info) {
+                    if (!empty($file_info['name']) && $file_info['error'] === UPLOAD_ERR_OK) {
+                        // Pattern name: file_{form_id}_{field_id}
+                        if (preg_match('/^file_(\d+)_(.+)$/', $file_field, $matches)) {
+                            $f_id = (int)$matches[1];
+                            $fld_id = $matches[2];
+
+                            $ext = strtolower(pathinfo($file_info['name'], PATHINFO_EXTENSION));
+                            $allowed_exts = array('jpg', 'jpeg', 'png', 'gif', 'pdf');
+                            if (in_array($ext, $allowed_exts, TRUE)) {
+                                $new_filename = 'PENGUJIAN_' . $session_id . '_' . $f_id . '_' . $fld_id . '_' . time() . '.' . $ext;
+                                $dest = $upload_dir . $new_filename;
+                                if (move_uploaded_file($file_info['tmp_name'], $dest)) {
+                                    if (!isset($forms_input[$f_id])) {
+                                        $forms_input[$f_id] = array();
+                                    }
+                                    if (!isset($forms_input[$f_id]['hasil'])) {
+                                        $forms_input[$f_id]['hasil'] = array();
+                                    }
+                                    $forms_input[$f_id]['hasil'][$fld_id] = 'uploads/pengujian/' . $new_filename;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             if ($this->Model_Pengujian->simpan_hasil_sesi($session_id, $forms_input)) {
                 $this->catat_audit('SAVE_SESSION_RESULTS', 'Pengujian', array(
                     'testing_session_id' => $session_id,
@@ -353,8 +387,20 @@ class Pengujian extends MY_Controller
     {
         $this->cek_hak_akses('laporan_view');
 
+        $session_id = (int)$session_id;
+        if ($session_id <= 0) {
+            show_404();
+        }
+
         $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
         if (!$sesi) {
+            // Cek apakah parameter yang diberikan adalah ID sampel (bukan ID sesi)
+            $sampel = $this->Model_Sampel->ambil_by_id($session_id);
+            if ($sampel) {
+                // Sampel ditemukan, alihkan ke halaman Tinjauan LHU Sampel (yang memuat seluruh sesi dan CP)
+                redirect('pengujian/tinjauan_lhu/' . $session_id);
+                return;
+            }
             show_404();
         }
 
@@ -578,10 +624,12 @@ class Pengujian extends MY_Controller
             redirect('pengujian/tinjauan_lhu/' . $sample_id);
         }
 
-        // Cari file LHU dari test_results milik sampel
+        $serumpun_ids = $this->Model_Pengujian->ambil_sample_ids_serumpun($sample_id);
+
+        // Cari file LHU dari test_results milik sampel atau sampel serumpun
         $this->db->select('file_laporan');
         $this->db->from('test_results');
-        $this->db->where('sample_id', $sample_id);
+        $this->db->where_in('sample_id', $serumpun_ids);
         $this->db->where('file_laporan IS NOT NULL', NULL, FALSE);
         $this->db->order_by('id', 'DESC');
         $row_laporan = $this->db->get()->row_array();
@@ -590,8 +638,42 @@ class Pengujian extends MY_Controller
         $full_path = !empty($file_laporan) ? FCPATH . $file_laporan : NULL;
 
         if (!$full_path || !file_exists($full_path) || filesize($full_path) === 0) {
-            $this->session->set_flashdata('pesan_gagal', 'Berkas LHU PDF final belum tersedia di server. Silakan hubungi Administrator.');
-            redirect('pengujian/tinjauan_lhu/' . $sample_id);
+            // Auto-generate LHU PDF final jika file belum tersedia
+            require_once APPPATH . 'libraries/Laporan_PDF.php';
+            $pdf_gen = new Laporan_PDF();
+
+            $this->db->select('ts.*, u.nama_lengkap as nama_penguji, u.nip as nip_penguji, uv.nama_lengkap as nama_verifier, uv.nip as nip_verifier');
+            $this->db->from('testing_sessions ts');
+            $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+            $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+            $this->db->where_in('ts.sample_id', $serumpun_ids);
+            $sesi_rows = $this->db->get()->result_array();
+
+            if (!empty($sesi_rows)) {
+                foreach ($sesi_rows as &$sr) {
+                    $sr['forms'] = $this->Model_Pengujian->ambil_hasil_by_session($sr['id']);
+                }
+                unset($sr);
+
+                $approver_id = !empty($sampel['updated_by']) ? $sampel['updated_by'] : 5;
+                $approver_user = $this->db->get_where('users', ['id' => $approver_id])->row_array();
+
+                $kd_clean = preg_replace('/[^A-Za-z0-9_\-]/', '_', (!empty($sampel['kode_sampel_manual']) ? $sampel['kode_sampel_manual'] : 'SMP_' . $sample_id));
+                $pdf_name = 'LHU_FINAL_' . $kd_clean . '_SMP' . $sample_id . '_' . time() . '.pdf';
+                $pdf_rel_path = 'uploads/laporan/' . $pdf_name;
+                $full_path = FCPATH . $pdf_rel_path;
+
+                try {
+                    $pdf_gen->buat_laporan_sampel($sampel, $sesi_rows, $approver_user, $full_path, 'F');
+                    $this->db->where_in('sample_id', $serumpun_ids)->update('test_results', ['file_laporan' => $pdf_rel_path]);
+                } catch (Exception $e) {
+                    $this->session->set_flashdata('pesan_gagal', 'Gagal membuat berkas PDF LHU: ' . $e->getMessage());
+                    redirect('pengujian/tinjauan_lhu/' . $sample_id);
+                }
+            } else {
+                $this->session->set_flashdata('pesan_gagal', 'Berkas LHU PDF final belum tersedia di server. Silakan hubungi Administrator.');
+                redirect('pengujian/tinjauan_lhu/' . $sample_id);
+            }
         }
 
         $this->catat_audit('DOWNLOAD_LHU_FINAL_SAMPEL', 'Pengujian', array(
@@ -606,6 +688,162 @@ class Pengujian extends MY_Controller
         header('Content-Length: ' . filesize($full_path));
         readfile($full_path);
         exit;
+    }
+
+    /**
+     * Preview / Cetak Laporan Hasil Uji (LHU) Final Gabungan Tingkat Sampel (Kimia & Mikro)
+     * Format Resmi BBPOM Bandar Lampung
+     *
+     * @param int $sample_id
+     */
+    public function lhu($sample_id = NULL)
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $sample_id = (int)$sample_id;
+        if ($sample_id <= 0) {
+            show_404();
+        }
+
+        $sampel = $this->Model_Sampel->ambil_by_id($sample_id);
+        if (!$sampel) {
+            show_404();
+        }
+
+        $serumpun_ids = $this->Model_Pengujian->ambil_sample_ids_serumpun($sample_id);
+
+        // Ambil seluruh sesi pengujian sampel (Kimia & Mikrobiologi) dari seluruh sampel serumpun
+        $this->db->select('ts.*, u.nama_lengkap as nama_penguji, u.nip as nip_penguji, uv.nama_lengkap as nama_verifier, uv.nip as nip_verifier, ua.nama_lengkap as nama_approver, ua.nip as nip_approver');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+        $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->where_in('ts.sample_id', $serumpun_ids);
+        $this->db->order_by('ts.id', 'ASC');
+        $sesi_list = $this->db->get()->result_array();
+
+        if (empty($sesi_list)) {
+            $this->session->set_flashdata('pesan_gagal', 'Belum ada sesi pengujian yang tercatat untuk sampel ini.');
+            redirect('pengujian/riwayat');
+        }
+
+        // Ambil form hasil per sesi
+        foreach ($sesi_list as &$s) {
+            $s['forms'] = $this->Model_Pengujian->ambil_hasil_by_session($s['id']);
+        }
+        unset($s);
+
+        // Resolusi Penandatangan Sesuai Role
+        $this->load->model('Model_User_Signature');
+
+        // Penguji
+        $penguji_id = !empty($sesi_list[0]['penguji_id']) ? $sesi_list[0]['penguji_id'] : null;
+        $penguji_info = $penguji_id ? $this->Model_Pengguna->ambil_by_id($penguji_id) : $this->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+        $sig_p = !empty($penguji_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($penguji_info['id']) : null;
+
+        // Penyelia
+        $verifier_id = !empty($sesi_list[0]['verifier_id']) ? $sesi_list[0]['verifier_id'] : null;
+        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+        $sig_v = !empty($verifier_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($verifier_info['id']) : null;
+
+        // Manajer Teknis
+        $approver_id = !empty($sesi_list[0]['approver_id']) ? $sesi_list[0]['approver_id'] : (!empty($sampel['updated_by']) ? $sampel['updated_by'] : null);
+        $approver_info = $approver_id ? $this->Model_Pengguna->ambil_by_id($approver_id) : $this->db->get_where('users', ['role_id' => 5, 'status' => 'Aktif'])->row_array();
+        $sig_a = !empty($approver_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($approver_info['id']) : null;
+
+        $this->catat_audit('VIEW_LHU_FINAL', 'Pengujian', array(
+            'sample_id' => $sample_id
+        ));
+
+        $view_data = array(
+            'sampel'             => $sampel,
+            'sesi_list'          => $sesi_list,
+            'penguji'            => $penguji_info,
+            'verifier'           => $verifier_info,
+            'approver'           => $approver_info,
+            'signature_penguji'  => $sig_p,
+            'signature_verifier' => $sig_v,
+            'signature_approver' => $sig_a
+        );
+
+        $this->load->view('pengujian/cetak_lhu', $view_data);
+    }
+
+    /**
+     * Preview / Unduh Catatan Pengujian (CP) Kimia (Form 5.10/F01)
+     *
+     * @param int $session_id
+     */
+    public function cp_kimia($session_id = NULL)
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $session_id = (int)$session_id;
+        if ($session_id <= 0) {
+            show_404();
+        }
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            $serumpun_ids = $this->Model_Pengujian->ambil_sample_ids_serumpun($session_id);
+            $sesi_kimia = $this->db->where_in('sample_id', $serumpun_ids)->where('jenis_pengujian', 'Kimia')->order_by('id', 'DESC')->get('testing_sessions')->row_array();
+            if ($sesi_kimia) {
+                redirect('pengujian/cp_kimia/' . $sesi_kimia['id']);
+                return;
+            }
+            show_404();
+        }
+
+        $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if (!in_array($sesi['status'], $allowed_statuses, TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            redirect('pengujian/riwayat');
+        }
+
+        $sampel_info = $this->Model_Sampel->ambil_by_id($sesi['sample_id']);
+        if (!$sampel_info) {
+            $this->session->set_flashdata('pesan_gagal', 'Data sampel terkait tidak ditemukan.');
+            redirect('pengujian/riwayat');
+        }
+
+        $forms         = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        $this->load->model('Model_User_Signature');
+
+        // Resolusi Pengguna & Tanda Tangan Sesuai Role
+        // 1. Role Penguji (role_id = 3)
+        $penguji_id = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;
+        $penguji_info = $penguji_id ? $this->Model_Pengguna->ambil_by_id($penguji_id) : $this->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+        $signature_penguji = !empty($penguji_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($penguji_info['id']) : null;
+
+        // 2. Role Penyelia (role_id = 4)
+        $verifier_id = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : null;
+        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+        $signature_verifier = !empty($verifier_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($verifier_info['id']) : null;
+
+        // 3. Role Manajer Teknis (role_id = 5)
+        $approver_id = !empty($sesi['approver_id']) ? $sesi['approver_id'] : (!empty($sampel_info['updated_by']) && $sampel_info['status'] === 'Approved / Final' ? $sampel_info['updated_by'] : null);
+        $approver_info = $approver_id ? $this->Model_Pengguna->ambil_by_id($approver_id) : $this->db->get_where('users', ['role_id' => 5, 'status' => 'Aktif'])->row_array();
+        $signature_approver = !empty($approver_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($approver_info['id']) : null;
+
+        $this->catat_audit('VIEW_CP_KIMIA', 'Pengujian', array(
+            'session_id' => $session_id,
+            'sample_id'  => $sesi['sample_id']
+        ));
+
+        $view_data = array(
+            'sesi'               => $sesi,
+            'sampel'             => $sampel_info,
+            'forms'              => $forms,
+            'penguji'            => $penguji_info,
+            'verifier'           => $verifier_info,
+            'approver'           => $approver_info,
+            'signature_penguji'  => $signature_penguji,
+            'signature_verifier' => $signature_verifier,
+            'signature_approver' => $signature_approver
+        );
+
+        $this->load->view('pengujian/cetak_cp_kimia', $view_data);
     }
 
     /**
@@ -632,6 +870,12 @@ class Pengujian extends MY_Controller
 
         $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
         if (!$sesi) {
+            $serumpun_ids = $this->Model_Pengujian->ambil_sample_ids_serumpun($session_id);
+            $sesi_mikro = $this->db->where_in('sample_id', $serumpun_ids)->where('jenis_pengujian', 'Mikrobiologi')->order_by('id', 'DESC')->get('testing_sessions')->row_array();
+            if ($sesi_mikro) {
+                redirect('pengujian/cp_mikro/' . $sesi_mikro['id'] . '/' . $mode);
+                return;
+            }
             show_404();
         }
 
@@ -656,8 +900,19 @@ class Pengujian extends MY_Controller
         }
 
         $forms         = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
-        $penguji_info  = $this->Model_Pengguna->ambil_by_id($sesi['penguji_id']);
-        $verifier_info = $this->Model_Pengguna->ambil_by_id($sesi['verifier_id']);
+
+        // Resolusi Pengguna Sesuai Role
+        $penguji_id = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;
+        $penguji_info = $penguji_id ? $this->Model_Pengguna->ambil_by_id($penguji_id) : $this->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+        if ($penguji_info && empty($penguji_id)) {
+            $penguji_id = $penguji_info['id'];
+        }
+
+        $verifier_id = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : null;
+        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+        if ($verifier_info && empty($verifier_id)) {
+            $verifier_id = $verifier_info['id'];
+        }
 
         // GATE KETAT TANDA TANGAN DIGITAL:
         // CP final harus otomatis memuat TTD Penguji dan Penyelia yang sah.
@@ -665,8 +920,8 @@ class Pengujian extends MY_Controller
         require_once APPPATH . 'libraries/CP_Mikrobiologi_PDF.php';
         $cp_gen = new CP_Mikrobiologi_PDF();
 
-        $val_penguji  = $cp_gen->validateUserSignature($sesi['penguji_id']);
-        $val_penyelia = $cp_gen->validateUserSignature($sesi['verifier_id']);
+        $val_penguji  = $cp_gen->validateUserSignature($penguji_id);
+        $val_penyelia = $cp_gen->validateUserSignature($verifier_id);
 
         $err_penguji  = !$val_penguji[0];
         $err_penyelia = !$val_penyelia[0];
@@ -767,11 +1022,29 @@ class Pengujian extends MY_Controller
             redirect('pengujian/riwayat');
         }
 
-        $penguji_id    = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : $hasil['penguji_id'];
-        $verifier_id   = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : $hasil['verifier_id'];
+        // Resolusi Pengguna & Tanda Tangan Sesuai Role
+        // 1. Role Penguji (role_id = 3)
+        $penguji_id    = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : (!empty($hasil['penguji_id']) ? $hasil['penguji_id'] : null);
+        $penguji_info  = $penguji_id ? $this->Model_Pengguna->ambil_by_id($penguji_id) : $this->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+        if ($penguji_info && empty($penguji_id)) {
+            $penguji_id = $penguji_info['id'];
+        }
 
-        $penguji_info  = $this->Model_Pengguna->ambil_by_id($penguji_id);
-        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : null;
+        // 2. Role Penyelia (role_id = 4)
+        $verifier_id   = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : (!empty($hasil['verifier_id']) ? $hasil['verifier_id'] : null);
+        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+        if ($verifier_info && empty($verifier_id)) {
+            $verifier_id = $verifier_info['id'];
+        }
+
+        // 3. Role Manajer Teknis (role_id = 5)
+        $approver_id   = !empty($sesi['approver_id']) ? $sesi['approver_id'] : (!empty($hasil['approver_id']) ? $hasil['approver_id'] : (!empty($sampel_info['updated_by']) && $sampel_info['status'] === 'Approved / Final' ? $sampel_info['updated_by'] : null));
+        $approver_info = $approver_id ? $this->Model_Pengguna->ambil_by_id($approver_id) : $this->db->get_where('users', ['role_id' => 5, 'status' => 'Aktif'])->row_array();
+
+        $this->load->model('Model_User_Signature');
+        $signature_penguji  = !empty($penguji_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($penguji_info['id']) : null;
+        $signature_verifier = !empty($verifier_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($verifier_info['id']) : null;
+        $signature_approver = !empty($approver_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($approver_info['id']) : null;
 
         require_once APPPATH . 'libraries/LCP_Mikrobiologi_PDF.php';
         $lcp_gen = new LCP_Mikrobiologi_PDF();
@@ -803,6 +1076,68 @@ class Pengujian extends MY_Controller
 
             $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
             redirect('pengujian/riwayat');
+        }
+
+        // Jika form template adalah Cemaran Mikroba Kualitatif (MIK-04), gunakan view LCP presisi
+        $is_kualitatif = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-04') ||
+            (!empty($hasil['template_id']) && (int)$hasil['template_id'] === 19) ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Kualitatif') !== false)
+        );
+
+        if ($is_kualitatif) {
+            $this->catat_audit('VIEW_LCP_KUALITATIF', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-04'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_kualitatif', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Uji Kimia Reaksi Warna / Pengendapan (KIM-01)
+        $is_reaksi_warna = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-01') ||
+            (!empty($hasil['template_id']) && (int)$hasil['template_id'] === 20) ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Reaksi Warna') !== false)
+        );
+
+        if ($is_reaksi_warna) {
+            $this->catat_audit('VIEW_LCP_REAKSI_WARNA', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-01'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_reaksi_warna', $view_data);
+            return;
         }
 
         $daftar_alat   = $this->Model_Alat->ambil_semua();

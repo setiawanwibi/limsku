@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak LCP - POM-06.02/CFM.01/SOP.01/F.01B.13 - Paracetamol Tablet 500mg</title>
+    <style>
+        /* Reset and Print Setup */
+        @page {
+            size: A4 portrait;
+            margin: 8mm 10mm 8mm 10mm;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px 0;
+            background-color: #525659;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 10pt;
+            color: #000;
+            line-height: 1.15;
+        }
+
+        /* Floating Controls */
+        .no-print {
+            position: fixed;
+            top: 15px;
+            right: 25px;
+            z-index: 9999;
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-print {
+            background-color: #198754;
+            color: #fff;
+        }
+        .btn-print:hover {
+            background-color: #146c43;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .btn-back:hover {
+            background-color: #565e64;
+        }
+
+        /* Document Paper */
+        .document-wrapper {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 30px auto;
+            padding: 8mm 10mm;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            page-break-after: always;
+            box-sizing: border-box;
+        }
+
+        .document-wrapper:last-child {
+            margin-bottom: 0;
+            page-break-after: avoid;
+        }
+
+        /* Excel Exact Grid Table */
+        table.excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 10pt;
+            color: #000;
+        }
+
+        table.excel-table td {
+            padding: 1px 3px;
+            overflow: hidden;
+            word-wrap: break-word;
+            line-height: 1.15;
+        }
+
+        /* Print Media Overrides */
+        @media print {
+            body {
+                background: none !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .document-wrapper {
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                min-height: auto !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Print / Save Controls -->
+    <div class="no-print">
+        <button onclick="window.print()" class="btn-action btn-print">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+            </svg>
+            Cetak / Simpan PDF
+        </button>
+        <button onclick="window.close()" class="btn-action btn-back">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Tutup
+        </button>
+    </div>
+
+    <!-- HALAMAN 1 -->
+    <div class="document-wrapper">
+        <table class="excel-table">
+        <colgroup>
+            <col style="width: 2.009%;">
+            <col style="width: 7.138%;">
+            <col style="width: 5.077%;">
+            <col style="width: 7.616%;">
+            <col style="width: 2.909%;">
+            <col style="width: 4.548%;">
+            <col style="width: 7.827%;">
+            <col style="width: 2.484%;">
+            <col style="width: 5.236%;">
+            <col style="width: 2.009%;">
+            <col style="width: 5.236%;">
+            <col style="width: 2.802%;">
+            <col style="width: 9.043%;">
+            <col style="width: 3.914%;">
+            <col style="width: 9.043%;">
+            <col style="width: 3.066%;">
+            <col style="width: 7.245%;">
+            <col style="width: 2.484%;">
+            <col style="width: 7.563%;">
+            <col style="width: 2.75%;">
+        </colgroup>
+            <tbody>
+                <tr style="height: 14.5pt;">
+                    <td style="border-top: 1.5pt solid #000; border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 1.5pt solid #000; border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 19.0pt;">
+                    <td colspan="19" style="border-left: 1.5pt solid #000; font-size: 14.5pt; font-weight: bold; text-align: center; vertical-align: middle"><div style="position: relative; width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center;">
+            <div style="position: absolute; left: 18px; top: -6px;">
+                <img src="http://localhost/limsku/assets/img/bpom_logo_excel.png" style="height: 54px; width: auto;" alt="Logo BPOM">
+            </div>
+            <div>
+                <div style="font-size: 14pt; font-weight: bold; letter-spacing: 0.5px;">LAMPIRAN CATATAN PENGUJIAN</div>
+            </div>
+        </div></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 14.5pt; font-weight: bold; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 19.0pt;">
+                    <td colspan="19" style="border-left: 1.5pt solid #000; font-size: 14.5pt; font-weight: bold; text-align: center; vertical-align: middle">CEMARAN MIKROBA KUALITATIF SEDIAAN FARMASI</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 14.5pt; font-weight: bold; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 9.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 18.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">Staphylococcus aures</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">Candida albicans</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">Salmonella sp</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 18.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">Pseudomonas aeruginosa</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">Shigella sp</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">E.coli</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 20.25pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 14.0pt; font-style: italic; vertical-align: middle">Lainnya: ..............</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 19.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 15.0pt; vertical-align: middle"></td>
+                    <td colspan="18" style="text-align: center; vertical-align: middle">Laboratorium Mikrobiologi Balai Besar POM di Bandar Lampung</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 15.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 20.25pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 18.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">Nama Sampel Uji :</td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">Kode Sampel Uji :</td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">Tanggal Diterima</td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">:</td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"><span style="font-size: 10pt;">08-05-2025</span></td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 14.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 18.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="2" colspan="7" style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"><strong style="font-size: 11pt; color: #000; line-height: 1.25;">Paracetamol Tablet 500mg</strong></td>
+                    <td rowspan="2" colspan="6" style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"><strong style="font-size: 11pt; color: #000; line-height: 1.25;">SMP-2025-001</strong></td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">Penguji</td>
+                    <td style="font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; font-weight: bold; vertical-align: middle">:</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"><span style="font-size: 10pt; font-weight: bold;">Penguji Mikrobiologi</span></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 14.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 18.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">Tanggal Mulai Uji</td>
+                    <td style="border-bottom: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; vertical-align: middle">:</td>
+                    <td style="border-bottom: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"><span style="font-size: 10pt;">10-05-2025</span></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 14.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 14.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; font-weight: bold; vertical-align: middle">Hasil Uji Kesesuaian Metode :</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Pelarut yang sesuai :            </td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">MLB</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; font-weight: bold; vertical-align: middle">Mikroba Baku </td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">TSB</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Staphylococcus aures ATCC / WDCM …................</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">TSB + 30 g/L polysorbate 80</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Pseudomonas aeruginosa ATCC / WDCM …...............</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">TSB + 30 g/L polysorbate 80 + 3 g/L Lesitin</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Candida albicans ATCC / WDCM …...............</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Lainnya: …..........................</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Lainnya: …..........................</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 14.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; font-weight: bold; vertical-align: middle">Homogenisasi Awal </td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Penimbangan/Pemipetan Sampel</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; text-align: center; vertical-align: middle">:</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle"><strong style="font-size: 11pt;">10.0</strong></td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">g atau mL *)</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Pelarut                                    </td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; text-align: center; vertical-align: middle">:</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle"><strong style="font-size: 11pt;">90.0</strong></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">mL</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">MLB</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">TSB</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">TSB + 30 g/L polysorbate 80</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">TSB + 30 g/L polysorbate 80 + 3 g/L Lesitin</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 12.0pt; vertical-align: middle">Lainnya : ….......................</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 14.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="5" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">Tanggal</td>
+                    <td rowspan="5" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">Tahapan Uji</td>
+                    <td rowspan="5" colspan="3" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">Media</td>
+                    <td colspan="4" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">Inkubasi</td>
+                    <td colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; text-align: center; vertical-align: middle">Kesesuaian Metode</td>
+                    <td colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; text-align: center; vertical-align: middle; white-space: normal">Kontrol Positif</td>
+                    <td colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; text-align: center; vertical-align: middle">Kontrol Media</td>
+                    <td rowspan="2" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; font-weight: bold; text-align: center; vertical-align: middle"> Sampel Uji</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 28.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="4" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">Suhu (°C) </td>
+                    <td rowspan="4" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle; white-space: normal">Waktu (Jam)</td>
+                    <td colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Sampel + Spike </td>
+                    <td colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle; white-space: normal">Media Tanpa sampel + Spike</td>
+                    <td colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle; white-space: normal">Tanpa Sampel dan Tanpa Spike</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 19.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">1 g atau mL</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">1 g atau mL</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">1 g atau mL</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9745;</td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">1 g atau mL</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 22.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">0,1 g atau mL</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="font-size: 11.0pt; text-align: center; vertical-align: middle">0,1 g atau mL</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">0,1 g atau mL</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">0,1 g atau mL</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 22.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Lainnya: ........</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Lainnya: ........</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Lainnya: ........</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 12.0pt; text-align: center; vertical-align: middle">&#9744;</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Lainnya: ........</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="3" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">10-05-2025</td>
+                    <td rowspan="3" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Pra Pengayaan</td>
+                    <td rowspan="3" colspan="3" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle; white-space: normal">sesuai pelarut yang digunakan saat homogenisasi awal</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: left; vertical-align: middle">30-37</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: left; vertical-align: middle">2 - 5</td>
+                    <td rowspan="3" colspan="2" style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">N/A</td>
+                    <td rowspan="3" colspan="2" style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">N/A</td>
+                    <td rowspan="3" colspan="2" style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">N/A</td>
+                    <td rowspan="3" colspan="2" style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">N/A</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: left; vertical-align: middle">Lainnya:</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: left; vertical-align: middle">Lainnya:</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 12.75pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: left; vertical-align: middle">.......</td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: left; vertical-align: middle">...........</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 14.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="8" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">11-05-2025</td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: top"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 11.0pt; vertical-align: top"></td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: top"></td>
+                    <td style="border-top: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-top: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="8" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Keruh</td>
+                    <td rowspan="8" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle; white-space: normal">Keruh</td>
+                    <td rowspan="8" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Jernih</td>
+                    <td rowspan="8" colspan="2" style="border-top: 0.75pt solid #000; border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; text-align: center; vertical-align: middle">Jernih</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 18.0pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">Pengayaan </td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">10 mL</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">MLB</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">30 - 35</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">18 - 24</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td rowspan="2" style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td rowspan="2" style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle; white-space: normal">Pengayaan Selektif</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">90 mL</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">TSB</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">35 - 37</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">24 - 48</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">100 ml</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">TSB</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">Lainnya:</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">Lainnya:</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">Lainnya:</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">90 ml</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">EEB</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">............</td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">..........</td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">.................</td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">100 mL</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle">Lactose Broth</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 15.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 12.0pt; text-align: center; vertical-align: middle; font-size: 11pt">&#9744;</td>
+                    <td style="font-size: 11.0pt; vertical-align: middle">Lainnya: ...........</td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+                <tr style="height: 14.5pt;">
+                    <td style="border-left: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td colspan="2" style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-left: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-bottom: 0.75pt solid #000; border-right: 0.75pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                    <td style="border-right: 1.5pt solid #000; font-size: 11.0pt; vertical-align: middle"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Footer Halaman 1 -->
+        <table class="excel-table" style="margin-top: 4px;">
+        <colgroup>
+            <col style="width: 2.009%;">
+            <col style="width: 7.138%;">
+            <col style="width: 5.077%;">
+            <col style="width: 7.616%;">
+            <col style="width: 2.909%;">
+            <col style="width: 4.548%;">
+            <col style="width: 7.827%;">
+            <col style="width: 2.484%;">
+            <col style="width: 5.236%;">
+            <col style="width: 2.009%;">
+            <col style="width: 5.236%;">
+            <col style="width: 2.802%;">
+            <col style="width: 9.043%;">
+            <col style="width: 3.914%;">
+            <col style="width: 9.043%;">
+            <col style="width: 3.066%;">
+            <col style="width: 7.245%;">
+            <col style="width: 2.484%;">
+            <col style="width: 7.563%;">
+            <col style="width: 2.75%;">
+        </colgroup>
+            <tbody>
+                <tr style="height: 15.5pt;">
+                    <td style="border: none;"></td>
+                    <td colspan="15" style="border: none; font-size: 11pt;">POM-06.02/CFM.01/SOP.01/F.01B.13</td>
+                    <td colspan="4" style="border: none; font-size: 11pt; text-align: right;">Lembar 1 dari 2 halaman</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    </body></html>

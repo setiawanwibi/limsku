@@ -409,8 +409,22 @@ class CP_Mikrobiologi_PDF extends FPDF
         $this->Cell(85, 5, 'Penyelia Mikro', 0, 1, 'C');
 
         // Area Gambar TTD
-        $sig_p = !empty($penguji['id']) ? $this->getUserSignature($penguji['id']) : (!empty($sesi['penguji_id']) ? $this->getUserSignature($sesi['penguji_id']) : NULL);
-        $sig_v = !empty($verifier['id']) ? $this->getUserSignature($verifier['id']) : (!empty($sesi['verifier_id']) ? $this->getUserSignature($sesi['verifier_id']) : NULL);
+        $ci =& get_instance();
+        $pid = !empty($penguji['id']) ? $penguji['id'] : (!empty($sesi['penguji_id']) ? $sesi['penguji_id'] : NULL);
+        if (!$pid) {
+            $u3 = $ci->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+            $pid = $u3['id'] ?? null;
+            if ($u3 && empty($penguji)) $penguji = $u3;
+        }
+        $vid = !empty($verifier['id']) ? $verifier['id'] : (!empty($sesi['verifier_id']) ? $sesi['verifier_id'] : NULL);
+        if (!$vid) {
+            $u4 = $ci->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+            $vid = $u4['id'] ?? null;
+            if ($u4 && empty($verifier)) $verifier = $u4;
+        }
+
+        $sig_p = $pid ? $this->getUserSignature($pid) : NULL;
+        $sig_v = $vid ? $this->getUserSignature($vid) : NULL;
 
         $y_ttd = $this->GetY() + 1;
         $ttd_w = 32;

@@ -119,6 +119,8 @@ $route['pengujian/pdf/(:num)']              = 'pengujian/download_pdf/$1';
 $route['pengujian/pdf_sesi/(:num)']         = 'pengujian/download_pdf_sesi/$1';
 $route['pengujian/cp_mikro/(:num)']         = 'pengujian/cp_mikro/$1';
 $route['pengujian/cp_mikro/(:num)/(:any)']  = 'pengujian/cp_mikro/$1/$2';
+$route['pengujian/cp_kimia/(:num)']         = 'pengujian/cp_kimia/$1';
+$route['pengujian/cp_kimia/(:num)/(:any)']  = 'pengujian/cp_kimia/$1/$2';
 $route['pengujian/lcp_pdf/(:num)']          = 'pengujian/lcp_pdf/$1';
 $route['pengujian/lcp_pdf/(:num)/(:any)']   = 'pengujian/lcp_pdf/$1/$2';
 $route['pengujian/verifikasi']               = 'pengujian/verifikasi';
@@ -133,6 +135,8 @@ $route['pengujian/tinjauan_lhu/(:num)']        = 'pengujian/tinjauan_lhu/$1';
 $route['pengujian/approve_sampel/(:num)']     = 'pengujian/proses_approval_sampel/$1';
 $route['pengujian/tolak_sampel/(:num)']       = 'pengujian/proses_penolakan_sampel/$1';
 $route['pengujian/proses_approval/(:num)']    = 'pengujian/proses_approval/$1';
+$route['pengujian/lhu/(:num)']               = 'pengujian/lhu/$1';
+$route['pengujian/cetak_lhu/(:num)']         = 'pengujian/lhu/$1';
 $route['pengujian/pdf_sampel/(:num)']         = 'pengujian/download_pdf_sampel/$1';
 $route['pengujian/pdf_sampel/(:num)/(:any)']  = 'pengujian/download_pdf_sampel/$1/$2';
 
