@@ -1,0 +1,84 @@
+{
+  "kode_template": "MIK-04",
+  "nama_template": "Uji Cemaran Mikroba Kualitatif Sediaan Farmasi",
+  "kategori": "Mikrobiologi",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01B.13",
+    "judul": "Cemaran Mikroba Kualitatif Sediaan Farmasi",
+    "kategori": "Mikrobiologi",
+    "sections": [
+      {
+        "id": "target_mikroba",
+        "title": "Target Cemaran Mikroba yang Diuji",
+        "description": "Pilih satu atau lebih target cemaran mikroba sesuai acuan pengujian sampel.",
+        "fields": [
+          {"id": "target_staphylococcus", "label": "Staphylococcus aures", "type": "checkbox", "default": false, "keterangan": "Ejaan dokumen resmi: Staphylococcus aures"},
+          {"id": "target_pseudomonas", "label": "Pseudomonas aeruginosa", "type": "checkbox", "default": false},
+          {"id": "target_candida", "label": "Candida albicans", "type": "checkbox", "default": false},
+          {"id": "target_shigella", "label": "Shigella sp", "type": "checkbox", "default": false},
+          {"id": "target_salmonella", "label": "Salmonella sp", "type": "checkbox", "default": false},
+          {"id": "target_ecoli", "label": "E.coli", "type": "checkbox", "default": false},
+          {"id": "target_lainnya_check", "label": "Lainnya", "type": "checkbox", "default": false},
+          {"id": "target_lainnya_text", "label": "Mikroba Lainnya", "type": "text", "placeholder": "Sebutkan mikroba target lainnya...", "depends_on": "target_lainnya_check"},
+          {"id": "lab_lokasi", "label": "Laboratorium Penguji", "type": "static_text", "value": "Laboratorium Mikrobiologi Balai Besar POM di Bandar Lampung"}
+        ]
+      },
+      {
+        "id": "kesesuaian_metode",
+        "title": "Hasil Uji Kesesuaian Metode",
+        "description": "Kontrol kesesuaian metode pelarut dan galur baku pembanding.",
+        "fields": [
+          {"id": "pelarut_kesesuaian", "label": "Pelarut Sampel yang Digunakan", "type": "text", "placeholder": "Contoh: Larutan Buffer Fosfat pH 7.2"},
+          {"id": "galur_baku", "label": "Galur Baku Mikroba Kontrol", "type": "text", "placeholder": "Contoh: ATCC 6538, ATCC 9027"},
+          {"id": "hasil_kesesuaian", "label": "Hasil Uji Kesesuaian", "type": "select", "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)", "Tidak Dilakukan"], "default": "Memenuhi Syarat (MS)"}
+        ]
+      },
+      {
+        "id": "tabel_pengamatan",
+        "title": "Tabel Hasil Pengamatan Uji Cemaran Mikroba",
+        "description": "Pengamatan pertumbuhan media pengaya, selektif, dan uji konfirmasi.",
+        "fields": [
+          {
+            "id": "tabel_cemaran",
+            "label": "Tabel Pengamatan",
+            "type": "table",
+            "columns": [
+              {"id": "bakteri_uji", "label": "Bakteri / Jamur Uji", "readonly": true},
+              {"id": "media_pengaya", "label": "Media Pengaya"},
+              {"id": "media_selektif", "label": "Media Selektif / Diferensial"},
+              {"id": "pengamatan_koloni", "label": "Ciri Koloni yang Diamati"},
+              {"id": "hasil_uji", "label": "Hasil Pengujian (Positif / Negatif)"}
+            ],
+            "default_rows": [
+              {"bakteri_uji": "Staphylococcus aures", "media_pengaya": "TSB", "media_selektif": "Vogel Johnson Agar / Baird Parker", "pengamatan_koloni": "", "hasil_uji": "Negatif"},
+              {"bakteri_uji": "Pseudomonas aeruginosa", "media_pengaya": "TSB", "media_selektif": "Cetrimide Agar", "pengamatan_koloni": "", "hasil_uji": "Negatif"},
+              {"bakteri_uji": "Escherichia coli", "media_pengaya": "EE Broth", "media_selektif": "MacConkey Agar", "pengamatan_koloni": "", "hasil_uji": "Negatif"},
+              {"bakteri_uji": "Salmonella sp.", "media_pengaya": "RVS / SC Broth", "media_selektif": "XLD Agar / HE Agar", "pengamatan_koloni": "", "hasil_uji": "Negatif"},
+              {"bakteri_uji": "Candida albicans", "media_pengaya": "SDB", "media_selektif": "SDA", "pengamatan_koloni": "", "hasil_uji": "Negatif"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kesimpulan_mikro",
+        "title": "Kesimpulan Hasil Pengujian",
+        "description": "Pernyataan hasil pengujian mikrobiologi.",
+        "fields": [
+          {
+            "id": "kesimpulan_status",
+            "label": "Kesimpulan",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)"
+          },
+          {
+            "id": "catatan_pengujian",
+            "label": "Catatan Pengujian",
+            "type": "textarea",
+            "placeholder": "Catatan tambahan atau kondisi pengujian spesifik..."
+          }
+        ]
+      }
+    ]
+  }
+}
