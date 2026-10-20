@@ -1260,5 +1260,108 @@
             el.addEventListener('change', function() { updateReagenInfo(this); });
             updateReagenInfo(el); // trigger awal saat halaman dimuat
         });
+
+        // =========================================================================
+        // Auto-Calculator Engine untuk Formulir Keragaman Bobot (KIM-02)
+        // =========================================================================
+        function hitungKeragamanBobot() {
+            // Cari input bobot rata-rata, kadar hasil uji, dan etiket
+            var bobotRataInput = document.querySelector('input[name*="[bobot_rata_rata]"]');
+            var kadarHasilInput = document.querySelector('input[name*="[kadar_hasil_uji]"]');
+            var etiketInput = document.querySelector('input[name*="[etiket]"]');
+
+            var bobotRata = bobotRataInput ? parseFloat(bobotRataInput.value) || 0 : 0;
+            var kadarHasil = kadarHasilInput ? parseFloat(kadarHasilInput.value) || 0 : 0;
+            var etiket = etiketInput ? parseFloat(etiketInput.value) || 0 : 0;
+
+            // Hitung Tahap 1 (10 data)
+            var kadarValuesT1 = [];
+            for (var i = 0; i < 10; i++) {
+                var brutoEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][bruto]"]');
+                var cangkangEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][cangkang]"]');
+                var nettoEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][netto]"]');
+                var kadarMgEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_mg]"]');
+                var kadarPersenEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_persen]"]');
+
+                if (brutoEl && nettoEl) {
+                    var bruto = parseFloat(brutoEl.value) || 0;
+                    var cangkang = cangkangEl ? (parseFloat(cangkangEl.value) || 0) : 0;
+                    var netto = bruto > 0 ? (bruto - cangkang) : 0;
+                    
+                    if (netto > 0) {
+                        nettoEl.value = netto.toFixed(2);
+                        
+                        // Jika bobot rata-rata dan kadar hasil terisi, hitung kadar unit
+                        if (bobotRata > 0 && kadarHasil > 0) {
+                            var kadarMg = (netto / bobotRata) * kadarHasil;
+                            if (kadarMgEl) kadarMgEl.value = kadarMg.toFixed(2);
+                            
+                            var kadarPersen = etiket > 0 ? (kadarMg / etiket) * 100 : (netto / bobotRata) * 100;
+                            if (kadarPersenEl) kadarPersenEl.value = kadarPersen.toFixed(2);
+                            kadarValuesT1.push(kadarPersen);
+                        } else if (kadarPersenEl && parseFloat(kadarPersenEl.value)) {
+                            kadarValuesT1.push(parseFloat(kadarPersenEl.value));
+                        }
+                    }
+                }
+            }
+
+            // Hitung statistik Tahap 1 jika ada data
+            if (kadarValuesT1.length >= 3) {
+                var n1 = kadarValuesT1.length;
+                var sum1 = kadarValuesT1.reduce(function(a, b) { return a + b; }, 0);
+                var mean1 = sum1 / n1;
+                
+                var variance1 = kadarValuesT1.reduce(function(a, b) { return a + Math.pow(b - mean1, 2); }, 0) / (n1 - 1);
+                var sd1 = Math.sqrt(variance1);
+                var rsd1 = mean1 > 0 ? (sd1 / mean1) * 100 : 0;
+
+                var xRerataT1Input = document.querySelector('input[name*="[x_rerata_tahap1]"]');
+                var sdT1Input = document.querySelector('input[name*="[sd_tahap1]"]');
+                var rsdT1Input = document.querySelector('input[name*="[rsd_tahap1]"]');
+
+                if (xRerataT1Input) xRerataT1Input.value = mean1.toFixed(2);
+                if (sdT1Input) sdT1Input.value = sd1.toFixed(2);
+                if (rsdT1Input) rsdT1Input.value = rsd1.toFixed(2);
+
+                // Perhitungan AV (Acceptance Value) untuk n=10 (k = 2.4)
+                var k = 2.4;
+                var M = mean1;
+                if (mean1 < 98.5) {
+                    M = 98.5;
+                } else if (mean1 > 101.5) {
+                    M = 101.5;
+                }
+                
+                var AV = 0;
+                if (mean1 >= 98.5 && mean1 <= 101.5) {
+                    AV = k * sd1;
+                } else if (mean1 < 98.5) {
+                    AV = (98.5 - mean1) + (k * sd1);
+                } else {
+                    AV = (mean1 - 101.5) + (k * sd1);
+                }
+
+                var mInput = document.querySelector('input[name*="[nilai_m]"]');
+                var avInput = document.querySelector('input[name*="[nilai_av]"]');
+                var kInput = document.querySelector('input[name*="[nilai_k]"]');
+                var kesimpulanSelect = document.querySelector('select[name*="[kesimpulan]"]');
+
+                if (mInput) mInput.value = M.toFixed(2);
+                if (avInput) avInput.value = AV.toFixed(2);
+                if (kInput && !kInput.value) kInput.value = "2.4";
+
+                if (kesimpulanSelect) {
+                    kesimpulanSelect.value = (AV <= 15.0) ? 'Memenuhi Syarat (MS)' : 'Tidak Memenuhi Syarat (TMS)';
+                }
+            }
+        }
+
+        // Pasang listener pada perubahan input bobot
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('input[name*="[tabel_tahap1]"], input[name*="[bobot_rata_rata]"], input[name*="[kadar_hasil_uji]"], input[name*="[etiket]"]')) {
+                hitungKeragamanBobot();
+            }
+        });
     });
 </script>

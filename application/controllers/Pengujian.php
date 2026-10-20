@@ -1140,6 +1140,36 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // Jika form template adalah Keragaman Bobot (KIM-02)
+        $is_keragaman_bobot = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-02') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Keragaman Bobot') !== false)
+        );
+
+        if ($is_keragaman_bobot) {
+            $this->catat_audit('VIEW_LCP_KERAGAMAN_BOBOT', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-02'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_keragaman_bobot', $view_data);
+            return;
+        }
+
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_semua();
 
