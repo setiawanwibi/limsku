@@ -931,4 +931,42 @@ class Laporan_PDF extends FPDF
 
         return $save_path;
     }
+
+    /**
+     * Helper konversi tanggal ke format teks Indonesia (contoh: 20 Oktober 2026)
+     */
+    public function formatTanggalIndo($tanggal = null)
+    {
+        if (empty($tanggal)) {
+            $tanggal = date('Y-m-d');
+        }
+
+        $bulan_indo = array(
+            1  => 'Januari',
+            2  => 'Februari',
+            3  => 'Maret',
+            4  => 'April',
+            5  => 'Mei',
+            6  => 'Juni',
+            7  => 'Juli',
+            8  => 'Agustus',
+            9  => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        );
+
+        $timestamp = strtotime($tanggal);
+        if (!$timestamp) {
+            $timestamp = time();
+        }
+
+        $tgl   = date('j', $timestamp);
+        $bln   = (int)date('n', $timestamp);
+        $thn   = date('Y', $timestamp);
+        $nama_bulan = isset($bulan_indo[$bln]) ? $bulan_indo[$bln] : date('F', $timestamp);
+
+        return $tgl . ' ' . $nama_bulan . ' ' . $thn;
+    }
 }
+
