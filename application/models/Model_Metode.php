@@ -379,6 +379,14 @@ class Model_Metode extends CI_Model
      * @param string $param_raw
      * @return string
      */
+    /**
+     * Normalisasi teks parameter monografi menjadi kelompok parameter kanonis.
+     * Mengelompokkan variasi penulisan atau sinonim hanya jika kesetaraannya dapat dipertanggungjawabkan farmakope.
+     * Teks asli monografi tetap dipertahankan utuh pada kolom parameter_uji untuk audit dan histori.
+     * 
+     * @param string $param_raw
+     * @return string
+     */
     public static function normalisasi_parameter($param_raw)
     {
         $clean = trim(preg_replace('/\s+/', ' ', (string)$param_raw));
@@ -397,11 +405,20 @@ class Model_Metode extends CI_Model
         if (preg_match('/^(disolusi|pelepasan obat)\b/i', $lower)) {
             return 'Disolusi';
         }
-        if (preg_match('/^(keseragaman sediaan|keseragaman kandungan|keragaman bobot)\b/i', $lower)) {
+        if (preg_match('/^keragaman bobot\b/i', $lower)) {
+            return 'Keragaman Bobot';
+        }
+        if (preg_match('/^keseragaman kandungan\b/i', $lower)) {
+            return 'Keseragaman Kandungan';
+        }
+        if (preg_match('/^keseragaman sediaan\b/i', $lower)) {
             return 'Keseragaman Sediaan';
         }
         if (preg_match('/^ph\b/i', $lower)) {
             return 'pH';
+        }
+        if (preg_match('/^bobot jenis\b/i', $lower)) {
+            return 'Bobot Jenis';
         }
         if (preg_match('/^waktu hancur/i', $lower)) {
             return 'Waktu Hancur';
@@ -426,62 +443,272 @@ class Model_Metode extends CI_Model
     }
 
     /**
-     * Menentukan kandidat LCP resmi aktif berdasarkan karakteristik metode dan bidang.
-     * Menolak penetapan jika bidang tidak cocok atau metode ambigu.
+     * Normalisasi metode analisis instrumen/pengujian menjadi kategori kanonis.
+     * Menangani variasi penulisan teks dan singkatan alat laboratorium.
      * 
-     * @param string $kanonis
-     * @param string $bidang 'Kimia' / 'Mikrobiologi'
-     * @param string|null $metode_analisa
-     * @param array $templates_by_id
-     * @return array [template_id, status, alasan]
+     * @param string|null $metode_raw
+     * @return string
      */
-    public static function cari_kandidat_lcp($kanonis, $bidang, $metode_analisa, $templates_by_id)
+    public static function normalisasi_metode($metode_raw)
     {
-        if ($bidang === 'Kimia') {
-            if ($kanonis === 'Penetapan Kadar' && isset($templates_by_id[1])) {
-                return array('template_id' => 1, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 1: Penetapan Kadar Obat (Kimia)');
-            }
-            if ($kanonis === 'Disolusi' && isset($templates_by_id[2])) {
-                return array('template_id' => 2, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 2: Uji Disolusi (Kimia)');
-            }
-            if ($kanonis === 'Keseragaman Sediaan' && isset($templates_by_id[3])) {
-                return array('template_id' => 3, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 3: Uji Keseragaman Bobot / Ukuran (Kimia)');
-            }
-            if ($kanonis === 'pH' && isset($templates_by_id[4])) {
-                return array('template_id' => 4, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 4: Uji pH / Derajat Keasaman (Kimia)');
-            }
-            if ($kanonis === 'Identifikasi' && isset($templates_by_id[7])) {
-                return array('template_id' => 7, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 7: Uji Identifikasi Kualitatif (Kimia)');
-            }
-            if ($kanonis === 'Waktu Hancur' && isset($templates_by_id[9])) {
-                return array('template_id' => 9, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 9: Uji Waktu Hancur Tablet (Kimia)');
-            }
-            if ($kanonis === 'Pemerian') {
-                return array('template_id' => 5, 'status' => 'PERLU_KONFIRMASI', 'alasan' => 'Pemerian fisik/organoleptis dapat menggunakan Form 5 (Kejernihan & Warna) atau Form Khusus Fisik');
-            }
-        } elseif ($bidang === 'Mikrobiologi') {
-            if ($kanonis === 'Sterilitas' && isset($templates_by_id[13])) {
-                return array('template_id' => 13, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 13: Uji Sterilitas (Mikrobiologi)');
-            }
-            if ($kanonis === 'Batas Mikroba' && isset($templates_by_id[14])) {
-                return array('template_id' => 14, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 14: Uji Batas Mikroba / ALT & AKK (Mikrobiologi)');
-            }
-            if ($kanonis === 'Potensi Antibiotik' && isset($templates_by_id[15])) {
-                return array('template_id' => 15, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 15: Uji Potensi Antibiotik (Mikrobiologi)');
-            }
-            if ($kanonis === 'Endotoksin Bakteri' && isset($templates_by_id[17])) {
-                return array('template_id' => 17, 'status' => 'OTOMATIS', 'alasan' => 'Sesuai Form 17: Uji Endotoksin Bakteri / LAL Test (Mikrobiologi)');
-            }
-            if ($kanonis === 'Mikroba Spesifik') {
-                return array('template_id' => 14, 'status' => 'PERLU_KONFIRMASI', 'alasan' => 'Uji mikroba spesifik dapat dirujuk ke Form 14 Batas Mikroba atau Form Khusus');
-            }
+        $clean = trim(preg_replace('/\s+/', ' ', (string)$metode_raw));
+        $lower = strtolower($clean);
+
+        if (empty($lower) || $lower === '-') {
+            return 'Metode Standar / Monografi';
+        }
+        if (preg_match('/(kckt|hplc)/i', $lower)) {
+            return 'KCKT / HPLC';
+        }
+        if (preg_match('/(serapan atom|aas|sepktrofotom\s*etri\s*serapan\s*atom)/i', $lower)) {
+            return 'Spektrofotometri Serapan Atom (AAS)';
+        }
+        if (preg_match('/ir\b/i', $lower)) {
+            return 'Spektrofotometri IR';
+        }
+        if (preg_match('/(spektrofotom|spektro|uv[\-\/\s]?vis|serapan uv)/i', $lower)) {
+            return 'Spektrofotometri UV-Vis';
+        }
+        if (preg_match('/(klt|lapis tipis)/i', $lower)) {
+            return 'Kromatografi Lapis Tipis (KLT)';
+        }
+        if (preg_match('/(gc[\-\s]?ms|spektrometri massa)/i', $lower)) {
+            return 'Kromatografi Gas (GC-MS)';
+        }
+        if (preg_match('/(kromatografi gas|gc\b)/i', $lower)) {
+            return 'Kromatografi Gas (GC)';
+        }
+        if (preg_match('/(reaksi kimia|reaksi warna|pengendapan)/i', $lower)) {
+            return 'Reaksi Kimia / Pengendapan';
+        }
+        if (preg_match('/(organolep|organopel|pemerian fisik)/i', $lower)) {
+            return 'Organoleptis';
+        }
+        if (preg_match('/(titrimetri|titrasi|volumetri)/i', $lower)) {
+            return 'Titrimetri';
+        }
+        if (preg_match('/(disintegrat|desintegrat|waktu hancur)/i', $lower)) {
+            return 'Disintegration Tester';
+        }
+        if (preg_match('/ph/i', $lower)) {
+            return 'pH Meter';
+        }
+        if (preg_match('/piknometer/i', $lower)) {
+            return 'Piknometer';
+        }
+        if (preg_match('/fotometer nyala/i', $lower)) {
+            return 'Fotometer Nyala';
+        }
+        if (preg_match('/(penyaringan|inokulasi)/i', $lower)) {
+            return 'Inokulasi / Filtrasi Membran';
+        }
+        if (preg_match('/(gel clot|gendal gel)/i', $lower)) {
+            return 'Gel Clot (LAL)';
+        }
+        if (preg_match('/(alt|akk)/i', $lower)) {
+            return 'Hitungan Cawan (ALT / AKK)';
         }
 
-        return array('template_id' => NULL, 'status' => 'PERLU_KONFIRMASI', 'alasan' => 'Belum ada katalog LCP aktif yang cocok dengan parameter ini');
+        return ucwords($clean);
     }
 
     /**
-     * Menganalisis seluruh monografi aktif dan mengelompokkan ke parameter kanonis & kandidat LCP.
+     * Menentukan kandidat LCP resmi aktif berdasarkan pasangan Parameter Kanonis & Metode Analisis Kanonis.
+     * Menggunakan kode template resmi (KIM-01 s/d KIM-12) dan status confidence level.
+     * 
+     * @param string $kanonis_param
+     * @param string $kanonis_metode
+     * @param string $bidang 'Kimia' / 'Mikrobiologi'
+     * @param array $tpl_by_code [kode_template => id]
+     * @return array [template_id, status, alasan]
+     */
+    public static function cari_kandidat_lcp($kanonis_param, $kanonis_metode, $bidang, $tpl_by_code)
+    {
+        if ($bidang === 'Kimia') {
+            // 1. Pemerian
+            if ($kanonis_param === 'Pemerian') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-10'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-10: Pemerian (Organoleptis) [F.01A.25]'
+                );
+            }
+
+            // 2. pH
+            if ($kanonis_param === 'pH') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-11'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-11: Penetapan pH [F.01A.27]'
+                );
+            }
+
+            // 3. Waktu Hancur
+            if ($kanonis_param === 'Waktu Hancur') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-04'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-04: Uji Waktu Hancur Tablet [F.01A.04]'
+                );
+            }
+
+            // 4. Bobot Jenis
+            if ($kanonis_param === 'Bobot Jenis') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-12'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-12: Penetapan Bobot Jenis Piknometer [F.01A.28]'
+                );
+            }
+
+            // 5. Keragaman Bobot
+            if ($kanonis_param === 'Keragaman Bobot') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-02'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-02: Uji Keragaman Bobot [F.01A.02]'
+                );
+            }
+
+            // 6. Keseragaman Kandungan
+            if ($kanonis_param === 'Keseragaman Kandungan') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-03'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-03: Uji Keseragaman Kandungan [F.01A.03]'
+                );
+            }
+
+            // 7. Keseragaman Sediaan
+            if ($kanonis_param === 'Keseragaman Sediaan') {
+                if (in_array($kanonis_metode, array('KCKT / HPLC', 'Spektrofotometri UV-Vis', 'Spektrofotometri IR'))) {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-03'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Keseragaman Sediaan Instrumental (' . $kanonis_metode . ') -> Form KIM-03 Keseragaman Kandungan'
+                    );
+                } else {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-02'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Keseragaman Sediaan Gravimetri/Bobot -> Form KIM-02 Keragaman Bobot'
+                    );
+                }
+            }
+
+            // 8. Disolusi
+            if ($kanonis_param === 'Disolusi') {
+                return array(
+                    'template_id' => $tpl_by_code['KIM-06'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form KIM-06: Uji Disolusi Bejana [F.01A.08]'
+                );
+            }
+
+            // 9. Penetapan Kadar
+            if ($kanonis_param === 'Penetapan Kadar') {
+                if ($kanonis_metode === 'KCKT / HPLC') {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-08'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Penetapan Kadar KCKT -> Form KIM-08 KCKT/HPLC [F.01A.12]'
+                    );
+                }
+                if (in_array($kanonis_metode, array('Spektrofotometri UV-Vis', 'Spektrofotometri IR'))) {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-05'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Penetapan Kadar Spektro -> Form KIM-05 Spektrofotometri [F.01A.06]'
+                    );
+                }
+                if ($kanonis_metode === 'Kromatografi Gas (GC-MS)') {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-09'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Penetapan Kadar GC-MS -> Form KIM-09 GC-MS [F.01A.17]'
+                    );
+                }
+                if ($kanonis_metode === 'Titrimetri') {
+                    return array(
+                        'template_id' => NULL,
+                        'status'      => 'PERLU_KONFIRMASI',
+                        'alasan'      => 'Metode Titrimetri: Belum ada form khusus titrimetri di katalog 12 LCP Kimia saat ini'
+                    );
+                }
+                return array(
+                    'template_id' => NULL,
+                    'status'      => 'PERLU_KONFIRMASI',
+                    'alasan'      => 'Metode ' . $kanonis_metode . ' memerlukan pemilihan form LCP alternatif'
+                );
+            }
+
+            // 10. Identifikasi
+            if ($kanonis_param === 'Identifikasi') {
+                if ($kanonis_metode === 'Kromatografi Lapis Tipis (KLT)') {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-07'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Identifikasi KLT -> Form KIM-07 Kromatografi Lapis Tipis [F.01A.10]'
+                    );
+                }
+                if ($kanonis_metode === 'Reaksi Kimia / Pengendapan') {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-01'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Identifikasi Reaksi Kimia -> Form KIM-01 Reaksi Warna/Pengendapan [F.01A.01]'
+                    );
+                }
+                if ($kanonis_metode === 'KCKT / HPLC') {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-08'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Identifikasi KCKT (Waktu Retensi) -> Form KIM-08 KCKT/HPLC'
+                    );
+                }
+                if (in_array($kanonis_metode, array('Spektrofotometri UV-Vis', 'Spektrofotometri IR'))) {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-05'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Identifikasi Spektrofotometri -> Form KIM-05 Spektrofotometri'
+                    );
+                }
+                if ($kanonis_metode === 'Kromatografi Gas (GC-MS)') {
+                    return array(
+                        'template_id' => $tpl_by_code['KIM-09'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Identifikasi GC-MS -> Form KIM-09 GC-MS'
+                    );
+                }
+                return array(
+                    'template_id' => $tpl_by_code['KIM-01'] ?? NULL,
+                    'status'      => 'PERLU_KONFIRMASI',
+                    'alasan'      => 'Identifikasi Umum: Dapat dirujuk ke Form KIM-01 (Kualitatif) atau form instrumen terkait'
+                );
+            }
+        } elseif ($bidang === 'Mikrobiologi') {
+            if ($kanonis_param === 'Batas Mikroba' && isset($tpl_by_code['MIK-04'])) {
+                return array(
+                    'template_id' => $tpl_by_code['MIK-04'],
+                    'status'      => 'PERLU_KONFIRMASI',
+                    'alasan'      => 'Rujukan ke Form MIK-04: Uji Cemaran Mikroba Kualitatif'
+                );
+            }
+            return array(
+                'template_id' => NULL,
+                'status'      => 'PERLU_KONFIRMASI',
+                'alasan'      => 'Pengujian Mikrobiologi: Menunggu penerbitan Form LCP Mikrobiologi lengkap'
+            );
+        }
+
+        return array(
+            'template_id' => NULL,
+            'status'      => 'PERLU_KONFIRMASI',
+            'alasan'      => 'Parameter/Metode belum terdaftar di katalog LCP resmi'
+        );
+    }
+
+    /**
+     * Menganalisis seluruh monografi aktif dan mengelompokkan ke pasangan parameter + metode analisa kanonis.
      * Tidak mengubah data di database (Safe Preview / Read-Only).
      * 
      * @return array
@@ -492,8 +719,10 @@ class Model_Metode extends CI_Model
         $this->db->where('status', 'Aktif');
         $tpl_raw = $this->db->get('form_templates')->result_array();
         $templates_by_id = array();
+        $templates_by_code = array();
         foreach ($tpl_raw as $t) {
             $templates_by_id[$t['id']] = $t;
+            $templates_by_code[$t['kode_template']] = (int)$t['id'];
         }
 
         // 2. Ambil seluruh monografi aktif
@@ -511,17 +740,18 @@ class Model_Metode extends CI_Model
         );
 
         foreach ($methods as $m) {
-            $is_mapped = (!empty($m['template_id']));
+            $is_mapped = (!empty($m['template_id']) && (int)$m['template_id'] > 0);
             if ($is_mapped) {
                 $stats['sudah_terpetakan']++;
             } else {
                 $stats['belum_terpetakan']++;
             }
 
-            $kanonis = self::normalisasi_parameter($m['parameter_uji']);
-            $kandidat = self::cari_kandidat_lcp($kanonis, $m['bidang_pengujian'], $m['metode_analisa'], $templates_by_id);
+            $kanonis_param  = self::normalisasi_parameter($m['parameter_uji']);
+            $kanonis_metode = self::normalisasi_metode($m['metode_analisa']);
+            $kandidat       = self::cari_kandidat_lcp($kanonis_param, $kanonis_metode, $m['bidang_pengujian'], $templates_by_code);
 
-            $group_key = $m['bidang_pengujian'] . '||' . $kanonis;
+            $group_key = $m['bidang_pengujian'] . '||' . $kanonis_param . '||' . $kanonis_metode;
             if (!isset($stats['kelompok_kanonis'][$group_key])) {
                 $target_tpl = ($kandidat['template_id'] && isset($templates_by_id[$kandidat['template_id']]))
                     ? $templates_by_id[$kandidat['template_id']]
@@ -530,7 +760,9 @@ class Model_Metode extends CI_Model
                 $stats['kelompok_kanonis'][$group_key] = array(
                     'key'                  => $group_key,
                     'bidang'               => $m['bidang_pengujian'],
-                    'kanonis'              => $kanonis,
+                    'kanonis'              => $kanonis_param,
+                    'kanonis_param'        => $kanonis_param,
+                    'kanonis_metode'       => $kanonis_metode,
                     'kandidat_template_id' => $kandidat['template_id'],
                     'target_kode'          => $target_tpl ? $target_tpl['kode_template'] : '-',
                     'target_nama'          => $target_tpl ? $target_tpl['nama_template'] : '-',
@@ -542,7 +774,8 @@ class Model_Metode extends CI_Model
                     'belum_map_count'      => 0,
                     'variasi_asli'         => array(),
                     'metode_analisa'       => array(),
-                    'method_ids'           => array()
+                    'method_ids'           => array(),
+                    'unmapped_method_ids'  => array()
                 );
             }
 
@@ -552,6 +785,7 @@ class Model_Metode extends CI_Model
                 $stats['kelompok_kanonis'][$group_key]['terpetakan_count']++;
             } else {
                 $stats['kelompok_kanonis'][$group_key]['belum_map_count']++;
+                $stats['kelompok_kanonis'][$group_key]['unmapped_method_ids'][] = $m['id'];
             }
 
             if (!in_array($m['parameter_uji'], $stats['kelompok_kanonis'][$group_key]['variasi_asli'])) {
@@ -561,6 +795,14 @@ class Model_Metode extends CI_Model
                 $stats['kelompok_kanonis'][$group_key]['metode_analisa'][] = $m['metode_analisa'];
             }
         }
+
+        // Urutkan kelompok: OTOMATIS terlebih dahulu, kemudian jumlah monografi terbanyak
+        uasort($stats['kelompok_kanonis'], function($a, $b) {
+            if ($a['status_kandidat'] === $b['status_kandidat']) {
+                return $b['total_monografi'] <=> $a['total_monografi'];
+            }
+            return ($a['status_kandidat'] === 'OTOMATIS') ? -1 : 1;
+        });
 
         // Hitung total kandidat otomatis vs perlu konfirmasi
         foreach ($stats['kelompok_kanonis'] as $grp) {
@@ -577,10 +819,10 @@ class Model_Metode extends CI_Model
     /**
      * Menerapkan Pemetaan Massal untuk Kelompok Parameter yang Disetujui Admin TI.
      * Menggunakan transaksi aman.
-     * Aturan perlindungan: Secara default TIDAK menimpa baris yang sudah dipetakan secara manual (template_id IS NULL),
+     * Aturan perlindungan: Secara default TIDAK menimpa baris yang sudah dipetakan secara manual,
      * kecuali jika opsi $overwrite_manual = TRUE disetujui secara eksplisit oleh Admin TI.
      * 
-     * @param string $group_key Format: 'Kimia||Penetapan Kadar'
+     * @param string $group_key Format: 'Kimia||Penetapan Kadar||KCKT / HPLC'
      * @param int $template_id ID Form LCP target
      * @param bool $overwrite_manual Apakah menimpa mapping manual yang sudah ada
      * @return array [sukses, updated_count, error]
@@ -588,12 +830,13 @@ class Model_Metode extends CI_Model
     public function terapkan_automap_kelompok($group_key, $template_id, $overwrite_manual = FALSE)
     {
         $parts = explode('||', $group_key);
-        if (count($parts) !== 2) {
+        if (count($parts) < 2) {
             return array('sukses' => FALSE, 'updated_count' => 0, 'error' => 'Format kunci kelompok tidak valid.');
         }
 
-        $bidang  = $parts[0];
-        $kanonis = $parts[1];
+        $bidang         = $parts[0];
+        $kanonis_param  = $parts[1];
+        $kanonis_metode = $parts[2] ?? NULL;
 
         // Validasi Template Target: Wajib aktif dan kategori cocok
         $template = $this->db->get_where('form_templates', array('id' => $template_id, 'status' => 'Aktif'))->row_array();
@@ -606,15 +849,17 @@ class Model_Metode extends CI_Model
         }
 
         // Ambil semua metode aktif pada bidang ini
-        $this->db->select('id, parameter_uji, template_id');
+        $this->db->select('id, parameter_uji, metode_analisa, template_id');
         $this->db->where('bidang_pengujian', $bidang);
         $this->db->where('status', 'Aktif');
         $methods = $this->db->get($this->tabel)->result_array();
 
         $target_ids = array();
         foreach ($methods as $m) {
-            if (self::normalisasi_parameter($m['parameter_uji']) === $kanonis) {
-                // Perlindungan mapping manual: lewati jika sudah memiliki template_id dan overwrite_manual = FALSE
+            $match_param = (self::normalisasi_parameter($m['parameter_uji']) === $kanonis_param);
+            $match_metode = ($kanonis_metode === NULL || self::normalisasi_metode($m['metode_analisa']) === $kanonis_metode);
+
+            if ($match_param && $match_metode) {
                 if (!empty($m['template_id']) && !$overwrite_manual) {
                     continue;
                 }
@@ -628,7 +873,6 @@ class Model_Metode extends CI_Model
 
         $this->db->trans_start();
 
-        // Terapkan mapping massal dalam chunks
         $chunks = array_chunk($target_ids, 200);
         $updated_count = 0;
         foreach ($chunks as $chunk) {
@@ -647,6 +891,78 @@ class Model_Metode extends CI_Model
         }
 
         return array('sukses' => TRUE, 'updated_count' => $updated_count, 'error' => NULL);
+    }
+
+    /**
+     * Menerapkan Pemetaan Massal Otomatis Sekali Klik (1-Click Batch Auto-Mapping)
+     * Untuk seluruh kelompok yang berstatus 'OTOMATIS' dan memiliki kandidat LCP resmi valid.
+     * Menjalankan seluruh pemetaan dalam 1 transaksi database yang sangat cepat dan aman.
+     * 
+     * @param bool $overwrite_manual Apakah menimpa baris yang sudah dipetakan manual
+     * @return array [sukses, updated_count, group_count, error]
+     */
+    public function terapkan_automap_semua_otomatis($overwrite_manual = FALSE)
+    {
+        $analysis = $this->analisis_automap();
+        if (empty($analysis['kelompok_kanonis'])) {
+            return array('sukses' => FALSE, 'updated_count' => 0, 'group_count' => 0, 'error' => 'Tidak ada kelompok parameter yang ditemukan.');
+        }
+
+        $mapping_tasks = array(); // [template_id => array(method_ids)]
+        $applied_groups = 0;
+
+        foreach ($analysis['kelompok_kanonis'] as $grp) {
+            if ($grp['status_kandidat'] === 'OTOMATIS' && !empty($grp['kandidat_template_id'])) {
+                $target_tpl_id = (int)$grp['kandidat_template_id'];
+                $ids = $overwrite_manual ? $grp['method_ids'] : $grp['unmapped_method_ids'];
+
+                if (!empty($ids)) {
+                    if (!isset($mapping_tasks[$target_tpl_id])) {
+                        $mapping_tasks[$target_tpl_id] = array();
+                    }
+                    $mapping_tasks[$target_tpl_id] = array_merge($mapping_tasks[$target_tpl_id], $ids);
+                    $applied_groups++;
+                }
+            }
+        }
+
+        if (empty($mapping_tasks)) {
+            return array(
+                'sukses'        => TRUE,
+                'updated_count' => 0,
+                'group_count'   => 0,
+                'pesan'         => 'Seluruh monografi yang memenuhi kriteria otomatis sudah terpetakan sebelumnya.'
+            );
+        }
+
+        $this->db->trans_start();
+
+        $total_updated = 0;
+        foreach ($mapping_tasks as $tpl_id => $ids) {
+            $unique_ids = array_unique($ids);
+            $chunks = array_chunk($unique_ids, 200);
+            foreach ($chunks as $chunk) {
+                $this->db->where_in('id', $chunk);
+                $this->db->update($this->tabel, array(
+                    'template_id' => $tpl_id,
+                    'updated_at'  => date('Y-m-d H:i:s')
+                ));
+                $total_updated += count($chunk);
+            }
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            return array('sukses' => FALSE, 'updated_count' => 0, 'group_count' => 0, 'error' => 'Transaksi database gagal dijalankan.');
+        }
+
+        return array(
+            'sukses'        => TRUE,
+            'updated_count' => $total_updated,
+            'group_count'   => $applied_groups,
+            'error'         => NULL
+        );
     }
 }
 

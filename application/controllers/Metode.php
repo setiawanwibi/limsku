@@ -276,6 +276,40 @@ class Metode extends MY_Controller
     }
 
     /**
+     * Terapkan Seluruh Pemetaan Rekomendasi Otomatis (1-Klik Batch Auto-Mapping)
+     */
+    public function terapkan_semua_automap()
+    {
+        $this->cek_hak_akses('metode_edit');
+
+        if ($this->input->method() !== 'post') {
+            redirect('metode/automap');
+        }
+
+        $overwrite_manual = ($this->input->post('overwrite_manual') === '1');
+
+        $res = $this->Model_Metode->terapkan_automap_semua_otomatis($overwrite_manual);
+
+        if ($res['sukses']) {
+            $this->catat_audit('MASS_AUTOMAP_ALL_RECOMMENDED', 'Metode', array(
+                'updated_count'    => $res['updated_count'],
+                'group_count'      => $res['group_count'],
+                'overwrite_manual' => $overwrite_manual
+            ));
+
+            if ($res['updated_count'] > 0) {
+                $this->session->set_flashdata('pesan_sukses', 'Hebat! Sebanyak ' . number_format($res['updated_count']) . ' monografi dari ' . $res['group_count'] . ' kelompok metode berhasil dipetakan secara otomatis ke Form LCP resmi dengan tingkat keyakinan 100%.');
+            } else {
+                $this->session->set_flashdata('pesan_sukses', $res['pesan'] ?? 'Seluruh monografi yang memenuhi kriteria otomatis sudah terpetakan sebelumnya.');
+            }
+        } else {
+            $this->session->set_flashdata('pesan_gagal', 'Gagal menjalankan pemetaan otomatis massal: ' . $res['error']);
+        }
+
+        redirect('metode/automap');
+    }
+
+    /**
      * Hapus metode
      * 
      * @param int $id
