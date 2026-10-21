@@ -1,0 +1,360 @@
+{
+  "kode_template": "KIM-08",
+  "nama_template": "Kromatografi Cair Kinerja Tinggi (HPLC/KCKT)",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.12",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - KROMATOGRAFI CAIR KINERJA TINGGI",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "kondisi_alat_kromatografi",
+        "title": "Kondisi Instrumen HPLC & Parameter Kromatografi",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.12. Parameter instrumen, kolom, detektor, elusi isokratik/gradient, suhu, laju alir, panjang gelombang.",
+        "fields": [
+          {
+            "id": "merk_alat",
+            "label": "Merk Alat HPLC",
+            "type": "text",
+            "placeholder": "Contoh: Waters / Shimadzu / Agilent"
+          },
+          {
+            "id": "tipe_seri",
+            "label": "Tipe / Seri",
+            "type": "text",
+            "placeholder": "Contoh: Alliance e2695 / Prominence LC-20AT"
+          },
+          {
+            "id": "detektor",
+            "label": "Detektor",
+            "type": "text",
+            "placeholder": "Contoh: UV-Vis / PDA / RID / FLD"
+          },
+          {
+            "id": "kondisi_analisis",
+            "label": "Kondisi Analisis",
+            "type": "select",
+            "options": ["Sesuai prosedur", "Adjusment"],
+            "default": "Sesuai prosedur"
+          },
+          {
+            "id": "kondisi_adjusment",
+            "label": "Kondisi Adjusment (jika ada)",
+            "type": "text"
+          },
+          {
+            "id": "pelarut",
+            "label": "Pelarut",
+            "type": "text"
+          },
+          {
+            "id": "suhu_opt",
+            "label": "Kondisi Suhu Kolom",
+            "type": "select",
+            "options": ["Suhu Kamar", "Suhu Terkontrol (°C)"],
+            "default": "Suhu Kamar"
+          },
+          {
+            "id": "suhu_custom",
+            "label": "Suhu Kolom Terkontrol (°C)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 30 / 40"
+          },
+          {
+            "id": "kolom_dimensi",
+            "label": "Kolom (Ukuran partikel µm, mm x cm, material)",
+            "type": "text",
+            "placeholder": "Contoh: C18 5 µm (4.6 mm x 25 cm)"
+          },
+          {
+            "id": "tipe_elusi",
+            "label": "Tipe Fase Gerak",
+            "type": "select",
+            "options": ["Isokratik", "Gradient"],
+            "default": "Isokratik"
+          },
+          {
+            "id": "fase_gerak_isokratik",
+            "label": "Fase Gerak Isokratik",
+            "type": "text",
+            "placeholder": "Contoh: Metanol : Dapar Fosfat pH 3.0 (60 : 40)"
+          },
+          {
+            "id": "gradient_komposisi",
+            "label": "Program Gradient (jika gradient)",
+            "type": "textarea",
+            "placeholder": "Waktu (menit), % A, % B, % C\nA: ...\nB: ...\nC: ..."
+          },
+          {
+            "id": "laju_aliran",
+            "label": "Laju Aliran (mL/menit)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 1.0"
+          },
+          {
+            "id": "panjang_gelombang",
+            "label": "Panjang Gelombang λ Uji (nm)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 254"
+          }
+        ]
+      },
+      {
+        "id": "baku_pembanding_section",
+        "title": "Data Baku Pembanding & Baku Internal",
+        "description": "Koreksi kadar kemurnian baku: Kb = (100 - Susut Pengeringan) * Kadar / 100",
+        "fields": [
+          {
+            "id": "baku_nama",
+            "label": "Nama Baku Pembanding",
+            "type": "text"
+          },
+          {
+            "id": "baku_no_kontrol",
+            "label": "Nomor Kontrol Baku",
+            "type": "text"
+          },
+          {
+            "id": "baku_kadar",
+            "label": "Kadar Baku (%) - L24",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 99.8"
+          },
+          {
+            "id": "baku_sp",
+            "label": "Susut Pengeringan / Kadar Air (%) - O24",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 0.2"
+          },
+          {
+            "id": "baku_kadar_terkoreksi",
+            "label": "Kadar Terkoreksi Baku (%) - T24 (Auto: (100-SP)*Kadar/100)",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "internal_nama",
+            "label": "Nama Baku Internal (jika menggunakan)",
+            "type": "text"
+          },
+          {
+            "id": "internal_no_kontrol",
+            "label": "Nomor Kontrol Baku Internal",
+            "type": "text"
+          },
+          {
+            "id": "internal_kadar",
+            "label": "Kadar Baku Internal (%)",
+            "type": "number",
+            "step": "any"
+          },
+          {
+            "id": "internal_sp",
+            "label": "Susut Pengeringan Baku Internal (%)",
+            "type": "number",
+            "step": "any"
+          },
+          {
+            "id": "internal_kadar_terkoreksi",
+            "label": "Kadar Terkoreksi Baku Internal (%)",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "status_kromatogram_uks",
+            "label": "Kromatogram Uji Kesesuaian Sistem (UKS)",
+            "type": "select",
+            "options": ["Terlampir", "Tidak Diperlukan"],
+            "default": "Terlampir"
+          },
+          {
+            "id": "status_kromatogram_sampel",
+            "label": "Kromatogram Baku, Sampel, Spiked Sample",
+            "type": "select",
+            "options": ["Terlampir", "Tidak Diperlukan"],
+            "default": "Terlampir"
+          },
+          {
+            "id": "status_regresi",
+            "label": "Regresi Kurva Baku dan Perhitungan",
+            "type": "select",
+            "options": ["Terlampir", "Metode One-Point Standard"],
+            "default": "Terlampir"
+          }
+        ]
+      },
+      {
+        "id": "tabel_penimbangan_hplc",
+        "title": "Tabel Penimbangan & Respon Puncak Kromatografi",
+        "description": "Perhitungan Bobot Bersih = (Wadah+Zat) - (Wadah+Sisa). Respon Puncak (Luas Area / Tinggi Puncak).",
+        "fields": [
+          {
+            "id": "bobot_rata_tablet",
+            "label": "Bobot Rata-rata Tablet / Sediaan (Br) [mg]",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 250.5"
+          },
+          {
+            "id": "klaim_etiket",
+            "label": "Komposisi / Klaim Etiket per Tablet (Ke) [mg]",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 50.0"
+          },
+          {
+            "id": "tabel_hplc",
+            "type": "table",
+            "label": "Data Pengukuran KCKT / HPLC",
+            "columns": [
+              {"id": "kategori", "label": "Kategori / Nama Zat", "type": "text", "readonly": true},
+              {"id": "wadah_zat", "label": "Wadah + Zat (g)", "type": "number", "step": "any"},
+              {"id": "wadah_sisa", "label": "Wadah + Sisa (g)", "type": "number", "step": "any"},
+              {"id": "bobot_bersih", "label": "Bobot Bersih (g)", "type": "number", "step": "any", "readonly": true},
+              {"id": "faktor_pengenceran", "label": "Faktor Pengenceran", "type": "number", "step": "any"},
+              {"id": "konsentrasi", "label": "Konsentrasi (satuan)", "type": "text"},
+              {"id": "vol_injeksi", "label": "Vol. Injeksi (µL)", "type": "number", "step": "any"},
+              {"id": "waktu_retensi", "label": "Rt (menit)", "type": "number", "step": "any"},
+              {"id": "respon_puncak", "label": "Respon Puncak (Area)", "type": "number", "step": "any"},
+              {"id": "lambda_nm", "label": "λ (nm)", "type": "number", "step": "any"}
+            ],
+            "default_rows": [
+              {"kategori": "Baku Pembanding", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "vol_injeksi": "20", "waktu_retensi": "", "respon_puncak": "", "lambda_nm": ""},
+              {"kategori": "Baku Internal", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "vol_injeksi": "20", "waktu_retensi": "", "respon_puncak": "", "lambda_nm": ""},
+              {"kategori": "Zat Uji Replikasi 1", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "vol_injeksi": "20", "waktu_retensi": "", "respon_puncak": "", "lambda_nm": ""},
+              {"kategori": "Zat Uji Replikasi 2", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "vol_injeksi": "20", "waktu_retensi": "", "respon_puncak": "", "lambda_nm": ""},
+              {"kategori": "Spiked Sample: Zat Uji", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "vol_injeksi": "20", "waktu_retensi": "", "respon_puncak": "", "lambda_nm": ""},
+              {"kategori": "Spiked Sample: Baku", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "vol_injeksi": "20", "waktu_retensi": "", "respon_puncak": "", "lambda_nm": ""}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "perhitungan_kadar_hplc",
+        "title": "Perhitungan Kadar, RPD & Horwitz",
+        "description": "Rumus Resmi: Kadar = (Lu/Lb) * (Bb/Bu) * (Fu/Fb) * (Br/Ke) * Kb * 100%. Dilanjutkan RPD dan batas penerimaan Horwitz.",
+        "fields": [
+          {
+            "id": "kadar_replikasi_1",
+            "label": "Kadar Uji 1 (%) - T51",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "kadar_replikasi_2",
+            "label": "Kadar Uji 2 (%) - T54",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "kadar_rata_persen",
+            "label": "Kadar Rata-rata (%) - H57",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "kadar_rata_mg",
+            "label": "Kadar Rata-rata (mg/tablet) - H58",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "hasil_identifikasi",
+            "label": "Hasil Uji (Identifikasi)",
+            "type": "select",
+            "options": ["Positif", "Negatif"],
+            "default": "Positif"
+          },
+          {
+            "id": "ketidakpastian_teks",
+            "label": "Hasil Uji ± Ketidakpastian",
+            "type": "text",
+            "placeholder": "Contoh: 99.82 ± 1.15 % / 49.91 ± 0.58 mg/tablet"
+          },
+          {
+            "id": "decision_rule",
+            "label": "Aturan Keputusan (Decision Rule)",
+            "type": "select",
+            "options": ["Simple Acceptance", "Guard Band"],
+            "default": "Simple Acceptance"
+          },
+          {
+            "id": "nilai_rpd",
+            "label": "Nilai RPD / RSD (%) - E62 (Auto: |K1-K2|/Kadar*100)",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "syarat_horwitz",
+            "label": "Syarat RPD / RSD Horwitz (%) - E63 (Auto: 0.5 * 2^(1 - 0.5*log10(C)))",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "lod_loq",
+            "label": "LOD / LOQ (jika ada)",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "kesimpulan_legalitas_hplc",
+        "title": "Pustaka Persyaratan & Kesimpulan",
+        "description": "Pustaka acuan monografi, syarat keberterimaan, dan keputusan akhir.",
+        "fields": [
+          {
+            "id": "pustaka_metode",
+            "label": "Pustaka Metode",
+            "type": "textarea"
+          },
+          {
+            "id": "pustaka_persyaratan",
+            "label": "Pustaka Persyaratan",
+            "type": "textarea"
+          },
+          {
+            "id": "syarat_kadar",
+            "label": "Syarat Persyaratan Kadar",
+            "type": "text",
+            "placeholder": "Contoh: Antara 90.0% dan 110.0% dari jumlah yang tertera pada etiket"
+          },
+          {
+            "id": "tolerance_limit",
+            "label": "Tolerance Limit",
+            "type": "text"
+          },
+          {
+            "id": "acceptance_limit",
+            "label": "Acceptance Limit",
+            "type": "text"
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)"
+          },
+          {
+            "id": "tanggal_laporan",
+            "label": "Tanggal Laporan",
+            "type": "date"
+          }
+        ]
+      }
+    ]
+  }
+}

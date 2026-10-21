@@ -1321,6 +1321,38 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // --- KHUSUS FORM LCP KIM-08: KROMATOGRAFI CAIR KINERJA TINGGI (HPLC / KCKT) ---
+        if (
+            (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'KIM-08') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'kromatografi cair kinerja tinggi') !== false) ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'hplc') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'kckt') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'hplc') !== false) ||
+            (!empty($hasil['sop_number']) && stripos($hasil['sop_number'], 'F.01A.12') !== false)
+        ) {
+            $this->catat_audit('VIEW_LCP_KCKT', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-08'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_kckt', $view_data);
+            return;
+        }
+
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_semua();
 

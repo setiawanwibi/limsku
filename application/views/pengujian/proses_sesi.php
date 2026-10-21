@@ -1827,5 +1827,130 @@
                 }
             }
         });
+
+        // =========================================================================
+        // Auto-Calculator Engine untuk Formulir HPLC / KCKT (KIM-08)
+        // Rumus Resmi: Kadar = (Lu/Lb) * (Bb/Bu) * (Fu/Fb) * (Br/Ke) * Kb * 100%
+        // RPD = |K1 - K2| / Kadar * 100%, Horwitz = 0.5 * 2^(1 - 0.5*log10(C))
+        // =========================================================================
+        function hitungHPLC() {
+            // 1. Koreksi Kadar Kemurnian Baku
+            var bakuKadarInput = document.querySelector('input[name*="[baku_kadar]"]');
+            var bakuSpInput = document.querySelector('input[name*="[baku_sp]"]');
+            var bakuTerkoreksiInput = document.querySelector('input[name*="[baku_kadar_terkoreksi]"]');
+
+            var Kb = 0;
+            if (bakuKadarInput) {
+                var rawKadar = parseFloat(bakuKadarInput.value) || 0;
+                var sp = parseFloat(bakuSpInput ? bakuSpInput.value : 0) || 0;
+                Kb = (100 - sp) * (rawKadar / 100);
+                if (bakuTerkoreksiInput && rawKadar > 0) {
+                    bakuTerkoreksiInput.value = Kb.toFixed(2);
+                }
+            }
+
+            // 2. Bobot Bersih Tiap Baris Tabel HPLC
+            var hplcRows = document.querySelectorAll('tr:has(input[name*="[bobot_bersih]"])');
+            if (!hplcRows || hplcRows.length === 0) {
+                var allBb = document.querySelectorAll('input[name*="[bobot_bersih]"]');
+                allBb.forEach(function(bEl) {
+                    var tr = bEl.closest('tr');
+                    if (tr) hitungBarisHPLC(tr);
+                });
+            } else {
+                hplcRows.forEach(function(row) {
+                    hitungBarisHPLC(row);
+                });
+            }
+
+            // 3. Parameter Tambahan: Br (Bobot rata tablet) & Ke (Klaim etiket)
+            var brInput = document.querySelector('input[name*="[bobot_rata_tablet]"]');
+            var keInput = document.querySelector('input[name*="[klaim_etiket]"]');
+            var Br = parseFloat(brInput ? brInput.value : 0) || 1;
+            var Ke = parseFloat(keInput ? keInput.value : 0) || 1;
+
+            // 4. Ambil Nilai Baku Pembanding (Row 0)
+            var bbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][bobot_bersih]"]');
+            var fbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][faktor_pengenceran]"]');
+            var lbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][respon_puncak]"]');
+
+            var Bb = parseFloat(bbBakuEl ? bbBakuEl.value : 0) || 0;
+            var Fb = parseFloat(fbBakuEl ? fbBakuEl.value : 1) || 1;
+            var Lb = parseFloat(lbBakuEl ? lbBakuEl.value : 0) || 0;
+
+            // 5. Hitung Replikasi 1 (Row 2) & Replikasi 2 (Row 3)
+            var k1 = hitungKadarSatuSampel(2, Lb, Bb, Fb, Br, Ke, Kb);
+            var k2 = hitungKadarSatuSampel(3, Lb, Bb, Fb, Br, Ke, Kb);
+
+            var k1Input = document.querySelector('input[name*="[kadar_replikasi_1]"]');
+            var k2Input = document.querySelector('input[name*="[kadar_replikasi_2]"]');
+
+            if (k1Input && k1 > 0) k1Input.value = k1.toFixed(2);
+            if (k2Input && k2 > 0) k2Input.value = k2.toFixed(2);
+
+            // 6. Rata-rata Kadar, RPD & Horwitz
+            if (k1 > 0 && k2 > 0) {
+                var rataPersen = (k1 + k2) / 2;
+                var rataMg = (rataPersen / 100) * Ke;
+                var rpd = (Math.abs(k1 - k2) / rataPersen) * 100;
+
+                // Syarat Horwitz: 0.5 * (2 ^ (1 - 0.5 * log10(C)))
+                var C = rataPersen / 100;
+                var horwitz = 0;
+                if (C > 0) {
+                    horwitz = 0.5 * Math.pow(2, (1 - (0.5 * (Math.log(C) / Math.LN10))));
+                }
+
+                var rataPersenInput = document.querySelector('input[name*="[kadar_rata_persen]"]');
+                var rataMgInput = document.querySelector('input[name*="[kadar_rata_mg]"]');
+                var rpdInput = document.querySelector('input[name*="[nilai_rpd]"]');
+                var horwitzInput = document.querySelector('input[name*="[syarat_horwitz]"]');
+
+                if (rataPersenInput) rataPersenInput.value = rataPersen.toFixed(2);
+                if (rataMgInput) rataMgInput.value = rataMg.toFixed(2);
+                if (rpdInput) rpdInput.value = rpd.toFixed(2);
+                if (horwitzInput && horwitz > 0) horwitzInput.value = horwitz.toFixed(2);
+            }
+        }
+
+        function hitungBarisHPLC(tr) {
+            var wZatInput = tr.querySelector('input[name*="[wadah_zat]"]');
+            var wSisaInput = tr.querySelector('input[name*="[wadah_sisa]"]');
+            var bBersihInput = tr.querySelector('input[name*="[bobot_bersih]"]');
+
+            if (wZatInput && wSisaInput && bBersihInput) {
+                var wZat = parseFloat(wZatInput.value) || 0;
+                var wSisa = parseFloat(wSisaInput.value) || 0;
+                if (wZat > 0 && wSisa > 0 && wZat >= wSisa) {
+                    var bBersih = wZat - wSisa;
+                    bBersihInput.value = bBersih.toFixed(4);
+                }
+            }
+        }
+
+        function hitungKadarSatuSampel(rowIdx, Lb, Bb, Fb, Br, Ke, Kb) {
+            if (Lb <= 0 || Bb <= 0 || Fb <= 0 || Ke <= 0 || Kb <= 0) return 0;
+
+            var buEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][bobot_bersih]"]');
+            var fuEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][faktor_pengenceran]"]');
+            var luEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][respon_puncak]"]');
+
+            var Bu = parseFloat(buEl ? buEl.value : 0) || 0;
+            var Fu = parseFloat(fuEl ? fuEl.value : 1) || 1;
+            var Lu = parseFloat(luEl ? luEl.value : 0) || 0;
+
+            if (Bu <= 0 || Lu <= 0) return 0;
+
+            // Kadar = (Lu / Lb) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb
+            var kadar = (Lu / Lb) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb;
+            return kadar;
+        }
+
+        // Listener HPLC input
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('input[name*="[baku_kadar]"], input[name*="[baku_sp]"], input[name*="[tabel_hplc]"], input[name*="[bobot_rata_tablet]"], input[name*="[klaim_etiket]"]')) {
+                hitungHPLC();
+            }
+        });
     });
 </script>
