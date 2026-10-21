@@ -1109,6 +1109,39 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // Jika form template adalah Uji Angka Kapang Khamir (MIK-02 / AKK)
+        $is_akk = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-02') ||
+            (!empty($hasil['nama_template']) && (
+                stripos($hasil['nama_template'], 'Kapang') !== false || 
+                stripos($hasil['nama_template'], 'AKK') !== false
+            ))
+        );
+
+        if ($is_akk) {
+            $this->catat_audit('VIEW_LCP_AKK', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-02'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_akk_farmasi', $view_data);
+            return;
+        }
+
         // Jika form template adalah Uji Kimia Reaksi Warna / Pengendapan (KIM-01)
         $is_reaksi_warna = (
             (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-01') ||
