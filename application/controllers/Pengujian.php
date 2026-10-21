@@ -1170,6 +1170,157 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // Jika form template adalah Keseragaman Kandungan (KIM-03)
+        $is_keseragaman_kandungan = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-03') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Keseragaman Kandungan') !== false)
+        );
+
+        if ($is_keseragaman_kandungan) {
+            $this->catat_audit('VIEW_LCP_KESERAGAMAN_KANDUNGAN', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-03'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_keseragaman_kandungan', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Waktu Hancur (KIM-04)
+        $is_waktu_hancur = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-04') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Waktu Hancur') !== false)
+        );
+
+        if ($is_waktu_hancur) {
+            $this->catat_audit('VIEW_LCP_WAKTU_HANCUR', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-04'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_waktu_hancur', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Spektrofotometri (KIM-05)
+        $is_spektrofotometri = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-05') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Spektrofotometri') !== false)
+        );
+
+        if ($is_spektrofotometri) {
+            $this->catat_audit('VIEW_LCP_SPEKTROFOTOMETRI', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-05'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_spektrofotometri', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Disolusi (KIM-06)
+        $is_disolusi = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-06') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Disolusi') !== false)
+        );
+
+        if ($is_disolusi) {
+            $this->catat_audit('VIEW_LCP_DISOLUSI', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-06'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_disolusi', $view_data);
+            return;
+        }
+
+        // --- KHUSUS FORM LCP KIM-07: KROMATOGRAFI LAPIS TIPIS ---
+        if (
+            (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'KIM-07') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'kromatografi lapis tipis') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'kromatografi lapis tipis') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'klt') !== false) ||
+            (!empty($hasil['sop_number']) && stripos($hasil['sop_number'], 'F.01A.10') !== false)
+        ) {
+            $this->catat_audit('VIEW_LCP_KLT', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-07'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_klt', $view_data);
+            return;
+        }
+
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_semua();
 

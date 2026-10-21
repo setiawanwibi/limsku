@@ -1,0 +1,135 @@
+{
+  "kode_template": "KIM-04",
+  "nama_template": "Waktu Hancur",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.04",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - WAKTU HANCUR",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "info_alat_dan_media",
+        "title": "Data Alat & Kondisi Pengujian Waktu Hancur",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.04. Informasi instrumen Disintegration Tester, media pelarut, dan suhu pengujian.",
+        "fields": [
+          {
+            "id": "bentuk_sediaan",
+            "label": "Bentuk Sediaan",
+            "type": "text",
+            "placeholder": "Contoh: Tablet / Tablet Salut Selaput / Kapsul"
+          },
+          {
+            "id": "tgl_uji",
+            "label": "Tanggal Uji",
+            "type": "date"
+          },
+          {
+            "id": "merk_alat",
+            "label": "Merk Alat",
+            "type": "text",
+            "placeholder": "Contoh: Electrolab / Erweka"
+          },
+          {
+            "id": "tipe_seri_alat",
+            "label": "Tipe / Seri Alat",
+            "type": "text",
+            "placeholder": "Contoh: ED-2AL / ZT 320"
+          },
+          {
+            "id": "tgl_kalibrasi_mulai",
+            "label": "Tanggal Kalibrasi (Mulai)",
+            "type": "text",
+            "placeholder": "Contoh: 10 Januari 2026"
+          },
+          {
+            "id": "tgl_kalibrasi_selesai",
+            "label": "Tanggal Kalibrasi (Selesai / s.d)",
+            "type": "text",
+            "placeholder": "Contoh: 10 Januari 2027"
+          },
+          {
+            "id": "media_uji",
+            "label": "Media Uji",
+            "type": "text",
+            "default": "Air suling",
+            "placeholder": "Contoh: Air suling / Larutan Asam Klorida 0.1 N"
+          },
+          {
+            "id": "suhu_pengujian",
+            "label": "Suhu Media (°C) - Syarat: 37 ± 2 °C",
+            "type": "number",
+            "step": "any",
+            "default": "37.0",
+            "placeholder": "Contoh: 37.0"
+          }
+        ]
+      },
+      {
+        "id": "tabel_pengamatan_sampel",
+        "title": "Hasil Pengamatan Waktu Hancur (6 Sampel)",
+        "description": "Catat waktu hancur masing-masing unit sediaan (menit / detik) dan kondisi fisik sediaan.",
+        "fields": [
+          {
+            "id": "tabel_hasil_hancur",
+            "label": "Tabel Hasil Pengujian 6 Sampel",
+            "type": "table",
+            "columns": [
+              {"id": "sampel_no", "label": "Sampel", "readonly": true},
+              {"id": "waktu_hancur", "label": "Waktu Hancur (menit/detik)"},
+              {"id": "pengamatan", "label": "Pengamatan / Keterangan Fisik"}
+            ],
+            "default_rows": [
+              {"sampel_no": "1", "waktu_hancur": "", "pengamatan": "Hancur sempurna, tidak ada residu pada kasa"},
+              {"sampel_no": "2", "waktu_hancur": "", "pengamatan": "Hancur sempurna, tidak ada residu pada kasa"},
+              {"sampel_no": "3", "waktu_hancur": "", "pengamatan": "Hancur sempurna, tidak ada residu pada kasa"},
+              {"sampel_no": "4", "waktu_hancur": "", "pengamatan": "Hancur sempurna, tidak ada residu pada kasa"},
+              {"sampel_no": "5", "waktu_hancur": "", "pengamatan": "Hancur sempurna, tidak ada residu pada kasa"},
+              {"sampel_no": "6", "waktu_hancur": "", "pengamatan": "Hancur sempurna, tidak ada residu pada kasa"}
+            ]
+          },
+          {
+            "id": "waktu_maksimum",
+            "label": "Waktu Hancur Terlama / Rata-rata",
+            "type": "text",
+            "placeholder": "Contoh: 8 menit 15 detik"
+          }
+        ]
+      },
+      {
+        "id": "pustaka_dan_kesimpulan",
+        "title": "Pustaka, Syarat & Kesimpulan",
+        "description": "Acuan monografi Farmakope dan interpretasi kesimpulan pengujian waktu hancur.",
+        "fields": [
+          {
+            "id": "pustaka_metode",
+            "label": "Pustaka Metode",
+            "type": "text",
+            "default": "Farmakope Indonesia Edisi VI <1251> Uji Waktu Hancur",
+            "placeholder": "Acuan metode analisa..."
+          },
+          {
+            "id": "pustaka_persyaratan",
+            "label": "Pustaka Persyaratan",
+            "type": "text",
+            "default": "Farmakope Indonesia Edisi VI",
+            "placeholder": "Acuan syarat mutu..."
+          },
+          {
+            "id": "syarat",
+            "label": "Syarat",
+            "type": "text",
+            "default": "Pada akhir batas waktu, semua tablet hancur sempurna (tidak lebih dari 15 menit untuk tablet tidak bersalut)",
+            "placeholder": "Kriteria penerimaan waktu hancur..."
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)"
+          }
+        ]
+      }
+    ]
+  }
+}

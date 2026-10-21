@@ -1,0 +1,250 @@
+{
+  "kode_template": "KIM-07",
+  "nama_template": "Kromatografi Lapis Tipis",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.10",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - KROMATOGRAFI LAPIS TIPIS",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "kondisi_analisis",
+        "title": "Kondisi Analisis",
+        "description": "Parameter kondisi kromatografi, pelarut, fase diam, fase gerak, dan baku pembanding sesuai POM-06.02/CFM.01/SOP.01/F.01A.10",
+        "fields": [
+          {
+            "id": "kondisi_analisis_opt",
+            "label": "Kondisi Analisis",
+            "type": "select",
+            "options": ["Sesuai prosedur", "Adjusment"],
+            "required": true
+          },
+          {
+            "id": "kondisi_adjusment",
+            "label": "Kondisi Adjusment (jika ada)",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "pelarut",
+            "label": "Pelarut",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "fase_diam",
+            "label": "Fase Diam",
+            "type": "text",
+            "default": "Silika gel 60 F254",
+            "required": true
+          },
+          {
+            "id": "ukuran_lempeng",
+            "label": "Ukuran Lempeng",
+            "type": "text",
+            "placeholder": "misal 10 x 20 cm",
+            "required": false
+          },
+          {
+            "id": "lempeng_lapis_tipis",
+            "label": "Lempeng Lapis Tipis",
+            "type": "select",
+            "options": ["Kaca", "Alumunium", "Lainnya"],
+            "required": true
+          },
+          {
+            "id": "fase_gerak_1",
+            "label": "Fase Gerak (FG) 1",
+            "type": "text",
+            "required": true
+          },
+          {
+            "id": "fase_gerak_2",
+            "label": "Fase Gerak (FG) 2",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "fase_gerak_3",
+            "label": "Fase Gerak (FG) 3",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "fase_gerak_dst",
+            "label": "Fase Gerak dst",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "teknik_pengembangan",
+            "label": "Teknik Pengembangan",
+            "type": "select",
+            "options": ["Menaik", "Jenuh", "Impregnasi"],
+            "required": true
+          },
+          {
+            "id": "impregnasi_dalam",
+            "label": "Impregnasi dalam (jika impregnasi)",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "jarak_rambat_cm",
+            "label": "Jarak Rambat (cm)",
+            "type": "number",
+            "step": "any",
+            "required": true
+          },
+          {
+            "id": "pengamatan",
+            "label": "Pengamatan",
+            "type": "select",
+            "options": ["Cahaya tampak", "UV 254 nm", "UV 366 nm", "UV 254 nm & UV 366 nm"],
+            "required": true
+          },
+          {
+            "id": "penampak_bercak",
+            "label": "Penampak Bercak",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "baku_nama",
+            "label": "Baku Pembanding (Nama Zat)",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "baku_no_kontrol",
+            "label": "No Kontrol Baku",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "baku_kadar",
+            "label": "Kadar Baku (%)",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "baku_susut_pengeringan",
+            "label": "Susut Pengeringan / Kadar Air (%)",
+            "type": "text",
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "tabel_pengujian",
+        "title": "Tabel Penimbangan, Preparasi & Nilai Rf",
+        "description": "Perhitungan Bobot Zat = (Wadah + Zat) - (Wadah + Sisa). Dilanjutkan penotolan dan pengamatan nilai Rf.",
+        "fields": [
+          {
+            "id": "klt_items",
+            "type": "table",
+            "label": "Data Penimbangan & Rf KLT",
+            "columns": [
+              {"id": "kategori", "label": "Kategori / Jenis", "type": "text", "readonly": true},
+              {"id": "nama_zat", "label": "Nama Zat", "type": "text"},
+              {"id": "wadah_zat", "label": "Wadah + Zat (g)", "type": "number", "step": "any"},
+              {"id": "wadah_sisa", "label": "Wadah + Sisa (g)", "type": "number", "step": "any"},
+              {"id": "bobot_zat", "label": "Bobot Zat (g)", "type": "number", "step": "any", "readonly": true},
+              {"id": "pengenceran", "label": "Pengenceran", "type": "text"},
+              {"id": "konsentrasi", "label": "Konsentrasi (satuan)", "type": "text"},
+              {"id": "vol_penotolan", "label": "Vol Penotolan (µl)", "type": "number", "step": "any"},
+              {"id": "rf_fg1", "label": "Rf FG 1", "type": "number", "step": "any"},
+              {"id": "rf_fg2", "label": "Rf FG 2", "type": "number", "step": "any"},
+              {"id": "rf_fg3", "label": "Rf FG 3", "type": "number", "step": "any"}
+            ],
+            "default_rows": [
+              {"kategori": "Baku Pembanding", "nama_zat": "", "wadah_zat": "", "wadah_sisa": "", "bobot_zat": "", "pengenceran": "", "konsentrasi": "", "vol_penotolan": "", "rf_fg1": "", "rf_fg2": "", "rf_fg3": ""},
+              {"kategori": "Zat Uji 1", "nama_zat": "1. ", "wadah_zat": "", "wadah_sisa": "", "bobot_zat": "", "pengenceran": "", "konsentrasi": "", "vol_penotolan": "", "rf_fg1": "", "rf_fg2": "", "rf_fg3": ""},
+              {"kategori": "Zat Uji 2", "nama_zat": "2. ", "wadah_zat": "", "wadah_sisa": "", "bobot_zat": "", "pengenceran": "", "konsentrasi": "", "vol_penotolan": "", "rf_fg1": "", "rf_fg2": "", "rf_fg3": ""},
+              {"kategori": "Spiked Sample: Zat Uji", "nama_zat": "Zat Uji", "wadah_zat": "", "wadah_sisa": "", "bobot_zat": "", "pengenceran": "", "konsentrasi": "", "vol_penotolan": "", "rf_fg1": "", "rf_fg2": "", "rf_fg3": ""},
+              {"kategori": "Spiked Sample: Baku", "nama_zat": "Baku Pembanding", "wadah_zat": "", "wadah_sisa": "", "bobot_zat": "", "pengenceran": "", "konsentrasi": "", "vol_penotolan": "", "rf_fg1": "", "rf_fg2": "", "rf_fg3": ""}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "evaluasi_kesimpulan",
+        "title": "Evaluasi & Kesimpulan",
+        "description": "Pengamatan bercak, kesesuaian sampel, dan kesimpulan pengujian.",
+        "fields": [
+          {
+            "id": "hasil_pengamatan",
+            "label": "Hasil Pengamatan*",
+            "type": "select",
+            "options": [
+              "Ada bercak sampel yang sejajar dengan baku dan spiked sample",
+              "Tidak ada bercak sampel yang sejajar dengan baku dan spiked sample"
+            ],
+            "required": true
+          },
+          {
+            "id": "kromatogram",
+            "label": "Kromatogram*",
+            "type": "text",
+            "default": "Terlampir",
+            "required": true
+          },
+          {
+            "id": "hasil_uji",
+            "label": "Hasil Uji*",
+            "type": "select",
+            "options": [
+              "Sampel diduga mengandung zat yang diuji",
+              "Sampel tidak mengandung zat yang diuji"
+            ],
+            "required": true
+          },
+          {
+            "id": "lod",
+            "label": "LOD",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "pustaka_metode",
+            "label": "Pustaka Metode",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "id": "pustaka_persyaratan",
+            "label": "Pustaka Persyaratan",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "id": "syarat",
+            "label": "Syarat",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan*",
+            "type": "select",
+            "options": ["MS", "TMS", "Diduga mengandung...."],
+            "required": true
+          },
+          {
+            "id": "kesimpulan_detail",
+            "label": "Detail Kesimpulan",
+            "type": "text",
+            "placeholder": "Keterangan tambahan jika diduga mengandung...",
+            "required": false
+          },
+          {
+            "id": "tanggal_laporan",
+            "label": "Tanggal Laporan",
+            "type": "date",
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+}

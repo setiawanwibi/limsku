@@ -1,0 +1,336 @@
+{
+  "kode_template": "KIM-03",
+  "nama_template": "Keseragaman Kandungan",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.03",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - KESERAGAMAN KANDUNGAN",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "info_instrumen_dan_baku",
+        "title": "Data Instrumen & Baku Pembanding",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.03. Isi informasi instrumen Spektro UV/HPLC, parameter preparasi baku pembanding, dan etiket.",
+        "fields": [
+          {
+            "id": "zat_uji",
+            "label": "Zat yang diuji",
+            "type": "text",
+            "placeholder": "Contoh: Parasetamol"
+          },
+          {
+            "id": "tgl_uji",
+            "label": "Tanggal Uji",
+            "type": "date"
+          },
+          {
+            "id": "pilihan_instrumen",
+            "label": "Instrumen yang Digunakan",
+            "type": "select",
+            "options": ["Spektrofotometri UV", "HPLC"],
+            "default": "HPLC"
+          },
+          {
+            "id": "merk_tipe_instrumen",
+            "label": "Merk/Tipe Instrumen",
+            "type": "text",
+            "placeholder": "Contoh: Shimadzu Prominence LC-20AD"
+          },
+          {
+            "id": "kuvet_tebal",
+            "label": "Kuvet / Tebal Kuvet (jika UV)",
+            "type": "text",
+            "placeholder": "Contoh: 1 cm (Silika)"
+          },
+          {
+            "id": "panjang_gelombang",
+            "label": "λ Uji (nm)",
+            "type": "text",
+            "placeholder": "Contoh: 243 nm"
+          },
+          {
+            "id": "sistem_kckt",
+            "label": "Sistem KCKT*",
+            "type": "select",
+            "options": ["Isokratik", "Gradien", "Bukan KCKT"],
+            "default": "Isokratik"
+          },
+          {
+            "id": "fase_gerak",
+            "label": "Fase Gerak",
+            "type": "text",
+            "placeholder": "Contoh: Metanol : Air (60:40)"
+          },
+          {
+            "id": "laju_alir",
+            "label": "Laju Alir (mL/menit)",
+            "type": "text",
+            "placeholder": "Contoh: 1.0 mL/menit"
+          },
+          {
+            "id": "baku_pembanding",
+            "label": "Baku Pembanding (Nama & No Kontrol)",
+            "type": "text",
+            "placeholder": "Contoh: BPFI Parasetamol No: 12345"
+          },
+          {
+            "id": "kemurnian_baku",
+            "label": "Kemurnian Baku (Kb) - L11 (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 99.8"
+          },
+          {
+            "id": "susut_pengeringan",
+            "label": "Susut Pengeringan / Kadar Air (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 0.2"
+          },
+          {
+            "id": "bobot_baku",
+            "label": "Bobot Baku (Bb) - L13 (mg)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 10.5"
+          },
+          {
+            "id": "hasil_ukur_baku",
+            "label": "Hasil Pengukuran Baku (Area/Serapan Baku) - L14",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Nilai rata-rata Area atau Absorbansi Baku"
+          },
+          {
+            "id": "faktor_pengenceran_baku",
+            "label": "Faktor Pengenceran Baku (Fb) - L15",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 100"
+          },
+          {
+            "id": "faktor_pengenceran_uji",
+            "label": "Faktor Pengenceran Uji (Fu) - L16",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 100"
+          },
+          {
+            "id": "etiket",
+            "label": "Etiket* (mg/sediaan) - E21",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 500"
+          },
+          {
+            "id": "satuan_sediaan",
+            "label": "Satuan Sediaan*",
+            "type": "select",
+            "options": ["mg/tab", "mg/kaps"],
+            "default": "mg/tab"
+          },
+          {
+            "id": "kondisi_analisis",
+            "label": "Kondisi Analisis*",
+            "type": "select",
+            "options": ["Sesuai prosedur", "Ada Adjustment"],
+            "default": "Sesuai prosedur"
+          },
+          {
+            "id": "ket_adjustment",
+            "label": "Keterangan Adjustment (jika ada)",
+            "type": "text",
+            "placeholder": "Catatan perubahan kondisi..."
+          }
+        ]
+      },
+      {
+        "id": "tahap_1",
+        "title": "Tahap 1 Pengujian (10 Unit)",
+        "description": "Pengukuran Area/Serapan sediaan No. 1 s/d 10. Nilai Kadar (mg) dan Kadar (%) terkalkulasi otomatis persis rumus Excel.",
+        "fields": [
+          {
+            "id": "tabel_tahap1",
+            "label": "Tabel Serapan & Kadar Tahap 1",
+            "type": "table",
+            "columns": [
+              {"id": "no", "label": "No", "readonly": true},
+              {"id": "area_serapan", "label": "Area / Serapan"},
+              {"id": "kadar_mg", "label": "Kadar (mg)"},
+              {"id": "kadar_persen", "label": "Kadar (%)"}
+            ],
+            "default_rows": [
+              {"no": "1", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "2", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "3", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "4", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "5", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "6", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "7", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "8", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "9", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "10", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""}
+            ]
+          },
+          {
+            "id": "rerata_kadar_mg_t1",
+            "label": "Rerata Kadar (mg) Tahap 1 (E35)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=AVERAGE(E25:E34)"
+          },
+          {
+            "id": "x_rerata_tahap1",
+            "label": "Xrerata Kadar (%) Tahap 1 (G35)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=AVERAGE(G25:G34)"
+          },
+          {
+            "id": "sd_tahap1",
+            "label": "SD (s) Tahap 1 (G36)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=STDEV(G25:G34)"
+          },
+          {
+            "id": "rsd_tahap1",
+            "label": "RSD (%) Tahap 1 (G37)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=G36/G35*100"
+          }
+        ]
+      },
+      {
+        "id": "tahap_2",
+        "title": "Tahap 2 Pengujian (Tambahan No 11 - 30 jika Diperlukan)",
+        "description": "Pengujian 20 unit lanjutan jika kriteria Tahap 1 belum terpenuhi.",
+        "fields": [
+          {
+            "id": "lakukan_tahap2",
+            "label": "Aktifkan Tahap 2?",
+            "type": "select",
+            "options": ["Tidak", "Ya"],
+            "default": "Tidak"
+          },
+          {
+            "id": "tabel_tahap2",
+            "label": "Tabel Serapan & Kadar Tahap 2 (No 11 - 30)",
+            "type": "table",
+            "columns": [
+              {"id": "no", "label": "No", "readonly": true},
+              {"id": "area_serapan", "label": "Area / Serapan"},
+              {"id": "kadar_mg", "label": "Kadar (mg)"},
+              {"id": "kadar_persen", "label": "Kadar (%)"}
+            ],
+            "default_rows": [
+              {"no": "11", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "12", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "13", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "14", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "15", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "16", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "17", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "18", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "19", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "20", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "21", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "22", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "23", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "24", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "25", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "26", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "27", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "28", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "29", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""},
+              {"no": "30", "area_serapan": "", "kadar_mg": "", "kadar_persen": ""}
+            ]
+          },
+          {
+            "id": "x_rerata_30",
+            "label": "Rerata (x rerata) 30 data (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Rata-rata kadar gabungan 30 unit"
+          },
+          {
+            "id": "sd_30",
+            "label": "SD (s) 30 data",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Standar Deviasi gabungan 30 unit"
+          },
+          {
+            "id": "rsd_30",
+            "label": "RSD 30 data (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "RSD gabungan 30 unit"
+          }
+        ]
+      },
+      {
+        "id": "evaluasi_av",
+        "title": "Evaluasi Nilai Keberterimaan (Acceptance Value - AV)",
+        "description": "Perhitungan matriks kondisi nilai M dan AV sesuai ketentuan Farmakope Indonesia (L1 <= 15.0).",
+        "fields": [
+          {
+            "id": "nilai_k",
+            "label": "k (Faktor Penerimaan)",
+            "type": "text",
+            "default": "2.4",
+            "placeholder": "2.4 untuk n=10, 2.0 untuk n=30"
+          },
+          {
+            "id": "target_t",
+            "label": "T (%) = Target",
+            "type": "text",
+            "default": "100",
+            "readonly": true
+          },
+          {
+            "id": "nilai_m",
+            "label": "M (Nilai Rujukan %)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Nilai M terhitung"
+          },
+          {
+            "id": "nilai_av",
+            "label": "AV (Nilai Keberterimaan)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Nilai AV terhitung"
+          },
+          {
+            "id": "batas_l1",
+            "label": "L1 (Batas Maksimum AV)",
+            "type": "text",
+            "default": "15.0",
+            "readonly": true
+          },
+          {
+            "id": "syarat",
+            "label": "Syarat",
+            "type": "text",
+            "default": "AV dari 10 unit ≤ 15,0 %"
+          },
+          {
+            "id": "pustaka",
+            "label": "Pustaka Acuan",
+            "type": "text",
+            "placeholder": "Contoh: Farmakope Indonesia Edisi VI <971> Keseragaman Sediaan"
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan Pengujian",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)"
+          }
+        ]
+      }
+    ]
+  }
+}

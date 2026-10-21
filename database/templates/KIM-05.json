@@ -1,0 +1,274 @@
+{
+  "kode_template": "KIM-05",
+  "nama_template": "Spektrofotometri",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.06",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - SPEKTROFOTOMETRI",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "info_instrumen_spektro",
+        "title": "Data Instrumen & Kondisi Analisis Spektrofotometri",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.06. Data alat Spektrofotometer UV-Vis, scanning, kuvet, pelarut, dan baku pembanding.",
+        "fields": [
+          {
+            "id": "zat_uji",
+            "label": "Zat yang Diuji",
+            "type": "text",
+            "placeholder": "Contoh: Parasetamol"
+          },
+          {
+            "id": "tgl_uji",
+            "label": "Tanggal Uji",
+            "type": "date"
+          },
+          {
+            "id": "merk_alat",
+            "label": "Merk Alat",
+            "type": "text",
+            "placeholder": "Contoh: Shimadzu"
+          },
+          {
+            "id": "tipe_seri_alat",
+            "label": "Tipe / Seri",
+            "type": "text",
+            "placeholder": "Contoh: UV-1800"
+          },
+          {
+            "id": "kondisi_analisis",
+            "label": "Kondisi Analisis*",
+            "type": "select",
+            "options": ["Sesuai prosedur", "Ada Adjustment"],
+            "default": "Sesuai prosedur"
+          },
+          {
+            "id": "ket_adjustment",
+            "label": "Kondisi Adjustment (jika ada)",
+            "type": "text",
+            "placeholder": "Catatan kondisi adjustment..."
+          },
+          {
+            "id": "kecepatan_scanning",
+            "label": "Kecepatan Scanning",
+            "type": "select",
+            "options": ["Lambat", "Sedang", "Cepat"],
+            "default": "Sedang"
+          },
+          {
+            "id": "rentang_panjang_gelombang",
+            "label": "Rentang Scanning Panjang Gelombang (nm)",
+            "type": "text",
+            "placeholder": "Contoh: 200 - 400 nm"
+          },
+          {
+            "id": "jenis_spektrum",
+            "label": "Jenis Spektrum",
+            "type": "select",
+            "options": ["Normal", "Derivatif"],
+            "default": "Normal"
+          },
+          {
+            "id": "jenis_kuvet",
+            "label": "Kuvet",
+            "type": "select",
+            "options": ["Kwarsa", "Kaca"],
+            "default": "Kwarsa"
+          },
+          {
+            "id": "tebal_kuvet",
+            "label": "Tebal Kuvet (cm)",
+            "type": "text",
+            "default": "1 cm"
+          },
+          {
+            "id": "pelarut",
+            "label": "Pelarut",
+            "type": "text",
+            "placeholder": "Contoh: Metanol P / NaOH 0.1 N"
+          },
+          {
+            "id": "blanko",
+            "label": "Blanko",
+            "type": "text",
+            "placeholder": "Contoh: Metanol P"
+          },
+          {
+            "id": "baku_pembanding",
+            "label": "Baku Pembanding (Nama & No Kontrol)",
+            "type": "text",
+            "placeholder": "Contoh: BPFI Parasetamol No. Kontrol: ..."
+          },
+          {
+            "id": "susut_pengeringan",
+            "label": "Susut Pengeringan / Kadar Air (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 0.2"
+          },
+          {
+            "id": "kadar_baku_persen",
+            "label": "Kadar Baku (Kb / M25) (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "M25: Contoh 99.8"
+          },
+          {
+            "id": "bobot_rata_rata_tablet",
+            "label": "Bobot Rata-rata Tablet (Br / K46) (mg)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "K46 (Br): Contoh 650.0"
+          },
+          {
+            "id": "klaim_etiket",
+            "label": "Klaim Etiket (Ke / K47) (mg/tablet)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "K47 (Ke): Contoh 500.0"
+          }
+        ]
+      },
+      {
+        "id": "data_penimbangan_dan_serapan",
+        "title": "Data Penimbangan, Pengenceran & Serapan",
+        "description": "Isi data penimbangan wadah+zat, wadah+sisa, faktor pengenceran, dan serapan (Absorbansi) pada panjang gelombang maksimum.",
+        "fields": [
+          {
+            "id": "tabel_preparasi",
+            "label": "Tabel Penimbangan & Pengukuran Serapan",
+            "type": "table",
+            "columns": [
+              {"id": "nama_zat", "label": "Nama Zat", "readonly": true},
+              {"id": "wadah_zat", "label": "Wadah + Zat (mg)"},
+              {"id": "wadah_sisa", "label": "Wadah + Sisa (mg)"},
+              {"id": "bobot_zat", "label": "Bobot Zat (mg)"},
+              {"id": "faktor_pengenceran", "label": "Faktor Pengenceran"},
+              {"id": "konsentrasi", "label": "Konsentrasi (mcg/mL)"},
+              {"id": "lambda_maks", "label": "λ Maks (nm)"},
+              {"id": "serapan", "label": "Serapan (Absorbansi)"}
+            ],
+            "default_rows": [
+              {
+                "nama_zat": "Baku Pembanding",
+                "wadah_zat": "",
+                "wadah_sisa": "",
+                "bobot_zat": "",
+                "faktor_pengenceran": "1000",
+                "konsentrasi": "",
+                "lambda_maks": "243.0",
+                "serapan": ""
+              },
+              {
+                "nama_zat": "Zat Uji 1",
+                "wadah_zat": "",
+                "wadah_sisa": "",
+                "bobot_zat": "",
+                "faktor_pengenceran": "1000",
+                "konsentrasi": "",
+                "lambda_maks": "243.0",
+                "serapan": ""
+              },
+              {
+                "nama_zat": "Zat Uji 2",
+                "wadah_zat": "",
+                "wadah_sisa": "",
+                "bobot_zat": "",
+                "faktor_pengenceran": "1000",
+                "konsentrasi": "",
+                "lambda_maks": "243.0",
+                "serapan": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "perhitungan_kadar_dan_presisi",
+        "title": "Perhitungan Kadar & Verifikasi Presisi (RPD / Horwitz)",
+        "description": "Rumus Excel resmi: Au/Ab * Bb/Bu * Fu/Fb * Br/Ke * Kb * 100%. Dilengkapi evaluasi RPD vs 1/2 CV Horwitz.",
+        "fields": [
+          {
+            "id": "kadar_uji_1",
+            "label": "Kadar Zat Uji 1 (O46) (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Kadar Uji 1"
+          },
+          {
+            "id": "kadar_uji_2",
+            "label": "Kadar Zat Uji 2 (O49) (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Kadar Uji 2"
+          },
+          {
+            "id": "kadar_rata_rata_persen",
+            "label": "Kadar Rata-rata (G52) (%)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=(O46+O49)/2"
+          },
+          {
+            "id": "kadar_rata_rata_mg",
+            "label": "Kadar Rata-rata (G53) (mg/tablet)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=(G52*Ke)/100"
+          },
+          {
+            "id": "hasil_identifikasi",
+            "label": "Hasil Uji (Identifikasi)",
+            "type": "text",
+            "default": "Positif"
+          },
+          {
+            "id": "rpd_hitung",
+            "label": "RPD / RSD (%) (D58)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=|Uji1 - Uji2| / Rata2 * 100"
+          },
+          {
+            "id": "syarat_rpd_horwitz",
+            "label": "Syarat RPD (1/2 CV Horwitz <) (G59)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "=1/2 * (2^(1 - 0.5*LOG10(Kadar/100)))"
+          },
+          {
+            "id": "lod_loq",
+            "label": "LOD / LOQ",
+            "type": "text",
+            "placeholder": "Jika dipersyaratkan..."
+          },
+          {
+            "id": "pustaka_metode",
+            "label": "Pustaka Metode",
+            "type": "text",
+            "placeholder": "Contoh: Farmakope Indonesia Edisi VI"
+          },
+          {
+            "id": "pustaka_persyaratan",
+            "label": "Pustaka Persyaratan",
+            "type": "text",
+            "placeholder": "Contoh: Farmakope Indonesia Edisi VI"
+          },
+          {
+            "id": "syarat_mutu",
+            "label": "Syarat",
+            "type": "text",
+            "placeholder": "Contoh: Mengandung tidak kurang dari 90.0% dan tidak lebih dari 110.0%"
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)"
+          }
+        ]
+      }
+    ]
+  }
+}
