@@ -112,7 +112,20 @@
                                                         <option value="">-- Pilih Form LCP <?php echo html_escape($jenis_pengujian); ?> --</option>
                                                         <?php if (!empty($daftar_template_bidang)): ?>
                                                             <?php foreach ($daftar_template_bidang as $tpl_b): ?>
-                                                                <option value="<?php echo $tpl_b['id']; ?>" <?php echo (($jenis_pengujian === 'Mikrobiologi' && $tpl_b['kode_template'] === 'MIK-04') || ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01')) ? 'selected' : ''; ?>>
+                                                                <?php
+                                                                $is_selected = false;
+                                                                if ($jenis_pengujian === 'Mikrobiologi') {
+                                                                    // Jika parameter adalah penghitungan mikroba / batas mikroba -> sarankan MIK-02 (AKK)
+                                                                    if ((stripos($p['parameter_uji'], 'hitung') !== false || stripos($p['parameter_uji'], 'kapang') !== false || stripos($p['parameter_uji'], 'khamir') !== false) && $tpl_b['kode_template'] === 'MIK-02') {
+                                                                        $is_selected = true;
+                                                                    } elseif ($tpl_b['kode_template'] === 'MIK-04' && stripos($p['parameter_uji'], 'spesifik') !== false) {
+                                                                        $is_selected = true;
+                                                                    }
+                                                                } elseif ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01') {
+                                                                    $is_selected = true;
+                                                                }
+                                                                ?>
+                                                                <option value="<?php echo $tpl_b['id']; ?>" <?php echo $is_selected ? 'selected' : ''; ?>>
                                                                     [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?>
                                                                 </option>
                                                             <?php endforeach; ?>
