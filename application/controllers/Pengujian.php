@@ -242,8 +242,9 @@ class Pengujian extends MY_Controller
                 redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
             }
 
-            // Dapatkan template_id: gunakan template bawaan metode atau custom yang dipilih analis
-            $chosen_template_id = !empty($metode_item['template_id']) ? $metode_item['template_id'] : (isset($custom_template_ids[$m_id]) ? (int)$custom_template_ids[$m_id] : NULL);
+            // Dapatkan template_id: Prioritaskan template yang dipilih/di-override oleh Analis, jika tidak ada fallback ke template default metode
+            $custom_val = isset($custom_template_ids[$m_id]) ? (int)$custom_template_ids[$m_id] : 0;
+            $chosen_template_id = ($custom_val > 0) ? $custom_val : (!empty($metode_item['template_id']) ? (int)$metode_item['template_id'] : NULL);
 
             if (empty($chosen_template_id)) {
                 $this->session->set_flashdata('pesan_gagal', 'Parameter "' . html_escape($metode_item['parameter_uji']) . '" belum memiliki form LCP. Silakan pilih form LCP yang sesuai.');

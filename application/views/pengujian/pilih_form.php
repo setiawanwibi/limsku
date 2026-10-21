@@ -78,22 +78,18 @@
                                     <th>METODE ANALISA</th>
                                     <th>PERSYARATAN / BAKU MUTU</th>
                                     <th>PUSTAKA ACUAN</th>
-                                    <th>STATUS PEMETAAN LCP</th>
+                                    <th width="35%">FORM LCP PENGUJIAN (FLEKSIBEL)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($parameter_monografi as $p): ?>
                                     <?php $is_mapped = !empty($p['template_id']); ?>
-                                    <tr class="<?php echo $is_mapped ? '' : 'table-light text-muted opacity-75'; ?>">
+                                    <tr>
                                         <td class="text-center">
-                                            <?php if ($is_mapped): ?>
-                                                <input class="form-check-input form-check-parameter" type="checkbox" name="method_ids[]" value="<?php echo $p['id']; ?>" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
-                                            <?php else: ?>
-                                                <input class="form-check-input form-check-parameter" type="checkbox" name="method_ids[]" value="<?php echo $p['id']; ?>" id="chk_metode_<?php echo $p['id']; ?>" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
-                                            <?php endif; ?>
+                                            <input class="form-check-input form-check-parameter" type="checkbox" name="method_ids[]" value="<?php echo $p['id']; ?>" id="chk_metode_<?php echo $p['id']; ?>" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
                                         </td>
                                         <td>
-                                            <strong class="text-dark">
+                                            <strong class="text-dark d-block">
                                                 <?php echo html_escape($p['parameter_uji']); ?>
                                             </strong>
                                             <small class="d-block text-muted"><code><?php echo html_escape($p['kode_metode']); ?></code></small>
@@ -102,24 +98,32 @@
                                         <td><small class="text-muted"><?php echo html_escape($p['persyaratan'] ?: '-'); ?></small></td>
                                         <td><?php echo html_escape($p['pustaka_acuan'] ?: '-'); ?></td>
                                         <td>
-                                            <?php if ($is_mapped): ?>
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> [<?php echo html_escape($p['kode_template']); ?>] <?php echo html_escape($p['nama_template']); ?>
-                                                </span>
-                                            <?php else: ?>
-                                                <div class="d-flex align-items-center gap-1">
-                                                    <select class="form-select form-select-sm border-warning select-custom-template" name="custom_template_ids[<?php echo $p['id']; ?>]">
-                                                        <option value="">-- Pilih Form LCP <?php echo html_escape($jenis_pengujian); ?> --</option>
-                                                        <?php if (!empty($daftar_template_bidang)): ?>
-                                                            <?php foreach ($daftar_template_bidang as $tpl_b): ?>
-                                                                <option value="<?php echo $tpl_b['id']; ?>" <?php echo (($jenis_pengujian === 'Mikrobiologi' && $tpl_b['kode_template'] === 'MIK-04') || ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01')) ? 'selected' : ''; ?>>
-                                                                    [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </div>
-                                            <?php endif; ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <select class="form-select form-select-sm border-<?php echo $is_mapped ? 'secondary-subtle' : 'warning'; ?> select-custom-template" name="custom_template_ids[<?php echo $p['id']; ?>]" id="sel_lcp_<?php echo $p['id']; ?>" style="font-size: 0.8rem;">
+                                                    <option value="">-- Pilih Form LCP <?php echo html_escape($jenis_pengujian); ?> --</option>
+                                                    <?php if (!empty($daftar_template_bidang)): ?>
+                                                        <?php foreach ($daftar_template_bidang as $tpl_b): ?>
+                                                            <?php 
+                                                                $is_default = ($p['template_id'] == $tpl_b['id']);
+                                                                $is_fallback_select = (!$is_mapped && (($jenis_pengujian === 'Mikrobiologi' && $tpl_b['kode_template'] === 'MIK-04') || ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01')));
+                                                                $selected = ($is_default || $is_fallback_select) ? 'selected' : '';
+                                                            ?>
+                                                            <option value="<?php echo $tpl_b['id']; ?>" <?php echo $selected; ?>>
+                                                                [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?><?php echo $is_default ? ' ★ (Default)' : ''; ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
+                                                <?php if ($is_mapped): ?>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2" style="font-size: 0.7rem; white-space: nowrap;" title="Sesuai pemetaan acuan monografi">
+                                                        <i class="bi bi-shield-check"></i> Default
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2" style="font-size: 0.7rem; white-space: nowrap;" title="Belum ada pemetaan default, silakan pilih">
+                                                        <i class="bi bi-exclamation-circle"></i> Custom
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -134,8 +138,12 @@
                 <?php endif; ?>
 
                 <div class="alert alert-info border-info small mb-4" role="alert">
-                    <i class="bi bi-info-circle-fill me-1"></i>
-                    <strong>Aturan SOP Pengujian:</strong> Hanya parameter yang memiliki pemetaan resmi ke template LCP yang dapat dipilih. Parameter tanpa mapping ditolak oleh sistem untuk mencegah pengujian tanpa form standar.
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle-fill text-info fs-5"></i>
+                        <div>
+                            <strong>Fleksibilitas Pengujian Laboratorium:</strong> Form LCP telah dipilihkan otomatis sesuai standar Monografi (★ Default). Jika pengujian di laboratorium menggunakan instrumen atau metode alternatif, analis dapat mengubah pilihan Form LCP secara fleksibel pada kolom dropdown di atas sebelum memulai sesi pengujian.
+                        </div>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center pt-3 border-top">
@@ -163,16 +171,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.form-check-parameter');
     const counterBadge = document.getElementById('badge-counter');
     const submitBtn = document.getElementById('btn-submit-sesi');
+    const templateSelects = document.querySelectorAll('.select-custom-template');
 
     function updateCounter() {
         if (!counterBadge || !submitBtn) return;
         let count = 0;
+        let hasInvalidSelection = false;
+
         checkboxes.forEach(function(cb) {
-            if (cb.checked) count++;
+            if (cb.checked) {
+                count++;
+                const row = cb.closest('tr');
+                const sel = row ? row.querySelector('.select-custom-template') : null;
+                if (sel && (!sel.value || sel.value === '')) {
+                    hasInvalidSelection = true;
+                }
+            }
         });
 
         counterBadge.textContent = count + ' parameter dipilih';
-        if (count > 0) {
+        if (count > 0 && !hasInvalidSelection) {
             counterBadge.className = 'badge bg-success px-3 py-2 fs-6';
             submitBtn.disabled = false;
         } else {
@@ -183,6 +201,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     checkboxes.forEach(function(cb) {
         cb.addEventListener('change', updateCounter);
+    });
+
+    templateSelects.forEach(function(sel) {
+        sel.addEventListener('change', function() {
+            const row = sel.closest('tr');
+            const cb = row ? row.querySelector('.form-check-parameter') : null;
+            if (cb && sel.value !== '' && !cb.checked) {
+                cb.checked = true;
+            }
+            updateCounter();
+        });
     });
 
     updateCounter();
