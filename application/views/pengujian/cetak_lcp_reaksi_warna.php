@@ -561,6 +561,9 @@ if (!empty($p['foto_pengamatan'])) {
                 <td style="font-size: 7.5pt; font-style: italic;">Ket: *Coret yang tidak perlu</td>
                 <td class="text-right" style="font-size: 7.5pt;">Lembar 1 dari 1 Halaman</td>
             </tr>
+            <tr>
+                <td colspan="2" style="font-size: 8pt; font-weight: bold; padding-top: 2px;">POM-06.02/CFM.01/SOP.01/F.01A.01</td>
+            </tr>
         </table>
     </div>
 </body>
