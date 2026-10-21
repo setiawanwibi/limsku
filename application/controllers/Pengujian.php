@@ -1386,6 +1386,37 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // --- KHUSUS FORM LCP KIM-10: PEMERIAN (ORGANOLEPTIS) ---
+        if (
+            (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'KIM-10') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'pemerian') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'pemerian') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'organoleptis') !== false) ||
+            (!empty($hasil['sop_number']) && stripos($hasil['sop_number'], 'F.01A.25') !== false)
+        ) {
+            $this->catat_audit('VIEW_LCP_PEMERIAN', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-10'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_pemerian', $view_data);
+            return;
+        }
+
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_semua();
 
