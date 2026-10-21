@@ -1,0 +1,388 @@
+{
+  "kode_template": "KIM-09",
+  "nama_template": "Kromatografi Gas Spektrometri Massa (GC-MS)",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.17",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - KROMATOGRAFI GAS SPEKTROMETRI MASSA",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "kondisi_alat_gcms",
+        "title": "Kondisi Instrumen GC-MS & Parameter Kromatografi",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.17. Parameter alat, gas pembawa, suhu oven/injektor, autosampler headspace, transferline, dan ion source.",
+        "fields": [
+          {
+            "id": "merk_alat",
+            "label": "Merk Alat GC-MS",
+            "type": "text",
+            "placeholder": "Contoh: Agilent / Shimadzu / Thermo"
+          },
+          {
+            "id": "tipe_seri",
+            "label": "Tipe / Seri",
+            "type": "text",
+            "placeholder": "Contoh: 7890B GC / 5977B MSD"
+          },
+          {
+            "id": "detektor",
+            "label": "Detektor",
+            "type": "text",
+            "placeholder": "Contoh: Mass Spectrometry (MSD)"
+          },
+          {
+            "id": "kondisi_analisis",
+            "label": "Kondisi Analisis",
+            "type": "select",
+            "options": ["Sesuai prosedur", "Adjusment"],
+            "default": "Sesuai prosedur"
+          },
+          {
+            "id": "kondisi_adjusment",
+            "label": "Kondisi Adjusment (jika ada)",
+            "type": "text"
+          },
+          {
+            "id": "gas_pembawa",
+            "label": "Gas Pembawa",
+            "type": "text",
+            "placeholder": "Contoh: Helium (He) High Purity 99.999%"
+          },
+          {
+            "id": "pelarut",
+            "label": "Pelarut",
+            "type": "text"
+          },
+          {
+            "id": "suhu_injektor",
+            "label": "Suhu Injektor (°C)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 250"
+          },
+          {
+            "id": "suhu_kolom_program",
+            "label": "Program Suhu Kolom (Oven)",
+            "type": "textarea",
+            "placeholder": "Suhu Awal (°C), Kenaikan (°C/menit), Suhu Akhir (°C), Waktu Tahan (menit)"
+          },
+          {
+            "id": "suhu_detektor",
+            "label": "Suhu Detektor (°C)",
+            "type": "number",
+            "step": "any"
+          },
+          {
+            "id": "suhu_ion_source",
+            "label": "Suhu Ion Source (°C)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 230"
+          },
+          {
+            "id": "suhu_interface",
+            "label": "Suhu Interface / Transferline (°C)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 280"
+          },
+          {
+            "id": "solvent_cut_time",
+            "label": "Solvent Cut Time (menit)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 3.5"
+          },
+          {
+            "id": "mode_penyuntikan",
+            "label": "Mode Penyuntikan",
+            "type": "select",
+            "options": ["Split", "Splitless"],
+            "default": "Split"
+          },
+          {
+            "id": "split_ratio",
+            "label": "Split Ratio (jika split)",
+            "type": "text",
+            "placeholder": "Contoh: 1:10 / 1:20"
+          },
+          {
+            "id": "volume_penyuntikan",
+            "label": "Volume Penyuntikan (µL)",
+            "type": "number",
+            "step": "any",
+            "placeholder": "Contoh: 1.0"
+          },
+          {
+            "id": "kolom_dimensi",
+            "label": "Kolom GC",
+            "type": "text",
+            "placeholder": "Contoh: HP-5MS (30 m x 0.25 mm x 0.25 µm)"
+          },
+          {
+            "id": "laju_alir_pressure",
+            "label": "Laju Alir / Pressure",
+            "type": "text",
+            "placeholder": "Contoh: 1.0 mL/menit (Constant Flow)"
+          },
+          {
+            "id": "headspace_info",
+            "label": "Autosampler Headspace (jika digunakan)",
+            "type": "text",
+            "placeholder": "Suhu inkubasi, Waktu inkubasi, Agitator speed, Suhu syringe"
+          }
+        ]
+      },
+      {
+        "id": "akuisisi_ms_baku",
+        "title": "Parameter Akuisisi MS & Baku Pembanding",
+        "description": "Pemilihan ion target (Quantifier) dan ion konfirmasi (Qualifier 1, 2, 3), serta data baku pembanding & internal.",
+        "fields": [
+          {
+            "id": "ms_nama_senyawa",
+            "label": "Nama Senyawa Target MS",
+            "type": "text"
+          },
+          {
+            "id": "quantifier_ion",
+            "label": "Quantifier Ion (m/z)",
+            "type": "text",
+            "placeholder": "Contoh: 194"
+          },
+          {
+            "id": "qualifier_ion_1",
+            "label": "Qualifier Ion 1 (m/z)",
+            "type": "text",
+            "placeholder": "Contoh: 109"
+          },
+          {
+            "id": "qualifier_ion_2",
+            "label": "Qualifier Ion 2 (m/z)",
+            "type": "text",
+            "placeholder": "Contoh: 67"
+          },
+          {
+            "id": "qualifier_ion_3",
+            "label": "Qualifier Ion 3 (m/z)",
+            "type": "text"
+          },
+          {
+            "id": "baku_nama",
+            "label": "Nama Baku Pembanding",
+            "type": "text"
+          },
+          {
+            "id": "baku_no_kontrol",
+            "label": "Nomor Kontrol Baku",
+            "type": "text"
+          },
+          {
+            "id": "baku_kadar",
+            "label": "Kadar Baku (%)",
+            "type": "number",
+            "step": "any"
+          },
+          {
+            "id": "baku_sp",
+            "label": "Susut Pengeringan / Kadar Air Baku (%)",
+            "type": "number",
+            "step": "any"
+          },
+          {
+            "id": "internal_nama",
+            "label": "Nama Baku Internal",
+            "type": "text"
+          },
+          {
+            "id": "internal_no_kontrol",
+            "label": "Nomor Kontrol Baku Internal",
+            "type": "text"
+          },
+          {
+            "id": "status_kromatogram_uks",
+            "label": "Kromatogram Uji Kesesuaian Sistem",
+            "type": "select",
+            "options": ["Terlampir", "Tidak Diperlukan"],
+            "default": "Terlampir"
+          },
+          {
+            "id": "status_kromatogram_sampel",
+            "label": "Kromatogram Baku, Sampel, Spiked Sample",
+            "type": "select",
+            "options": ["Terlampir", "Tidak Diperlukan"],
+            "default": "Terlampir"
+          }
+        ]
+      },
+      {
+        "id": "tabel_pengujian_gcms",
+        "title": "Tabel Pengujian, Pengukuran Area & Rasio Ion",
+        "description": "Perhitungan Bobot Bersih = (Wadah+Zat) - (Wadah+Sisa). Rasio Ion 1 = B/A, Rasio Ion 2 = C/A, Rasio Ion 3 = D/A. Rasio Area = Zat Uji / Baku Internal.",
+        "fields": [
+          {
+            "id": "tabel_gcms",
+            "type": "table",
+            "label": "Data Pengukuran GC-MS",
+            "columns": [
+              {"id": "kategori", "label": "Kategori / Nama Zat", "type": "text", "readonly": true},
+              {"id": "wadah_zat", "label": "Wadah + Zat (g)", "type": "number", "step": "any"},
+              {"id": "wadah_sisa", "label": "Wadah + Sisa (g)", "type": "number", "step": "any"},
+              {"id": "bobot_bersih", "label": "Bobot Bersih (g)", "type": "number", "step": "any", "readonly": true},
+              {"id": "faktor_pengenceran", "label": "Faktor Pengenceran", "type": "number", "step": "any"},
+              {"id": "konsentrasi", "label": "Konsentrasi", "type": "text"},
+              {"id": "waktu_retensi", "label": "Rt (menit)", "type": "number", "step": "any"},
+              {"id": "area_quantifier", "label": "Quantifier (A)", "type": "number", "step": "any"},
+              {"id": "area_qualifier_1", "label": "Qualifier 1 (B)", "type": "number", "step": "any"},
+              {"id": "area_qualifier_2", "label": "Qualifier 2 (C)", "type": "number", "step": "any"},
+              {"id": "area_qualifier_3", "label": "Qualifier 3 (D)", "type": "number", "step": "any"},
+              {"id": "rasio_ion_1", "label": "Rasio 1 (B/A)", "type": "number", "step": "any", "readonly": true},
+              {"id": "rasio_ion_2", "label": "Rasio 2 (C/A)", "type": "number", "step": "any", "readonly": true},
+              {"id": "rasio_ion_3", "label": "Rasio 3 (D/A)", "type": "number", "step": "any", "readonly": true},
+              {"id": "rasio_area_internal", "label": "Rasio Area (Uji/Int)", "type": "number", "step": "any"}
+            ],
+            "default_rows": [
+              {"kategori": "Baku Pembanding", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "Baku Internal", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "1. Zat Uji", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "   Baku Internal Zat Uji 1", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "2. Zat Uji", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "   Baku Internal Zat Uji 2", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "Spiked Sample: Zat Uji", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""},
+              {"kategori": "Spiked Sample: Baku", "wadah_zat": "", "wadah_sisa": "", "bobot_bersih": "", "faktor_pengenceran": "", "konsentrasi": "", "waktu_retensi": "", "area_quantifier": "", "area_qualifier_1": "", "area_qualifier_2": "", "area_qualifier_3": "", "rasio_ion_1": "", "rasio_ion_2": "", "rasio_ion_3": "", "rasio_area_internal": ""}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "evaluasi_rasio_ion",
+        "title": "Evaluasi Keberterimaan Rasio Ion & Identifikasi",
+        "description": "Syarat keberterimaan ion ratio: ± 40% dari baku pembanding atau sesuai tabel monografi.",
+        "fields": [
+          {
+            "id": "rasio_ion_1_rentang_baku",
+            "label": "Rasio Ion 1 - Rentang Toleransi Baku",
+            "type": "text",
+            "placeholder": "Contoh: 0.250 - 0.450"
+          },
+          {
+            "id": "rasio_ion_1_kesimpulan",
+            "label": "Rasio Ion 1 - Kesimpulan",
+            "type": "select",
+            "options": ["MS", "TMS"],
+            "default": "MS"
+          },
+          {
+            "id": "rasio_ion_2_rentang_baku",
+            "label": "Rasio Ion 2 - Rentang Toleransi Baku",
+            "type": "text"
+          },
+          {
+            "id": "rasio_ion_2_kesimpulan",
+            "label": "Rasio Ion 2 - Kesimpulan",
+            "type": "select",
+            "options": ["MS", "TMS"],
+            "default": "MS"
+          },
+          {
+            "id": "rasio_ion_3_rentang_baku",
+            "label": "Rasio Ion 3 - Rentang Toleransi Baku",
+            "type": "text"
+          },
+          {
+            "id": "rasio_ion_3_kesimpulan",
+            "label": "Rasio Ion 3 - Kesimpulan",
+            "type": "select",
+            "options": ["MS", "TMS"],
+            "default": "MS"
+          },
+          {
+            "id": "rumus_perhitungan",
+            "label": "Rumus Perhitungan",
+            "type": "textarea",
+            "placeholder": "Kadar = (Lu / Lb) x (Bb / Bu) x ..."
+          },
+          {
+            "id": "hasil_identifikasi",
+            "label": "Hasil Uji (Identifikasi)",
+            "type": "select",
+            "options": ["Positif", "Negatif", "Sesuai", "Tidak Sesuai"],
+            "default": "Positif"
+          },
+          {
+            "id": "hasil_ketidakpastian",
+            "label": "Hasil ± Ketidakpastian",
+            "type": "text",
+            "placeholder": "Contoh: 98.50 ± 1.20 %"
+          },
+          {
+            "id": "decision_rule",
+            "label": "Aturan Keputusan (Decision Rule)",
+            "type": "select",
+            "options": ["Simple Acceptance", "Guard Band"],
+            "default": "Simple Acceptance"
+          },
+          {
+            "id": "nilai_rpd",
+            "label": "Nilai RPD / RSD (%)",
+            "type": "number",
+            "step": "any"
+          },
+          {
+            "id": "syarat_rpd",
+            "label": "Syarat RPD / RSD",
+            "type": "text"
+          },
+          {
+            "id": "lod_loq",
+            "label": "LOD / LOQ",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "kesimpulan_gcms",
+        "title": "Pustaka Persyaratan & Kesimpulan Akhir",
+        "description": "Pustaka acuan monografi, syarat keberterimaan, dan keputusan akhir.",
+        "fields": [
+          {
+            "id": "pustaka_metode",
+            "label": "Pustaka Metode",
+            "type": "textarea"
+          },
+          {
+            "id": "pustaka_persyaratan",
+            "label": "Pustaka Persyaratan",
+            "type": "textarea"
+          },
+          {
+            "id": "syarat",
+            "label": "Syarat Persyaratan",
+            "type": "text"
+          },
+          {
+            "id": "tolerance_limit",
+            "label": "Tolerance Limit",
+            "type": "text"
+          },
+          {
+            "id": "acceptance_limit",
+            "label": "Acceptance Limit",
+            "type": "text"
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)"
+          },
+          {
+            "id": "tanggal_laporan",
+            "label": "Tanggal Laporan",
+            "type": "date"
+          }
+        ]
+      }
+    ]
+  }
+}

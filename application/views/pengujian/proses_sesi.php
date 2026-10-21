@@ -1952,5 +1952,69 @@
                 hitungHPLC();
             }
         });
+
+        // =========================================================================
+        // Auto-Calculator Engine untuk Formulir GC-MS (KIM-09)
+        // Menghitung: Bobot Bersih = Wadah+Zat - Wadah+Sisa
+        // Rasio Ion: R1 = B/A, R2 = C/A, R3 = D/A
+        // =========================================================================
+        function hitungGCMS() {
+            var gcmsRows = document.querySelectorAll('tr:has(input[name*="[area_quantifier]"])');
+            if (!gcmsRows || gcmsRows.length === 0) {
+                var allA = document.querySelectorAll('input[name*="[area_quantifier]"]');
+                allA.forEach(function(aEl) {
+                    var tr = aEl.closest('tr');
+                    if (tr) hitungBarisGCMS(tr);
+                });
+            } else {
+                gcmsRows.forEach(function(row) {
+                    hitungBarisGCMS(row);
+                });
+            }
+        }
+
+        function hitungBarisGCMS(tr) {
+            // Bobot Bersih
+            var wZatInput = tr.querySelector('input[name*="[wadah_zat]"]');
+            var wSisaInput = tr.querySelector('input[name*="[wadah_sisa]"]');
+            var bBersihInput = tr.querySelector('input[name*="[bobot_bersih]"]');
+
+            if (wZatInput && wSisaInput && bBersihInput) {
+                var wZat = parseFloat(wZatInput.value) || 0;
+                var wSisa = parseFloat(wSisaInput.value) || 0;
+                if (wZat > 0 && wSisa > 0 && wZat >= wSisa) {
+                    bBersihInput.value = (wZat - wSisa).toFixed(4);
+                }
+            }
+
+            // Rasio Ion
+            var aInput = tr.querySelector('input[name*="[area_quantifier]"]');
+            var bInput = tr.querySelector('input[name*="[area_qualifier_1]"]');
+            var cInput = tr.querySelector('input[name*="[area_qualifier_2]"]');
+            var dInput = tr.querySelector('input[name*="[area_qualifier_3]"]');
+
+            var r1Input = tr.querySelector('input[name*="[rasio_ion_1]"]');
+            var r2Input = tr.querySelector('input[name*="[rasio_ion_2]"]');
+            var r3Input = tr.querySelector('input[name*="[rasio_ion_3]"]');
+
+            var A = parseFloat(aInput ? aInput.value : 0) || 0;
+            var B = parseFloat(bInput ? bInput.value : 0) || 0;
+            var C = parseFloat(cInput ? cInput.value : 0) || 0;
+            var D = parseFloat(dInput ? dInput.value : 0) || 0;
+
+            if (A > 0) {
+                if (r1Input && B > 0) r1Input.value = (B / A).toFixed(3);
+                if (r2Input && C > 0) r2Input.value = (C / A).toFixed(3);
+                if (r3Input && D > 0) r3Input.value = (D / A).toFixed(3);
+            }
+        }
+
+        // Listener GC-MS input
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('input[name*="[tabel_gcms]"]')) {
+                var tr = e.target.closest('tr');
+                if (tr) hitungBarisGCMS(tr);
+            }
+        });
     });
 </script>
