@@ -2016,5 +2016,92 @@
                 if (tr) hitungBarisGCMS(tr);
             }
         });
+
+        // =========================================================================
+        // Auto-Calculator Engine untuk Formulir Penetapan pH (KIM-11)
+        // Rata-rata = (pH 1 + pH 2) / 2
+        // =========================================================================
+        function hitungPH() {
+            var ph1Input = document.querySelector('input[name*="[ph_uji_1]"]');
+            var ph2Input = document.querySelector('input[name*="[ph_uji_2]"]');
+            var phRataInput = document.querySelector('input[name*="[ph_rata_rata]"]');
+
+            if (ph1Input && ph2Input && phRataInput) {
+                var p1 = parseFloat(ph1Input.value);
+                var p2 = parseFloat(ph2Input.value);
+                if (!isNaN(p1) && !isNaN(p2)) {
+                    phRataInput.value = ((p1 + p2) / 2).toFixed(2);
+                }
+            }
+        }
+
+        // Listener pH input
+        document.addEventListener('input', function(e) {
+            if (e.target && (e.target.name && (e.target.name.indexOf('[ph_uji_1]') !== -1 || e.target.name.indexOf('[ph_uji_2]') !== -1))) {
+                hitungPH();
+            }
+        });
+
+        // =========================================================================
+        // Auto-Calculator Engine untuk Formulir Penetapan Bobot Jenis (KIM-12)
+        // Bobot Zat = W1 - W0, Bobot Air = W2 - W0, BJ = (W1 - W0) / (W2 - W0)
+        // =========================================================================
+        function hitungBobotJenis() {
+            var rows = document.querySelectorAll('tr:has(input[name*="[bobot_1]"])');
+            var w = [null, null, null]; // W0, W1, W2
+
+            for (var i = 0; i < 3; i++) {
+                var b1Input = document.querySelector('input[name*="[tabel_penimbangan][' + i + '][bobot_1]"]');
+                var b2Input = document.querySelector('input[name*="[tabel_penimbangan][' + i + '][bobot_2]"]');
+                var rataInput = document.querySelector('input[name*="[tabel_penimbangan][' + i + '][rata_rata]"]');
+
+                if (b1Input) {
+                    var v1 = parseFloat(b1Input.value);
+                    var v2 = parseFloat(b2Input ? b2Input.value : NaN);
+
+                    if (!isNaN(v1) && !isNaN(v2)) {
+                        var mean = (v1 + v2) / 2;
+                        if (rataInput) rataInput.value = mean.toFixed(4);
+                        w[i] = mean;
+                    } else if (!isNaN(v1)) {
+                        if (rataInput) rataInput.value = v1.toFixed(4);
+                        w[i] = v1;
+                    }
+                }
+            }
+
+            var w0 = w[0];
+            var w1 = w[1];
+            var w2 = w[2];
+
+            var zatEl = document.querySelector('input[name*="[bobot_zat_bersih]"]');
+            var airEl = document.querySelector('input[name*="[bobot_air_bersih]"]');
+            var bjEl = document.querySelector('input[name*="[nilai_bobot_jenis]"]');
+
+            if (w0 !== null && w1 !== null) {
+                var bZat = w1 - w0;
+                if (zatEl) zatEl.value = bZat.toFixed(4);
+            }
+
+            if (w0 !== null && w2 !== null) {
+                var bAir = w2 - w0;
+                if (airEl) airEl.value = bAir.toFixed(4);
+            }
+
+            if (w0 !== null && w1 !== null && w2 !== null) {
+                var bZat = w1 - w0;
+                var bAir = w2 - w0;
+                if (bAir > 0 && bjEl) {
+                    bjEl.value = (bZat / bAir).toFixed(4);
+                }
+            }
+        }
+
+        // Listener Bobot Jenis input
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('input[name*="[tabel_penimbangan]"]')) {
+                hitungBobotJenis();
+            }
+        });
     });
 </script>

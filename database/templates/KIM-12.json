@@ -1,0 +1,109 @@
+{
+  "kode_template": "KIM-12",
+  "nama_template": "Penetapan Bobot Jenis",
+  "kategori": "Kimia",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.28",
+    "judul": "LAMPIRAN CATATAN PENGUJIAN - BOBOT JENIS",
+    "kategori": "Kimia",
+    "sections": [
+      {
+        "id": "info_alat_bj",
+        "title": "Instrumen Neraca & Piknometer",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.28. Instrumen timbangan analitik dan piknometer kalibrasi.",
+        "fields": [
+          {
+            "id": "merk_alat",
+            "label": "Merk Alat Timbangan / Piknometer",
+            "type": "text",
+            "placeholder": "Contoh: Mettler Toledo / Sartorius / Iwaki"
+          },
+          {
+            "id": "tipe_seri",
+            "label": "Tipe / Seri / Volume Piknometer",
+            "type": "text",
+            "placeholder": "Contoh: MS204TS / Piknometer 25 mL"
+          }
+        ]
+      },
+      {
+        "id": "penimbangan_bobot_jenis",
+        "title": "Tabel Penimbangan & Perhitungan Bobot Jenis (BJ)",
+        "description": "Formula: Bobot Zat = W1 - W0, Bobot Air = W2 - W0. Bobot Jenis = (W1 - W0) / (W2 - W0).",
+        "fields": [
+          {
+            "id": "tabel_penimbangan",
+            "type": "table",
+            "label": "Data Penimbangan Piknometer",
+            "columns": [
+              {"id": "komponen", "label": "Yang Ditimbang", "type": "text", "readonly": true},
+              {"id": "bobot_1", "label": "Bobot 1 (g)", "type": "number", "step": "any"},
+              {"id": "bobot_2", "label": "Bobot 2 (g)", "type": "number", "step": "any"},
+              {"id": "rata_rata", "label": "Rata-rata (g)", "type": "number", "step": "any", "readonly": true}
+            ],
+            "default_rows": [
+              {"komponen": "Piknometer Kosong (W0)", "bobot_1": "", "bobot_2": "", "rata_rata": ""},
+              {"komponen": "Piknometer + Zat (W1)", "bobot_1": "", "bobot_2": "", "rata_rata": ""},
+              {"komponen": "Piknometer + Air (W2)", "bobot_1": "", "bobot_2": "", "rata_rata": ""}
+            ]
+          },
+          {
+            "id": "bobot_zat_bersih",
+            "label": "Bobot Zat Uji (W1 - W0) [g]",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "bobot_air_bersih",
+            "label": "Bobot Air (W2 - W0) [g]",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          },
+          {
+            "id": "nilai_bobot_jenis",
+            "label": "Bobot Jenis (BJ) = (W1 - W0) / (W2 - W0)",
+            "type": "number",
+            "step": "any",
+            "readonly": true
+          }
+        ]
+      },
+      {
+        "id": "evaluasi_bj",
+        "title": "Pustaka Persyaratan & Kesimpulan",
+        "description": "Pustaka acuan monografi dan syarat rentang Bobot Jenis.",
+        "fields": [
+          {
+            "id": "pustaka",
+            "label": "Pustaka Acuan",
+            "type": "text",
+            "default": "FI VI"
+          },
+          {
+            "id": "syarat_bj",
+            "label": "Syarat Bobot Jenis Monografi",
+            "type": "text",
+            "placeholder": "Contoh: Antara 1.010 dan 1.030",
+            "required": true
+          },
+          {
+            "id": "kesimpulan",
+            "label": "Kesimpulan",
+            "type": "select",
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
+            "default": "Memenuhi Syarat (MS)",
+            "required": true
+          },
+          {
+            "id": "tanggal_laporan",
+            "label": "Tanggal Laporan",
+            "type": "date",
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+}

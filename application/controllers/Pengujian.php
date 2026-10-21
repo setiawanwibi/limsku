@@ -1417,6 +1417,67 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // --- KHUSUS FORM LCP KIM-11: PENETAPAN pH ---
+        if (
+            (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'KIM-11') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'ph') !== false) ||
+            (!empty($hasil['nama_pengujian']) && (stripos($hasil['nama_pengujian'], 'penetapan ph') !== false || strtolower(trim($hasil['nama_pengujian'])) === 'ph')) ||
+            (!empty($hasil['sop_number']) && stripos($hasil['sop_number'], 'F.01A.27') !== false)
+        ) {
+            $this->catat_audit('VIEW_LCP_PH', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-11'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_ph', $view_data);
+            return;
+        }
+
+        // --- KHUSUS FORM LCP KIM-12: PENETAPAN BOBOT JENIS ---
+        if (
+            (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'KIM-12') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'bobot jenis') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'bobot jenis') !== false) ||
+            (!empty($hasil['nama_pengujian']) && stripos($hasil['nama_pengujian'], 'bj') !== false) ||
+            (!empty($hasil['sop_number']) && stripos($hasil['sop_number'], 'F.01A.28') !== false)
+        ) {
+            $this->catat_audit('VIEW_LCP_BOBOT_JENIS', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'KIM-12'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_bobot_jenis', $view_data);
+            return;
+        }
+
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_semua();
 
