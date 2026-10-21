@@ -3,14 +3,14 @@
   "nama_template": "Keragaman Bobot",
   "kategori": "Kimia",
   "skema_form": {
-    "kode_dokumen": "",
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01A.02",
     "judul": "LAMPIRAN CATATAN PENGUJIAN - KERAGAMAN BOBOT",
     "kategori": "Kimia",
     "sections": [
       {
-        "id": "info_instrumen_dan_kadar",
-        "title": "Instrumen & Parameter Analisis",
-        "description": "Informasi timbangan analitik, bobot rata-rata 20 tablet/kapsul, kadar hasil uji, dan klaim etiket.",
+        "id": "info_sampel_instrumen",
+        "title": "Data Instrumen & Parameter Pengujian",
+        "description": "Formulir resmi POM-06.02/CFM.01/SOP.01/F.01A.02. Isi informasi timbangan analitik, bobot rata-rata, kadar hasil uji, dan klaim etiket.",
         "fields": [
           {
             "id": "zat_uji",
@@ -19,51 +19,63 @@
             "placeholder": "Contoh: Parasetamol"
           },
           {
-            "id": "tipe_sediaan",
-            "label": "Bentuk Sediaan",
-            "type": "select",
-            "options": ["Tablet", "Kapsul"],
-            "default": "Tablet"
-          },
-          {
-            "id": "merk_timbangan",
-            "label": "Merk / Tipe Timbangan",
+            "id": "merk_timbangan_1",
+            "label": "Merk/Tipe Timbangan (1)",
             "type": "text",
             "placeholder": "Contoh: Mettler Toledo MS204TS"
           },
           {
-            "id": "tgl_kalibrasi",
-            "label": "Tanggal Kalibrasi Timbangan",
+            "id": "tgl_kalibrasi_1",
+            "label": "Tanggal Kalibrasi (1)",
             "type": "text",
             "placeholder": "Contoh: 12 Januari 2026"
           },
           {
+            "id": "merk_timbangan_2",
+            "label": "Merk/Tipe Timbangan (2 - Opsional)",
+            "type": "text",
+            "placeholder": "Timbangan kedua jika digunakan..."
+          },
+          {
+            "id": "tgl_kalibrasi_2",
+            "label": "Tanggal Kalibrasi (2 - Opsional)",
+            "type": "text",
+            "placeholder": "Tanggal kalibrasi timbangan kedua..."
+          },
+          {
             "id": "bobot_rata_rata",
-            "label": "Bobot rata-rata 20 tablet/kapsul (mg)",
+            "label": "Bobot rata-rata (mg)",
             "type": "number",
             "step": "any",
-            "placeholder": "Contoh: 650.5"
+            "placeholder": "G14: Contoh 650.5"
+          },
+          {
+            "id": "satuan_sediaan",
+            "label": "Satuan Sediaan",
+            "type": "select",
+            "options": ["mg/tab", "mg/kaps"],
+            "default": "mg/tab"
           },
           {
             "id": "kadar_hasil_uji",
-            "label": "Kadar dari hasil uji (% atau mg/sediaan)",
+            "label": "Kadar dari hasil uji*",
             "type": "number",
             "step": "any",
-            "placeholder": "Contoh: 99.8"
+            "placeholder": "G15: Kadar dalam mg/tab atau mg/kaps"
           },
           {
             "id": "etiket",
-            "label": "Klaim Etiket (mg/sediaan)",
+            "label": "Etiket*",
             "type": "number",
             "step": "any",
-            "placeholder": "Contoh: 500"
+            "placeholder": "G16: Klaim etiket dalam mg/tab atau mg/kaps"
           }
         ]
       },
       {
         "id": "tahap_1",
-        "title": "Tahap 1 Pengujian (n = 10)",
-        "description": "Pengukuran penimbangan 10 unit sediaan tablet/kapsul pertama.",
+        "title": "Tahap 1 Pengujian (10 Unit)",
+        "description": "Data penimbangan dan perhitungan kadar unit sediaan No. 1 s/d 10. Nilai Netto, Kadar mg/tab, dan Kadar % dihitung otomatis persis rumus Excel.",
         "fields": [
           {
             "id": "tgl_uji_tahap1",
@@ -72,14 +84,14 @@
           },
           {
             "id": "tabel_tahap1",
-            "label": "Tabel Data Penimbangan Tahap 1 (10 Data)",
+            "label": "Tabel Bobot & Kadar Tahap 1",
             "type": "table",
             "columns": [
-              {"id": "no", "label": "No", "readonly": true},
+              {"id": "no", "label": "No.", "readonly": true},
               {"id": "bruto", "label": "Bruto (mg)"},
               {"id": "cangkang", "label": "Cangkang (mg)"},
               {"id": "netto", "label": "NETTO (mg)"},
-              {"id": "kadar_mg", "label": "Kadar (mg/sediaan)"},
+              {"id": "kadar_mg", "label": "mg/tab (atau kaps)"},
               {"id": "kadar_persen", "label": "Kadar (%)"}
             ],
             "default_rows": [
@@ -97,35 +109,35 @@
           },
           {
             "id": "x_rerata_tahap1",
-            "label": "X rerata (Kadar %)",
+            "label": "Xrerata (I30)",
             "type": "number",
             "step": "any",
-            "placeholder": "Rata-rata kadar %"
+            "placeholder": "AVERAGE(I20:I29)"
           },
           {
             "id": "sd_tahap1",
-            "label": "Standar Deviasi / SD (s)",
+            "label": "SD (s) (I31)",
             "type": "number",
             "step": "any",
-            "placeholder": "Nilai s"
+            "placeholder": "STDEV(I20:I29)"
           },
           {
             "id": "rsd_tahap1",
-            "label": "RSD (%)",
+            "label": "RSD (%) (I32)",
             "type": "number",
             "step": "any",
-            "placeholder": "Nilai RSD %"
+            "placeholder": "=I31/I30*100"
           }
         ]
       },
       {
         "id": "tahap_2",
-        "title": "Tahap 2 Pengujian (Tambahan 20 Unit jika Diperlukan)",
-        "description": "Lanjutan penimbangan unit No. 11 sampai 30 jika kriteria penerimaan Tahap 1 belum terpenuhi.",
+        "title": "Tahap 2 Pengujian (Tambahan 20 Unit No. 11 - 30)",
+        "description": "Lanjutan penimbangan jika Tahap 1 memerlukan pengujian 30 data.",
         "fields": [
           {
             "id": "lakukan_tahap2",
-            "label": "Lakukan Pengujian Tahap 2?",
+            "label": "Aktifkan Tahap 2?",
             "type": "select",
             "options": ["Tidak", "Ya"],
             "default": "Tidak"
@@ -137,14 +149,14 @@
           },
           {
             "id": "tabel_tahap2",
-            "label": "Tabel Data Penimbangan Tahap 2 (No 11 - 30)",
+            "label": "Tabel Bobot & Kadar Tahap 2 (No 11 - 30)",
             "type": "table",
             "columns": [
-              {"id": "no", "label": "No", "readonly": true},
+              {"id": "no", "label": "No.", "readonly": true},
               {"id": "bruto", "label": "Bruto (mg)"},
               {"id": "cangkang", "label": "Cangkang (mg)"},
               {"id": "netto", "label": "NETTO (mg)"},
-              {"id": "kadar_mg", "label": "Kadar (mg/sediaan)"},
+              {"id": "kadar_mg", "label": "mg/tab (atau kaps)"},
               {"id": "kadar_persen", "label": "Kadar (%)"}
             ],
             "default_rows": [
@@ -172,87 +184,84 @@
           },
           {
             "id": "x_rerata_30",
-            "label": "X rerata (30 data)",
+            "label": "Xrerata 30 data",
             "type": "number",
             "step": "any",
-            "placeholder": "Rata-rata 30 data"
+            "placeholder": "Rata-rata gabungan 30 data"
           },
           {
             "id": "sd_30",
-            "label": "SD s (30 data)",
+            "label": "SD (s) 30 data",
             "type": "number",
             "step": "any",
-            "placeholder": "SD 30 data"
+            "placeholder": "Standar Deviasi gabungan 30 data"
           },
           {
             "id": "rsd_30",
-            "label": "RSD (30 data %)",
+            "label": "RSD 30 data (%)",
             "type": "number",
             "step": "any",
-            "placeholder": "RSD 30 data"
+            "placeholder": "RSD gabungan 30 data"
           }
         ]
       },
       {
-        "id": "perhitungan_av",
-        "title": "Evaluasi Nilai Keberterimaan (Acceptance Value - AV)",
-        "description": "Perhitungan nilai AV berdasarkan Farmakope Indonesia (L1 <= 15.0).",
+        "id": "penilaian_av",
+        "title": "Evaluasi & Perhitungan Nilai Penerimaan (Acceptance Value)",
+        "description": "Perhitungan nilai M dan AV (Acceptance Value) sesuai tabel matriks kondisi Farmakope Indonesia.",
         "fields": [
           {
             "id": "nilai_k",
-            "label": "Faktor Penerimaan (k)",
+            "label": "k (Faktor Penerimaan)",
             "type": "text",
             "default": "2.4",
-            "placeholder": "2.4 untuk n=10, atau 2.0 untuk n=30"
+            "placeholder": "2.4 untuk n=10, 2.0 untuk n=30"
           },
           {
             "id": "target_t",
-            "label": "Target T (%)",
+            "label": "T (%) = Target",
             "type": "text",
-            "default": "100%",
+            "default": "100",
             "readonly": true
           },
           {
             "id": "nilai_m",
-            "label": "Nilai Rujukan M (%)",
+            "label": "M (Nilai Rujukan %)",
             "type": "number",
             "step": "any",
-            "placeholder": "Nilai M terhitung"
+            "placeholder": "M terhitung"
           },
           {
             "id": "nilai_av",
-            "label": "Nilai Keberterimaan (AV)",
+            "label": "AV (Nilai Keberterimaan)",
             "type": "number",
             "step": "any",
-            "placeholder": "Hasil AV (Acceptance Value)"
+            "placeholder": "Hasil kalkulasi AV"
           },
           {
             "id": "batas_l1",
-            "label": "Batas Maksimum L1 (%)",
+            "label": "L1 (Batas Maksimum AV)",
             "type": "text",
             "default": "15.0",
             "readonly": true
           },
           {
-            "id": "syarat_av",
-            "label": "Kriteria Persyaratan AV",
+            "id": "syarat",
+            "label": "Syarat",
             "type": "text",
-            "default": "AV dari 10 unit sediaan ≤ 15,0 % (Jika n=30, AV ≤ 15,0 % dan tidak ada unit < (1-L2*0.01)M atau > (1+L2*0.01)M)"
+            "default": "AV dari 10 unit ≤ 15,0 %"
           },
           {
             "id": "pustaka",
-            "label": "Pustaka Acuan",
+            "label": "Pustaka",
             "type": "text",
             "placeholder": "Contoh: Farmakope Indonesia Edisi VI <971> Keseragaman Sediaan"
           },
           {
             "id": "kesimpulan",
-            "label": "Kesimpulan Pengujian",
+            "label": "Kesimpulan",
             "type": "select",
-            "options": [
-              "Memenuhi Syarat (MS)",
-              "Tidak Memenuhi Syarat (TMS)"
-            ],
+            "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)"],
             "default": "Memenuhi Syarat (MS)"
           }
         ]
