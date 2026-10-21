@@ -115,10 +115,18 @@
                                                                 <?php
                                                                 $is_selected = false;
                                                                 if ($jenis_pengujian === 'Mikrobiologi') {
-                                                                    // Jika parameter adalah penghitungan mikroba / batas mikroba -> sarankan MIK-02 (AKK)
-                                                                    if ((stripos($p['parameter_uji'], 'hitung') !== false || stripos($p['parameter_uji'], 'kapang') !== false || stripos($p['parameter_uji'], 'khamir') !== false) && $tpl_b['kode_template'] === 'MIK-02') {
+                                                                    // Jika parameter adalah lempeng total / ALT -> sarankan MIK-01 (ALT)
+                                                                    if ((stripos($p['parameter_uji'], 'lempeng') !== false || stripos($p['parameter_uji'], 'alt') !== false) && $tpl_b['kode_template'] === 'MIK-01') {
+                                                                        $is_selected = true;
+                                                                    } elseif ((stripos($p['parameter_uji'], 'hitung') !== false || stripos($p['parameter_uji'], 'kapang') !== false || stripos($p['parameter_uji'], 'khamir') !== false) && $tpl_b['kode_template'] === 'MIK-02') {
                                                                         $is_selected = true;
                                                                     } elseif ($tpl_b['kode_template'] === 'MIK-04' && stripos($p['parameter_uji'], 'spesifik') !== false) {
+                                                                        $is_selected = true;
+                                                                    } elseif ($tpl_b['kode_template'] === 'MIK-03' && stripos($p['parameter_uji'], 'potensi') !== false) {
+                                                                        $is_selected = true;
+                                                                    } elseif ($tpl_b['kode_template'] === 'MIK-05' && stripos($p['parameter_uji'], 'endotoksin') !== false) {
+                                                                        $is_selected = true;
+                                                                    } elseif ($tpl_b['kode_template'] === 'MIK-06' && (stripos($p['parameter_uji'], 'kepekaan') !== false || stripos($p['parameter_uji'], 'lal') !== false)) {
                                                                         $is_selected = true;
                                                                     }
                                                                 } elseif ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01') {

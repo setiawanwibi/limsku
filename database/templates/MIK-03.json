@@ -1,0 +1,104 @@
+{
+  "kode_template": "MIK-03",
+  "nama_template": "Potensi Antibiotika Metode Lempeng-Silinder 5 Dosis",
+  "kategori": "Mikrobiologi",
+  "skema_form": {
+    "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01B.18",
+    "judul": "POTENSI ANTIBIOTIKA METODE LEMPENG-SILINDER 5 DOSIS",
+    "kategori": "Mikrobiologi",
+    "sections": [
+      {
+        "id": "kondisi_pengujian",
+        "title": "Kondisi dan Parameter Pengujian",
+        "description": "Pengaturan mikroba uji, media, inokulum, dan kondisi inkubasi.",
+        "fields": [
+          {"id": "mikroba_uji", "label": "1. Mikroba Uji", "type": "text", "placeholder": "Contoh: Saccharomyces cerevisiae ATCC 2601"},
+          {"id": "bobot_contoh", "label": "2. Penimbangan / Pemipetan Contoh", "type": "text", "placeholder": "Nilai bobot atau volume contoh"},
+          {"id": "satuan_contoh", "label": "Satuan Bobot/Volume", "type": "select", "options": ["g", "mL"], "default": "g"},
+          {"id": "medium_dasar", "label": "3. Medium Lapisan Dasar", "type": "text", "placeholder": "Contoh: Antibiotic Medium 1"},
+          {"id": "medium_inokulum", "label": "Medium Lapisan Inokulum", "type": "text", "placeholder": "Contoh: Antibiotic Medium 1"},
+          {"id": "pelarut_awal", "label": "4. Pelarut Awal", "type": "text", "placeholder": "Contoh: Dimetilformamida (DMF)"},
+          {"id": "pengencer", "label": "5. Pengencer", "type": "text", "placeholder": "Contoh: Dapar Kalium Fosfat 0.05 M pH 6.0"},
+          {"id": "suhu_inkubasi", "label": "6. Suhu Inkubasi (°C)", "type": "text", "default": "29 - 31"},
+          {"id": "waktu_inkubasi", "label": "Waktu Inkubasi (Jam)", "type": "text", "default": "16 - 18"},
+          {"id": "volume_penetesan", "label": "7. Volume Penetesan (µL)", "type": "text", "default": "100"},
+          {"id": "kekeruhan_mikroba", "label": "8. Kekeruhan Mikroba", "type": "text", "placeholder": "Contoh: 0.5 McF atau 25 %T"},
+          {"id": "satuan_kekeruhan", "label": "Satuan Kekeruhan", "type": "select", "options": ["McF", "%Transmitan"], "default": "McF"},
+          {"id": "konsentrasi_inokula", "label": "9. Konsentrasi Inokula", "type": "text", "placeholder": "Contoh: 1.0 %"}
+        ]
+      },
+      {
+        "id": "baku_potensi",
+        "title": "Baku Potensi Antibiotika & Dosis",
+        "description": "Informasi baku pembanding antibiotik dan dosis pengujian 5 tingkat (S1 - S5).",
+        "fields": [
+          {"id": "nama_baku", "label": "Nama Baku", "type": "text", "placeholder": "Contoh: Nistatin BPFI"},
+          {"id": "tgl_buka_baku", "label": "Tanggal Buka Kemasan Baku", "type": "date"},
+          {"id": "no_kontrol_baku", "label": "No. Kontrol / Lot", "type": "text"},
+          {"id": "nilai_potensi_baku", "label": "Nilai Potensi Baku", "type": "text", "placeholder": "Contoh: 5850"},
+          {"id": "satuan_potensi_baku", "label": "Satuan Potensi Baku", "type": "select", "options": ["µg/mg", "SI/mg"], "default": "SI/mg"},
+          {"id": "penimbangan_baku", "label": "Penimbangan Baku", "type": "text", "placeholder": "Contoh: 25.0 mg"},
+          {"id": "keterangan_penimbangan_baku", "label": "Keterangan Larutan Baku", "type": "textarea", "placeholder": "Keterangan volume pelarutan baku..."},
+          {"id": "rasio_dosis", "label": "11. Rasio Dosis", "type": "text", "default": "1 : 1.25"},
+          {"id": "dosis_s1", "label": "Dosis S1", "type": "text"},
+          {"id": "dosis_s2", "label": "Dosis S2", "type": "text"},
+          {"id": "dosis_s3", "label": "Dosis S3 (Dosis Acuan / Tengah)", "type": "text"},
+          {"id": "dosis_s4", "label": "Dosis S4", "type": "text"},
+          {"id": "dosis_s5", "label": "Dosis S5", "type": "text"},
+          {"id": "satuan_dosis", "label": "Satuan Dosis", "type": "select", "options": ["µg/mL", "SI/mL"], "default": "SI/mL"},
+          {"id": "metode_pengukuran_zona", "label": "12. Pengukuran Daerah Hambatan", "type": "select", "options": ["Automatic Zona Reader", "Manual"], "default": "Automatic Zona Reader"}
+        ]
+      },
+      {
+        "id": "perhitungan_larutan",
+        "title": "Perhitungan Larutan Baku (S1 - S5) & Larutan Uji",
+        "description": "Rincian langkah pengenceran dan perhitungan larutan baku serta larutan uji.",
+        "fields": [
+          {"id": "larutan_baku_s1", "label": "13a. Larutan Baku S1", "type": "textarea", "placeholder": "Rincian pengenceran S1..."},
+          {"id": "larutan_baku_s2", "label": "13b. Larutan Baku S2", "type": "textarea", "placeholder": "Rincian pengenceran S2..."},
+          {"id": "larutan_baku_s3", "label": "13c. Larutan Baku S3", "type": "textarea", "placeholder": "Rincian pengenceran S3..."},
+          {"id": "larutan_baku_s4", "label": "13d. Larutan Baku S4", "type": "textarea", "placeholder": "Rincian pengenceran S4..."},
+          {"id": "larutan_baku_s5", "label": "13e. Larutan Baku S5", "type": "textarea", "placeholder": "Rincian pengenceran S5..."},
+          {"id": "perhitungan_larutan_uji", "label": "14. Perhitungan Larutan Uji", "type": "textarea", "placeholder": "Rincian preparasi dan pengenceran sampel uji..."}
+        ]
+      },
+      {
+        "id": "perhitungan_rsd",
+        "title": "Perhitungan RSD Antar Cawan Petri",
+        "description": "Perhitungan %RSD presisi respons daerah hambatan antar cawan Petri (Syarat ≤ 10%).",
+        "fields": [
+          {"id": "rsd_s1_nilai", "label": "RSD S1 (%)", "type": "text"},
+          {"id": "rsd_s1_status", "label": "Status RSD S1", "type": "select", "options": ["Memenuhi", "Tidak Memenuhi"], "default": "Memenuhi"},
+          {"id": "rsd_s2_nilai", "label": "RSD S2 (%)", "type": "text"},
+          {"id": "rsd_s2_status", "label": "Status RSD S2", "type": "select", "options": ["Memenuhi", "Tidak Memenuhi"], "default": "Memenuhi"},
+          {"id": "rsd_s4_nilai", "label": "RSD S4 (%)", "type": "text"},
+          {"id": "rsd_s4_status", "label": "Status RSD S4", "type": "select", "options": ["Memenuhi", "Tidak Memenuhi"], "default": "Memenuhi"},
+          {"id": "rsd_s5_nilai", "label": "RSD S5 (%)", "type": "text"},
+          {"id": "rsd_s5_status", "label": "Status RSD S5", "type": "select", "options": ["Memenuhi", "Tidak Memenuhi"], "default": "Memenuhi"},
+          {"id": "rsd_uji_nilai", "label": "RSD Uji (%)", "type": "text"},
+          {"id": "rsd_uji_status", "label": "Status RSD Uji", "type": "select", "options": ["Memenuhi", "Tidak Memenuhi"], "default": "Memenuhi"},
+          {"id": "rsd_tengah_s1_nilai", "label": "RSD Dosis Tengah S3 pada S1 (%)", "type": "text"},
+          {"id": "rsd_tengah_s2_nilai", "label": "RSD Dosis Tengah S3 pada S2 (%)", "type": "text"},
+          {"id": "rsd_tengah_s4_nilai", "label": "RSD Dosis Tengah S3 pada S4 (%)", "type": "text"},
+          {"id": "rsd_tengah_s5_nilai", "label": "RSD Dosis Tengah S3 pada S5 (%)", "type": "text"},
+          {"id": "rsd_tengah_uji_nilai", "label": "RSD Dosis Tengah S3 pada Uji (%)", "type": "text"}
+        ]
+      },
+      {
+        "id": "kurva_baku_dan_hasil",
+        "title": "Kurva Baku & Potensi Sampel",
+        "description": "Linearitas kurva baku (%R2 ≥ 95%), potensi sampel, dan acuan pustaka.",
+        "fields": [
+          {"id": "kurva_r", "label": "Nilai R", "type": "text", "placeholder": "Contoh: 0.9985"},
+          {"id": "kurva_r2", "label": "Nilai R2", "type": "text", "placeholder": "Contoh: 0.9970"},
+          {"id": "kurva_persen_r2", "label": "Nilai %R2", "type": "text", "placeholder": "Contoh: 99.70"},
+          {"id": "kurva_status", "label": "Status Linearitas (%R2 ≥ 95%)", "type": "select", "options": ["Memenuhi", "Tidak Memenuhi"], "default": "Memenuhi"},
+          {"id": "potensi_sampel_persen", "label": "17. Potensi Sampel (%)", "type": "text", "placeholder": "Contoh: 102.5"},
+          {"id": "pustaka_metode", "label": "Pustaka / Metode Acuan", "type": "text", "default": "Farmakope Indonesia Edisi VI"},
+          {"id": "syarat_potensi", "label": "Syarat Potensi (%)", "type": "text", "placeholder": "Contoh: 90.0 - 120.0 %"},
+          {"id": "kesimpulan_status", "label": "Kesimpulan", "type": "select", "options": ["Memenuhi Syarat (MS)", "Tidak Memenuhi Syarat (TMS)", "Hasil Pengujian Seperti Tersebut (HPST)"], "default": "Memenuhi Syarat (MS)"}
+        ]
+      }
+    ]
+  }
+}

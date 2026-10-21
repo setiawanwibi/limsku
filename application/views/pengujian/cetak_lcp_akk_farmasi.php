@@ -164,9 +164,9 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
             justify-content: space-between;
         }
 
-        /* Box Utama Border Ganda (Outer Double Border) */
+        /* Box Utama Border Tunggal (Outer Solid Border sesuai Kualitatif) */
         .outer-border-box {
-            border: 3px double #000;
+            border: 1.5pt solid #000;
             padding: 3px 5px 4px 5px;
             display: flex;
             flex-direction: column;
@@ -257,20 +257,25 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
     <div class="document-wrapper">
         <div class="outer-border-box">
 
-            <!-- 1. KOP HEADER -->
-            <table class="excel-table">
-                <tr style="height: 18pt;">
-                    <td class="text-center text-bold" style="font-size: 11pt; letter-spacing: 0.5px;">LAMPIRAN CATATAN PENGUJIAN</td>
-                </tr>
-                <tr style="height: 17pt;">
-                    <td class="text-center text-bold" style="font-size: 10pt; letter-spacing: 0.3px;">UJI ANGKA KAPANG KHAMIR SEDIAAN FARMASI</td>
-                </tr>
-                <tr style="height: 18pt;">
-                    <td class="text-center text-bold" style="font-size: 9pt;">Laboratorium Mikrobiologi Balai Besar POM di Bandar Lampung</td>
+            <!-- 1. KOP HEADER RESMI DENGAN LOGO BPOM -->
+            <table class="excel-table" style="margin-bottom: 2px;">
+                <colgroup>
+                    <col style="width: 14%;">
+                    <col style="width: 86%;">
+                </colgroup>
+                <tr>
+                    <td class="text-center" style="vertical-align: middle; padding: 2px 4px 2px 2px;">
+                        <img src="<?php echo base_url('assets/img/bpom_logo_excel.png'); ?>" style="height: 48px; width: auto; max-width: 95%; display: block; margin: 0 auto;" alt="Logo BPOM">
+                    </td>
+                    <td class="text-center" style="vertical-align: middle; padding-right: 30px;">
+                        <div style="font-size: 11pt; font-weight: bold; letter-spacing: 0.5px;">LAMPIRAN CATATAN PENGUJIAN</div>
+                        <div style="font-size: 10pt; font-weight: bold; margin-top: 1px; letter-spacing: 0.3px;">UJI ANGKA KAPANG KHAMIR SEDIAAN FARMASI</div>
+                        <div style="font-size: 8.5pt; font-weight: bold; margin-top: 2px;">Laboratorium Mikrobiologi Balai Besar POM di Bandar Lampung</div>
+                    </td>
                 </tr>
             </table>
 
-            <div style="height: 4px;"></div>
+            <div style="height: 3px;"></div>
 
             <!-- 2. METADATA SAMPEL -->
             <table class="excel-table" style="border: 1pt solid #000;">
@@ -690,7 +695,7 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
             </div>
 
             <!-- 9. TANDA TANGAN (PENGUJI & PEMERIKSA / PENYELIA) -->
-            <table class="excel-table" style="border-bottom: 2px double #000;">
+            <table class="excel-table" style="border-bottom: 1pt solid #000;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
