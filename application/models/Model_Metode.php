@@ -686,18 +686,64 @@ class Model_Metode extends CI_Model
                 );
             }
         } elseif ($bidang === 'Mikrobiologi') {
-            if ($kanonis_param === 'Batas Mikroba' && isset($tpl_by_code['MIK-04'])) {
+            // 1. Endotoksin Bakteri
+            if ($kanonis_param === 'Endotoksin Bakteri') {
+                if (stripos($kanonis_metode, 'kepekaan') !== false || stripos($kanonis_param, 'kepekaan') !== false) {
+                    return array(
+                        'template_id' => $tpl_by_code['MIK-06'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Sesuai Form MIK-06: Konfirmasi Kepekaan LAL Semi Kuantitatif'
+                    );
+                }
                 return array(
-                    'template_id' => $tpl_by_code['MIK-04'],
-                    'status'      => 'PERLU_KONFIRMASI',
-                    'alasan'      => 'Rujukan ke Form MIK-04: Uji Cemaran Mikroba Kualitatif'
+                    'template_id' => $tpl_by_code['MIK-05'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form MIK-05: Uji Endotoksin Bakteri Semi Kuantitatif'
                 );
             }
-            return array(
-                'template_id' => NULL,
-                'status'      => 'PERLU_KONFIRMASI',
-                'alasan'      => 'Pengujian Mikrobiologi: Menunggu penerbitan Form LCP Mikrobiologi lengkap'
-            );
+
+            // 2. Potensi Antibiotik
+            if ($kanonis_param === 'Potensi Antibiotik') {
+                return array(
+                    'template_id' => $tpl_by_code['MIK-03'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form MIK-03: Potensi Antibiotika Metode Lempeng-Silinder 5 Dosis'
+                );
+            }
+
+            // 3. Batas Mikroba
+            if ($kanonis_param === 'Batas Mikroba') {
+                if (stripos($kanonis_metode, 'akk') !== false || stripos($kanonis_metode, 'kapang') !== false || stripos($kanonis_metode, 'khamir') !== false) {
+                    return array(
+                        'template_id' => $tpl_by_code['MIK-02'] ?? NULL,
+                        'status'      => 'OTOMATIS',
+                        'alasan'      => 'Sesuai Form MIK-02: Uji Angka Kapang Khamir (AKK) Sediaan Farmasi'
+                    );
+                }
+                return array(
+                    'template_id' => $tpl_by_code['MIK-01'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form MIK-01: Uji Angka Lempeng Total (ALT) Sediaan Farmasi'
+                );
+            }
+
+            // 4. Mikroba Spesifik / Cemaran Mikroba Kualitatif
+            if ($kanonis_param === 'Mikroba Spesifik') {
+                return array(
+                    'template_id' => $tpl_by_code['MIK-04'] ?? NULL,
+                    'status'      => 'OTOMATIS',
+                    'alasan'      => 'Sesuai Form MIK-04: Uji Cemaran Mikroba Kualitatif Sediaan Farmasi'
+                );
+            }
+
+            // 5. Sterilitas
+            if ($kanonis_param === 'Sterilitas') {
+                return array(
+                    'template_id' => NULL,
+                    'status'      => 'PERLU_KONFIRMASI',
+                    'alasan'      => 'Uji Sterilitas: Menunggu penerbitan Form LCP Uji Sterilitas khusus'
+                );
+            }
         }
 
         return array(
