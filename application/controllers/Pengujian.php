@@ -1110,6 +1110,165 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // Jika form template adalah Uji Angka Lempeng Total (MIK-01 / ALT)
+        $is_alt = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-01') ||
+            (!empty($hasil['nama_template']) && (
+                stripos($hasil['nama_template'], 'Lempeng') !== false || 
+                stripos($hasil['nama_template'], 'ALT') !== false
+            ))
+        );
+
+        if ($is_alt) {
+            $this->catat_audit('VIEW_LCP_ALT', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-01'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_alt_farmasi', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Uji Angka Kapang Khamir (MIK-02 / AKK)
+        $is_akk = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-02') ||
+            (!empty($hasil['nama_template']) && (
+                stripos($hasil['nama_template'], 'Kapang') !== false || 
+                stripos($hasil['nama_template'], 'AKK') !== false
+            ))
+        );
+
+        if ($is_akk) {
+            $this->catat_audit('VIEW_LCP_AKK', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-02'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_akk_farmasi', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Potensi Antibiotika Metode Lempeng-Silinder 5 Dosis (MIK-03)
+        $is_potensi = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-03') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Potensi Antibiotik') !== false)
+        );
+
+        if ($is_potensi) {
+            $this->catat_audit('VIEW_LCP_POTENSI_ANTIBIOTIK', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-03'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_potensi_antibiotik', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Uji Endotoksin Bakteri Semi Kuantitatif (MIK-05)
+        $is_endotoksin = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-05') ||
+            (!empty($hasil['nama_template']) && stripos($hasil['nama_template'], 'Endotoksin') !== false)
+        );
+
+        if ($is_endotoksin) {
+            $this->catat_audit('VIEW_LCP_ENDOTOKSIN', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-05'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_endotoksin_semi_kuantitatif', $view_data);
+            return;
+        }
+
+        // Jika form template adalah Konfirmasi Kepekaan LAL Semi Kuantitatif (MIK-06)
+        $is_lal = (
+            (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-06') ||
+            (!empty($hasil['nama_template']) && (
+                stripos($hasil['nama_template'], 'Kepekaan LAL') !== false ||
+                stripos($hasil['nama_template'], 'Konfirmasi Kepekaan') !== false
+            ))
+        );
+
+        if ($is_lal) {
+            $this->catat_audit('VIEW_LCP_KEPEKAAN_LAL', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => !empty($hasil['kode_template']) ? $hasil['kode_template'] : 'MIK-06'
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_konfirmasi_kepekaan_lal', $view_data);
+            return;
+        }
+
         // Jika form template adalah Uji Kimia Reaksi Warna / Pengendapan (KIM-01)
         $is_reaksi_warna = (
             (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'KIM-01') ||

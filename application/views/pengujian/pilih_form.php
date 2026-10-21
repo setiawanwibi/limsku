@@ -105,7 +105,26 @@
                                                         <?php foreach ($daftar_template_bidang as $tpl_b): ?>
                                                             <?php 
                                                                 $is_default = ($p['template_id'] == $tpl_b['id']);
-                                                                $is_fallback_select = (!$is_mapped && (($jenis_pengujian === 'Mikrobiologi' && $tpl_b['kode_template'] === 'MIK-04') || ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01')));
+                                                                $is_fallback_select = false;
+                                                                if (!$is_mapped) {
+                                                                    if ($jenis_pengujian === 'Mikrobiologi') {
+                                                                        if ((stripos($p['parameter_uji'], 'lempeng') !== false || stripos($p['parameter_uji'], 'alt') !== false) && $tpl_b['kode_template'] === 'MIK-01') {
+                                                                            $is_fallback_select = true;
+                                                                        } elseif ((stripos($p['parameter_uji'], 'hitung') !== false || stripos($p['parameter_uji'], 'kapang') !== false || stripos($p['parameter_uji'], 'khamir') !== false) && $tpl_b['kode_template'] === 'MIK-02') {
+                                                                            $is_fallback_select = true;
+                                                                        } elseif ($tpl_b['kode_template'] === 'MIK-04' && stripos($p['parameter_uji'], 'spesifik') !== false) {
+                                                                            $is_fallback_select = true;
+                                                                        } elseif ($tpl_b['kode_template'] === 'MIK-03' && stripos($p['parameter_uji'], 'potensi') !== false) {
+                                                                            $is_fallback_select = true;
+                                                                        } elseif ($tpl_b['kode_template'] === 'MIK-05' && stripos($p['parameter_uji'], 'endotoksin') !== false) {
+                                                                            $is_fallback_select = true;
+                                                                        } elseif ($tpl_b['kode_template'] === 'MIK-06' && (stripos($p['parameter_uji'], 'kepekaan') !== false || stripos($p['parameter_uji'], 'lal') !== false)) {
+                                                                            $is_fallback_select = true;
+                                                                        }
+                                                                    } elseif ($jenis_pengujian === 'Kimia' && $tpl_b['kode_template'] === 'KIM-01') {
+                                                                        $is_fallback_select = true;
+                                                                    }
+                                                                }
                                                                 $selected = ($is_default || $is_fallback_select) ? 'selected' : '';
                                                             ?>
                                                             <option value="<?php echo $tpl_b['id']; ?>" <?php echo $selected; ?>>
