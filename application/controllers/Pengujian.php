@@ -711,6 +711,14 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
+        // Gate Ketat Laporan Hasil Uji (LHU):
+        // LHU Final hanya dapat diakses / diunduh jika sampel telah disetujui secara final (Approved) oleh Manajer Teknis.
+        if (empty($sampel['status']) || $sampel['status'] !== 'Approved / Final') {
+            $this->session->set_flashdata('pesan_gagal', 'Laporan Hasil Uji (LHU) belum tersedia. LHU hanya dapat diakses setelah disetujui (Approved) oleh Manajer Teknis.');
+            redirect('pengujian/riwayat');
+            return;
+        }
+
         $serumpun_ids = $this->Model_Pengujian->ambil_sample_ids_serumpun($sample_id);
 
         // Ambil seluruh sesi pengujian sampel (Kimia & Mikrobiologi) dari seluruh sampel serumpun

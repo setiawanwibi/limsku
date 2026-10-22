@@ -345,6 +345,8 @@ class Model_Pengujian extends CI_Model
             GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") as kesimpulan,
             MAX(CASE WHEN ts.jenis_pengujian = "Kimia" THEN ts.id ELSE NULL END) as sesi_kimia_id,
             MAX(CASE WHEN ts.jenis_pengujian = "Mikrobiologi" THEN ts.id ELSE NULL END) as sesi_mikro_id,
+            MAX(CASE WHEN ts.jenis_pengujian = "Kimia" THEN ts.status ELSE NULL END) as status_sesi_kimia,
+            MAX(CASE WHEN ts.jenis_pengujian = "Mikrobiologi" THEN ts.status ELSE NULL END) as status_sesi_mikro,
             MIN(ts.id) as first_session_id');
         $this->db->from('testing_sessions ts');
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');

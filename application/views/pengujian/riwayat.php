@@ -437,6 +437,20 @@
         color: #3730a3;
     }
 
+    .riwayat-action-disabled {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #94a3b8;
+        cursor: not-allowed !important;
+        opacity: 0.85;
+    }
+
+    .riwayat-action-disabled:hover {
+        background: #f1f5f9;
+        color: #64748b;
+        border-color: #cbd5e1;
+    }
+
     .riwayat-actions .dropdown-menu {
         z-index: 1060;
         min-width: 175px;
@@ -1441,6 +1455,7 @@
                                             </a>
 
                                             <?php
+                                                $is_cp_approved = in_array($st, array('Menunggu Approval', 'Approved / Final'), true);
                                                 $cp_url = (isset($h['jenis_pengujian']) && $h['jenis_pengujian'] === 'Kimia')
                                                     ? site_url('pengujian/cp_kimia/' . $h['id'])
                                                     : site_url('pengujian/cp_mikro/' . $h['id']);
@@ -1448,18 +1463,31 @@
                                                     ? 'Lihat / Unduh Catatan Pengujian (CP) Kimia'
                                                     : 'Lihat / Unduh Catatan Pengujian (CP) Mikrobiologi';
                                             ?>
-                                            <a
-                                                href="<?php echo $cp_url; ?>"
-                                                class="
-                                                    riwayat-action-btn
-                                                    riwayat-action-cp
-                                                "
-                                                title="<?php echo $cp_title; ?>"
-                                                target="_blank"
-                                            >
-                                                <i class="bi bi-journal-check me-1"></i>
-                                                CP
-                                            </a>
+                                            <?php if ($is_cp_approved): ?>
+                                                <a
+                                                    href="<?php echo $cp_url; ?>"
+                                                    class="
+                                                        riwayat-action-btn
+                                                        riwayat-action-cp
+                                                    "
+                                                    title="<?php echo $cp_title; ?>"
+                                                    target="_blank"
+                                                >
+                                                    <i class="bi bi-journal-check me-1"></i>
+                                                    CP
+                                                </a>
+                                            <?php else: ?>
+                                                <span
+                                                    class="
+                                                        riwayat-action-btn
+                                                        riwayat-action-disabled
+                                                    "
+                                                    title="Catatan Pengujian (CP) belum tersedia (Menunggu Verifikasi / Approval Penyelia)"
+                                                >
+                                                    <i class="bi bi-lock-fill me-1"></i>
+                                                    CP
+                                                </span>
+                                            <?php endif; ?>
 
                                         <?php else: ?>
                                             <!-- RIWAYAT HASIL UJI & RIWAYAT APPROVAL (DIGABUNG PER KODE SAMPEL, TANPA PDF) -->
@@ -1472,6 +1500,17 @@
                                                 $detail_target_url = $is_sample_row
                                                     ? site_url('pengujian/tinjauan_lhu/' . $target_sample_id)
                                                     : site_url('pengujian/detail_sesi/' . $h['id']);
+
+                                                // 1. Validasi Ketersediaan LHU: HANYA jika sudah disetujui (Approved) oleh Manajer Teknis
+                                                $lhu_tersedia = ($st === 'Approved / Final');
+
+                                                // 2. Validasi Ketersediaan CP: HANYA jika sudah diverifikasi/diapprove oleh Penyelia
+                                                $st_kimia = !empty($h['status_sesi_kimia']) ? $h['status_sesi_kimia'] : $st;
+                                                $st_mikro = !empty($h['status_sesi_mikro']) ? $h['status_sesi_mikro'] : $st;
+
+                                                $cp_kimia_tersedia = in_array($st_kimia, array('Menunggu Approval', 'Approved / Final'), true);
+                                                $cp_mikro_tersedia = in_array($st_mikro, array('Menunggu Approval', 'Approved / Final'), true);
+                                                $cp_umum_tersedia  = in_array($st, array('Menunggu Approval', 'Approved / Final'), true);
                                             ?>
                                             <a
                                                 href="<?php echo $detail_target_url; ?>"
@@ -1485,19 +1524,33 @@
                                                 Detail
                                             </a>
 
+                                            <!-- TOMBOL LHU (LAPORAN HASIL UJI) -->
                                             <?php if (!empty($target_sample_id)): ?>
-                                                <a
-                                                    href="<?php echo site_url('pengujian/lhu/' . $target_sample_id); ?>"
-                                                    class="
-                                                        riwayat-action-btn
-                                                        riwayat-action-lhu
-                                                    "
-                                                    title="Lihat / Cetak Final LHU (Gabungan Kimia & Mikro)"
-                                                    target="_blank"
-                                                >
-                                                    <i class="bi bi-file-earmark-text me-1"></i>
-                                                    LHU
-                                                </a>
+                                                <?php if ($lhu_tersedia): ?>
+                                                    <a
+                                                        href="<?php echo site_url('pengujian/lhu/' . $target_sample_id); ?>"
+                                                        class="
+                                                            riwayat-action-btn
+                                                            riwayat-action-lhu
+                                                        "
+                                                        title="Lihat / Cetak Final LHU (Telah Disetujui Manajer Teknis)"
+                                                        target="_blank"
+                                                    >
+                                                        <i class="bi bi-file-earmark-text me-1"></i>
+                                                        LHU
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span
+                                                        class="
+                                                            riwayat-action-btn
+                                                            riwayat-action-disabled
+                                                        "
+                                                        title="LHU belum tersedia (Menunggu Approval Manajer Teknis)"
+                                                    >
+                                                        <i class="bi bi-lock-fill me-1"></i>
+                                                        LHU
+                                                    </span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
 
                                             <!-- LCP -->
@@ -1532,48 +1585,81 @@
                                                 </a>
                                             <?php endif; ?>
 
-                                            <!-- CP -->
+                                            <!-- TOMBOL CP (CATATAN PENGUJIAN) -->
                                             <?php if (!empty($h['sesi_kimia_id']) && !empty($h['sesi_mikro_id'])): ?>
-                                                <div class="dropdown d-inline-block">
-                                                    <button class="riwayat-action-btn riwayat-action-cp dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" aria-expanded="false">
-                                                        <i class="bi bi-journal-check me-1"></i> CP
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.75rem;">
-                                                        <li>
-                                                            <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/cp_kimia/' . $h['sesi_kimia_id']); ?>" target="_blank">
-                                                                <i class="bi bi-journal-check me-1 text-primary"></i> CP Kimia (Sesi #<?php echo $h['sesi_kimia_id']; ?>)
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/cp_mikro/' . $h['sesi_mikro_id']); ?>" target="_blank">
-                                                                <i class="bi bi-journal-check me-1 text-info"></i> CP Mikrobiologi (Sesi #<?php echo $h['sesi_mikro_id']; ?>)
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                                                <?php if (!$cp_kimia_tersedia && !$cp_mikro_tersedia): ?>
+                                                    <span
+                                                        class="riwayat-action-btn riwayat-action-disabled"
+                                                        title="CP belum tersedia (Menunggu Verifikasi / Approval Penyelia)"
+                                                    >
+                                                        <i class="bi bi-lock-fill me-1"></i> CP
+                                                    </span>
+                                                <?php else: ?>
+                                                    <div class="dropdown d-inline-block">
+                                                        <button class="riwayat-action-btn riwayat-action-cp dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" aria-expanded="false">
+                                                            <i class="bi bi-journal-check me-1"></i> CP
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.75rem;">
+                                                            <li>
+                                                                <?php if ($cp_kimia_tersedia): ?>
+                                                                    <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/cp_kimia/' . $h['sesi_kimia_id']); ?>" target="_blank">
+                                                                        <i class="bi bi-journal-check me-1 text-primary"></i> CP Kimia (Sesi #<?php echo $h['sesi_kimia_id']; ?>)
+                                                                    </a>
+                                                                <?php else: ?>
+                                                                    <span class="dropdown-item py-1 text-muted disabled">
+                                                                        <i class="bi bi-lock-fill me-1 text-secondary"></i> CP Kimia (Menunggu Penyelia)
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                            </li>
+                                                            <li>
+                                                                <?php if ($cp_mikro_tersedia): ?>
+                                                                    <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/cp_mikro/' . $h['sesi_mikro_id']); ?>" target="_blank">
+                                                                        <i class="bi bi-journal-check me-1 text-info"></i> CP Mikrobiologi (Sesi #<?php echo $h['sesi_mikro_id']; ?>)
+                                                                    </a>
+                                                                <?php else: ?>
+                                                                    <span class="dropdown-item py-1 text-muted disabled">
+                                                                        <i class="bi bi-lock-fill me-1 text-secondary"></i> CP Mikro (Menunggu Penyelia)
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <?php
                                                     if (!empty($h['sesi_kimia_id'])) {
+                                                        $is_this_cp_ready = $cp_kimia_tersedia;
                                                         $cp_url = site_url('pengujian/cp_kimia/' . $h['sesi_kimia_id']);
                                                         $cp_title = 'Lihat / Unduh Catatan Pengujian (CP) Kimia';
                                                     } elseif (!empty($h['sesi_mikro_id'])) {
+                                                        $is_this_cp_ready = $cp_mikro_tersedia;
                                                         $cp_url = site_url('pengujian/cp_mikro/' . $h['sesi_mikro_id']);
                                                         $cp_title = 'Lihat / Unduh Catatan Pengujian (CP) Mikrobiologi';
                                                     } else {
+                                                        $is_this_cp_ready = $cp_umum_tersedia;
                                                         $cp_url = (isset($h['jenis_pengujian']) && $h['jenis_pengujian'] === 'Kimia')
                                                             ? site_url('pengujian/cp_kimia/' . $target_sample_id)
                                                             : site_url('pengujian/cp_mikro/' . $target_sample_id);
                                                         $cp_title = 'Lihat / Unduh Catatan Pengujian (CP)';
                                                     }
                                                 ?>
-                                                <a
-                                                    href="<?php echo $cp_url; ?>"
-                                                    class="riwayat-action-btn riwayat-action-cp"
-                                                    title="<?php echo $cp_title; ?>"
-                                                    target="_blank"
-                                                >
-                                                    <i class="bi bi-journal-check me-1"></i> CP
-                                                </a>
+                                                <?php if ($is_this_cp_ready): ?>
+                                                    <a
+                                                        href="<?php echo $cp_url; ?>"
+                                                        class="riwayat-action-btn riwayat-action-cp"
+                                                        title="<?php echo $cp_title; ?>"
+                                                        target="_blank"
+                                                    >
+                                                        <i class="bi bi-journal-check me-1"></i> CP
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span
+                                                        class="riwayat-action-btn riwayat-action-disabled"
+                                                        title="CP belum tersedia (Menunggu Verifikasi / Approval Penyelia)"
+                                                    >
+                                                        <i class="bi bi-lock-fill me-1"></i> CP
+                                                    </span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
 
                                         <?php endif; ?>

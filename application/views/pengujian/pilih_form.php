@@ -1,36 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<?php
-// Deteksi rekomendasi pintar dari nama sampel
-$smart_suggestions = array();
-if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
-    $nama_sampel_upper = strtoupper($sampel['nama_sampel']);
-    // Pisahkan nama sampel menjadi token kata (minimal 3 huruf)
-    $sampel_tokens = preg_split('/[^A-Za-z0-9]+/', $nama_sampel_upper);
-    $sampel_tokens = array_filter($sampel_tokens, function($t) { return strlen($t) >= 3; });
-
-    foreach ($daftar_zat_aktif as $za) {
-        $za_name = strtoupper(trim($za['nama_zat_aktif']));
-        if (empty($za_name)) continue;
-
-        // Cocok persis substring
-        if (stripos($nama_sampel_upper, $za_name) !== false) {
-            $smart_suggestions[] = $za['nama_zat_aktif'];
-        } else {
-            // Cocok per token kata
-            foreach ($sampel_tokens as $token) {
-                if (stripos($za_name, $token) !== false) {
-                    $smart_suggestions[] = $za['nama_zat_aktif'];
-                    break;
-                }
-            }
-        }
-        if (count($smart_suggestions) >= 4) break;
-    }
-    $smart_suggestions = array_unique($smart_suggestions);
-}
-?>
-
 <style>
     /* =========================================================
        HALAMAN PILIH ZAT AKTIF & PARAMETER MONOGRAFI (LIMSKU)
@@ -141,175 +110,10 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
         color: #64748b;
     }
 
-    /* Step 1: Search & Zat Aktif Controls */
+    /* Step 1: Zat Aktif Box */
     .zat-aktif-select-wrap {
         padding: 22px 24px;
     }
-
-    /* Smart Recommendation Banner */
-    .smart-recommend-bar {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 10px 16px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 10px;
-        margin-bottom: 18px;
-    }
-    .btn-recommend-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 20px;
-        background: #ffffff;
-        border: 1px solid #86efac;
-        color: #15803d;
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.18s ease;
-    }
-    .btn-recommend-chip:hover {
-        background: #16a34a;
-        color: #ffffff;
-        border-color: #16a34a;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(22, 163, 74, 0.2);
-    }
-
-    /* Search Toolbar */
-    .search-filter-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 14px 16px;
-        margin-bottom: 18px;
-    }
-    .search-input-group {
-        position: relative;
-    }
-    .search-input-group .form-control {
-        border-radius: 8px;
-        border: 1.5px solid #cbd5e1;
-        padding-left: 38px;
-        font-size: 0.88rem;
-        font-weight: 500;
-        height: 42px;
-    }
-    .search-input-group .form-control:focus {
-        border-color: #0284c7;
-        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-    }
-    .search-input-group .search-icon {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #64748b;
-        font-size: 0.95rem;
-        pointer-events: none;
-        z-index: 5;
-    }
-    .btn-clear-search {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: #94a3b8;
-        cursor: pointer;
-        font-size: 0.85rem;
-        padding: 4px;
-        display: none;
-        z-index: 5;
-    }
-    .btn-clear-search:hover {
-        color: #ef4444;
-    }
-
-    /* Alphabet Filter Buttons */
-    .alphabet-filter-container {
-        display: flex;
-        align-items: center;
-        gap: 3px;
-        overflow-x: auto;
-        padding: 2px 0;
-        scrollbar-width: thin;
-    }
-    .alpha-btn {
-        width: 27px;
-        height: 27px;
-        min-width: 27px;
-        border-radius: 6px;
-        border: 1px solid #e2e8f0;
-        background: #ffffff;
-        color: #475569;
-        font-size: 0.72rem;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        padding: 0;
-        transition: all 0.15s ease;
-    }
-    .alpha-btn:hover {
-        background: #e2e8f0;
-        color: #0f172a;
-    }
-    .alpha-btn.active {
-        background: <?php echo ($jenis_pengujian === 'Kimia' ? '#0284c7' : '#10b981'); ?>;
-        border-color: <?php echo ($jenis_pengujian === 'Kimia' ? '#0284c7' : '#10b981'); ?>;
-        color: #ffffff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .alpha-btn.btn-all {
-        width: auto;
-        padding: 0 10px;
-    }
-
-    /* Autocomplete Suggestions Dropdown */
-    .suggestions-list-box {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-        max-height: 250px;
-        overflow-y: auto;
-        z-index: 1050;
-        display: none;
-        margin-top: 4px;
-    }
-    .suggestion-item {
-        padding: 9px 14px;
-        font-size: 0.85rem;
-        color: #1e293b;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #f1f5f9;
-        transition: background 0.12s ease;
-    }
-    .suggestion-item:last-child {
-        border-bottom: none;
-    }
-    .suggestion-item:hover, .suggestion-item.active {
-        background: #eff6ff;
-        color: #0284c7;
-        font-weight: 600;
-    }
-
-    /* Main Select & Submit */
     .select-za-control {
         border-radius: 10px;
         border: 1.5px solid #cbd5e1;
@@ -555,77 +359,22 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
         </div>
     </div>
 
-    <!-- 2. Step 1: Pemilihan Zat Aktif Monografi dengan Fitur Search Cerdas -->
+    <!-- 2. Step 1: Pemilihan Zat Aktif Monografi -->
     <div class="step-card">
         <div class="step-header">
             <div class="step-title-wrap">
                 <div class="step-number">1</div>
                 <div>
                     <h5 class="step-title">Tentukan Zat Aktif Monografi Obat</h5>
-                    <p class="step-subtitle">Ketik cepat atau saring abjad untuk menemukan zat aktif Farmakope yang sesuai.</p>
+                    <p class="step-subtitle">Setiap sesi pengujian difokuskan pada tepat 1 zat aktif utama sesuai monografi standar Farmakope.</p>
                 </div>
             </div>
-            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small" id="badge_total_za">
+            <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
                 <i class="bi bi-database me-1"></i> <?php echo count($daftar_zat_aktif); ?> Zat Aktif Tersedia
             </span>
         </div>
 
         <div class="zat-aktif-select-wrap">
-
-            <!-- Smart Suggestion dari nama sampel (1-Klik Langsung Pilih) -->
-            <?php if (!empty($smart_suggestions)): ?>
-                <div class="smart-recommend-bar">
-                    <span class="text-success fw-bold small d-inline-flex align-items-center gap-1">
-                        <i class="bi bi-stars text-warning fs-6"></i> Saran Cerdas (Nama Sampel):
-                    </span>
-                    <?php foreach ($smart_suggestions as $sug): ?>
-                        <button type="button" 
-                                class="btn-recommend-chip" 
-                                onclick="quickSelectZatAktif('<?php echo html_escape(addslashes($sug)); ?>')" 
-                                title="Klik untuk langsung memuat monografi <?php echo html_escape($sug); ?>">
-                            <i class="bi bi-lightning-charge-fill text-warning"></i>
-                            <span><?php echo html_escape($sug); ?></span>
-                        </button>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Interactive Search Toolbar -->
-            <div class="search-filter-box">
-                <div class="row align-items-center g-3">
-                    <div class="col-lg-6 col-md-12">
-                        <div class="search-input-group">
-                            <i class="bi bi-search search-icon"></i>
-                            <input type="text" 
-                                   id="input_search_zat_aktif" 
-                                   class="form-control" 
-                                   placeholder="🔍 Ketik cepat nama zat aktif (misal: Ketoconazole, Parasetamol, Calcium...)" 
-                                   autocomplete="off">
-                            <button type="button" class="btn-clear-search" id="btn_clear_search_za" title="Hapus pencarian">
-                                <i class="bi bi-x-circle-fill"></i>
-                            </button>
-                            <!-- Autocomplete Suggestions List Floating Box -->
-                            <div class="suggestions-list-box" id="suggestions_box_za"></div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-12">
-                        <!-- Quick Alphabet Filter A-Z -->
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em; white-space: nowrap;">
-                                Filter Huruf:
-                            </span>
-                            <div class="alphabet-filter-container" id="alpha_container">
-                                <button type="button" class="alpha-btn btn-all active" data-char="ALL" title="Tampilkan Semua">Semua</button>
-                                <?php foreach (range('A', 'Z') as $char): ?>
-                                    <button type="button" class="alpha-btn" data-char="<?php echo $char; ?>"><?php echo $char; ?></button>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Dropdown Form -->
             <form method="get" action="<?php echo site_url('pengujian/pilih_form/' . $sampel['id']); ?>" id="form-pilih-zat-aktif">
                 <input type="hidden" name="jenis" value="<?php echo html_escape($jenis_pengujian); ?>">
                 <div class="row align-items-center g-3">
@@ -640,19 +389,9 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2 px-1">
-                            <small class="text-muted" id="search_feedback_msg">
-                                Menampilkan <?php echo count($daftar_zat_aktif); ?> zat aktif monografi <?php echo html_escape($jenis_pengujian); ?>.
-                            </small>
-                            <?php if (!empty($zat_aktif_terpilih)): ?>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.76rem;">
-                                    <i class="bi bi-check2-circle me-1"></i> Aktif: <strong><?php echo html_escape($zat_aktif_terpilih); ?></strong>
-                                </span>
-                            <?php endif; ?>
-                        </div>
                     </div>
                     <div class="col-lg-3 col-md-4">
-                        <button type="submit" class="btn btn-primary btn-muat-parameter w-100 shadow-sm" id="btn-submit-load-param">
+                        <button type="submit" class="btn btn-primary btn-muat-parameter w-100 shadow-sm">
                             <i class="bi bi-arrow-clockwise"></i> Muat Parameter
                         </button>
                     </div>
@@ -669,24 +408,19 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
             <input type="hidden" name="nama_zat_aktif" value="<?php echo html_escape($zat_aktif_terpilih); ?>">
 
             <div class="step-card">
-                <div class="step-header flex-wrap">
+                <div class="step-header">
                     <div class="step-title-wrap">
                         <div class="step-number">2</div>
                         <div>
                             <h5 class="step-title">
-                                Parameter Uji Kritis Monografi: 
+                                Pilih Parameter Uji Kritis Sesuai Monografi: 
                                 <span class="text-primary"><?php echo html_escape($zat_aktif_terpilih); ?></span>
                             </h5>
                             <p class="step-subtitle">Centang parameter yang akan diuji. Analis dapat menyesuaikan Form LCP pada kolom instrumen sebelum pengujian dimulai.</p>
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center flex-wrap gap-2">
-                        <!-- Mini search di tabel parameter -->
-                        <div class="input-group input-group-sm" style="max-width: 220px;">
-                            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                            <input type="text" id="input_filter_tabel_param" class="form-control" placeholder="Cari di parameter...">
-                        </div>
+                    <div class="d-flex align-items-center gap-2">
                         <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-semibold" id="btn-select-all">
                             <i class="bi bi-check-all me-1"></i> Pilih Semua
                         </button>
@@ -699,7 +433,7 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
 
                 <?php if (!empty($parameter_monografi)): ?>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0 parameter-table" id="tabel_parameter_monografi">
+                        <table class="table table-hover align-middle mb-0 parameter-table">
                             <thead>
                                 <tr>
                                     <th width="4%" class="text-center">PILIH</th>
@@ -713,7 +447,7 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
                             <tbody>
                                 <?php foreach ($parameter_monografi as $p): ?>
                                     <?php $is_mapped = !empty($p['template_id']); ?>
-                                    <tr id="row_param_<?php echo $p['id']; ?>" class="parameter-row" data-param-text="<?php echo strtolower(html_escape($p['parameter_uji'] . ' ' . $p['kode_metode'] . ' ' . $p['metode_analisa'])); ?>">
+                                    <tr id="row_param_<?php echo $p['id']; ?>">
                                         <td class="text-center">
                                             <input class="form-check-input custom-param-checkbox form-check-parameter" 
                                                    type="checkbox" 
@@ -864,12 +598,12 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
                 </div>
                 <h5 class="fw-bold text-dark mb-2">Pilih Satu Zat Aktif Monografi Obat Terlebih Dahulu</h5>
                 <p class="text-muted small mx-auto mb-4" style="max-width: 520px; line-height: 1.6;">
-                    Gunakan kotak pencarian atau dropdown pada <strong>Langkah 1</strong> di atas untuk memuat daftar seluruh parameter uji kritis, spesifikasi baku mutu, dan pemetaan formulir LCP yang relevan untuk sampel ini.
+                    Gunakan dropdown pilihan pada <strong>Langkah 1</strong> di atas untuk memuat daftar seluruh parameter uji kritis, spesifikasi baku mutu, dan pemetaan formulir LCP yang relevan untuk sampel ini.
                 </p>
                 <div class="d-inline-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary px-4 py-2 fw-semibold rounded-pill" onclick="document.getElementById('input_search_zat_aktif').focus()">
-                        <i class="bi bi-search me-1"></i> Ketik Nama Zat Aktif Sekarang
-                    </button>
+                    <label for="select_zat_aktif" class="btn btn-outline-primary px-4 py-2 fw-semibold rounded-pill cursor-pointer">
+                        <i class="bi bi-search me-1"></i> Klik untuk Memilih Zat Aktif
+                    </label>
                 </div>
             </div>
 
@@ -884,207 +618,7 @@ if (!empty($sampel['nama_sampel']) && !empty($daftar_zat_aktif)) {
 </div>
 
 <script>
-// Fungsi global cepat untuk memilih zat aktif dan langsung submit
-function quickSelectZatAktif(namaZat) {
-    const selectZa = document.getElementById('select_zat_aktif');
-    const form = document.getElementById('form-pilih-zat-aktif');
-    if (!selectZa || !form) return;
-
-    // Pastikan option ada di select
-    let found = false;
-    for (let i = 0; i < selectZa.options.length; i++) {
-        if (selectZa.options[i].value.toUpperCase() === namaZat.toUpperCase()) {
-            selectZa.selectedIndex = i;
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
-        // Buat option baru jika belum ada
-        const opt = new Option(namaZat, namaZat, true, true);
-        selectZa.add(opt);
-    }
-    form.submit();
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    // =========================================================
-    // 1. FITUR SEARCH ZAT AKTIF & ALPHABET FILTER
-    // =========================================================
-    const searchInput = document.getElementById('input_search_zat_aktif');
-    const btnClearSearch = document.getElementById('btn_clear_search_za');
-    const selectZa = document.getElementById('select_zat_aktif');
-    const suggestionsBox = document.getElementById('suggestions_box_za');
-    const feedbackMsg = document.getElementById('search_feedback_msg');
-    const alphaButtons = document.querySelectorAll('.alpha-btn');
-    const formZa = document.getElementById('form-pilih-zat-aktif');
-
-    // Simpan semua opsi asli dari select saat load
-    const originalOptions = [];
-    if (selectZa) {
-        for (let i = 0; i < selectZa.options.length; i++) {
-            const opt = selectZa.options[i];
-            if (opt.value !== '') {
-                originalOptions.push({
-                    value: opt.value,
-                    text: opt.text,
-                    selected: opt.selected
-                });
-            }
-        }
-    }
-
-    let activeLetter = 'ALL';
-
-    function renderFilteredSelect(query = '', letter = 'ALL') {
-        if (!selectZa) return;
-        const q = query.trim().toUpperCase();
-        const letFilter = letter.toUpperCase();
-
-        const filtered = originalOptions.filter(function(item) {
-            const valUpper = item.value.toUpperCase();
-            const matchQuery = (q === '' || valUpper.includes(q));
-            const matchLetter = (letFilter === 'ALL' || valUpper.startsWith(letFilter));
-            return matchQuery && matchLetter;
-        });
-
-        // Re-populate select element
-        selectZa.innerHTML = '';
-        const defaultOpt = new Option('-- Pilih Satu Zat Aktif Utama Monografi Obat --', '');
-        selectZa.add(defaultOpt);
-
-        filtered.forEach(function(item) {
-            const opt = new Option(item.text, item.value, false, item.selected);
-            selectZa.add(opt);
-        });
-
-        // Update info message
-        if (feedbackMsg) {
-            if (q !== '' || letFilter !== 'ALL') {
-                feedbackMsg.innerHTML = 'Ditemukan <strong>' + filtered.length + '</strong> zat aktif yang cocok.';
-            } else {
-                feedbackMsg.textContent = 'Menampilkan ' + originalOptions.length + ' zat aktif monografi <?php echo html_escape($jenis_pengujian); ?>.';
-            }
-        }
-
-        // Tampilkan box suggestions jika user mengetik
-        if (suggestionsBox) {
-            if (q.length >= 1) {
-                suggestionsBox.innerHTML = '';
-                if (filtered.length === 0) {
-                    suggestionsBox.innerHTML = '<div class="p-3 text-muted text-center small"><i class="bi bi-info-circle me-1"></i> Tidak ditemukan zat aktif "' + html_escape_js(q) + '"</div>';
-                } else {
-                    const maxDisplay = Math.min(filtered.length, 12);
-                    for (let i = 0; i < maxDisplay; i++) {
-                        const item = filtered[i];
-                        const div = document.createElement('div');
-                        div.className = 'suggestion-item';
-                        // Highlight kecocokan
-                        const regex = new RegExp('(' + escapeRegExp(q) + ')', 'gi');
-                        const highlightedText = item.text.replace(regex, '<span class="text-primary fw-bold">$1</span>');
-                        div.innerHTML = '<span><i class="bi bi-capsule me-2 text-muted"></i>' + highlightedText + '</span><span class="badge bg-light text-secondary border small">Pilih &rarr;</span>';
-                        div.addEventListener('click', function() {
-                            quickSelectZatAktif(item.value);
-                        });
-                        suggestionsBox.appendChild(div);
-                    }
-                    if (filtered.length > 12) {
-                        const moreDiv = document.createElement('div');
-                        moreDiv.className = 'p-2 text-center text-muted small bg-light';
-                        moreDiv.textContent = '...dan ' + (filtered.length - 12) + ' zat aktif lainnya (persempit pencarian)';
-                        suggestionsBox.appendChild(moreDiv);
-                    }
-                }
-                suggestionsBox.style.display = 'block';
-            } else {
-                suggestionsBox.style.display = 'none';
-            }
-        }
-    }
-
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function html_escape_js(str) {
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const val = this.value;
-            if (btnClearSearch) {
-                btnClearSearch.style.display = val.length > 0 ? 'block' : 'none';
-            }
-            renderFilteredSelect(val, activeLetter);
-        });
-
-        // Enter key di input search
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const q = this.value.trim().toUpperCase();
-                // Jika ada tepat 1 kecocokan di suggestions atau dropdown, langsung pilih
-                if (selectZa && selectZa.options.length === 2 && selectZa.options[1].value !== '') {
-                    selectZa.selectedIndex = 1;
-                    if (formZa) formZa.submit();
-                } else if (suggestionsBox && suggestionsBox.querySelector('.suggestion-item')) {
-                    suggestionsBox.querySelector('.suggestion-item').click();
-                }
-            }
-        });
-    }
-
-    if (btnClearSearch) {
-        btnClearSearch.addEventListener('click', function() {
-            if (searchInput) {
-                searchInput.value = '';
-                searchInput.focus();
-            }
-            btnClearSearch.style.display = 'none';
-            renderFilteredSelect('', activeLetter);
-        });
-    }
-
-    // Klik di luar suggestion box untuk menutup
-    document.addEventListener('click', function(e) {
-        if (suggestionsBox && !suggestionsBox.contains(e.target) && e.target !== searchInput) {
-            suggestionsBox.style.display = 'none';
-        }
-    });
-
-    // Alphabet filter
-    alphaButtons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            alphaButtons.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            activeLetter = this.getAttribute('data-char');
-            renderFilteredSelect(searchInput ? searchInput.value : '', activeLetter);
-        });
-    });
-
-    // =========================================================
-    // 2. SEARCH FILTER DI TABEL PARAMETER (LANGKAH 2)
-    // =========================================================
-    const inputFilterTable = document.getElementById('input_filter_tabel_param');
-    if (inputFilterTable) {
-        inputFilterTable.addEventListener('input', function() {
-            const query = this.value.trim().toLowerCase();
-            const paramRows = document.querySelectorAll('.parameter-row');
-            paramRows.forEach(function(row) {
-                const text = row.getAttribute('data-param-text') || '';
-                if (query === '' || text.includes(query)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    }
-
-    // =========================================================
-    // 3. PARAMETER SELECTION & DYNAMIC COUNTER LOGIC
-    // =========================================================
     const checkboxes = document.querySelectorAll('.form-check-parameter');
     const counterBadge = document.getElementById('badge-counter');
     const dockSummary = document.getElementById('text-dock-summary');
@@ -1146,10 +680,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Event listener checkbox
     checkboxes.forEach(function(cb) {
         cb.addEventListener('change', updateCounter);
     });
 
+    // Event listener select template LCP (interaktif)
     templateSelects.forEach(function(sel) {
         sel.addEventListener('change', function() {
             const row = sel.closest('tr');
@@ -1157,10 +693,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const badgeContainer = row ? row.querySelector('.badge-status-lcp') : null;
             const defaultId = sel.getAttribute('data-default-id');
 
+            // Otomatis centang baris jika analis memilih template
             if (cb && sel.value !== '' && !cb.checked) {
                 cb.checked = true;
             }
 
+            // Perbarui visual badge default vs custom
             if (badgeContainer) {
                 if (sel.value && defaultId && sel.value === defaultId) {
                     badgeContainer.innerHTML = '<span class="badge-lcp-default" title="Sesuai pemetaan acuan monografi"><i class="bi bi-shield-check"></i> Default</span>';
@@ -1175,6 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Select All & Deselect All
     if (btnSelectAll) {
         btnSelectAll.addEventListener('click', function() {
             checkboxes.forEach(function(cb) {
@@ -1193,6 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Inisialisasi awal
     updateCounter();
 });
 </script>
