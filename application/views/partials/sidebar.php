@@ -26,6 +26,13 @@ $ada_menu_registrasi = $bisa_sampel;
 $ada_menu_pengujian  = ($bisa_pengujian_antrean || $bisa_verifikasi || $bisa_approval || $bisa_laporan);
 $ada_menu_master     = ($bisa_metode || $bisa_kelas_terapi || $bisa_template || $bisa_alat || $bisa_reagen || $bisa_pengguna || $bisa_peran);
 $ada_menu_sistem     = $bisa_audit;
+
+// Ambil badge notifikasi antrean & workflow laboratorium
+if (!isset($badges)) {
+    $ci =& get_instance();
+    $ci->load->model('Model_Notifikasi');
+    $badges = $ci->Model_Notifikasi->ambil_semua_badge();
+}
 ?>
 <nav id="lims-sidebar">
     <div class="sidebar-header border-bottom">
@@ -53,6 +60,9 @@ $ada_menu_sistem     = $bisa_audit;
             <a href="<?php echo site_url('akun'); ?>" class="nav-link px-3 py-2 rounded">
                 <i class="bi bi-person-circle me-2"></i>
                 <span>Profil &amp; TTD Digital</span>
+                <?php if (!empty($badges['akun']) && $badges['akun'] > 0): ?>
+                    <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['akun_label']); ?>">!</span>
+                <?php endif; ?>
             </a>
         </li>
 
@@ -67,6 +77,11 @@ $ada_menu_sistem     = $bisa_audit;
                     <a href="<?php echo site_url('sampel'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-box-seam me-2"></i>
                         <span>Data Sampel</span>
+                        <?php if (!empty($badges['sampel']) && $badges['sampel'] > 0): ?>
+                            <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['sampel_label']); ?>">
+                                <?php echo $badges['sampel']; ?>
+                            </span>
+                        <?php endif; ?>
                     </a>
                 </li>
             <?php endif; ?>
@@ -83,6 +98,11 @@ $ada_menu_sistem     = $bisa_audit;
                     <a href="<?php echo site_url('pengujian/antrean'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-list-task me-2"></i>
                         <span>Antrean Pengujian</span>
+                        <?php if (!empty($badges['pengujian_antrean']) && $badges['pengujian_antrean'] > 0): ?>
+                            <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_antrean_label']); ?>">
+                                <?php echo $badges['pengujian_antrean']; ?>
+                            </span>
+                        <?php endif; ?>
                     </a>
                 </li>
             <?php endif; ?>
@@ -92,6 +112,11 @@ $ada_menu_sistem     = $bisa_audit;
                     <a href="<?php echo site_url('pengujian/verifikasi'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-check2-square me-2"></i>
                         <span>Verifikasi Laporan</span>
+                        <?php if (!empty($badges['pengujian_verifikasi']) && $badges['pengujian_verifikasi'] > 0): ?>
+                            <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_verifikasi_label']); ?>">
+                                <?php echo $badges['pengujian_verifikasi']; ?>
+                            </span>
+                        <?php endif; ?>
                     </a>
                 </li>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_verifikasi') ? 'active' : ''; ?>">
@@ -107,6 +132,11 @@ $ada_menu_sistem     = $bisa_audit;
                     <a href="<?php echo site_url('pengujian/approval'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-shield-check me-2"></i>
                         <span>Approval Laporan</span>
+                        <?php if (!empty($badges['pengujian_approval']) && $badges['pengujian_approval'] > 0): ?>
+                            <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_approval_label']); ?>">
+                                <?php echo $badges['pengujian_approval']; ?>
+                            </span>
+                        <?php endif; ?>
                     </a>
                 </li>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_approval') ? 'active' : ''; ?>">
@@ -122,6 +152,11 @@ $ada_menu_sistem     = $bisa_audit;
                     <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-file-earmark-text me-2"></i>
                         <span>Riwayat Hasil Uji</span>
+                        <?php if (!empty($badges['pengujian_riwayat']) && $badges['pengujian_riwayat'] > 0): ?>
+                            <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_riwayat_label']); ?>">
+                                <?php echo $badges['pengujian_riwayat']; ?>
+                            </span>
+                        <?php endif; ?>
                     </a>
                 </li>
             <?php endif; ?>

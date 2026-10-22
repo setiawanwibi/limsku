@@ -1,40 +1,29 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <?php
-// Calculate notification badge count based on user role
+// Calculate notification badge count based on user role using Model_Notifikasi
 $notif_count = 0;
-$notif_target = '#';
+$notif_target = site_url('dasbor');
 if ($this->session->userdata('logged_in')) {
-    $role_id_topbar = $this->session->userdata('role_id');
-    $user_id_topbar = $this->session->userdata('user_id');
-    $ci =& get_instance();
+    if (!isset($badges)) {
+        $ci =& get_instance();
+        $ci->load->model('Model_Notifikasi');
+        $badges = $ci->Model_Notifikasi->ambil_semua_badge();
+    }
+    $notif_count = !empty($badges['total_tindakan']) ? $badges['total_tindakan'] : 0;
     
-    if ($ci->Model_Hak_Akses->memiliki_akses($role_id_topbar, 'pengujian_input') 
-        && !$ci->Model_Hak_Akses->memiliki_akses($role_id_topbar, 'pengujian_verify')) {
-        // Penguji: count antrean sampel + pengujian ditolak yang perlu revisi
-        $ci->db->where('status', 'Menunggu Pengujian');
-        $c_antrean = $ci->db->count_all_results('samples');
-        
-        $ci->db->where('penguji_id', $user_id_topbar);
-        $ci->db->where('status', 'Ditolak');
-        $c_ditolak = $ci->db->count_all_results('testing_sessions');
-        
-        $notif_count = $c_antrean + $c_ditolak;
-        $notif_target = site_url('pengujian/antrean');
-    } elseif ($ci->Model_Hak_Akses->memiliki_akses($role_id_topbar, 'pengujian_verify')) {
-        // Penyelia: count antrean verifikasi
-        $ci->db->where('status', 'Menunggu Verifikasi');
-        $notif_count = $ci->db->count_all_results('testing_sessions');
+    // Tentukan shortcut target jika tombol notifikasi topbar diklik
+    if (!empty($badges['pengujian_verifikasi'])) {
         $notif_target = site_url('pengujian/verifikasi');
-    } elseif ($ci->Model_Hak_Akses->memiliki_akses($role_id_topbar, 'pengujian_approve')) {
-        // Manajer Teknis: count antrean approval
-        $ci->db->where('status', 'Menunggu Approval');
-        $notif_count = $ci->db->count_all_results('testing_sessions');
+    } elseif (!empty($badges['pengujian_approval'])) {
         $notif_target = site_url('pengujian/approval');
-    } elseif ($ci->Model_Hak_Akses->memiliki_akses($role_id_topbar, 'sampel_view')) {
-        // Petugas Penerima Sampel: count sampel baru
-        $ci->db->where('status', 'Menunggu Pengujian');
-        $notif_count = $ci->db->count_all_results('samples');
+    } elseif (!empty($badges['pengujian_antrean'])) {
+        $notif_target = site_url('pengujian/antrean');
+    } elseif (!empty($badges['sampel'])) {
         $notif_target = site_url('sampel');
+    } elseif (!empty($badges['pengujian_riwayat'])) {
+        $notif_target = site_url('pengujian/riwayat');
+    } elseif (!empty($badges['akun'])) {
+        $notif_target = site_url('akun');
     }
 }
 ?>

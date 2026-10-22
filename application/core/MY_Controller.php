@@ -101,6 +101,11 @@ class MY_Controller extends CI_Controller
      */
     protected function muat_tampilan($konten_view, $data_tambahan = array())
     {
+        if ($this->session->userdata('logged_in')) {
+            $this->load->model('Model_Notifikasi');
+            $this->data['badges'] = $this->Model_Notifikasi->ambil_semua_badge();
+        }
+
         $data_gabungan = array_merge($this->data, $data_tambahan);
         $data_gabungan['konten_utama'] = $this->load->view($konten_view, $data_gabungan, TRUE);
         $this->load->view('layouts/main', $data_gabungan);
