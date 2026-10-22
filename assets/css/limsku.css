@@ -160,7 +160,7 @@ body {
     font-size: 0.7rem !important;
 }
 
-/* Sidebar Notification Badges */
+/* Sidebar Notification Badges - Soft Pastel Blue */
 .sidebar-badge-notif {
     display: inline-flex;
     align-items: center;
@@ -172,11 +172,11 @@ body {
     font-weight: 700;
     line-height: 1;
     color: #ffffff !important;
-    background: #ef4444;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: #5b9ce6;
+    background: linear-gradient(135deg, #67b0f8 0%, #4690e8 100%);
     border-radius: 999px;
     margin-left: auto;
-    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.35);
+    box-shadow: 0 2px 5px rgba(70, 144, 232, 0.32);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     flex-shrink: 0;
     letter-spacing: -0.2px;
@@ -184,23 +184,23 @@ body {
 
 #lims-sidebar ul li a:hover .sidebar-badge-notif {
     transform: scale(1.08);
-    box-shadow: 0 3px 6px rgba(220, 38, 38, 0.45);
+    box-shadow: 0 3px 6px rgba(70, 144, 232, 0.42);
 }
 
 #lims-sidebar ul li.active .sidebar-badge-notif {
-    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+    box-shadow: 0 2px 6px rgba(70, 144, 232, 0.38);
 }
 
 .sidebar-badge-notif.sidebar-badge-warning {
     background: #f59e0b;
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.35);
+    box-shadow: 0 2px 5px rgba(217, 119, 6, 0.35);
 }
 
 .sidebar-badge-notif.sidebar-badge-info {
-    background: #0ea5e9;
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.35);
+    background: #38bdf8;
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    box-shadow: 0 2px 5px rgba(2, 132, 199, 0.35);
 }
 
 /* Main Content Area — diberi margin-left dan padding-top untuk fixed sidebar & topbar */

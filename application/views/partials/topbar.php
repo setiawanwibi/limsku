@@ -40,9 +40,9 @@ if ($this->session->userdata('logged_in')) {
         <div class="d-flex align-items-center ms-auto">
             <?php if ($this->session->userdata('logged_in')): ?>
                 <!-- Notifikasi "Belum dibaca" Badge -->
-                <a href="<?php echo $notif_target; ?>" class="d-inline-flex align-items-center text-decoration-none me-4 px-3 py-1 rounded-pill" style="background-color: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s;">
-                    <span class="text-secondary fw-semibold small me-2" style="color: #64748b !important;">Belum dibaca</span>
-                    <span class="badge rounded-pill fw-bold text-danger px-2 py-1" style="background-color: #fef2f2; color: #dc2626 !important; font-size: 0.8rem;">
+                <a href="<?php echo $notif_target; ?>" class="d-inline-flex align-items-center text-decoration-none me-4 px-3 py-1 rounded-pill" style="background-color: #f0f7ff; border: 1px solid #d0e4ff; transition: all 0.2s;">
+                    <span class="text-secondary fw-semibold small me-2" style="color: #475569 !important;">Belum dibaca</span>
+                    <span class="badge rounded-pill fw-bold px-2 py-1" style="background: linear-gradient(135deg, #67b0f8 0%, #4690e8 100%); color: #ffffff !important; font-size: 0.78rem; box-shadow: 0 1px 3px rgba(70, 144, 232, 0.35);">
                         <?php echo $notif_count; ?>
                     </span>
                 </a>
