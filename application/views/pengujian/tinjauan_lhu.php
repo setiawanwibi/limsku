@@ -172,12 +172,18 @@
                     <a href="<?php echo site_url('pengujian/pdf_sampel/' . $sampel['id']); ?>" class="btn btn-danger btn-sm" target="_blank">
                         <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh LHU PDF
                     </a>
-                    <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm">
-                        <i class="bi bi-file-earmark-check me-1"></i> Ke Riwayat Approval
-                    </a>
+                    <?php if (!empty($is_mt)): ?>
+                        <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-check me-1"></i> Ke Riwayat Approval
+                        </a>
+                    <?php else: ?>
+                        <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-success btn-sm">
+                            <i class="bi bi-clock-history me-1"></i> Ke Riwayat Pengujian
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
-                <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Antrean
+                <a href="<?php echo !empty($is_mt) ? site_url('pengujian/approval') : site_url('pengujian/riwayat'); ?>" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> <?php echo !empty($is_mt) ? 'Kembali ke Antrean' : 'Kembali ke Riwayat'; ?>
                 </a>
             </div>
         </div>
@@ -469,9 +475,15 @@
                                 <a href="<?php echo site_url('pengujian/pdf_sampel/' . $sampel['id']); ?>" class="btn btn-danger btn-sm px-3" target="_blank">
                                     <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh LHU PDF
                                 </a>
-                                <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm px-3">
-                                    <i class="bi bi-file-earmark-check me-1"></i> Buka Riwayat Approval
-                                </a>
+                                <?php if (!empty($is_mt)): ?>
+                                    <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm px-3">
+                                        <i class="bi bi-file-earmark-check me-1"></i> Buka Riwayat Approval
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-success btn-sm px-3">
+                                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php elseif (!empty($kelengkapan['siap_mt']) && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve')): ?>

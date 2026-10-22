@@ -2125,7 +2125,7 @@ class Pengujian extends MY_Controller
      */
     public function tinjauan_lhu($sample_id = NULL)
     {
-        $this->cek_hak_akses('pengujian_approve');
+        $this->cek_hak_akses('laporan_view');
 
         if (empty($sample_id)) {
             show_404();
@@ -2136,8 +2136,10 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        $this->data['halaman_aktif'] = 'pengujian_approval';
-        $this->data['judul_halaman'] = 'Tinjauan LHU Sampel: ' . html_escape($tinjauan['sampel']['nama_sampel']);
+        $is_mt = $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve');
+        $this->data['is_mt']         = $is_mt;
+        $this->data['halaman_aktif'] = $is_mt ? 'pengujian_approval' : 'pengujian_riwayat';
+        $this->data['judul_halaman'] = 'Tinjauan Detail Laporan Pengujian: ' . html_escape($tinjauan['sampel']['nama_sampel']);
         $this->data['sampel']        = $tinjauan['sampel'];
         $this->data['kelengkapan']   = $tinjauan['kelengkapan'];
         $this->data['sesi_list']     = $tinjauan['sesi_list'];
