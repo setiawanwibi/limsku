@@ -23,10 +23,6 @@ class Alat extends MY_Controller
 
         $this->data['halaman_aktif'] = 'alat';
         $this->data['judul_halaman'] = 'Master Alat Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Alat Laboratorium', 'url' => site_url('alat'))
-        );
-
         $this->data['daftar_alat'] = $this->Model_Alat->ambil_semua();
 
         $this->muat_tampilan('alat/index');

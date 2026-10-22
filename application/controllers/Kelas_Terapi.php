@@ -23,9 +23,6 @@ class Kelas_Terapi extends MY_Controller
 
         $this->data['halaman_aktif']      = 'kelas_terapi';
         $this->data['judul_halaman']      = 'Master Kelas Terapi';
-        $this->data['breadcrumbs']        = array(
-            array('label' => 'Kelas Terapi', 'url' => site_url('kelas-terapi'))
-        );
         $this->data['daftar_kelas_terapi'] = $this->Model_Kelas_Terapi->ambil_semua();
 
         // Hitung penggunaan metode untuk setiap kelas terapi

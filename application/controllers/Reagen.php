@@ -31,9 +31,6 @@ class Reagen extends MY_Controller
 
         $this->data['halaman_aktif'] = 'reagen';
         $this->data['judul_halaman'] = 'Master Reagen Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Reagen', 'url' => site_url('reagen'))
-        );
 
         $this->data['status_aktif']  = $status;
         $this->data['jenis_aktif']   = $jenis;

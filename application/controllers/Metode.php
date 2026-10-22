@@ -29,9 +29,6 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif'] = 'metode';
         $this->data['judul_halaman'] = 'Master Metode Pengujian (Monografi)';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Metode', 'url' => site_url('metode'))
-        );
 
         $this->data['bidang_aktif']  = $bidang;
         $this->data['status_aktif']  = $status;

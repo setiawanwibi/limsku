@@ -503,7 +503,7 @@
 
                 <!-- Identifier Input -->
                 <div class="form-group-custom">
-                    <label for="nama_pengguna">Email atau NIP</label>
+                    <label for="nama_pengguna">Username atau NIP</label>
                     <div class="input-wrapper-custom">
                         <i class="bi bi-person input-icon-left"></i>
                         <input type="text" 
