@@ -17,7 +17,9 @@ class Model_Pengujian extends CI_Model
     }
 
     /**
-     * Mengambil daftar sampel yang berstatus "Menunggu Pengujian" (Antrean Pengujian)
+     * Mengambil daftar sampel yang memiliki slot pengujian belum diambil (Antrean Pengujian).
+     * Mendukung multi-bidang (Kimia & Mikrobiologi):
+     * Sampel tetap muncul di antrean jika salah satu bidang (Kimia / Mikro) masih belum memiliki sesi aktif/final.
      * 
      * @return array
      */
@@ -26,56 +28,144 @@ class Model_Pengujian extends CI_Model
         $this->db->select('s.*, uc.nama_lengkap as nama_pembuat');
         $this->db->from('samples s');
         $this->db->join('users uc', 'uc.id = s.created_by', 'left');
-        $this->db->where('s.status', 'Menunggu Pengujian');
+        // Jangan tampilkan jika sampel sudah final atau ditolak
+        $this->db->where_not_in('s.status', array('Approved / Final', 'Ditolak'));
         $this->db->order_by('s.id', 'ASC');
-        return $this->db->get()->result_array();
+        $daftar_sampel = $this->db->get()->result_array();
+
+        if (empty($daftar_sampel)) {
+            return array();
+        }
+
+        $sample_ids = array_column($daftar_sampel, 'id');
+        $this->db->select('id, sample_id, penguji_id, jenis_pengujian, status');
+        $this->db->from('testing_sessions');
+        $this->db->where_in('sample_id', $sample_ids);
+        $daftar_sesi = $this->db->get()->result_array();
+
+        // Kelompokkan sesi per sample_id
+        $sesi_map = array();
+        foreach ($daftar_sesi as $sesi) {
+            $sid = (int)$sesi['sample_id'];
+            if (!isset($sesi_map[$sid])) {
+                $sesi_map[$sid] = array();
+            }
+            $sesi_map[$sid][] = $sesi;
+        }
+
+        $antrean_tersedia = array();
+        foreach ($daftar_sampel as $s) {
+            $sid = (int)$s['id'];
+            $sesi_list = isset($sesi_map[$sid]) ? $sesi_map[$sid] : array();
+
+            // Evaluasi kebutuhan
+            $eval_k = $this->evaluasi_kebutuhan_pengujian(isset($s['jumlah_kimia']) ? $s['jumlah_kimia'] : NULL);
+            $eval_m = $this->evaluasi_kebutuhan_pengujian(isset($s['jumlah_mikro']) ? $s['jumlah_mikro'] : NULL);
+
+            $wajib_kimia = $eval_k['is_wajib'];
+            $wajib_mikro = $eval_m['is_wajib'];
+
+            // Jika keduanya tidak diwajibkan secara eksplisit, cek apakah status lama masih Menunggu Pengujian
+            if (!$wajib_kimia && !$wajib_mikro) {
+                if ($s['status'] === 'Menunggu Pengujian') {
+                    $wajib_kimia = TRUE; // fallback default
+                } else {
+                    continue;
+                }
+            }
+
+            // Cek ketersediaan sesi untuk masing-masing bidang
+            $sesi_kimia = NULL;
+            $sesi_mikro = NULL;
+            foreach ($sesi_list as $ses) {
+                if ($ses['jenis_pengujian'] === 'Kimia' && in_array($ses['status'], array('Sedang Diuji', 'Menunggu Verifikasi', 'Menunggu Approval', 'Approved / Final'))) {
+                    $sesi_kimia = $ses;
+                }
+                if ($ses['jenis_pengujian'] === 'Mikrobiologi' && in_array($ses['status'], array('Sedang Diuji', 'Menunggu Verifikasi', 'Menunggu Approval', 'Approved / Final'))) {
+                    $sesi_mikro = $ses;
+                }
+            }
+
+            $slot_kimia_tersedia = ($wajib_kimia && empty($sesi_kimia));
+            $slot_mikro_tersedia = ($wajib_mikro && empty($sesi_mikro));
+
+            // Jika masih ada minimal 1 slot yang belum diambil oleh analis
+            if ($slot_kimia_tersedia || $slot_mikro_tersedia) {
+                $s['wajib_kimia']          = $wajib_kimia;
+                $s['wajib_mikro']          = $wajib_mikro;
+                $s['slot_kimia_tersedia']  = $slot_kimia_tersedia;
+                $s['slot_mikro_tersedia']  = $slot_mikro_tersedia;
+                $s['sesi_kimia_aktif']     = $sesi_kimia;
+                $s['sesi_mikro_aktif']     = $sesi_mikro;
+                $antrean_tersedia[] = $s;
+            }
+        }
+
+        return $antrean_tersedia;
     }
 
     /**
-     * Mengambil daftar sampel yang sedang diuji
+     * Mengambil daftar sesi pengujian aktif milik penguji tertentu (Sampel Saya)
      * 
      * @param int|null $penguji_id
      * @return array
      */
     public function ambil_dalam_pengujian($penguji_id = NULL)
     {
-        $this->db->select('s.*, u.nama_lengkap as nama_penguji, ts.id as session_id, ts.jenis_pengujian');
-        $this->db->from('samples s');
-        $this->db->join('users u', 'u.id = s.penguji_id', 'left');
-        $this->db->join('testing_sessions ts', "ts.sample_id = s.id AND ts.status = 'Sedang Diuji'", 'left');
-        $this->db->where('s.status', 'Sedang Diuji');
+        $this->db->select('ts.id as session_id, ts.jenis_pengujian, ts.status as session_status, ts.waktu_mulai, s.*, u.nama_lengkap as nama_penguji');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->where('ts.status', 'Sedang Diuji');
         if ($penguji_id) {
-            $this->db->where('s.penguji_id', $penguji_id);
+            $this->db->where('ts.penguji_id', $penguji_id);
         }
-        $this->db->order_by('s.id', 'DESC');
+        $this->db->order_by('ts.id', 'DESC');
         return $this->db->get()->result_array();
     }
 
     /**
      * Klaim sampel oleh penguji (Self-Assignment)
-     * Mengubah status sampel dari "Menunggu Pengujian" -> "Sedang Diuji"
+     * Mendukung klaim spesifik bidang ('Kimia' / 'Mikrobiologi') atau auto-deteksi
      * 
      * @param int $sample_id
      * @param int $penguji_id
+     * @param string|null $jenis_pengujian
      * @return bool
      */
-    public function klaim_sampel($sample_id, $penguji_id)
+    public function klaim_sampel($sample_id, $penguji_id, $jenis_pengujian = NULL)
     {
         $this->db->trans_start();
 
-        // Lock & Verify status sampel
+        // Lock & Verify sampel
         $sampel = $this->db->get_where('samples', array('id' => $sample_id))->row_array();
-        if (!$sampel || $sampel['status'] !== 'Menunggu Pengujian') {
+        if (!$sampel || in_array($sampel['status'], array('Approved / Final', 'Ditolak'))) {
             $this->db->trans_rollback();
             return FALSE;
         }
 
-        // Update status & penguji_id pada tabel samples
-        $this->db->where('id', $sample_id);
-        $this->db->update('samples', array(
-            'status'     => 'Sedang Diuji',
-            'penguji_id' => $penguji_id
-        ));
+        // Cek sesi yang sudah ada
+        $this->db->where('sample_id', $sample_id);
+        $sesi_list = $this->db->get('testing_sessions')->result_array();
+
+        if ($jenis_pengujian) {
+            foreach ($sesi_list as $ses) {
+                if ($ses['jenis_pengujian'] === $jenis_pengujian && in_array($ses['status'], array('Sedang Diuji', 'Menunggu Verifikasi', 'Menunggu Approval', 'Approved / Final'))) {
+                    // Bidang ini sudah ada sesinya
+                    $this->db->trans_rollback();
+                    return FALSE;
+                }
+            }
+        }
+
+        // Update status umum sampel menjadi Sedang Diuji jika masih Menunggu Pengujian
+        if ($sampel['status'] === 'Menunggu Pengujian') {
+            $this->db->where('id', $sample_id);
+            $this->db->update('samples', array(
+                'status'     => 'Sedang Diuji',
+                'penguji_id' => $penguji_id
+            ));
+        }
 
         $this->db->trans_complete();
         return $this->db->trans_status();
@@ -1459,7 +1549,7 @@ class Model_Pengujian extends CI_Model
 
         try {
             $pdf_gen->buat_laporan_sampel($sampel, $sesi_lengkap_list, $approver_user, $pdf_abs_path, 'F');
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return [
                 'sukses' => FALSE,
                 'pesan'  => 'Finalisasi LHU dibatalkan: ' . $e->getMessage()

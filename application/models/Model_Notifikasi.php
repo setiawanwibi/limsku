@@ -77,14 +77,16 @@ class Model_Notifikasi extends CI_Model
 
         // =========================================================================
         // 1. MENU: PROFIL & TTD DIGITAL (akun)
-        // Jika user belum memiliki spesimen TTD digital tersimpan
+        // Hanya untuk role operasional lab yang wajib TTD (Penguji, Penyelia, MT)
         // =========================================================================
-        $this->db->where('user_id', $user_id);
-        $sig = $this->db->get('user_signatures')->row_array();
-        if (empty($sig) || empty($sig['signature_file'])) {
-            $badges['akun'] = 1;
-            $badges['akun_label'] = 'Spesimen TTD Digital belum diunggah';
-            $badges['akun_type']  = 'danger';
+        if ($bisa_antrean || $bisa_verifikasi || $bisa_approval) {
+            $this->db->where('user_id', $user_id);
+            $sig = $this->db->get('user_signatures')->row_array();
+            if (empty($sig) || empty($sig['signature_file'])) {
+                $badges['akun'] = 1;
+                $badges['akun_label'] = 'Spesimen TTD Digital belum diunggah';
+                $badges['akun_type']  = 'danger';
+            }
         }
 
         // =========================================================================
@@ -104,8 +106,9 @@ class Model_Notifikasi extends CI_Model
         // Sampel yang siap untuk diklaim / diuji analis di laboratorium
         // =========================================================================
         if ($bisa_antrean) {
-            $this->db->where('status', 'Menunggu Pengujian');
-            $jml_antrean_uji = $this->db->count_all_results('samples');
+            $this->load->model('Model_Pengujian');
+            $antrean_list = $this->Model_Pengujian->ambil_antrean();
+            $jml_antrean_uji = count($antrean_list);
             $badges['pengujian_antrean'] = (int) $jml_antrean_uji;
             $badges['pengujian_antrean_label'] = $jml_antrean_uji . ' sampel dalam antrean pengujian';
             $badges['pengujian_antrean_type']  = 'danger';

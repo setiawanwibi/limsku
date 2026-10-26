@@ -22,23 +22,29 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="form-check border rounded p-3 text-center h-100 position-relative shadow-sm bg-light">
-                            <input class="form-check-input position-absolute top-0 end-0 m-3" type="radio" name="jenis_pengujian" id="jenis_kimia" value="Kimia" required>
-                            <label class="form-check-label w-100 cursor-pointer pt-2" for="jenis_kimia">
+                        <div class="form-check border rounded p-3 text-center h-100 position-relative shadow-sm <?php echo !empty($sesi_kimia_ada) ? 'bg-secondary bg-opacity-10 opacity-75' : 'bg-light'; ?>">
+                            <input class="form-check-input position-absolute top-0 end-0 m-3" type="radio" name="jenis_pengujian" id="jenis_kimia" value="Kimia" <?php echo !empty($sesi_kimia_ada) ? 'disabled' : 'required'; ?>>
+                            <label class="form-check-label w-100 <?php echo !empty($sesi_kimia_ada) ? 'cursor-not-allowed text-muted' : 'cursor-pointer'; ?> pt-2" for="jenis_kimia">
                                 <div class="fs-1 text-primary mb-2">🧪</div>
                                 <strong class="d-block text-dark fs-6">Uji Kimia</strong>
                                 <small class="text-muted d-block mt-1">Pengujian Parameter Fisika &amp; Kimia Obat / Sediaan</small>
+                                <?php if (!empty($sesi_kimia_ada)): ?>
+                                    <span class="badge bg-secondary mt-2">Sudah Diambil / Berjalan</span>
+                                <?php endif; ?>
                             </label>
                         </div>
                     </div>
 
                     <div class="col-md-6">
-                        <div class="form-check border rounded p-3 text-center h-100 position-relative shadow-sm bg-light">
-                            <input class="form-check-input position-absolute top-0 end-0 m-3" type="radio" name="jenis_pengujian" id="jenis_mikro" value="Mikrobiologi" required>
-                            <label class="form-check-label w-100 cursor-pointer pt-2" for="jenis_mikro">
+                        <div class="form-check border rounded p-3 text-center h-100 position-relative shadow-sm <?php echo !empty($sesi_mikro_ada) ? 'bg-secondary bg-opacity-10 opacity-75' : 'bg-light'; ?>">
+                            <input class="form-check-input position-absolute top-0 end-0 m-3" type="radio" name="jenis_pengujian" id="jenis_mikro" value="Mikrobiologi" <?php echo !empty($sesi_mikro_ada) ? 'disabled' : 'required'; ?>>
+                            <label class="form-check-label w-100 <?php echo !empty($sesi_mikro_ada) ? 'cursor-not-allowed text-muted' : 'cursor-pointer'; ?> pt-2" for="jenis_mikro">
                                 <div class="fs-1 text-success mb-2">🧫</div>
                                 <strong class="d-block text-dark fs-6">Uji Mikrobiologi</strong>
                                 <small class="text-muted d-block mt-1">Pengujian Sterilitas, ALT, AKK &amp; Patogen</small>
+                                <?php if (!empty($sesi_mikro_ada)): ?>
+                                    <span class="badge bg-secondary mt-2">Sudah Diambil / Berjalan</span>
+                                <?php endif; ?>
                             </label>
                         </div>
                     </div>

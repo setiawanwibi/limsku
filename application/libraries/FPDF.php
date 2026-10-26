@@ -671,6 +671,15 @@ class FPDF
             $this->y += $h;
     }
 
+    protected function _dounderline($x, $y, $txt)
+    {
+        // Underline text
+        $up = isset($this->CurrentFont['up']) ? $this->CurrentFont['up'] : -100;
+        $ut = isset($this->CurrentFont['ut']) ? $this->CurrentFont['ut'] : 50;
+        $w = $this->GetStringWidth($txt) + ($this->ws * substr_count($txt, ' '));
+        return sprintf('%.2F %.2F %.2F %.2F re f', $x*$this->k, ($this->h-($y-$up/1000*$this->FontSizePt))*$this->k, $w*$this->k, -$ut/1000*$this->FontSizePt*$this->k);
+    }
+
     public function Image($file, $x=null, $y=null, $w=0, $h=0)
     {
         if(!isset($this->images[$file]))

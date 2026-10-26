@@ -55,24 +55,39 @@ class Pengujian extends MY_Controller
         $this->cek_hak_akses('pengujian_assign');
 
         $penguji_id = $this->session->userdata('user_id');
+        $jenis_pengujian = $this->input->get('jenis', TRUE);
+        if ($jenis_pengujian && !in_array($jenis_pengujian, array('Kimia', 'Mikrobiologi'), TRUE)) {
+            $jenis_pengujian = NULL;
+        }
 
-        // Jika sampel sudah memiliki sesi pengujian aktif milik penguji ini, arahkan langsung
-        $sesi_aktif = $this->Model_Pengujian->ambil_sesi_by_sample($sample_id);
-        if ($sesi_aktif && $sesi_aktif['penguji_id'] == $penguji_id && $sesi_aktif['status'] === 'Sedang Diuji') {
+        // Jika penguji ini sudah memiliki sesi aktif pada sampel ini, arahkan langsung
+        $this->db->where('sample_id', $sample_id);
+        $this->db->where('penguji_id', $penguji_id);
+        $this->db->where('status', 'Sedang Diuji');
+        if ($jenis_pengujian) {
+            $this->db->where('jenis_pengujian', $jenis_pengujian);
+        }
+        $sesi_aktif = $this->db->get('testing_sessions')->row_array();
+        if ($sesi_aktif) {
             redirect('pengujian/proses_sesi/' . $sesi_aktif['id']);
         }
 
-        if ($this->Model_Pengujian->klaim_sampel($sample_id, $penguji_id)) {
+        if ($this->Model_Pengujian->klaim_sampel($sample_id, $penguji_id, $jenis_pengujian)) {
             $this->catat_audit('ASSIGN', 'Pengujian', array(
-                'sample_id'  => $sample_id,
-                'penguji_id' => $penguji_id,
-                'status'     => 'Sedang Diuji'
+                'sample_id'       => $sample_id,
+                'penguji_id'      => $penguji_id,
+                'jenis_pengujian' => $jenis_pengujian,
+                'status'          => 'Sedang Diuji'
             ));
 
-            $this->session->set_flashdata('pesan_sukses', 'Sampel berhasil diklaim. Silakan pilih jenis pengujian.');
-            redirect('pengujian/pilih_jenis/' . $sample_id);
+            $this->session->set_flashdata('pesan_sukses', 'Sampel berhasil diambil. Silakan tentukan parameter pengujian.');
+            if ($jenis_pengujian) {
+                redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
+            } else {
+                redirect('pengujian/pilih_jenis/' . $sample_id);
+            }
         } else {
-            $this->session->set_flashdata('pesan_gagal', 'Gagal mengklaim sampel (sampel mungkin sudah diklaim atau berstatus lain).');
+            $this->session->set_flashdata('pesan_gagal', 'Gagal mengklaim sampel (slot pengujian untuk bidang ini mungkin sudah diambil atau sampel berstatus tidak aktif).');
             redirect('pengujian/antrean');
         }
     }
@@ -91,9 +106,23 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        if ($sampel['status'] !== 'Sedang Diuji') {
-            $this->session->set_flashdata('pesan_gagal', 'Sampel tidak berstatus "Sedang Diuji". Klaim sampel terlebih dahulu.');
+        if (in_array($sampel['status'], array('Approved / Final', 'Ditolak'))) {
+            $this->session->set_flashdata('pesan_gagal', 'Sampel tidak dalam status aktif pengujian.');
             redirect('pengujian/antrean');
+        }
+
+        // Ambil sesi yang sudah ada untuk sampel ini agar opsi yang sudah diambil ter-disable
+        $this->db->where('sample_id', $sample_id);
+        $sesi_list = $this->db->get('testing_sessions')->result_array();
+        $sesi_kimia_ada = FALSE;
+        $sesi_mikro_ada = FALSE;
+        foreach ($sesi_list as $ses) {
+            if ($ses['jenis_pengujian'] === 'Kimia' && in_array($ses['status'], array('Sedang Diuji', 'Menunggu Verifikasi', 'Menunggu Approval', 'Approved / Final'))) {
+                $sesi_kimia_ada = TRUE;
+            }
+            if ($ses['jenis_pengujian'] === 'Mikrobiologi' && in_array($ses['status'], array('Sedang Diuji', 'Menunggu Verifikasi', 'Menunggu Approval', 'Approved / Final'))) {
+                $sesi_mikro_ada = TRUE;
+            }
         }
 
         if ($this->input->method() === 'post') {
@@ -103,16 +132,27 @@ class Pengujian extends MY_Controller
                 redirect('pengujian/pilih_jenis/' . $sample_id);
             }
 
+            if ($jenis_pengujian === 'Kimia' && $sesi_kimia_ada) {
+                $this->session->set_flashdata('pesan_gagal', 'Pengujian Kimia untuk sampel ini sudah dibuat atau sedang berjalan.');
+                redirect('pengujian/pilih_jenis/' . $sample_id);
+            }
+            if ($jenis_pengujian === 'Mikrobiologi' && $sesi_mikro_ada) {
+                $this->session->set_flashdata('pesan_gagal', 'Pengujian Mikrobiologi untuk sampel ini sudah dibuat atau sedang berjalan.');
+                redirect('pengujian/pilih_jenis/' . $sample_id);
+            }
+
             redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian));
         }
 
-        $this->data['halaman_aktif'] = 'pengujian_antrean';
-        $this->data['judul_halaman'] = 'Pilih Jenis Pengujian';
-        $this->data['breadcrumbs']   = array(
+        $this->data['halaman_aktif']  = 'pengujian_antrean';
+        $this->data['judul_halaman']  = 'Pilih Jenis Pengujian';
+        $this->data['breadcrumbs']    = array(
             array('label' => 'Pengujian', 'url' => site_url('pengujian')),
             array('label' => 'Pilih Jenis Pengujian', 'url' => '#')
         );
-        $this->data['sampel']        = $sampel;
+        $this->data['sampel']         = $sampel;
+        $this->data['sesi_kimia_ada'] = $sesi_kimia_ada;
+        $this->data['sesi_mikro_ada'] = $sesi_mikro_ada;
 
         $this->muat_tampilan('pengujian/pilih_jenis');
     }

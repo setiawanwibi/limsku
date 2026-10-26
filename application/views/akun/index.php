@@ -553,12 +553,10 @@
         <div class="akun-card">
 
             <div class="akun-card-header">
-
                 <h5 class="akun-card-title">
-                    <i class="bi bi-pen-fill"></i>
-                    Tanda Tangan Digital (TTD)
+                    <i class="bi <?php echo $boleh_ttd ? 'bi-pen-fill' : 'bi-shield-lock-fill'; ?>"></i>
+                    <?php echo $boleh_ttd ? 'Tanda Tangan Digital (TTD)' : 'Keamanan &amp; Pengaturan Akun'; ?>
                 </h5>
-
             </div>
 
 
@@ -814,26 +812,113 @@
 
 
                     <!-- =================================================
-                         ROLE TIDAK MEMILIKI TTD
+                         ROLE NON-TTD (ADMIN TI): FORM EDIT PROFIL & GANTI PASSWORD
                          ================================================= -->
 
-                    <div class="ttd-not-available">
+                    <!-- FLASH MESSAGE SUCCESS / ERROR -->
+                    <?php if ($this->session->flashdata('pesan_sukses')): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <?php echo $this->session->flashdata('pesan_sukses'); ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
 
-                        <i class="bi bi-info-circle-fill"></i>
+                    <?php if ($this->session->flashdata('pesan_gagal')): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <?php echo $this->session->flashdata('pesan_gagal'); ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
 
-                        <div>
+                    <!-- NAV TABS PENGATURAN AKUN -->
+                    <ul class="nav nav-pills mb-3 gap-2" id="adminAccountTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active px-3 py-2 small fw-bold" id="tab-profil-btn" data-bs-toggle="pill" data-bs-target="#tab-profil" type="button" role="tab">
+                                <i class="bi bi-person-fill me-1"></i> Ubah Data Diri
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link px-3 py-2 small fw-bold" id="tab-password-btn" data-bs-toggle="pill" data-bs-target="#tab-password" type="button" role="tab">
+                                <i class="bi bi-key-fill me-1"></i> Ganti Kata Sandi
+                            </button>
+                        </li>
+                    </ul>
 
-                            <strong>
-                                Fitur TTD Tidak Tersedia untuk Role Anda.
-                            </strong>
+                    <div class="tab-content" id="adminAccountTabContent">
+                        <!-- TAB 1: UBAH DATA DIRI -->
+                        <div class="tab-pane fade show active" id="tab-profil" role="tabpanel">
+                            <?php echo form_open('akun/ubah_profil', array('class' => 'needs-validation')); ?>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Nama Lengkap &amp; Gelar</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                        <input type="text" name="nama_lengkap" class="form-control form-control-sm" value="<?php echo html_escape($user['nama_lengkap']); ?>" required>
+                                    </div>
+                                    <div class="form-text small" style="font-size: 0.70rem;">Nama ini akan tampil di seluruh riwayat audit trail dan header sistem.</div>
+                                </div>
 
-                            <span>
-                                Fitur Tanda Tangan Digital khusus diperuntukkan
-                                bagi Penguji, Penyelia, dan Manajer Teknis.
-                            </span>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Alamat Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" name="email" class="form-control form-control-sm" value="<?php echo html_escape($user['email']); ?>" placeholder="nama@bbpom.go.id">
+                                    </div>
+                                    <div class="form-text small" style="font-size: 0.70rem;">Digunakan untuk korespondensi resmi dan pemulihan akun.</div>
+                                </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Username Akun</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-at"></i></span>
+                                        <input type="text" name="username" class="form-control form-control-sm" value="<?php echo html_escape($user['username']); ?>" required minlength="3">
+                                    </div>
+                                    <div class="form-text small" style="font-size: 0.70rem;">Digunakan saat masuk ke sistem LIMSKU. Huruf, angka, tanda strip (-) atau underscore (_).</div>
+                                </div>
+
+                                <div class="text-end pt-2">
+                                    <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold">
+                                        <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan Data Diri
+                                    </button>
+                                </div>
+                            <?php echo form_close(); ?>
                         </div>
 
+                        <!-- TAB 2: GANTI KATA SANDI -->
+                        <div class="tab-pane fade" id="tab-password" role="tabpanel">
+                            <?php echo form_open('akun/ubah_password', array('class' => 'needs-validation')); ?>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Kata Sandi Saat Ini</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                                        <input type="password" name="sandi_lama" class="form-control form-control-sm" placeholder="Masukkan kata sandi lama Anda" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Kata Sandi Baru</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-shield-lock"></i></span>
+                                        <input type="password" name="sandi_baru" class="form-control form-control-sm" placeholder="Minimal 6 karakter" required minlength="6">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Ulangi Kata Sandi Baru</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-shield-check"></i></span>
+                                        <input type="password" name="konfirmasi_sandi" class="form-control form-control-sm" placeholder="Ketik ulang kata sandi baru" required>
+                                    </div>
+                                </div>
+
+                                <div class="text-end pt-2">
+                                    <button type="submit" class="btn btn-success btn-sm px-3 fw-bold">
+                                        <i class="bi bi-key me-1"></i> Perbarui Kata Sandi
+                                    </button>
+                                </div>
+                            <?php echo form_close(); ?>
+                        </div>
                     </div>
 
 

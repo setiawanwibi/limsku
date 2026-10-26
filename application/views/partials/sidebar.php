@@ -9,6 +9,7 @@ $bisa_pengujian_antrean  = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pen
 $bisa_verifikasi         = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify');
 $bisa_approval           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve');
 $bisa_laporan            = $this->Model_Hak_Akses->memiliki_akses($role_id, 'laporan_view');
+$bisa_monitoring_rekap   = in_array((int)$role_id, array(1, 4, 5), true); // Hanya Admin TI, Penyelia, dan Manajer Teknis
 
 $bisa_metode             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'metode_view');
 $bisa_kelas_terapi       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'kelas_terapi_view');
@@ -59,7 +60,7 @@ if (!isset($badges)) {
         <li class="mb-1 <?php echo ($halaman_aktif === 'akun') ? 'active' : ''; ?>">
             <a href="<?php echo site_url('akun'); ?>" class="nav-link px-3 py-2 rounded">
                 <i class="bi bi-person-circle me-2"></i>
-                <span>Profil &amp; TTD Digital</span>
+                <span><?php echo in_array((int)$role_id, array(2, 3, 4, 5)) ? 'Profil &amp; TTD Digital' : 'Profil &amp; Keamanan Akun'; ?></span>
                 <?php if (!empty($badges['akun']) && $badges['akun'] > 0): ?>
                     <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['akun_label']); ?>">!</span>
                 <?php endif; ?>
@@ -157,6 +158,15 @@ if (!isset($badges)) {
                                 <?php echo $badges['pengujian_riwayat']; ?>
                             </span>
                         <?php endif; ?>
+                    </a>
+                </li>
+            <?php endif; ?>
+
+            <?php if ($bisa_monitoring_rekap): ?>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'laporan_monitoring') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('laporan'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                        <span>Monitoring &amp; Rekap</span>
                     </a>
                 </li>
             <?php endif; ?>

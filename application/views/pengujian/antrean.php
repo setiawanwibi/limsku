@@ -407,7 +407,7 @@
     }
 
     /* =========================================================
-       TOMBOL AMBIL
+       TOMBOL AMBIL MULTI-BIDANG
     ========================================================= */
 
     .btn-ambil-sampel {
@@ -431,6 +431,56 @@
         background: #eaf7f6;
         border-color: #9fcfcb;
         color: #127c78;
+    }
+
+    .btn-ambil-kimia {
+        border-color: #bee5eb;
+        background: #eef8fc;
+        color: #0c63e4;
+    }
+
+    .btn-ambil-kimia:hover {
+        background: #0c63e4;
+        border-color: #0c63e4;
+        color: #fff;
+    }
+
+    .btn-ambil-mikro {
+        border-color: #c3e6cb;
+        background: #eefaf1;
+        color: #198754;
+    }
+
+    .btn-ambil-mikro:hover {
+        background: #198754;
+        border-color: #198754;
+        color: #fff;
+    }
+
+    .slot-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: .67rem;
+        font-weight: 600;
+        padding: 3px 7px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+    .slot-tag-avail {
+        background: #eaf7f6;
+        color: #159b98;
+        border: 1px solid #c8eae7;
+    }
+    .slot-tag-taken {
+        background: #f1f3f5;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+    .slot-tag-done {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
     }
 
     /* =========================================================
@@ -815,17 +865,22 @@
                                 </td>
 
 
-                                <!-- KATEGORI -->
+                                <!-- KATEGORI & BIDANG -->
 
                                 <td>
 
-                                    <?php
-
-                                    echo html_escape(
-                                        $sd['kategori_sampel'] ?: '-'
-                                    );
-
-                                    ?>
+                                    <div>
+                                        <?php
+                                        echo html_escape(
+                                            $sd['kategori_sampel'] ?: '-'
+                                        );
+                                        ?>
+                                    </div>
+                                    <?php if (!empty($sd['jenis_pengujian'])): ?>
+                                        <span class="badge <?php echo ($sd['jenis_pengujian'] === 'Kimia') ? 'bg-primary' : 'bg-success'; ?> bg-opacity-10 text-<?php echo ($sd['jenis_pengujian'] === 'Kimia') ? 'primary' : 'success'; ?> border border-<?php echo ($sd['jenis_pengujian'] === 'Kimia') ? 'primary' : 'success'; ?> mt-1" style="font-size: 0.65rem;">
+                                            <?php echo ($sd['jenis_pengujian'] === 'Kimia') ? '🧪 Kimia' : '🧫 Mikrobiologi'; ?>
+                                        </span>
+                                    <?php endif; ?>
 
                                 </td>
 
@@ -839,7 +894,7 @@
                                         <?php
 
                                         echo html_escape(
-                                            $sd['status']
+                                            !empty($sd['session_status']) ? $sd['session_status'] : $sd['status']
                                         );
 
                                         ?>
@@ -853,8 +908,13 @@
 
                                 <td>
 
+                                    <?php
+                                    $link_proses = !empty($sd['session_id']) 
+                                        ? site_url('pengujian/proses_sesi/' . $sd['session_id']) 
+                                        : site_url('pengujian/proses/' . $sd['id']);
+                                    ?>
                                     <a
-                                        href="<?php echo site_url('pengujian/proses/' . $sd['id']); ?>"
+                                        href="<?php echo $link_proses; ?>"
                                         class="btn btn-warning btn-sm fw-semibold"
                                     >
 
@@ -1059,38 +1119,91 @@
 
 
                                 <!-- =================================
-                                     STATUS
+                                     STATUS BIDANG (KIMIA & MIKRO)
                                      ================================= -->
 
                                 <td>
 
-                                    <span class="status-menunggu">
+                                    <div class="d-flex flex-column gap-1">
+                                        <?php if (!empty($s['wajib_kimia'])): ?>
+                                            <div>
+                                                <?php if (!empty($s['slot_kimia_tersedia'])): ?>
+                                                    <span class="slot-tag slot-tag-avail" title="Pengujian Kimia belum diambil">
+                                                        🧪 Kimia: <strong>Tersedia</strong>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="slot-tag slot-tag-taken" title="Pengujian Kimia sudah diproses">
+                                                        🧪 Kimia: <?php echo html_escape(!empty($s['sesi_kimia_aktif']['status']) ? $s['sesi_kimia_aktif']['status'] : 'Diambil'); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
 
-                                        BELUM DIAMBIL
+                                        <?php if (!empty($s['wajib_mikro'])): ?>
+                                            <div>
+                                                <?php if (!empty($s['slot_mikro_tersedia'])): ?>
+                                                    <span class="slot-tag slot-tag-avail" title="Pengujian Mikrobiologi belum diambil">
+                                                        🧫 Mikro: <strong>Tersedia</strong>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="slot-tag slot-tag-taken" title="Pengujian Mikrobiologi sudah diproses">
+                                                        🧫 Mikro: <?php echo html_escape(!empty($s['sesi_mikro_aktif']['status']) ? $s['sesi_mikro_aktif']['status'] : 'Diambil'); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
 
-                                    </span>
+                                        <?php if (empty($s['wajib_kimia']) && empty($s['wajib_mikro'])): ?>
+                                            <span class="status-menunggu">
+                                                BELUM DIAMBIL
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
 
                                 </td>
 
 
                                 <!-- =================================
-                                     AKSI
+                                     AKSI (KLAIM BIDANG)
                                      ================================= -->
 
                                 <td>
 
-                                    <a
-                                        href="<?php echo site_url('pengujian/klaim/' . $s['id']); ?>"
-                                        class="btn-ambil-sampel"
-                                        onclick="return confirm('Klaim dan ambil pekerjaan pengujian sampel ini?');"
-                                    >
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <?php if (!empty($s['slot_kimia_tersedia'])): ?>
+                                            <a
+                                                href="<?php echo site_url('pengujian/klaim/' . $s['id'] . '?jenis=Kimia'); ?>"
+                                                class="btn-ambil-sampel btn-ambil-kimia"
+                                                onclick="return confirm('Klaim dan ambil pekerjaan Uji Kimia untuk sampel ini?');"
+                                                title="Ambil Uji Kimia"
+                                            >
+                                                🧪 Ambil Kimia
+                                            </a>
+                                        <?php endif; ?>
 
-                                        Ambil Sampel
+                                        <?php if (!empty($s['slot_mikro_tersedia'])): ?>
+                                            <a
+                                                href="<?php echo site_url('pengujian/klaim/' . $s['id'] . '?jenis=Mikrobiologi'); ?>"
+                                                class="btn-ambil-sampel btn-ambil-mikro"
+                                                onclick="return confirm('Klaim dan ambil pekerjaan Uji Mikrobiologi untuk sampel ini?');"
+                                                title="Ambil Uji Mikrobiologi"
+                                            >
+                                                🧫 Ambil Mikro
+                                            </a>
+                                        <?php endif; ?>
 
-                                    </a>
+                                        <?php if (empty($s['slot_kimia_tersedia']) && empty($s['slot_mikro_tersedia'])): ?>
+                                            <a
+                                                href="<?php echo site_url('pengujian/klaim/' . $s['id']); ?>"
+                                                class="btn-ambil-sampel"
+                                                onclick="return confirm('Klaim dan ambil pekerjaan pengujian sampel ini?');"
+                                            >
+                                                Ambil Sampel
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
 
                                 </td>
-
 
                             </tr>
 

@@ -263,15 +263,51 @@ class Model_Dasbor extends CI_Model
                 ),
                 'total' => $total_dist
             ),
-            // Deferred modules (Alat & Reagen)
+            // Modul Reagen: Reagen mendekati kadaluarsa (<= 60 hari ke depan) & sudah kadaluarsa
+            'reagen_kedaluwarsa' => $this->ambil_statistik_reagen_exp(),
             'alat_kalibrasi' => array(
                 'status'  => 'deferred',
                 'pesan'   => 'Modul master alat & kalibrasi belum masuk scope database saat ini.'
-            ),
-            'reagen_kedaluwarsa' => array(
-                'status'  => 'deferred',
-                'pesan'   => 'Modul master reagen & material belum masuk scope database saat ini.'
             )
+        );
+    }
+
+    /**
+     * Mengambil statistik reagen yang mendekati kadaluarsa dan sudah kadaluarsa
+     * 
+     * @return array
+     */
+    public function ambil_statistik_reagen_exp()
+    {
+        $q = $this->db->query("
+            SELECT 
+                COUNT(*) as total_reagen,
+                SUM(CASE WHEN expired_date IS NOT NULL AND expired_date != '0000-00-00' AND expired_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) AND expired_date >= CURDATE() THEN 1 ELSE 0 END) as exp_30_hari,
+                SUM(CASE WHEN expired_date IS NOT NULL AND expired_date != '0000-00-00' AND expired_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND expired_date >= CURDATE() THEN 1 ELSE 0 END) as exp_60_hari,
+                SUM(CASE WHEN expired_date IS NOT NULL AND expired_date != '0000-00-00' AND expired_date < CURDATE() THEN 1 ELSE 0 END) as sudah_exp
+            FROM reagents
+        ")->row_array();
+
+        // Ambil daftar reagen terdekat yang mendekati kadaluarsa (dalam 60 hari ke depan)
+        $q_list = $this->db->query("
+            SELECT id, kode_barang, nama_barang, merk, stok, expired_date,
+                   DATEDIFF(expired_date, CURDATE()) as sisa_hari
+            FROM reagents
+            WHERE expired_date IS NOT NULL 
+              AND expired_date != '0000-00-00'
+              AND expired_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)
+              AND expired_date >= CURDATE()
+            ORDER BY expired_date ASC
+            LIMIT 5
+        ")->result_array();
+
+        return array(
+            'status'         => 'active',
+            'mendekati_exp'  => (int) ($q['exp_60_hari'] ?? 0),
+            'exp_30_hari'    => (int) ($q['exp_30_hari'] ?? 0),
+            'sudah_exp'      => (int) ($q['sudah_exp'] ?? 0),
+            'total_reagen'   => (int) ($q['total_reagen'] ?? 0),
+            'daftar_segera'  => $q_list
         );
     }
 }

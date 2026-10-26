@@ -923,6 +923,11 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            <?php if (in_array((int)$this->session->userdata('role_id'), array(1, 4, 5), true)): ?>
+                <a href="<?php echo site_url('laporan'); ?>" class="btn btn-outline-info btn-sm">
+                    <i class="bi bi-graph-up-arrow me-1"></i> Monitoring &amp; Rekap
+                </a>
+            <?php endif; ?>
             <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve')): ?>
                 <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-shield-check me-1"></i> Antrean Approval MT
