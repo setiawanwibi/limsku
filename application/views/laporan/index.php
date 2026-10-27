@@ -456,8 +456,40 @@
 
     <!-- FILTER PANEL INTERAKTIF -->
     <div class="filter-panel">
+        <?php if (!empty($is_penyelia_locked)): ?>
+            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between rounded-3 border-0 bg-opacity-10 bg-primary text-primary" style="font-size: 0.8rem;">
+                <div>
+                    <i class="bi bi-shield-check me-2 fs-6"></i>
+                    <strong>Mode Penyelia Terpadu:</strong> Data monitoring dibatasi khusus pada komoditi wewenang Anda: 
+                    <?php 
+                        $kom_text = array_map(function($k) {
+                            if ($k === 'obat') return '💊 Laboratorium Obat';
+                            if ($k === 'pangan') return '🍲 Laboratorium Pangan';
+                            if ($k === 'herbal') return '🌿 Laboratorium Herbal';
+                            if ($k === 'kosmetik') return '💄 Laboratorium Kosmetik';
+                            return ucfirst($k);
+                        }, $komoditi_penyelia ?? array('obat'));
+                        echo implode(', ', $kom_text);
+                    ?>.
+                </div>
+                <span class="badge bg-primary text-white" style="font-size: 0.68rem;">Akses Wewenang Penyelia</span>
+            </div>
+        <?php endif; ?>
+
         <form method="GET" action="<?php echo site_url('laporan'); ?>">
             <div class="filter-grid">
+                <?php if (empty($is_penyelia_locked)): ?>
+                    <div>
+                        <label class="filter-label"><i class="bi bi-grid-fill me-1"></i> Komoditi</label>
+                        <select name="komoditi" class="filter-input">
+                            <option value="">-- Semua Komoditi --</option>
+                            <option value="obat" <?php echo ($filter['komoditi'] === 'obat') ? 'selected' : ''; ?>>💊 Obat</option>
+                            <option value="pangan" <?php echo ($filter['komoditi'] === 'pangan') ? 'selected' : ''; ?>>🍲 Pangan</option>
+                            <option value="herbal" <?php echo ($filter['komoditi'] === 'herbal') ? 'selected' : ''; ?>>🌿 Herbal</option>
+                            <option value="kosmetik" <?php echo ($filter['komoditi'] === 'kosmetik') ? 'selected' : ''; ?>>💄 Kosmetik</option>
+                        </select>
+                    </div>
+                <?php endif; ?>
                 <div>
                     <label class="filter-label"><i class="bi bi-calendar-event me-1"></i> Tanggal Mulai</label>
                     <input type="date" name="tgl_mulai" class="filter-input" value="<?php echo html_escape($filter['tgl_mulai']); ?>">
@@ -716,24 +748,28 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. Inisialisasi DataTable dengan tampilan bersih
+        // 1. Inisialisasi DataTable dengan tampilan bersih jika ada baris data
         if (typeof jQuery !== 'undefined' && typeof jQuery.fn.DataTable !== 'undefined') {
-            $('#tabel-monitoring').DataTable({
-                pageLength: 20,
-                ordering: true,
-                language: {
-                    search: "Cari di tabel:",
-                    searchPlaceholder: "Ketik kata kunci...",
-                    lengthMenu: "Tampilkan _MENU_ baris",
-                    info: "Menampilkan _START_ - _END_ dari _TOTAL_ sampel",
-                    infoEmpty: "Tidak ada data sampel",
-                    zeroRecords: "Data tidak ditemukan",
-                    paginate: {
-                        next: '<i class="bi bi-chevron-right"></i>',
-                        previous: '<i class="bi bi-chevron-left"></i>'
+            var $tabel = $('#tabel-monitoring');
+            // Hanya jalankan DataTable jika ada baris data nyata (bukan baris kosong colspan)
+            if ($tabel.find('tbody tr td[colspan]').length === 0) {
+                $tabel.DataTable({
+                    pageLength: 20,
+                    ordering: true,
+                    language: {
+                        search: "Cari di tabel:",
+                        searchPlaceholder: "Ketik kata kunci...",
+                        lengthMenu: "Tampilkan _MENU_ baris",
+                        info: "Menampilkan _START_ - _END_ dari _TOTAL_ sampel",
+                        infoEmpty: "Tidak ada data sampel",
+                        zeroRecords: "Data tidak ditemukan",
+                        paginate: {
+                            next: '<i class="bi bi-chevron-right"></i>',
+                            previous: '<i class="bi bi-chevron-left"></i>'
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         // 2. Inisialisasi Chart 1: Donut Status Pengujian

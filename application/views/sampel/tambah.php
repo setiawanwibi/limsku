@@ -459,8 +459,58 @@
 
                     <div class="row g-3">
 
-                        <div class="col-md-3">
+                        <!-- PILIHAN KOMODITI -->
+                        <div class="col-12">
+                            <label class="form-label d-flex align-items-center gap-2 fw-bold text-dark">
+                                <i class="bi bi-tag-fill text-primary"></i>
+                                Komoditi Sampel
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem;">Wajib</span>
+                            </label>
+                            <?php $val_komoditi = set_value('komoditi', isset($komoditi_pilihan) ? $komoditi_pilihan : 'obat'); ?>
+                            <div class="row g-2">
+                                <div class="col-md-3 col-6">
+                                    <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'obat') ? 'border-primary bg-primary-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                        <input type="radio" name="komoditi" value="obat" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'obat') ? 'checked' : ''; ?>>
+                                        <div>
+                                            <div class="fw-bold text-dark small"><i class="bi bi-capsule me-1 text-primary"></i> Obat</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Lab Kimia / Mikro Obat</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'pangan') ? 'border-success bg-success-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                        <input type="radio" name="komoditi" value="pangan" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'pangan') ? 'checked' : ''; ?>>
+                                        <div>
+                                            <div class="fw-bold text-dark small"><i class="bi bi-cup-hot me-1 text-success"></i> Pangan &amp; Air</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Lab Pangan &amp; Minuman</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'herbal') ? 'border-warning bg-warning-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                        <input type="radio" name="komoditi" value="herbal" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'herbal') ? 'checked' : ''; ?>>
+                                        <div>
+                                            <div class="fw-bold text-dark small"><i class="bi bi-flower1 me-1 text-warning"></i> Herbal / Jamu</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Obat Tradisional</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'kosmetik') ? 'border-danger bg-danger-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                        <input type="radio" name="komoditi" value="kosmetik" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'kosmetik') ? 'checked' : ''; ?>>
+                                        <div>
+                                            <div class="fw-bold text-dark small"><i class="bi bi-brush me-1 text-danger"></i> Kosmetik</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">Lab Kosmetika</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="bi bi-info-circle me-1"></i> Data sampel akan langsung diteruskan ke penguji &amp; penyelia pada komoditi yang dipilih.
+                            </div>
+                        </div>
 
+                        <div class="col-md-3">
                             <label
                                 for="no"
                                 class="form-label"
@@ -745,17 +795,22 @@
 
 
                 <!-- =================================================
-                     SECTION 3
-                     DETAIL PRODUK & KEMASAN
+                     BAGIAN KHUSUS KOMODITI: OBAT
                      ================================================= -->
+                <div id="section-wrapper-obat" class="komoditi-section-wrapper" <?php echo ($val_komoditi !== 'obat') ? 'style="display:none;"' : ''; ?>>
 
-                <div class="registrasi-section">
+                    <!-- =================================================
+                         SECTION 3
+                         DETAIL PRODUK & KEMASAN
+                         ================================================= -->
 
-                    <div class="registrasi-section-header">
+                    <div class="registrasi-section">
 
-                        <div class="registrasi-section-number">
-                            03
-                        </div>
+                        <div class="registrasi-section-header">
+
+                            <div class="registrasi-section-number">
+                                03
+                            </div>
 
                         <div>
 
@@ -1224,7 +1279,196 @@
                     </div>
 
                 </div>
+                <!-- AKHIR SECTION WRAPPER OBAT -->
 
+                <!-- =================================================
+                     BAGIAN KHUSUS KOMODITI: PANGAN & AIR (DUMMY FORM)
+                     ================================================= -->
+                <div id="section-wrapper-pangan" class="komoditi-section-wrapper" <?php echo ($val_komoditi !== 'pangan') ? 'style="display:none;"' : ''; ?>>
+                    <div class="registrasi-section" style="border-left: 4px solid #198754;">
+                        <div class="registrasi-section-header">
+                            <div class="registrasi-section-number bg-success text-white">03</div>
+                            <div>
+                                <h6 class="registrasi-section-title text-success">
+                                    <i class="bi bi-cup-hot text-success me-1"></i> Parameter Produk &amp; Sampling (Pangan &amp; Air)
+                                </h6>
+                                <p class="registrasi-section-subtitle">
+                                    Karakteristik produk pangan olahan, air minum kemasan, dan target pengujian
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="pangan_kategori" class="form-label">Kategori Pangan BPOM</label>
+                                <select class="form-select" id="pangan_kategori" name="pangan_kategori">
+                                    <option value="">-- Pilih Kategori Pangan --</option>
+                                    <option value="01.0 Produk Susu dan Analognya">01.0 Produk Susu dan Analognya</option>
+                                    <option value="02.0 Lemak, Minyak, dan Emulsi Minyak">02.0 Lemak, Minyak, dan Emulsi Minyak</option>
+                                    <option value="04.0 Buah dan Sayur Olahan">04.0 Buah dan Sayur Olahan</option>
+                                    <option value="05.0 Kembang Gula / Permen dan Cokelat">05.0 Kembang Gula / Permen dan Cokelat</option>
+                                    <option value="06.0 Serealia dan Produk Biji-bijian">06.0 Serealia dan Produk Biji-bijian</option>
+                                    <option value="08.0 Daging dan Produk Daging Olahan">08.0 Daging dan Produk Daging Olahan</option>
+                                    <option value="14.0 Minuman Siap Konsumsi / AMDK">14.0 Minuman Siap Konsumsi / AMDK</option>
+                                    <option value="15.0 Makanan Ringan Siap Santap">15.0 Makanan Ringan Siap Santap</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="pangan_nie" class="form-label">Izin Edar (BPOM MD/ML/P-IRT)</label>
+                                <input type="text" class="form-control" id="pangan_nie" name="pangan_nie" placeholder="BPOM RI MD 123456789">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="pangan_kode_produksi" class="form-label">Kode Produksi / Exp Date</label>
+                                <input type="text" class="form-control" id="pangan_kode_produksi" name="pangan_kode_produksi" placeholder="EXP: 2026-12-31">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="pangan_kemasan" class="form-label">Jenis Kemasan Pangan</label>
+                                <input type="text" class="form-control" id="pangan_kemasan" name="pangan_kemasan" placeholder="Botol PET / Kaleng / Plastik Vakum / Tetrapak">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="pangan_suhu" class="form-label">Suhu Pengambilan Sampel</label>
+                                <select class="form-select" id="pangan_suhu" name="pangan_suhu">
+                                    <option value="Suhu Ruang (25-30 °C)">Suhu Ruang (25-30 °C)</option>
+                                    <option value="Chilled (0-4 °C)">Chilled / Dingin (0-4 °C)</option>
+                                    <option value="Frozen (Minus 18 °C)">Frozen / Beku (-18 °C)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="pangan_volume" class="form-label">Volume / Berat Bersih (Netto)</label>
+                                <input type="text" class="form-control" id="pangan_volume" name="pangan_volume" placeholder="Contoh: 600 ml / 250 gram">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="pangan_parameter" class="form-label">Target Pengujian Utama</label>
+                                <textarea class="form-control" id="pangan_parameter" name="pangan_parameter" rows="2" placeholder="Uji Mikroba (ALT, E. Coli, Salmonella) / Uji Kimia (Bahan Pengawet, Pemanis Buatan, Logam Berat)"></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="pangan_produsen" class="form-label">Nama &amp; Alamat Pabrik / Produsen Pangan</label>
+                                <textarea class="form-control" id="pangan_produsen" name="pangan_produsen" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =================================================
+                     BAGIAN KHUSUS KOMODITI: HERBAL / JAMU (DUMMY FORM)
+                     ================================================= -->
+                <div id="section-wrapper-herbal" class="komoditi-section-wrapper" <?php echo ($val_komoditi !== 'herbal') ? 'style="display:none;"' : ''; ?>>
+                    <div class="registrasi-section" style="border-left: 4px solid #ffc107;">
+                        <div class="registrasi-section-header">
+                            <div class="registrasi-section-number bg-warning text-dark">03</div>
+                            <div>
+                                <h6 class="registrasi-section-title text-warning-emphasis">
+                                    <i class="bi bi-flower1 text-warning me-1"></i> Parameter Produk &amp; Sampling (Herbal / Jamu / Obat Tradisional)
+                                </h6>
+                                <p class="registrasi-section-subtitle">
+                                    Identitas bentuk sediaan, izin edar (TR/TI/SD), klaim khasiat, dan skrining BKO
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="herbal_bentuk_sediaan" class="form-label">Bentuk Sediaan Herbal</label>
+                                <select class="form-select" id="herbal_bentuk_sediaan" name="herbal_bentuk_sediaan">
+                                    <option value="">-- Pilih Bentuk Sediaan --</option>
+                                    <option value="Cairan Obat Dalam / Jamu Cair">Cairan Obat Dalam / Jamu Cair</option>
+                                    <option value="Kapsul Herbal">Kapsul Herbal</option>
+                                    <option value="Serbuk Seduh / Rajangan">Serbuk Seduh / Rajangan</option>
+                                    <option value="Pil / Tablet Herbal">Pil / Tablet Herbal</option>
+                                    <option value="Minyak Gosok / Balsem / Cairan Obat Luar">Minyak Gosok / Cairan Obat Luar</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="herbal_nie" class="form-label">Nomor Izin Edar (TR / TI / QD / SD)</label>
+                                <input type="text" class="form-control" id="herbal_nie" name="herbal_nie" placeholder="POM TR 123456789">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="herbal_bets" class="form-label">No. Bets &amp; Exp Date</label>
+                                <input type="text" class="form-control" id="herbal_bets" name="herbal_bets" placeholder="BETS-01 / EXP: 2027-05">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="herbal_klaim" class="form-label">Klaim Khasiat / Kegunaan Tradisional</label>
+                                <textarea class="form-control" id="herbal_klaim" name="herbal_klaim" rows="2" placeholder="Membantu meredakan pegal linu, memelihara daya tahan tubuh, dll."></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="herbal_bko" class="form-label">Skrining BKO (Bahan Kimia Obat) yang Diwaspadai</label>
+                                <textarea class="form-control" id="herbal_bko" name="herbal_bko" rows="2" placeholder="Skrining Parasetamol, Deksametason, Sildenafil Sitrat, Fenilbutazon, dll."></textarea>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="herbal_simplisia" class="form-label">Kandungan Simplisia / Bahan Herbal Utama</label>
+                                <input type="text" class="form-control" id="herbal_simplisia" name="herbal_simplisia" placeholder="Curcuma xanthorrhiza rhizoma, Zingiberis officinale, Phyllanthus niruri">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =================================================
+                     BAGIAN KHUSUS KOMODITI: KOSMETIK (DUMMY FORM)
+                     ================================================= -->
+                <div id="section-wrapper-kosmetik" class="komoditi-section-wrapper" <?php echo ($val_komoditi !== 'kosmetik') ? 'style="display:none;"' : ''; ?>>
+                    <div class="registrasi-section" style="border-left: 4px solid #dc3545;">
+                        <div class="registrasi-section-header">
+                            <div class="registrasi-section-number bg-danger text-white">03</div>
+                            <div>
+                                <h6 class="registrasi-section-title text-danger">
+                                    <i class="bi bi-brush text-danger me-1"></i> Parameter Produk &amp; Sampling (Kosmetik)
+                                </h6>
+                                <p class="registrasi-section-subtitle">
+                                    Nomor notifikasi, kategori kosmetik, asal sediaan, dan target uji bahan berbahaya
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="kosmetik_notifikasi" class="form-label">Nomor Notifikasi BPOM (NA / NK)</label>
+                                <input type="text" class="form-control" id="kosmetik_notifikasi" name="kosmetik_notifikasi" placeholder="NA18240101234">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="kosmetik_kategori" class="form-label">Kategori Kosmetik</label>
+                                <select class="form-select" id="kosmetik_kategori" name="kosmetik_kategori">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="Perawatan Kulit (Skincare: Serum, Krim, Toner)">Perawatan Kulit (Skincare: Serum, Krim, Toner)</option>
+                                    <option value="Riasan Wajah / Makeup (Lipstik, Bedak, Foundation)">Riasan Wajah / Makeup (Lipstik, Bedak, Foundation)</option>
+                                    <option value="Perawatan Rambut (Sampo, Minyak Rambut)">Perawatan Rambut (Sampo, Minyak Rambut)</option>
+                                    <option value="Wewangian / Parfum / Cologne">Wewangian / Parfum / Cologne</option>
+                                    <option value="Pembersih Badan (Sabun Mandi)">Pembersih Badan (Sabun Mandi)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="kosmetik_asal" class="form-label">Asal Produk</label>
+                                <select class="form-select" id="kosmetik_asal" name="kosmetik_asal">
+                                    <option value="Produksi Dalam Negeri (Lokal)">Produksi Dalam Negeri (Lokal)</option>
+                                    <option value="Impor">Impor</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="kosmetik_target_uji" class="form-label">Target Uji Bahan Dilarang / Berbahaya</label>
+                                <textarea class="form-control" id="kosmetik_target_uji" name="kosmetik_target_uji" rows="2" placeholder="Uji Merkuri (Hg), Hidrokuinon, Asam Retinoat, Timbal (Pb), Pewarna Merah K3 / K10"></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="kosmetik_produsen" class="form-label">Nama Pemilik Izin Notifikasi / Pabrik</label>
+                                <textarea class="form-control" id="kosmetik_produsen" name="kosmetik_produsen" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- =================================================
                      FORM FOOTER
@@ -1261,3 +1505,49 @@
     </div>
 
 </div>
+
+<!-- SCRIPT SWITCHER DINAMIS KOMODITI -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const radios = document.querySelectorAll('input[name="komoditi"]');
+    const wrappers = {
+        'obat': document.getElementById('section-wrapper-obat'),
+        'pangan': document.getElementById('section-wrapper-pangan'),
+        'herbal': document.getElementById('section-wrapper-herbal'),
+        'kosmetik': document.getElementById('section-wrapper-kosmetik')
+    };
+
+    function updateKomoditiForm(selectedVal) {
+        // Update styling radio cards
+        radios.forEach(function(radio) {
+            const card = radio.closest('label');
+            if (card) {
+                if (radio.value === selectedVal) {
+                    card.classList.add('border-primary', 'bg-primary-subtle', 'bg-opacity-25');
+                    card.classList.remove('border-light-subtle', 'bg-light');
+                } else {
+                    card.classList.remove('border-primary', 'bg-primary-subtle', 'bg-opacity-25');
+                    card.classList.add('border-light-subtle', 'bg-light');
+                }
+            }
+        });
+
+        // Switch container section
+        Object.keys(wrappers).forEach(function(k) {
+            if (wrappers[k]) {
+                if (k === selectedVal) {
+                    wrappers[k].style.display = 'block';
+                } else {
+                    wrappers[k].style.display = 'none';
+                }
+            }
+        });
+    }
+
+    radios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            updateKomoditiForm(this.value);
+        });
+    });
+});
+</script>

@@ -644,6 +644,7 @@
         $role_id_user = $this->session->userdata('role_id');
         $bisa_tambah = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_create') || $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_input');
         $bisa_import = $this->Model_Hak_Akses->memiliki_akses($role_id_user, 'sampel_import');
+        $param_komoditi = (!empty($komoditi_aktif) && $komoditi_aktif !== 'semua') ? ('?komoditi=' . $komoditi_aktif) : '';
         ?>
 
         <?php if ($bisa_tambah || $bisa_import): ?>
@@ -652,7 +653,7 @@
             <!-- IMPORT EXCEL -->
             <?php if ($bisa_import): ?>
             <a
-                href="<?php echo site_url('sampel/import'); ?>"
+                href="<?php echo site_url('sampel/import' . $param_komoditi); ?>"
                 class="btn-import-excel"
             >
 
@@ -696,7 +697,7 @@
             <!-- TERIMA SAMPEL BARU / INPUT MANUAL -->
             <?php if ($bisa_tambah): ?>
             <a
-                href="<?php echo site_url('sampel/tambah'); ?>"
+                href="<?php echo site_url('sampel/tambah' . $param_komoditi); ?>"
                 class="btn-terima-sampel"
                 title="Form Registrasi Sampel Manual (31 Field)"
             >
@@ -713,6 +714,31 @@
 
     </div>
 
+
+    <!-- =====================================================
+         NAVIGASI TAB KOMODITI PETUGAS SAMPEL
+         ===================================================== -->
+    <?php
+        $k_aktif = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $r_kom   = isset($rekap_komoditi) ? $rekap_komoditi : array('semua' => 0, 'obat' => 0, 'pangan' => 0, 'herbal' => 0, 'kosmetik' => 0);
+    ?>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <a href="<?php echo site_url('sampel?komoditi=obat'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'obat') ? 'btn-primary shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
+            💊 Sampel Obat <span class="badge <?php echo ($k_aktif === 'obat') ? 'bg-white text-primary' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['obat']; ?></span>
+        </a>
+        <a href="<?php echo site_url('sampel?komoditi=pangan'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'pangan') ? 'btn-success shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
+            🍲 Sampel Pangan & Air <span class="badge <?php echo ($k_aktif === 'pangan') ? 'bg-white text-success' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['pangan']; ?></span>
+        </a>
+        <a href="<?php echo site_url('sampel?komoditi=herbal'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'herbal') ? 'btn-warning text-dark shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
+            🌿 Sampel Herbal / Jamu <span class="badge <?php echo ($k_aktif === 'herbal') ? 'bg-white text-dark' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['herbal']; ?></span>
+        </a>
+        <a href="<?php echo site_url('sampel?komoditi=kosmetik'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'kosmetik') ? 'btn-info text-white shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
+            💄 Sampel Kosmetik <span class="badge <?php echo ($k_aktif === 'kosmetik') ? 'bg-white text-info' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['kosmetik']; ?></span>
+        </a>
+        <a href="<?php echo site_url('sampel?komoditi=semua'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 ms-auto <?php echo ($k_aktif === 'semua') ? 'btn-dark shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
+            🌟 Semua Sampel <span class="badge <?php echo ($k_aktif === 'semua') ? 'bg-white text-dark' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['semua']; ?></span>
+        </a>
+    </div>
 
     <!-- =====================================================
          CARD TABEL

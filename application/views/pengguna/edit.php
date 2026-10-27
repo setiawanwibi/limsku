@@ -451,6 +451,52 @@
                         </select>
                     </div>
 
+                    <?php
+                        $user_kom = !empty($user['komoditi_akses']) ? json_decode($user['komoditi_akses'], true) : array();
+                        if (!is_array($user_kom)) {
+                            $user_kom = array($user['komoditi_akses']);
+                        }
+                    ?>
+                    <!-- Penugasan Komoditi / Modul Laboratorium -->
+                    <div class="col-12 mt-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-grid-fill text-primary me-1"></i> Penugasan Modul / Komoditi Laboratorium
+                        </label>
+                        <p class="text-muted small mb-2">Tentukan modul pengujian apa saja yang dapat diakses oleh akun pengguna ini:</p>
+                        <div class="d-flex flex-wrap gap-3 p-3 bg-light rounded border">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="obat" id="kom_obat" <?php echo in_array('obat', $user_kom) || in_array('all', $user_kom) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-semibold" for="kom_obat">
+                                    💊 Lab Obat
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="pangan" id="kom_pangan" <?php echo in_array('pangan', $user_kom) || in_array('all', $user_kom) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-semibold" for="kom_pangan">
+                                    🍲 Lab Pangan & Air
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="herbal" id="kom_herbal" <?php echo in_array('herbal', $user_kom) || in_array('all', $user_kom) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-semibold" for="kom_herbal">
+                                    🌿 Lab Herbal / Obat Bahan Alam
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="kosmetik" id="kom_kosmetik" <?php echo in_array('kosmetik', $user_kom) || in_array('all', $user_kom) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-semibold" for="kom_kosmetik">
+                                    💄 Lab Kosmetik
+                                </label>
+                            </div>
+                            <div class="form-check ms-auto">
+                                <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="all" id="kom_all" <?php echo in_array('all', $user_kom) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold text-primary" for="kom_all">
+                                    🌟 Seluruh Komoditi (MT / Mikro / Petugas Sampel)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Tombol Aksi -->

@@ -351,6 +351,89 @@ class Excel_Importer
                 case 'balai':
                     $mapped_field = 'balai_penguji';
                     break;
+
+                // =====================================================
+                // KOLOM KHUSUS KOMODITI: PANGAN & AIR
+                // =====================================================
+                case 'kategori pangan':
+                case 'kategori pangan bpom':
+                    $mapped_field = 'spesifik:kategori_pangan';
+                    break;
+                case 'kode produksi':
+                case 'kode produksi exp date':
+                    $mapped_field = 'spesifik:kode_produksi';
+                    break;
+                case 'jenis kemasan':
+                case 'kemasan pangan':
+                    $mapped_field = 'kemasan';
+                    break;
+                case 'suhu sampling':
+                case 'suhu pengambilan sampel':
+                    $mapped_field = 'penyimpanan';
+                    break;
+                case 'volume netto':
+                case 'volume berat bersih':
+                case 'netto':
+                    $mapped_field = 'spesifik:volume_netto';
+                    break;
+                case 'target pengujian':
+                case 'target pengujian utama':
+                case 'parameter uji':
+                    $mapped_field = 'spesifik:target_pengujian';
+                    break;
+                case 'nama alamat produsen':
+                case 'produsen pangan':
+                case 'pabrik pangan':
+                    $mapped_field = 'nama_alamat_perusahaan';
+                    break;
+
+                // =====================================================
+                // KOLOM KHUSUS KOMODITI: HERBAL / JAMU
+                // =====================================================
+                case 'bentuk sediaan':
+                case 'bentuk sediaan herbal':
+                    $mapped_field = 'spesifik:bentuk_sediaan';
+                    break;
+                case 'no bets exp':
+                case 'no bets dan exp':
+                    $mapped_field = 'no_bets';
+                    break;
+                case 'klaim khasiat':
+                case 'khasiat':
+                case 'kegunaan tradisional':
+                    $mapped_field = 'spesifik:klaim_khasiat';
+                    break;
+                case 'skrining bko':
+                case 'bko':
+                case 'skrining bahan kimia obat':
+                    $mapped_field = 'spesifik:skrining_bko';
+                    break;
+                case 'simplisia utama':
+                case 'kandungan herbal':
+                case 'bahan herbal':
+                    $mapped_field = 'komposisi';
+                    break;
+
+                // =====================================================
+                // KOLOM KHUSUS KOMODITI: KOSMETIK
+                // =====================================================
+                case 'kategori kosmetik':
+                    $mapped_field = 'spesifik:kategori_kosmetik';
+                    break;
+                case 'nomor notifikasi':
+                case 'notifikasi bpom':
+                case 'no notifikasi':
+                    $mapped_field = 'nomor_izin_edar';
+                    break;
+                case 'asal produk':
+                    $mapped_field = 'spesifik:asal_produk';
+                    break;
+                case 'target uji bahan berbahaya':
+                case 'target uji bahaya':
+                case 'uji bahan berbahaya':
+                    $mapped_field = 'spesifik:target_uji_bahaya';
+                    break;
+
                 default:
                     $unrecognized[$idx] = $raw_col_name;
                     break;

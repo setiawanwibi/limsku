@@ -458,8 +458,8 @@
         <!-- BODY -->
         <div class="detail-sampel-body">
 
-            <!-- STATUS & KODE -->
-            <div class="detail-summary">
+            <!-- STATUS, KOMODITI & KODE -->
+            <div class="detail-summary" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
 
                 <div class="detail-summary-box">
                     <div>
@@ -469,6 +469,28 @@
 
                         <span class="detail-status">
                             <?php echo html_escape($sampel['status']); ?>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-summary-box">
+                    <div>
+                        <span class="detail-summary-label">
+                            Komoditi Pengujian
+                        </span>
+
+                        <?php 
+                        $kom = isset($sampel['komoditi']) ? strtolower($sampel['komoditi']) : 'obat';
+                        $kom_badge = array(
+                            'obat'     => array('label' => '💊 Obat', 'class' => 'bg-primary-subtle text-primary border border-primary-subtle'),
+                            'pangan'   => array('label' => '🍲 Pangan & Air', 'class' => 'bg-success-subtle text-success border border-success-subtle'),
+                            'herbal'   => array('label' => '🌿 Herbal / Jamu', 'class' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'),
+                            'kosmetik' => array('label' => '💄 Kosmetik', 'class' => 'bg-danger-subtle text-danger border border-danger-subtle')
+                        );
+                        $badge_info = isset($kom_badge[$kom]) ? $kom_badge[$kom] : array('label' => strtoupper($kom), 'class' => 'bg-secondary text-white');
+                        ?>
+                        <span class="badge px-3 py-2 fw-bold rounded-pill <?php echo $badge_info['class']; ?>" style="font-size: 0.82rem;">
+                            <?php echo $badge_info['label']; ?>
                         </span>
                     </div>
                 </div>
@@ -715,6 +737,41 @@
                 </div>
 
             </div>
+
+            <?php 
+            $spesifik = !empty($sampel['atribut_spesifik']) ? json_decode($sampel['atribut_spesifik'], true) : array();
+            if (!empty($spesifik) && is_array($spesifik)): 
+            ?>
+            <!-- PARAMETER SPESIFIK KOMODITI -->
+            <div class="detail-section mb-4" style="border: 1px solid #c7e1db; background: #fbfdfc;">
+                <div class="detail-section-header" style="background: #eef8f5;">
+                    <div class="detail-section-icon" style="background: #159b98; color: #fff;">
+                        <i class="bi bi-sliders"></i>
+                    </div>
+                    <h6 class="detail-section-title text-dark">
+                        Parameter Spesifik Komoditi (<?php echo strtoupper($sampel['komoditi'] ?: 'OBAT'); ?>)
+                    </h6>
+                </div>
+                <div class="detail-section-body">
+                    <div class="row g-3">
+                        <?php foreach ($spesifik as $k_spec => $v_spec): ?>
+                            <?php if ($v_spec !== NULL && $v_spec !== ''): ?>
+                                <div class="col-md-6">
+                                    <div class="p-2 border rounded bg-white">
+                                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                            <?php echo ucwords(str_replace('_', ' ', $k_spec)); ?>
+                                        </small>
+                                        <span class="text-dark fw-semibold" style="font-size: 0.85rem;">
+                                            <?php echo html_escape($v_spec); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- PERUSAHAAN & KOMPOSISI + EVALUASI -->
             <div class="detail-columns">

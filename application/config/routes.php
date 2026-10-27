@@ -14,6 +14,10 @@ $route['translate_uri_dashes'] = FALSE;
 $route['masuk']  = 'autentikasi/masuk';
 $route['keluar'] = 'autentikasi/keluar';
 
+// Portal Pemilih Modul Laboratorium
+$route['portal']                  = 'portal/index';
+$route['portal/pilih/(:any)']     = 'portal/pilih/$1';
+
 // Dasbor
 $route['dasbor']                = 'dasbor/index';
 $route['dasbor/api_ringkasan']  = 'dasbor/api_ringkasan';

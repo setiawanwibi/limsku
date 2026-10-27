@@ -24,6 +24,9 @@
                         </span>
                     </div>
                 </a>
+                <a href="<?php echo site_url('portal'); ?>" class="btn btn-sm btn-outline-primary me-2 fw-semibold" title="Beralih Portal Modul Laboratorium">
+                    <i class="bi bi-grid-fill me-1"></i> Portal
+                </a>
                 <a href="<?php echo site_url('akun'); ?>" class="btn btn-sm btn-outline-secondary me-2 fw-semibold" title="Profil & TTD Digital">
                     <i class="bi bi-person-gear"></i>
                 </a>

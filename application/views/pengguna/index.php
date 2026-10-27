@@ -542,6 +542,7 @@
                             <th>Nama Lengkap</th>
                             <th>Role / Peran</th>
                             <th>Laboratorium</th>
+                            <th>Akses Modul</th>
                             <th>Status</th>
                             <th width="18%">Aksi</th>
                         </tr>
@@ -551,7 +552,12 @@
 
                         <?php if (!empty($daftar_pengguna)): ?>
 
-                            <?php $no = 1; foreach ($daftar_pengguna as $u): ?>
+                            <?php $no = 1; foreach ($daftar_pengguna as $u): 
+                                $kom_arr = !empty($u['komoditi_akses']) ? json_decode($u['komoditi_akses'], true) : array();
+                                if (!is_array($kom_arr)) {
+                                    $kom_arr = !empty($u['komoditi_akses']) ? array($u['komoditi_akses']) : array('obat');
+                                }
+                            ?>
 
                                 <tr>
                                     <td><?php echo $no++; ?></td>
@@ -578,6 +584,28 @@
 
                                     <td>
                                         <?php echo html_escape($u['nama_lab'] ?: 'Seluruh Lab / Non-Lab'); ?>
+                                    </td>
+
+                                    <td>
+                                        <?php if (in_array('all', $kom_arr) || in_array('all_sampel', $kom_arr)): ?>
+                                            <span class="badge bg-success" style="font-size: 0.68rem;">Semua Komoditi</span>
+                                        <?php else: ?>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                <?php foreach ($kom_arr as $k): ?>
+                                                    <?php if ($k === 'obat'): ?>
+                                                        <span class="badge bg-primary" style="font-size: 0.65rem;">Obat</span>
+                                                    <?php elseif ($k === 'pangan'): ?>
+                                                        <span class="badge bg-success" style="font-size: 0.65rem;">Pangan</span>
+                                                    <?php elseif ($k === 'herbal'): ?>
+                                                        <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Herbal</span>
+                                                    <?php elseif ($k === 'kosmetik'): ?>
+                                                        <span class="badge bg-info text-dark" style="font-size: 0.65rem;">Kosmetik</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-secondary" style="font-size: 0.65rem;"><?php echo html_escape($k); ?></span>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
 
                                     <td>

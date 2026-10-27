@@ -16,21 +16,57 @@ class Model_Sampel extends CI_Model
     }
 
     /**
-     * Mengambil daftar sampel laboratorium
+     * Mengambil daftar sampel laboratorium dengan filter komoditi opsional
      * 
+     * @param string|null $komoditi
      * @param int $limit
      * @param int $offset
      * @return array
      */
-    public function ambil_semua($limit = 2000, $offset = 0)
+    public function ambil_semua($komoditi = NULL, $limit = 2000, $offset = 0)
     {
         $this->db->select('s.*, uc.nama_lengkap as nama_pembuat, uu.nama_lengkap as nama_pengubah');
         $this->db->from($this->tabel . ' s');
         $this->db->join('users uc', 'uc.id = s.created_by', 'left');
         $this->db->join('users uu', 'uu.id = s.updated_by', 'left');
+
+        if (!empty($komoditi) && $komoditi !== 'semua') {
+            $this->db->group_start();
+            $this->db->where('s.komoditi', $komoditi);
+            if ($komoditi === 'obat') {
+                $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                $this->db->or_where('s.komoditi', '');
+            }
+            $this->db->group_end();
+        }
+
         $this->db->order_by('s.id', 'DESC');
         $this->db->limit($limit, $offset);
         return $this->db->get()->result_array();
+    }
+
+    /**
+     * Menghitung jumlah sampel per komoditi untuk badge navigasi tab
+     * 
+     * @return array
+     */
+    public function hitung_per_komoditi()
+    {
+        $this->db->select('
+            COUNT(*) as total,
+            SUM(CASE WHEN komoditi = "obat" OR komoditi IS NULL OR komoditi = "" THEN 1 ELSE 0 END) as total_obat,
+            SUM(CASE WHEN komoditi = "pangan" THEN 1 ELSE 0 END) as total_pangan,
+            SUM(CASE WHEN komoditi = "herbal" THEN 1 ELSE 0 END) as total_herbal,
+            SUM(CASE WHEN komoditi = "kosmetik" THEN 1 ELSE 0 END) as total_kosmetik
+        ');
+        $res = $this->db->get($this->tabel)->row_array();
+        return array(
+            'semua'    => (int)($res['total'] ?? 0),
+            'obat'     => (int)($res['total_obat'] ?? 0),
+            'pangan'   => (int)($res['total_pangan'] ?? 0),
+            'herbal'   => (int)($res['total_herbal'] ?? 0),
+            'kosmetik' => (int)($res['total_kosmetik'] ?? 0),
+        );
     }
 
     /**

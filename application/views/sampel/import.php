@@ -580,9 +580,67 @@
 
 
                 <!-- =================================================
+                     PILIHAN KOMODITI SASARAN IMPORT
+                     ================================================= -->
+                <div class="mb-4">
+                    <label class="form-label d-flex align-items-center gap-2 fw-bold text-dark mb-2">
+                        <i class="bi bi-tag-fill text-primary"></i>
+                        Komoditi Sasaran Import
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem;">Wajib</span>
+                    </label>
+                    <?php $val_komoditi = set_value('komoditi', isset($komoditi_pilihan) ? $komoditi_pilihan : 'obat'); ?>
+                    <div class="row g-2">
+                        <div class="col-md-3 col-6">
+                            <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'obat') ? 'border-primary bg-primary-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                <input type="radio" name="komoditi" value="obat" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'obat') ? 'checked' : ''; ?>>
+                                <div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-capsule me-1 text-primary"></i> Obat</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kimia / Mikro Obat</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'pangan') ? 'border-success bg-success-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                <input type="radio" name="komoditi" value="pangan" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'pangan') ? 'checked' : ''; ?>>
+                                <div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-cup-hot me-1 text-success"></i> Pangan &amp; Air</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Pangan &amp; Minuman</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'herbal') ? 'border-warning bg-warning-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                <input type="radio" name="komoditi" value="herbal" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'herbal') ? 'checked' : ''; ?>>
+                                <div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-flower1 me-1 text-warning"></i> Herbal / Jamu</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Obat Tradisional</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'kosmetik') ? 'border-danger bg-danger-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                <input type="radio" name="komoditi" value="kosmetik" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'kosmetik') ? 'checked' : ''; ?>>
+                                <div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-brush me-1 text-danger"></i> Kosmetik</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kosmetika</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-2 border-top border-light-subtle">
+                        <div class="form-text text-muted small mb-0">
+                            <i class="bi bi-info-circle me-1"></i> Seluruh data sampel dalam file ini otomatis dikelompokkan ke dalam komoditi yang dipilih.
+                        </div>
+                        <a id="btn-download-template" href="<?php echo site_url('sampel/download_template/' . $val_komoditi); ?>" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-2 fw-semibold px-3 py-1 rounded-pill" style="font-size: 0.78rem;">
+                            <i class="bi bi-file-earmark-excel-fill text-success"></i>
+                            <span id="text-download-template">Unduh Template <?php echo ucfirst($val_komoditi); ?> (.xlsx)</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- =================================================
                      FILE
                      ================================================= -->
-
                 <div class="import-upload-section">
 
                     <label
@@ -646,3 +704,39 @@
     </div>
 
 </div>
+
+<!-- SCRIPT SWITCHER DOWNLOAD TEMPLATE SESUAI KOMODITI -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const radios = document.querySelectorAll('input[name="komoditi"]');
+    const btnDownload = document.getElementById('btn-download-template');
+    const textDownload = document.getElementById('text-download-template');
+    const baseUrlDownload = '<?php echo site_url("sampel/download_template/"); ?>';
+
+    radios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const selected = this.value;
+            // Update styling radio cards
+            radios.forEach(function(r) {
+                const card = r.closest('label');
+                if (card) {
+                    if (r.value === selected) {
+                        card.classList.add('border-primary', 'bg-primary-subtle', 'bg-opacity-25');
+                        card.classList.remove('border-light-subtle', 'bg-light');
+                    } else {
+                        card.classList.remove('border-primary', 'bg-primary-subtle', 'bg-opacity-25');
+                        card.classList.add('border-light-subtle', 'bg-light');
+                    }
+                }
+            });
+
+            // Update Link & Teks Button Download Template
+            if (btnDownload && textDownload) {
+                btnDownload.href = baseUrlDownload + selected;
+                const capitalized = selected.charAt(0).toUpperCase() + selected.slice(1);
+                textDownload.textContent = 'Unduh Template ' + capitalized + ' (.xlsx)';
+            }
+        });
+    });
+});
+</script>

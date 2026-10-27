@@ -55,26 +55,41 @@ class Autentikasi extends MY_Controller
                 if ($hasil['status'] === TRUE) {
                     $user = $hasil['user'];
 
+                    // Decode akses komoditi
+                    $komoditi_raw = !empty($user['komoditi_akses']) ? json_decode($user['komoditi_akses'], true) : array();
+                    if (!is_array($komoditi_raw)) {
+                        $komoditi_raw = !empty($user['komoditi_akses']) ? array($user['komoditi_akses']) : array('obat');
+                    }
+
                     // Set data session login
                     $sess_data = array(
-                        'user_id'       => $user['id'],
-                        'username'      => $user['username'],
-                        'nama_lengkap'  => $user['nama_lengkap'],
-                        'role_id'       => $user['role_id'],
-                        'role_name'     => $user['nama_role'],
-                        'laboratory_id' => $user['laboratory_id'],
-                        'logged_in'     => TRUE
+                        'user_id'        => $user['id'],
+                        'username'       => $user['username'],
+                        'nama_lengkap'   => $user['nama_lengkap'],
+                        'role_id'        => $user['role_id'],
+                        'role_name'      => $user['nama_role'],
+                        'laboratory_id'  => $user['laboratory_id'],
+                        'komoditi_akses' => $komoditi_raw,
+                        'komoditi_aktif' => in_array('all', $komoditi_raw) || in_array('obat', $komoditi_raw) ? 'obat' : ($komoditi_raw[0] ?? 'obat'),
+                        'logged_in'      => TRUE
                     );
                     $this->session->set_userdata($sess_data);
 
                     // Catat audit log login sukses
                     $this->catat_audit('LOGIN_SUKSES', 'Autentikasi', array(
                         'username' => $user['username'],
-                        'role'     => $user['nama_role']
+                        'role'     => $user['nama_role'],
+                        'komoditi' => $sess_data['komoditi_akses']
                     ));
 
                     $this->session->set_flashdata('pesan_sukses', 'Selamat datang kembali, ' . $user['nama_lengkap'] . '!');
-                    redirect('dasbor');
+
+                    // Alihkan ke portal pemilih modul jika memiliki akses jamak/all, atau langsung ke dasbor
+                    if (in_array('all', $komoditi_raw) || count($komoditi_raw) > 1 || (int)$user['role_id'] === 1 || (int)$user['role_id'] === 2) {
+                        redirect('portal');
+                    } else {
+                        redirect('dasbor');
+                    }
                 } else {
                     // Catat audit log login gagal (tanpa menyimpan password)
                     $this->catat_audit('LOGIN_GAGAL', 'Autentikasi', array(

@@ -38,7 +38,8 @@ class Pengujian extends MY_Controller
         $this->data['halaman_aktif'] = 'pengujian_antrean';
         $this->data['judul_halaman'] = 'Antrean Pengujian Laboratorium';
 
-        $this->data['antrean_sampel'] = $this->Model_Pengujian->ambil_antrean();
+        $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        $this->data['antrean_sampel'] = $this->Model_Pengujian->ambil_antrean($komoditi_akses);
         $this->data['sedang_diuji']   = $this->Model_Pengujian->ambil_dalam_pengujian($this->session->userdata('user_id'));
 
         $this->muat_tampilan('pengujian/antrean');

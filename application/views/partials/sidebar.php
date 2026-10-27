@@ -49,6 +49,19 @@ if (!isset($badges)) {
         </button>
     </div>
 
+    <!-- Active Workspace Bar -->
+    <div class="px-3 py-2 bg-light border-bottom d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <span class="badge bg-primary px-2 py-1" style="font-size: 0.65rem;">
+                <i class="bi bi-capsule me-1"></i> LAB OBAT
+            </span>
+            <span class="text-muted small text-truncate" style="font-size: 0.72rem;">Farmasi & Uji</span>
+        </div>
+        <a href="<?php echo site_url('portal'); ?>" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 0.68rem;" title="Beralih Modul">
+            Ganti
+        </a>
+    </div>
+
     <ul class="components list-unstyled px-2 py-3">
         <!-- Dasbor: Tampil untuk semua authenticated user -->
         <li class="mb-1 <?php echo ($halaman_aktif === 'dasbor') ? 'active' : ''; ?>">

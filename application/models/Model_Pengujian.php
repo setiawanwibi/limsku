@@ -18,18 +18,33 @@ class Model_Pengujian extends CI_Model
 
     /**
      * Mengambil daftar sampel yang memiliki slot pengujian belum diambil (Antrean Pengujian).
-     * Mendukung multi-bidang (Kimia & Mikrobiologi):
-     * Sampel tetap muncul di antrean jika salah satu bidang (Kimia / Mikro) masih belum memiliki sesi aktif/final.
+     * Mendukung multi-bidang (Kimia & Mikrobiologi) dan penyekatan komoditi:
      * 
+     * @param array|string|null $komoditi_izin
      * @return array
      */
-    public function ambil_antrean()
+    public function ambil_antrean($komoditi_izin = NULL)
     {
         $this->db->select('s.*, uc.nama_lengkap as nama_pembuat');
         $this->db->from('samples s');
         $this->db->join('users uc', 'uc.id = s.created_by', 'left');
         // Jangan tampilkan jika sampel sudah final atau ditolak
         $this->db->where_not_in('s.status', array('Approved / Final', 'Ditolak'));
+
+        // Penyekatan Komoditi untuk Penguji
+        if (!empty($komoditi_izin) && $komoditi_izin !== 'all') {
+            $izins = is_array($komoditi_izin) ? $komoditi_izin : array($komoditi_izin);
+            if (!in_array('all', $izins) && !in_array('all_sampel', $izins)) {
+                $this->db->group_start();
+                $this->db->where_in('s.komoditi', $izins);
+                if (in_array('obat', $izins)) {
+                    $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                    $this->db->or_where('s.komoditi', '');
+                }
+                $this->db->group_end();
+            }
+        }
+
         $this->db->order_by('s.id', 'ASC');
         $daftar_sampel = $this->db->get()->result_array();
 

@@ -155,6 +155,34 @@ class Model_Laporan extends CI_Model
             $query->or_like('s.no_bets', $keyword);
             $query->group_end();
         }
+
+        // 6. Penyekatan Hak Akses Komoditi (Khusus Role Penyelia & Pengguna Tertentu)
+        if (!empty($filter['komoditi_izin']) && $filter['komoditi_izin'] !== 'all') {
+            $izins = is_array($filter['komoditi_izin']) ? $filter['komoditi_izin'] : array($filter['komoditi_izin']);
+            if (!in_array('all', $izins) && !in_array('all_sampel', $izins)) {
+                $query->group_start();
+                $query->where_in('s.kategori_sampel', $izins);
+                // Jika izin mencakup 'obat', seluruh data obat historis (kategori_sampel = Targeted, Rutin, NULL, '') disertakan
+                if (in_array('obat', $izins)) {
+                    $query->or_where_in('s.kategori_sampel', array('Targeted', 'Rutin', 'Kasus'));
+                    $query->or_where('s.kategori_sampel IS NULL', NULL, FALSE);
+                    $query->or_where('s.kategori_sampel', '');
+                }
+                $query->group_end();
+            }
+        }
+
+        // 7. Filter Manual Komoditi (Untuk Admin / MT yang memiliki akses 'all')
+        if (!empty($filter['komoditi']) && $filter['komoditi'] !== 'all') {
+            $query->group_start();
+            $query->where('s.kategori_sampel', $filter['komoditi']);
+            if ($filter['komoditi'] === 'obat') {
+                $query->or_where_in('s.kategori_sampel', array('Targeted', 'Rutin', 'Kasus'));
+                $query->or_where('s.kategori_sampel IS NULL', NULL, FALSE);
+                $query->or_where('s.kategori_sampel', '');
+            }
+            $query->group_end();
+        }
     }
 
     /**

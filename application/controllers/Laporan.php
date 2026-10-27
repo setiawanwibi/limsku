@@ -41,6 +41,13 @@ class Laporan extends MY_Controller
         $this->data['hide_breadcrumb'] = true;
         $this->data['breadcrumbs']     = array();
 
+        // Ambil penugasan komoditi user dari session
+        $role_id = (int)$this->session->userdata('role_id');
+        $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        if (!is_array($komoditi_akses)) {
+            $komoditi_akses = array($komoditi_akses);
+        }
+
         // Ambil parameter filter dari GET
         $filter = array(
             'tgl_mulai'       => $this->input->get('tgl_mulai', TRUE),
@@ -48,8 +55,21 @@ class Laporan extends MY_Controller
             'status'          => $this->input->get('status', TRUE),
             'jenis_pengujian' => $this->input->get('jenis_pengujian', TRUE),
             'penguji_id'      => $this->input->get('penguji_id', TRUE),
-            'kata_kunci'      => $this->input->get('kata_kunci', TRUE)
+            'kata_kunci'      => $this->input->get('kata_kunci', TRUE),
+            'komoditi'        => $this->input->get('komoditi', TRUE)
         );
+
+        // Penyekatan Hak Akses Komoditi:
+        // Jika Penyelia (Role 4): KUNCI ke komoditi tugasnya saja!
+        if ($role_id === 4) {
+            $filter['komoditi_izin'] = $komoditi_akses;
+            $this->data['is_penyelia_locked'] = true;
+            $this->data['komoditi_penyelia']  = $komoditi_akses;
+        } else {
+            // Untuk Admin (1) & Manajer Teknis (5): Bebas melihat semua
+            $filter['komoditi_izin'] = 'all';
+            $this->data['is_penyelia_locked'] = false;
+        }
 
         // Default tanggal: 30 hari terakhir jika tidak diset
         if (empty($filter['tgl_mulai'])) {
@@ -76,14 +96,27 @@ class Laporan extends MY_Controller
     {
         $this->cek_hak_akses('laporan_view');
 
+        $role_id = (int)$this->session->userdata('role_id');
+        $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        if (!is_array($komoditi_akses)) {
+            $komoditi_akses = array($komoditi_akses);
+        }
+
         $filter = array(
             'tgl_mulai'       => $this->input->get('tgl_mulai', TRUE),
             'tgl_selesai'     => $this->input->get('tgl_selesai', TRUE),
             'status'          => $this->input->get('status', TRUE),
             'jenis_pengujian' => $this->input->get('jenis_pengujian', TRUE),
             'penguji_id'      => $this->input->get('penguji_id', TRUE),
-            'kata_kunci'      => $this->input->get('kata_kunci', TRUE)
+            'kata_kunci'      => $this->input->get('kata_kunci', TRUE),
+            'komoditi'        => $this->input->get('komoditi', TRUE)
         );
+
+        if ($role_id === 4) {
+            $filter['komoditi_izin'] = $komoditi_akses;
+        } else {
+            $filter['komoditi_izin'] = 'all';
+        }
 
         $daftar_rekap = $this->Model_Laporan->ambil_daftar_monitoring($filter);
 
@@ -170,14 +203,27 @@ class Laporan extends MY_Controller
     {
         $this->cek_hak_akses('laporan_view');
 
+        $role_id = (int)$this->session->userdata('role_id');
+        $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        if (!is_array($komoditi_akses)) {
+            $komoditi_akses = array($komoditi_akses);
+        }
+
         $filter = array(
             'tgl_mulai'       => $this->input->get('tgl_mulai', TRUE),
             'tgl_selesai'     => $this->input->get('tgl_selesai', TRUE),
             'status'          => $this->input->get('status', TRUE),
             'jenis_pengujian' => $this->input->get('jenis_pengujian', TRUE),
             'penguji_id'      => $this->input->get('penguji_id', TRUE),
-            'kata_kunci'      => $this->input->get('kata_kunci', TRUE)
+            'kata_kunci'      => $this->input->get('kata_kunci', TRUE),
+            'komoditi'        => $this->input->get('komoditi', TRUE)
         );
+
+        if ($role_id === 4) {
+            $filter['komoditi_izin'] = $komoditi_akses;
+        } else {
+            $filter['komoditi_izin'] = 'all';
+        }
 
         $daftar_rekap = $this->Model_Laporan->ambil_daftar_monitoring($filter);
         $statistik    = $this->Model_Laporan->ambil_statistik_monitoring($filter);

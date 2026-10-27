@@ -60,10 +60,11 @@ class Pengguna extends MY_Controller
                     'nip'           => $this->input->post('nip', TRUE) ?: NULL,
                     'password'      => $this->input->post('password'),
                     'nama_lengkap'  => $this->input->post('nama_lengkap', TRUE),
-                    'email'         => $this->input->post('email', TRUE) ?: NULL,
-                    'role_id'       => $this->input->post('role_id', TRUE),
-                    'laboratory_id' => $this->input->post('laboratory_id', TRUE) ?: NULL,
-                    'status'        => $this->input->post('status', TRUE) ?: 'Aktif'
+                    'email'          => $this->input->post('email', TRUE) ?: NULL,
+                    'role_id'        => $this->input->post('role_id', TRUE),
+                    'laboratory_id'  => $this->input->post('laboratory_id', TRUE) ?: NULL,
+                    'komoditi_akses' => json_encode($this->input->post('komoditi_akses') ?: array('obat')),
+                    'status'         => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 
                 $user_id = $this->Model_Pengguna->tambah($data_simpan);
@@ -126,8 +127,9 @@ class Pengguna extends MY_Controller
                     'nama_lengkap'  => $this->input->post('nama_lengkap', TRUE),
                     'email'         => $this->input->post('email', TRUE) ?: NULL,
                     'role_id'       => $this->input->post('role_id', TRUE),
-                    'laboratory_id' => $this->input->post('laboratory_id', TRUE) ?: NULL,
-                    'status'        => $this->input->post('status', TRUE) ?: 'Aktif'
+                    'laboratory_id'  => $this->input->post('laboratory_id', TRUE) ?: NULL,
+                    'komoditi_akses' => json_encode($this->input->post('komoditi_akses') ?: array('obat')),
+                    'status'         => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 
                 // Jika kata sandi diisi
