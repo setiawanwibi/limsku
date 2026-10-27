@@ -353,52 +353,120 @@
         transform: translateY(-1px);
     }
 
-    /* Small visual indicator */
-    .input-group-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        margin-bottom: 7px;
+    /* Searchable Pickers (Alat & Reagen) */
+    .searchable-picker-box {
+        background: #ffffff;
+        border: 1px solid #dce5e9;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .searchable-picker-box:focus-within {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+    }
+    .searchable-picker-search {
+        position: relative;
+        background: #f8fafc;
+        border-bottom: 1px solid #edf2f7;
+        padding: 6px 10px;
+    }
+    .searchable-picker-search i.search-icon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+    .searchable-picker-search input.picker-search-input {
+        width: 100%;
+        padding: 6px 30px 6px 30px;
+        font-size: 0.80rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #334155;
+        outline: none;
+        transition: border-color 0.15s ease;
+    }
+    .searchable-picker-search input.picker-search-input:focus {
+        border-color: #0284c7;
+    }
+    .searchable-picker-search .btn-clear-picker-search {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: 0;
+        color: #94a3b8;
+        font-size: 0.95rem;
+        padding: 0;
+        cursor: pointer;
+        display: none;
+        line-height: 1;
+    }
+    .searchable-picker-search .btn-clear-picker-search:hover {
+        color: #e11d48;
+    }
+    .searchable-picker-select {
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        font-size: 0.82rem;
+        padding: 6px 8px;
+        width: 100%;
+        outline: none;
+    }
+    .searchable-picker-select option {
+        padding: 6px 10px;
+        border-radius: 4px;
+        margin-bottom: 2px;
+        line-height: 1.4;
+    }
+    .searchable-picker-select option:disabled {
+        background-color: #f1f5f9 !important;
+        color: #94a3b8 !important;
+        cursor: not-allowed;
+    }
+    .searchable-picker-empty {
+        padding: 12px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.78rem;
+        background: #ffffff;
+        display: none;
     }
 
-    /* Responsive */
+    /* Info cards for selected Alat & Reagen */
+    .info-item-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-top: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .info-item-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 0.82rem;
+    }
+    .info-item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 6px;
+        color: #64748b;
+        font-size: 0.75rem;
+    }
     @media (max-width: 767.98px) {
-        .proses-sesi-header {
-            padding: 15px;
-        }
-
-        .proses-sesi-header .row {
-            gap: 13px;
-        }
-
-        .proses-sesi-badges {
-            justify-content: flex-start;
-        }
-
-        .proses-sesi-body {
-            padding: 14px;
-        }
-
-        .uji-form-header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .uji-form-method {
-            text-align: left;
-        }
-
-        .uji-form-body {
-            padding: 15px;
-        }
-
-        .proses-sesi-actions {
-            align-items: stretch;
-            flex-direction: column-reverse;
-        }
-
-        .proses-btn {
-            width: 100%;
+        .info-item-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -597,24 +665,39 @@
                                                 <span><i class="bi bi-tools text-primary me-1"></i> Alat Laboratorium yang Digunakan</span>
                                                 <small class="text-muted fw-normal">Pilih satu atau lebih</small>
                                             </label>
-                                            <select class="form-select select-alat-instrument" name="forms[<?php echo $f['id']; ?>][alat_ids][]" multiple size="4" data-target-info="#info-alat-<?php echo $f['id']; ?>">
-                                                <?php if (!empty($daftar_alat)): ?>
-                                                    <?php foreach ($daftar_alat as $alat): ?>
-                                                        <option value="<?php echo $alat['id']; ?>" <?php echo in_array($alat['id'], $saved_alat_ids) ? 'selected' : ''; ?>
-                                                            data-kode="<?php echo html_escape($alat['kode_barang']); ?>"
-                                                            data-nama="<?php echo html_escape($alat['nama_barang']); ?>"
-                                                            data-merk="<?php echo html_escape($alat['merk_tipe'] ?: '-'); ?>"
-                                                            data-software="<?php echo html_escape($alat['perangkat_lunak'] ?: '-'); ?>"
-                                                            data-detektor="<?php echo html_escape($alat['detektor'] ?: '-'); ?>"
-                                                            data-ruangan="<?php echo html_escape($alat['nama_ruangan'] ?: '-'); ?>"
-                                                            data-kondisi="<?php echo html_escape($alat['kondisi_adm'] ?: '-'); ?>">
-                                                            [<?php echo html_escape($alat['kode_barang']); ?>] <?php echo html_escape($alat['nama_barang']); ?> <?php echo !empty($alat['merk_tipe']) ? '(' . html_escape($alat['merk_tipe']) . ')' : ''; ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                 <?php else: ?>
-                                                    <option disabled>Belum ada data alat aktif</option>
-                                                <?php endif; ?>
-                                            </select>
+
+                                            <!-- Searchable Container Alat -->
+                                            <div class="searchable-picker-box mb-1" id="picker-box-alat-<?php echo $f['id']; ?>">
+                                                <div class="searchable-picker-search">
+                                                    <i class="bi bi-search search-icon"></i>
+                                                    <input type="text" class="picker-search-input input-search-alat" placeholder="Cari nama, kode, atau merk alat..." autocomplete="off">
+                                                    <button type="button" class="btn-clear-picker-search" title="Bersihkan pencarian">
+                                                        <i class="bi bi-x-circle-fill"></i>
+                                                    </button>
+                                                </div>
+
+                                                <select class="form-select searchable-picker-select select-alat-instrument" name="forms[<?php echo $f['id']; ?>][alat_ids][]" multiple size="4" data-target-info="#info-alat-<?php echo $f['id']; ?>">
+                                                    <?php if (!empty($daftar_alat)): ?>
+                                                        <?php foreach ($daftar_alat as $alat): ?>
+                                                            <option value="<?php echo $alat['id']; ?>" <?php echo in_array($alat['id'], $saved_alat_ids) ? 'selected' : ''; ?>
+                                                                data-kode="<?php echo html_escape($alat['kode_barang']); ?>"
+                                                                data-nama="<?php echo html_escape($alat['nama_barang']); ?>"
+                                                                data-merk="<?php echo html_escape($alat['merk_tipe'] ?: '-'); ?>"
+                                                                data-software="<?php echo html_escape($alat['perangkat_lunak'] ?: '-'); ?>"
+                                                                data-detektor="<?php echo html_escape($alat['detektor'] ?: '-'); ?>"
+                                                                data-ruangan="<?php echo html_escape($alat['nama_ruangan'] ?: '-'); ?>"
+                                                                data-kondisi="<?php echo html_escape($alat['kondisi_adm'] ?: '-'); ?>">
+                                                                [<?php echo html_escape($alat['kode_barang']); ?>] <?php echo html_escape($alat['nama_barang']); ?> <?php echo !empty($alat['merk_tipe']) ? '(' . html_escape($alat['merk_tipe']) . ')' : ''; ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <option disabled>Belum ada data alat aktif</option>
+                                                    <?php endif; ?>
+                                                </select>
+                                                <div class="searchable-picker-empty picker-empty-alat">
+                                                    <i class="bi bi-search me-1"></i> Tidak ada alat yang cocok dengan pencarian
+                                                </div>
+                                            </div>
                                             <small class="text-muted d-block mt-1">Tahan tombol <em>Ctrl</em> (Windows) untuk memilih lebih dari 1 alat.</small>
 
                                             <!-- Container Detail Alat Terpilih -->
@@ -626,25 +709,72 @@
                                                 <span><i class="bi bi-droplet-half text-info me-1"></i> Reagen yang Digunakan</span>
                                                 <small class="text-muted fw-normal">Pilih satu atau lebih</small>
                                             </label>
-                                            <select class="form-select select-reagen-material" name="forms[<?php echo $f['id']; ?>][reagen_ids][]" multiple size="4" data-target-info="#info-reagen-<?php echo $f['id']; ?>">
-                                                <?php if (!empty($daftar_reagen)): ?>
-                                                    <?php foreach ($daftar_reagen as $rg): ?>
-                                                        <option value="<?php echo $rg['id']; ?>" <?php echo in_array($rg['id'], $saved_reagen_ids) ? 'selected' : ''; ?>
-                                                            data-kode="<?php echo html_escape($rg['kode_barang'] ?: '-'); ?>"
-                                                            data-katalog="<?php echo html_escape($rg['katalog'] ?: '-'); ?>"
-                                                            data-nama="<?php echo html_escape(!empty($rg['nama_barang']) ? $rg['nama_barang'] : $rg['nama_reagen']); ?>"
-                                                            data-merk="<?php echo html_escape($rg['merk'] ?: '-'); ?>"
-                                                            data-stok="<?php echo html_escape($rg['stok'] ?: '-'); ?>"
-                                                            data-jenis="<?php echo html_escape($rg['jenis_barang'] ?: '-'); ?>"
-                                                            data-exp="<?php echo html_escape($rg['expired_date'] ?: '-'); ?>">
-                                                            <?php echo html_escape(!empty($rg['nama_barang']) ? $rg['nama_barang'] : $rg['nama_reagen']); ?> <?php echo !empty($rg['merk']) ? '(' . html_escape($rg['merk']) . ')' : ''; ?> <?php echo !empty($rg['kemasan']) ? '[' . html_escape($rg['kemasan']) . ']' : ''; ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <option disabled>Belum ada data reagen aktif</option>
-                                                <?php endif; ?>
-                                            </select>
-                                            <small class="text-muted d-block mt-1">Tahan tombol <em>Ctrl</em> (Windows) untuk memilih lebih dari 1 reagen.</small>
+
+                                            <!-- Searchable Container Reagen -->
+                                            <div class="searchable-picker-box mb-1" id="picker-box-reagen-<?php echo $f['id']; ?>">
+                                                <div class="searchable-picker-search">
+                                                    <i class="bi bi-search search-icon"></i>
+                                                    <input type="text" class="picker-search-input input-search-reagen" placeholder="Cari nama reagen, kode, katalog, merk..." autocomplete="off">
+                                                    <button type="button" class="btn-clear-picker-search" title="Bersihkan pencarian">
+                                                        <i class="bi bi-x-circle-fill"></i>
+                                                    </button>
+                                                </div>
+
+                                                <select class="form-select searchable-picker-select select-reagen-material" name="forms[<?php echo $f['id']; ?>][reagen_ids][]" multiple size="4" data-target-info="#info-reagen-<?php echo $f['id']; ?>">
+                                                    <?php if (!empty($daftar_reagen)): ?>
+                                                        <?php foreach ($daftar_reagen as $rg): ?>
+                                                            <?php
+                                                            // Cek apakah stok kosong (0, null, atau berawalan 0)
+                                                            $stok_raw = !empty($rg['stok']) ? trim($rg['stok']) : '0';
+                                                            $is_stok_kosong = ($stok_raw === '' || $stok_raw === '0' || preg_match('/^0(\.0+)?(\s+.*)?$/i', $stok_raw));
+
+                                                            // Cek apakah expired date sudah lewat
+                                                            $is_expired = false;
+                                                            if (!empty($rg['expired_date']) && $rg['expired_date'] !== '0000-00-00') {
+                                                                $is_expired = (strtotime($rg['expired_date']) < strtotime('today'));
+                                                            }
+
+                                                            // Tentukan apakah reagen tidak dapat dipilih
+                                                            $is_disabled = ($is_stok_kosong || $is_expired);
+                                                            $status_keterangan = '';
+                                                            if ($is_expired && $is_stok_kosong) {
+                                                                $status_keterangan = ' [KEDALUWARSA & STOK KOSONG]';
+                                                            } elseif ($is_expired) {
+                                                                $status_keterangan = ' [KEDALUWARSA - ' . date('d/m/Y', strtotime($rg['expired_date'])) . ']';
+                                                            } elseif ($is_stok_kosong) {
+                                                                $status_keterangan = ' [STOK HABIS]';
+                                                            }
+                                                            $nama_tampil = !empty($rg['nama_barang']) ? $rg['nama_barang'] : $rg['nama_reagen'];
+                                                            ?>
+                                                            <option value="<?php echo $rg['id']; ?>" 
+                                                                <?php echo in_array($rg['id'], $saved_reagen_ids) ? 'selected' : ''; ?>
+                                                                <?php echo $is_disabled ? 'disabled' : ''; ?>
+                                                                data-kode="<?php echo html_escape($rg['kode_barang'] ?: '-'); ?>"
+                                                                data-katalog="<?php echo html_escape($rg['katalog'] ?: '-'); ?>"
+                                                                data-nama="<?php echo html_escape($nama_tampil); ?>"
+                                                                data-merk="<?php echo html_escape($rg['merk'] ?: '-'); ?>"
+                                                                data-stok="<?php echo html_escape($rg['stok'] ?: '-'); ?>"
+                                                                data-jenis="<?php echo html_escape($rg['jenis_barang'] ?: '-'); ?>"
+                                                                data-exp="<?php echo html_escape($rg['expired_date'] ?: '-'); ?>"
+                                                                data-is-expired="<?php echo $is_expired ? '1' : '0'; ?>"
+                                                                data-is-empty-stock="<?php echo $is_stok_kosong ? '1' : '0'; ?>">
+                                                                <?php echo html_escape($nama_tampil); ?> <?php echo !empty($rg['merk']) ? '(' . html_escape($rg['merk']) . ')' : ''; ?> <?php echo !empty($rg['kemasan']) ? '[' . html_escape($rg['kemasan']) . ']' : ''; ?><?php echo $status_keterangan; ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <option disabled>Belum ada data reagen aktif</option>
+                                                    <?php endif; ?>
+                                                </select>
+                                                <div class="searchable-picker-empty picker-empty-reagen">
+                                                    <i class="bi bi-search me-1"></i> Tidak ada reagen yang cocok dengan pencarian
+                                                </div>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">
+                                                Tahan tombol <em>Ctrl</em> (Windows) untuk memilih lebih dari 1 reagen.
+                                                <span class="text-danger fw-semibold d-inline-block ms-1">
+                                                    <i class="bi bi-slash-circle me-1"></i>Reagen kedaluwarsa atau stok habis dinonaktifkan otomatis.
+                                                </span>
+                                            </small>
 
                                             <!-- Container Detail Reagen Terpilih -->
                                             <div id="info-reagen-<?php echo $f['id']; ?>" class="mt-2 info-detail-container"></div>
@@ -1249,6 +1379,67 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
+
+        // =========================================================================
+        // Live Search Filter untuk Picker Alat & Reagen
+        // =========================================================================
+        function initSearchablePicker(box) {
+            var searchInput = box.querySelector('.picker-search-input');
+            var clearBtn    = box.querySelector('.btn-clear-picker-search');
+            var selectElem  = box.querySelector('.searchable-picker-select');
+            var emptyNotice = box.querySelector('.searchable-picker-empty');
+
+            if (!searchInput || !selectElem) return;
+
+            var allOptions = Array.from(selectElem.options);
+
+            function filterOptions() {
+                var query = searchInput.value.trim().toLowerCase();
+                var visibleCount = 0;
+
+                allOptions.forEach(function(opt) {
+                    // Option status bawaan atau placeholder tidak difilter
+                    if (opt.value === '' && opt.disabled) return;
+
+                    var text = (opt.textContent || '').toLowerCase();
+                    var match = (query === '' || text.indexOf(query) !== -1);
+
+                    // Di multi-select standard browser, hidden / style.display = 'none' menyembunyikan option
+                    if (match) {
+                        opt.hidden = false;
+                        opt.style.display = '';
+                        visibleCount++;
+                    } else {
+                        opt.hidden = true;
+                        opt.style.display = 'none';
+                    }
+                });
+
+                if (clearBtn) {
+                    clearBtn.style.display = query !== '' ? 'block' : 'none';
+                }
+
+                if (emptyNotice) {
+                    emptyNotice.style.display = (visibleCount === 0 && allOptions.length > 0) ? 'block' : 'none';
+                }
+            }
+
+            searchInput.addEventListener('input', filterOptions);
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    searchInput.focus();
+                    filterOptions();
+                });
+            }
+        }
+
+        // Inisialisasi semua picker alat & reagen di semua formulir
+        document.querySelectorAll('.searchable-picker-box').forEach(function(box) {
+            initSearchablePicker(box);
+        });
 
         // Pasang event listener change pada semua select alat & reagen
         document.querySelectorAll('.select-alat-instrument').forEach(function(el) {

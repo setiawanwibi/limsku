@@ -68,7 +68,13 @@
         border-radius: 14px;
         box-shadow: 0 4px 18px rgba(41, 66, 87, 0.05);
         margin-bottom: 24px;
-        overflow: hidden;
+        position: relative;
+        z-index: 1;
+    }
+    .step-card-za {
+        overflow: visible !important;
+        position: relative;
+        z-index: 1050 !important;
     }
     .step-header {
         display: flex;
@@ -110,9 +116,15 @@
         color: #64748b;
     }
 
-    /* Step 1: Zat Aktif Box */
+    /* Step 1: Zat Aktif Box & Searchable Combobox */
     .zat-aktif-select-wrap {
         padding: 22px 24px;
+        overflow: visible !important;
+    }
+    .searchable-za-container {
+        position: relative;
+        width: 100%;
+        z-index: 105;
     }
     .select-za-control {
         border-radius: 10px;
@@ -127,6 +139,111 @@
     .select-za-control:focus {
         border-color: <?php echo ($jenis_pengujian === 'Kimia' ? '#0284c7' : '#10b981'); ?>;
         box-shadow: 0 0 0 3px <?php echo ($jenis_pengujian === 'Kimia' ? 'rgba(2, 132, 199, 0.15)' : 'rgba(16, 185, 129, 0.15)'); ?>;
+    }
+    .search-icon-left {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.15rem;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .btn-clear-search {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: 0;
+        color: #94a3b8;
+        font-size: 1.15rem;
+        padding: 4px;
+        cursor: pointer;
+        z-index: 5;
+        display: none;
+        border-radius: 50%;
+        line-height: 1;
+        transition: color 0.15s ease;
+    }
+    .btn-clear-search:hover {
+        color: #e11d48;
+    }
+    .za-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border: 1.5px solid <?php echo ($jenis_pengujian === 'Kimia' ? '#0284c7' : '#10b981'); ?>;
+        border-radius: 12px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22);
+        z-index: 99999 !important;
+        display: none;
+        overflow: hidden;
+    }
+    .za-dropdown-list {
+        max-height: 280px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .za-dropdown-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 16px;
+        background: #f8fafc;
+        border-bottom: 1px solid #edf2f7;
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .za-dropdown-item {
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        border-bottom: 1px solid #f8fafc;
+        transition: all 0.15s ease;
+    }
+    .za-dropdown-item:last-child {
+        border-bottom: 0;
+    }
+    .za-dropdown-item:hover,
+    .za-dropdown-item.is-highlighted {
+        background: <?php echo ($jenis_pengujian === 'Kimia' ? '#f0f9ff' : '#ecfdf5'); ?>;
+        color: <?php echo ($jenis_pengujian === 'Kimia' ? '#0369a1' : '#047857'); ?>;
+    }
+    .za-dropdown-item.is-selected {
+        background: <?php echo ($jenis_pengujian === 'Kimia' ? '#e0f2fe' : '#d1fae5'); ?>;
+        color: <?php echo ($jenis_pengujian === 'Kimia' ? '#0284c7' : '#059669'); ?>;
+        font-weight: 700;
+    }
+    .za-dropdown-item mark {
+        background: #fef08a;
+        color: #854d0e;
+        padding: 1px 3px;
+        border-radius: 3px;
+    }
+    .za-empty-state {
+        padding: 24px 16px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+    .za-empty-state i {
+        font-size: 1.75rem;
+        display: block;
+        margin-bottom: 6px;
+        color: #cbd5e1;
     }
     .btn-muat-parameter {
         border-radius: 10px;
@@ -360,7 +477,7 @@
     </div>
 
     <!-- 2. Step 1: Pemilihan Zat Aktif Monografi -->
-    <div class="step-card">
+    <div class="step-card step-card-za">
         <div class="step-header">
             <div class="step-title-wrap">
                 <div class="step-number">1</div>
@@ -377,21 +494,54 @@
         <div class="zat-aktif-select-wrap">
             <form method="get" action="<?php echo site_url('pengujian/pilih_form/' . $sampel['id']); ?>" id="form-pilih-zat-aktif">
                 <input type="hidden" name="jenis" value="<?php echo html_escape($jenis_pengujian); ?>">
+                <!-- Value aktual yang dikirimkan -->
+                <input type="hidden" name="zat_aktif" id="hidden_zat_aktif" value="<?php echo html_escape($zat_aktif_terpilih); ?>">
+
                 <div class="row align-items-center g-3">
                     <div class="col-lg-9 col-md-8">
-                        <div class="position-relative">
-                            <select name="zat_aktif" id="select_zat_aktif" class="form-select select-za-control" onchange="this.form.submit()" required>
-                                <option value="">-- Pilih Satu Zat Aktif Utama Monografi Obat --</option>
-                                <?php foreach ($daftar_zat_aktif as $za): ?>
-                                    <option value="<?php echo html_escape($za['nama_zat_aktif']); ?>" <?php echo ($zat_aktif_terpilih === $za['nama_zat_aktif']) ? 'selected' : ''; ?>>
-                                        <?php echo html_escape($za['nama_zat_aktif']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                        <div class="searchable-za-container" id="za_search_container">
+                            <i class="bi bi-search search-icon-left"></i>
+                            <input 
+                                type="text" 
+                                id="input_search_za" 
+                                class="form-control select-za-control ps-5 pe-5 shadow-sm" 
+                                placeholder="Ketik nama zat aktif untuk mencari (contoh: Salbutamol, Paracetamol, Aluminium)..." 
+                                value="<?php echo html_escape($zat_aktif_terpilih); ?>"
+                                autocomplete="off"
+                                spellcheck="false"
+                            >
+                            <button type="button" class="btn-clear-search" id="btn_clear_za" title="Bersihkan pencarian">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+
+                            <!-- Dropdown Live Search List -->
+                            <div class="za-dropdown-menu shadow" id="za_dropdown_menu">
+                                <div class="za-dropdown-header">
+                                    <span><i class="bi bi-funnel me-1"></i> Hasil Pencarian Zat Aktif</span>
+                                    <span class="badge bg-secondary-subtle text-secondary" id="za_counter_badge"><?php echo count($daftar_zat_aktif); ?> zat aktif</span>
+                                </div>
+                                <div class="za-dropdown-list" id="za_dropdown_list">
+                                    <?php foreach ($daftar_zat_aktif as $za): ?>
+                                        <?php $isSelected = ($zat_aktif_terpilih === $za['nama_zat_aktif']); ?>
+                                        <div class="za-dropdown-item <?php echo $isSelected ? 'is-selected' : ''; ?>" data-value="<?php echo html_escape($za['nama_zat_aktif']); ?>">
+                                            <span class="za-name"><?php echo html_escape($za['nama_zat_aktif']); ?></span>
+                                            <?php if ($isSelected): ?>
+                                                <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Terpilih
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="za-empty-state d-none" id="za_empty_state">
+                                    <i class="bi bi-search"></i>
+                                    <span>Zat aktif tidak ditemukan</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4">
-                        <button type="submit" class="btn btn-primary btn-muat-parameter w-100 shadow-sm">
+                        <button type="submit" class="btn btn-primary btn-muat-parameter w-100 shadow-sm" id="btn_submit_za">
                             <i class="bi bi-arrow-clockwise"></i> Muat Parameter
                         </button>
                     </div>
@@ -626,6 +776,184 @@ document.addEventListener('DOMContentLoaded', function() {
     const templateSelects = document.querySelectorAll('.select-custom-template');
     const btnSelectAll = document.getElementById('btn-select-all');
     const btnDeselectAll = document.getElementById('btn-deselect-all');
+
+    // =========================================================
+    // SEARCHABLE ZAT AKTIF COMBOBOX
+    // =========================================================
+    const searchContainer = document.getElementById('za_search_container');
+    const inputSearchZa = document.getElementById('input_search_za');
+    const hiddenZa = document.getElementById('hidden_zat_aktif');
+    const btnClearZa = document.getElementById('btn_clear_za');
+    const dropdownMenu = document.getElementById('za_dropdown_menu');
+    const dropdownList = document.getElementById('za_dropdown_list');
+    const counterBadgeZa = document.getElementById('za_counter_badge');
+    const emptyStateZa = document.getElementById('za_empty_state');
+    const formPilihZa = document.getElementById('form-pilih-zat-aktif');
+    const zaItems = dropdownList ? dropdownList.querySelectorAll('.za-dropdown-item') : [];
+
+    let currentHighlightIdx = -1;
+
+    function openDropdown() {
+        if (!dropdownMenu) return;
+        dropdownMenu.style.display = 'block';
+        updateClearButton();
+    }
+
+    function closeDropdown() {
+        if (!dropdownMenu) return;
+        dropdownMenu.style.display = 'none';
+        currentHighlightIdx = -1;
+        removeHighlight();
+    }
+
+    function updateClearButton() {
+        if (!btnClearZa || !inputSearchZa) return;
+        btnClearZa.style.display = inputSearchZa.value.trim() !== '' ? 'block' : 'none';
+    }
+
+    function removeHighlight() {
+        zaItems.forEach(item => item.classList.remove('is-highlighted'));
+    }
+
+    function highlightText(text, query) {
+        if (!query) return text;
+        const regex = new RegExp('(' + query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + ')', 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function filterZatAktif() {
+        if (!inputSearchZa) return;
+        const query = inputSearchZa.value.trim().toLowerCase();
+        let matchCount = 0;
+        const visibleItems = [];
+
+        zaItems.forEach(function(item) {
+            const rawText = item.getAttribute('data-value') || '';
+            const nameSpan = item.querySelector('.za-name');
+
+            if (query === '' || rawText.toLowerCase().includes(query)) {
+                item.style.display = 'flex';
+                if (nameSpan) {
+                    nameSpan.innerHTML = highlightText(rawText, query);
+                }
+                matchCount++;
+                visibleItems.push(item);
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        if (counterBadgeZa) {
+            counterBadgeZa.textContent = matchCount + ' ditemukan';
+        }
+
+        if (emptyStateZa) {
+            if (matchCount === 0) {
+                emptyStateZa.classList.remove('d-none');
+            } else {
+                emptyStateZa.classList.add('d-none');
+            }
+        }
+
+        updateClearButton();
+        return visibleItems;
+    }
+
+    function selectZatAktif(val) {
+        if (!val) return;
+        if (inputSearchZa) inputSearchZa.value = val;
+        if (hiddenZa) hiddenZa.value = val;
+        closeDropdown();
+
+        // Otomatis submit form untuk memuat parameter monografi
+        if (formPilihZa) {
+            formPilihZa.submit();
+        }
+    }
+
+    if (inputSearchZa) {
+        inputSearchZa.addEventListener('focus', function() {
+            openDropdown();
+            filterZatAktif();
+        });
+
+        inputSearchZa.addEventListener('input', function() {
+            openDropdown();
+            filterZatAktif();
+        });
+
+        // Keyboard Navigation (Arrow Up, Down, Enter, Escape)
+        inputSearchZa.addEventListener('keydown', function(e) {
+            const visibleItems = Array.from(zaItems).filter(item => item.style.display !== 'none');
+            if (visibleItems.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                openDropdown();
+                currentHighlightIdx = (currentHighlightIdx + 1) % visibleItems.length;
+                removeHighlight();
+                visibleItems[currentHighlightIdx].classList.add('is-highlighted');
+                visibleItems[currentHighlightIdx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                openDropdown();
+                currentHighlightIdx = (currentHighlightIdx - 1 + visibleItems.length) % visibleItems.length;
+                removeHighlight();
+                visibleItems[currentHighlightIdx].classList.add('is-highlighted');
+                visibleItems[currentHighlightIdx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentHighlightIdx >= 0 && visibleItems[currentHighlightIdx]) {
+                    const chosen = visibleItems[currentHighlightIdx].getAttribute('data-value');
+                    selectZatAktif(chosen);
+                } else if (visibleItems.length === 1) {
+                    selectZatAktif(visibleItems[0].getAttribute('data-value'));
+                } else {
+                    if (formPilihZa) formPilihZa.submit();
+                }
+            } else if (e.key === 'Escape') {
+                closeDropdown();
+            }
+        });
+    }
+
+    // Klik Item Zat Aktif
+    zaItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            const chosen = this.getAttribute('data-value');
+            selectZatAktif(chosen);
+        });
+    });
+
+    // Tombol Clear
+    if (btnClearZa) {
+        btnClearZa.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (inputSearchZa) {
+                inputSearchZa.value = '';
+                inputSearchZa.focus();
+            }
+            if (hiddenZa) {
+                hiddenZa.value = '';
+            }
+            openDropdown();
+            filterZatAktif();
+        });
+    }
+
+    // Tutup dropdown saat klik di luar area
+    document.addEventListener('click', function(e) {
+        if (searchContainer && !searchContainer.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+
+    // Cek awal tombol clear
+    updateClearButton();
+
+    // =========================================================
+    // PARAMETER SELECTION & VALIDATION
+    // =========================================================
 
     function updateRowHighlight(cb) {
         const row = cb.closest('tr');
