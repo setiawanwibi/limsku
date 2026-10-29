@@ -50,6 +50,10 @@
             <i class="bi bi-arrow-left"></i> Riwayat
         </a>
         
+        <a href="<?php echo site_url('pengujian/lcp_pdf/' . $hasil['id']); ?>" class="btn btn-primary" target="_blank" title="Tinjau Lembar Catatan Pengujian (LCP)">
+            <i class="bi bi-file-earmark-ruled me-1"></i> Buka LCP
+        </a>
+
         <?php if (!empty($hasil['file_laporan'])): ?>
             <a href="<?php echo site_url('pengujian/pdf/' . $hasil['id']); ?>" class="btn btn-danger" target="_blank">
                 <i class="bi bi-file-earmark-pdf"></i> Unduh LHU PDF

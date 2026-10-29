@@ -272,6 +272,35 @@
         font-weight: 700;
     }
 
+    .queue-status-mt {
+        border-color: #f5c2c7;
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .status-ditolak-mt {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 3px 9px;
+        border: 1px solid #f5c2c7;
+        border-radius: 20px;
+        background: #f8d7da;
+        color: #842029;
+        font-size: .62rem;
+        font-weight: 700;
+    }
+
+    .banner-tolak-mt {
+        background: #fff8f8;
+        border: 1.5px solid #f5c2c7;
+        border-left: 4px solid #dc3545;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.06);
+    }
+
     .queue-empty {
         padding: 30px 15px;
         color: #8999a3;
@@ -569,6 +598,30 @@
         font-size: .61rem;
         font-weight: 700;
         white-space: nowrap;
+    }
+
+    .btn-lcp-view {
+        min-height: 28px;
+        padding: 4px 10px;
+        border: 1px solid #159b98;
+        border-radius: 6px;
+        background: #eef9f8;
+        color: #117875;
+        font-size: .66rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .btn-lcp-view:hover {
+        background: #159b98;
+        color: #fff;
+        border-color: #159b98;
+        box-shadow: 0 2px 6px rgba(21, 155, 152, 0.25);
     }
 
     /* =========================================================
@@ -1023,9 +1076,15 @@
                                         <?php echo html_escape($item['jenis_pengujian'] ?: 'Pengujian'); ?>
                                     </small>
 
-                                    <span class="queue-status">
-                                        Baru
-                                    </span>
+                                    <?php if ($item['status'] === 'Ditolak MT'): ?>
+                                        <span class="queue-status queue-status-mt" title="Ditolak oleh Manajer Teknis">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Ditolak MT
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="queue-status">
+                                            Baru
+                                        </span>
+                                    <?php endif; ?>
 
                                 </div>
 
@@ -1086,12 +1145,33 @@
                                     ?>
                                 </span>
 
-                                <span class="status-menunggu">
-                                    <i class="bi bi-clock-history me-1"></i>
-                                    MENUNGGU VERIFIKASI
-                                </span>
-
+                                <?php if ($selected_item['status'] === 'Ditolak MT'): ?>
+                                    <span class="status-ditolak-mt">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        DIKEMBALIKAN OLEH MT
+                                    </span>
+                                <?php else: ?>
+                                    <span class="status-menunggu">
+                                        <i class="bi bi-clock-history me-1"></i>
+                                        MENUNGGU VERIFIKASI
+                                    </span>
+                                <?php endif; ?>
                             </div>
+
+                            <?php if ($selected_item['status'] === 'Ditolak MT' && !empty($selected_item['alasan_penolakan'])): ?>
+                                <div class="banner-tolak-mt mt-2">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <i class="bi bi-exclamation-octagon-fill text-danger fs-6"></i>
+                                        <strong class="text-danger" style="font-size: 0.78rem;">Catatan Penolakan oleh Manajer Teknis (MT):</strong>
+                                    </div>
+                                    <div class="text-dark bg-white p-2 rounded border border-danger-subtle font-monospace" style="font-size: 0.74rem; line-height: 1.5;">
+                                        <?php echo nl2br(html_escape($selected_item['alasan_penolakan'])); ?>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" style="font-size: 0.68rem;">
+                                        <i class="bi bi-info-circle me-1"></i> Silakan periksa kembali data pengujian / LCP di bawah. Anda dapat mengembalikannya ke Penguji dengan memilih keputusan <strong>"Tolak &amp; Kembalikan"</strong> di sebelah kanan.
+                                    </small>
+                                </div>
+                            <?php endif; ?>
 
 
                             <h4 class="sample-name">
@@ -1118,19 +1198,6 @@
                                 ?>
 
                             </p>
-
-                        </div>
-
-
-                        <div>
-
-                            <a
-                                href="<?php echo site_url('pengujian/detail_sesi/' . $selected_item['id']); ?>"
-                                class="btn-lampiran"
-                            >
-                                <i class="bi bi-folder2-open"></i>
-                                Buka Lampiran
-                            </a>
 
                         </div>
 
@@ -1258,9 +1325,10 @@
                             <a
                                 href="<?php echo site_url('pengujian/detail_sesi/' . $selected_item['id']); ?>"
                                 class="btn-preview"
+                                title="Lihat detail lengkap sesi pengujian"
                             >
-                                <i class="bi bi-file-earmark-pdf"></i>
-                                Preview PDF
+                                <i class="bi bi-folder2-open"></i>
+                                Detail Sesi
                             </a>
 
                         </div>
@@ -1321,8 +1389,12 @@
                                         Persyaratan
                                     </th>
 
-                                    <th class="pe-3">
+                                    <th>
                                         Kesimpulan
+                                    </th>
+
+                                    <th class="pe-3 text-center" style="width: 100px;">
+                                        Lembar LCP
                                     </th>
 
                                 </tr>
@@ -1397,7 +1469,7 @@
                                             </td>
 
 
-                                            <td class="pe-3">
+                                            <td>
 
                                                 <?php
 
@@ -1435,6 +1507,18 @@
 
                                             </td>
 
+                                            <td class="pe-3 text-center text-nowrap">
+                                                <a
+                                                    href="<?php echo site_url('pengujian/lcp_pdf/' . $form['id']); ?>"
+                                                    target="_blank"
+                                                    class="btn-lcp-view"
+                                                    title="Buka &amp; Tinjau Lembar Catatan Pengujian (LCP) Form Ini"
+                                                >
+                                                    <i class="bi bi-file-earmark-ruled"></i>
+                                                    Buka LCP
+                                                </a>
+                                            </td>
+
                                         </tr>
 
                                     <?php endforeach; ?>
@@ -1444,7 +1528,7 @@
                                     <tr>
 
                                         <td
-                                            colspan="4"
+                                            colspan="5"
                                             class="text-center py-4"
                                         >
 
@@ -1720,6 +1804,16 @@ function toggleKeputusan(type) {
 
     }
 }
+
+<?php if ($selected_item && $selected_item['status'] === 'Ditolak MT'): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    const radioTolak = document.getElementById('keputusanTolak');
+    if (radioTolak) {
+        radioTolak.checked = true;
+        toggleKeputusan('tolak');
+    }
+});
+<?php endif; ?>
 </script>
 
 <style>

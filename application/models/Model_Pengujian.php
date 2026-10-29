@@ -613,7 +613,7 @@ class Model_Pengujian extends CI_Model
         $this->db->from('testing_sessions ts');
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
-        $this->db->where('ts.status', 'Menunggu Verifikasi');
+        $this->db->where_in('ts.status', array('Menunggu Verifikasi', 'Ditolak MT'));
         $this->db->order_by('ts.id', 'ASC');
         $res = $this->db->get()->result_array();
 
@@ -624,7 +624,7 @@ class Model_Pengujian extends CI_Model
             $this->db->join('methods m', 'm.id = tr.method_id', 'left');
             $this->db->join('form_templates t', 't.id = tr.template_id', 'left');
             $this->db->join('users u', 'u.id = tr.penguji_id', 'left');
-            $this->db->where('tr.status', 'Menunggu Verifikasi');
+            $this->db->where_in('tr.status', array('Menunggu Verifikasi', 'Ditolak MT'));
             $this->db->order_by('tr.id', 'ASC');
             return $this->db->get()->result_array();
         }
@@ -641,7 +641,7 @@ class Model_Pengujian extends CI_Model
         $waktu_sekarang = date('Y-m-d H:i:s');
 
         $sesi = $this->db->get_where('testing_sessions', array('id' => $session_id))->row_array();
-        if (!$sesi || $sesi['status'] !== 'Menunggu Verifikasi') {
+        if (!$sesi || !in_array($sesi['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
             $this->db->trans_rollback();
             return FALSE;
         }
@@ -681,7 +681,7 @@ class Model_Pengujian extends CI_Model
 
         $this->db->trans_start();
 
-        if (!$hasil || $hasil['status'] !== 'Menunggu Verifikasi') {
+        if (!$hasil || !in_array($hasil['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
             $this->db->trans_rollback();
             return FALSE;
         }
@@ -715,9 +715,16 @@ class Model_Pengujian extends CI_Model
         $waktu_sekarang = date('Y-m-d H:i:s');
 
         $sesi = $this->db->get_where('testing_sessions', array('id' => $session_id))->row_array();
-        if (!$sesi || $sesi['status'] !== 'Menunggu Verifikasi') {
+        if (!$sesi || !in_array($sesi['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
             $this->db->trans_rollback();
             return FALSE;
+        }
+
+        // Jika sesi sebelumnya berasal dari penolakan MT, gabungkan catatan MT dan catatan Penyelia
+        $final_alasan = $alasan_penolakan;
+        if ($sesi['status'] === 'Ditolak MT' && !empty($sesi['alasan_penolakan'])) {
+            $catatan_mt_lama = trim($sesi['alasan_penolakan']);
+            $final_alasan = "[Catatan MT]: " . $catatan_mt_lama . "\n\n[Review Penyelia]: " . $alasan_penolakan;
         }
 
         $this->db->where('id', $session_id);
@@ -725,7 +732,7 @@ class Model_Pengujian extends CI_Model
             'status'           => 'Ditolak',
             'verifier_id'      => $verifier_id,
             'waktu_verifikasi' => $waktu_sekarang,
-            'alasan_penolakan' => $alasan_penolakan
+            'alasan_penolakan' => $final_alasan
         ));
 
         $this->db->where('session_id', $session_id);
@@ -733,7 +740,7 @@ class Model_Pengujian extends CI_Model
             'status'           => 'Ditolak',
             'verifier_id'      => $verifier_id,
             'waktu_verifikasi' => $waktu_sekarang,
-            'alasan_penolakan' => $alasan_penolakan
+            'alasan_penolakan' => $final_alasan
         ));
 
         $this->db->where('id', $sesi['sample_id']);
@@ -755,7 +762,7 @@ class Model_Pengujian extends CI_Model
 
         $this->db->trans_start();
 
-        if (!$hasil || $hasil['status'] !== 'Menunggu Verifikasi') {
+        if (!$hasil || !in_array($hasil['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
             $this->db->trans_rollback();
             return FALSE;
         }
@@ -1341,32 +1348,33 @@ class Model_Pengujian extends CI_Model
                 }
             }
 
-            $eval = $this->evaluasi_kelengkapan_sesi_sampel($s, $sesi_sampel);
+            // Kumpulkan daftar sesi yang siap diapprove MT (status 'Menunggu Approval')
+            $penguji_list = [];
+            $verifier_list = [];
+            $kesimpulan_list = [];
+            $sesi_ids = [];
+            $daftar_sesi_siap = [];
 
-            if ($eval['siap_mt']) {
-                // Kumpulkan informasi penguji, verifier, kesimpulan, dan daftar sesi yang siap
-                $penguji_list = [];
-                $verifier_list = [];
-                $kesimpulan_list = [];
-                $sesi_ids = [];
-                $daftar_sesi_siap = [];
+            foreach ($sesi_sampel as $sesi) {
+                if (isset($sesi['status']) && $sesi['status'] === 'Menunggu Approval') {
+                    $sesi_ids[] = (int)$sesi['id'];
+                    $daftar_sesi_siap[] = $sesi;
 
-                foreach ($sesi_sampel as $sesi) {
-                    if (isset($sesi['status']) && $sesi['status'] === 'Menunggu Approval') {
-                        $sesi_ids[] = (int)$sesi['id'];
-                        $daftar_sesi_siap[] = $sesi;
-
-                        if (!empty($sesi['nama_penguji']) && !in_array($sesi['nama_penguji'], $penguji_list, TRUE)) {
-                            $penguji_list[] = $sesi['nama_penguji'];
-                        }
-                        if (!empty($sesi['nama_verifier']) && !in_array($sesi['nama_verifier'], $verifier_list, TRUE)) {
-                            $verifier_list[] = $sesi['nama_verifier'];
-                        }
-                        if (!empty($sesi['kesimpulan'])) {
-                            $kesimpulan_list[] = trim($sesi['kesimpulan']);
-                        }
+                    if (!empty($sesi['nama_penguji']) && !in_array($sesi['nama_penguji'], $penguji_list, TRUE)) {
+                        $penguji_list[] = $sesi['nama_penguji'];
+                    }
+                    if (!empty($sesi['nama_verifier']) && !in_array($sesi['nama_verifier'], $verifier_list, TRUE)) {
+                        $verifier_list[] = $sesi['nama_verifier'];
+                    }
+                    if (!empty($sesi['kesimpulan'])) {
+                        $kesimpulan_list[] = trim($sesi['kesimpulan']);
                     }
                 }
+            }
+
+            // Sampel layak masuk antrean approval MT jika memiliki minimal 1 sesi yang menunggu approval
+            if (!empty($daftar_sesi_siap)) {
+                $eval = $this->evaluasi_kelengkapan_sesi_sampel($s, $sesi_sampel);
 
                 $s['kelengkapan']        = $eval;
                 $s['sesi_ids']            = $sesi_ids;
@@ -1754,12 +1762,12 @@ class Model_Pengujian extends CI_Model
         $this->db->trans_start();
 
         // 1. Update status dan alasan pada testing_sessions
+        // Catatan: Dikembalikan ke Penyelia untuk direview ulang dengan status 'Ditolak MT'
         $this->db->where_in('id', $target_sesi_ids);
         $this->db->where_in('sample_id', $serumpun_ids);
         $up_sesi = $this->db->update('testing_sessions', [
-            'status'           => 'Ditolak',
+            'status'           => 'Ditolak MT',
             'approver_id'      => $approver_id,
-            'catatan_approver' => $alasan,
             'alasan_penolakan' => $alasan,
             'waktu_approval'   => $waktu_sekarang,
             'updated_at'       => $waktu_sekarang
@@ -1770,11 +1778,11 @@ class Model_Pengujian extends CI_Model
             return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui penolakan pada sesi pengujian.'];
         }
 
-        // 2. Update status test_results
+        // 2. Update status test_results kembali ke antrean verifikasi dengan catatan penolakan MT
         $this->db->where_in('session_id', $target_sesi_ids);
         $this->db->where_in('sample_id', $serumpun_ids);
         $up_results = $this->db->update('test_results', [
-            'status'           => 'Ditolak',
+            'status'           => 'Menunggu Verifikasi',
             'approver_id'      => $approver_id,
             'alasan_penolakan' => $alasan,
             'waktu_approval'   => $waktu_sekarang,
@@ -1786,10 +1794,10 @@ class Model_Pengujian extends CI_Model
             return ['sukses' => FALSE, 'pesan' => 'Gagal memperbarui status parameter hasil pengujian.'];
         }
 
-        // 3. Update status samples
+        // 3. Update status samples menjadi 'Menunggu Verifikasi' (dikembalikan ke Penyelia)
         $this->db->where_in('id', $serumpun_ids);
         $up_sampel = $this->db->update('samples', [
-            'status'     => 'Ditolak',
+            'status'     => 'Menunggu Verifikasi',
             'updated_by' => $approver_id,
             'updated_at' => $waktu_sekarang
         ]);
@@ -1805,7 +1813,7 @@ class Model_Pengujian extends CI_Model
             'kode_sampel'      => $sampel['kode_sampel_manual'],
             'sesi_ids'         => $target_sesi_ids,
             'status_sebelum'   => 'Menunggu Approval',
-            'status_sesudah'   => 'Ditolak',
+            'status_sesudah'   => 'Ditolak MT (Dikembalikan ke Penyelia)',
             'alasan_penolakan' => $alasan,
             'approver_id'      => $approver_id,
             'waktu_keputusan'  => $waktu_sekarang
@@ -1830,12 +1838,12 @@ class Model_Pengujian extends CI_Model
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE) {
-            return ['sukses' => FALSE, 'pesan' => 'Terjadi kesalahan sistem saat menyimpan penolakan ke database.'];
+            return ['sukses' => FALSE, 'pesan' => 'Transaksi database penolakan sampel gagal dieksekusi.'];
         }
 
         return [
             'sukses'   => TRUE,
-            'pesan'    => 'Pengujian sampel berhasil ditolak dan dikembalikan untuk revisi.',
+            'pesan'    => 'Hasil pengujian sampel berhasil ditolak dan dikembalikan ke Penyelia untuk ditinjau ulang sebelum diteruskan ke Penguji.',
             'sesi_ids' => $target_sesi_ids
         ];
     }

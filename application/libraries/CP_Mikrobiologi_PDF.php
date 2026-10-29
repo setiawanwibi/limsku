@@ -101,6 +101,96 @@ class CP_Mikrobiologi_PDF extends FPDF
     }
 
     /**
+     * Helper mencetak satu baris tabel dengan multi-line wrapping dinamis
+     */
+    public function RowMultiCell($widths, $aligns, $data, $min_height = 6)
+    {
+        // Hitung tinggi maksimal yang dibutuhkan oleh baris
+        $max_lines = 1;
+        for ($i = 0; $i < count($data); $i++) {
+            $w = $widths[$i];
+            $txt = $data[$i];
+            // Hitung estimasi baris
+            $lines = $this->NbLines($w, $txt);
+            if ($lines > $max_lines) {
+                $max_lines = $lines;
+            }
+        }
+        $h = max($min_height, $max_lines * 4.5);
+
+        // Cek page break
+        if ($this->GetY() + $h > 265) {
+            $this->AddPage('P', 'A4');
+        }
+
+        $startX = $this->GetX();
+        $startY = $this->GetY();
+
+        for ($i = 0; $i < count($data); $i++) {
+            $w = $widths[$i];
+            $a = $aligns[$i];
+            $txt = $data[$i];
+
+            // Gambar border cell persegi panjang penuh
+            $this->Rect($startX, $startY, $w, $h);
+
+            // Tulis teks di dalamnya
+            $this->SetXY($startX + 0.8, $startY + 1);
+            $this->MultiCell($w - 1.6, 4, $txt, 0, $a);
+
+            // Pindah X ke kolom berikutnya
+            $startX += $w;
+            $this->SetXY($startX, $startY);
+        }
+        $this->SetY($startY + $h);
+    }
+
+    /**
+     * Hitung jumlah baris teks pada lebar tertentu
+     */
+    public function NbLines($w, $txt)
+    {
+        $cw =& $this->CurrentFont['cw'];
+        if ($w == 0) $w = $this->w - $this->rMargin - $this->x;
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', (string)$txt);
+        $nb = strlen($s);
+        if ($nb > 0 and $s[$nb - 1] == "\n") $nb--;
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c == "\n") {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if ($c == ' ') $sep = $i;
+            $l += $cw[$c] ?? 500;
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j) $i++;
+                } else {
+                    $i = $sep + 1;
+                }
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            } else {
+                $i++;
+            }
+        }
+        return $nl;
+    }
+
+    /**
      * Buat Dokumen CP Mikrobiologi PDF
      * 
      * @param array $sampel Data sampel (tabel samples)
@@ -270,15 +360,19 @@ class CP_Mikrobiologi_PDF extends FPDF
 
         // ==========================================
         // BARIS 19: Tabel Uji yang dilakukan, Hasil, Syarat, Pustaka, Metode
-        // Kolom B-C: 45 mm, D-E: 38 mm, F-G: 42 mm, H-J: 45 mm, K: 20 mm
+        // Proporsi lebar kolom presisi (Total = 190 mm):
+        // Uji yang dilakukan: 60 mm, Hasil: 44 mm, Syarat: 32 mm, Pustaka: 25 mm, Metode: 29 mm
         // ==========================================
-        $print_table_header = function() {
+        $col_widths = array(60, 44, 32, 25, 29);
+        $col_aligns = array('L', 'L', 'L', 'L', 'C');
+
+        $print_table_header = function() use ($col_widths) {
             $this->SetFont('Arial', 'B', 8.5);
-            $this->Cell(45, 6, 'Uji yang dilakukan', 1, 0, 'C');
-            $this->Cell(38, 6, 'Hasil', 1, 0, 'C');
-            $this->Cell(42, 6, 'Syarat', 1, 0, 'C');
-            $this->Cell(45, 6, 'Pustaka', 1, 0, 'C');
-            $this->Cell(20, 6, 'Metode', 1, 1, 'C');
+            $this->Cell($col_widths[0], 6, 'Uji yang dilakukan', 1, 0, 'C');
+            $this->Cell($col_widths[1], 6, 'Hasil', 1, 0, 'C');
+            $this->Cell($col_widths[2], 6, 'Syarat', 1, 0, 'C');
+            $this->Cell($col_widths[3], 6, 'Pustaka', 1, 0, 'C');
+            $this->Cell($col_widths[4], 6, 'Metode', 1, 1, 'C');
         };
 
         $print_table_header();
@@ -288,7 +382,7 @@ class CP_Mikrobiologi_PDF extends FPDF
         $row_count = 0;
         if (!empty($forms)) {
             foreach ($forms as $f) {
-                if ($this->GetY() > 255) {
+                if ($this->GetY() > 250) {
                     $this->AddPage('P', 'A4');
                     $print_table_header();
                     $this->SetFont('Arial', '', 8);
@@ -303,7 +397,7 @@ class CP_Mikrobiologi_PDF extends FPDF
                 }
                 $hasil_items = array();
                 foreach ($pv as $k => $v) {
-                    if (in_array($k, array('alat_ids', 'reagen_ids', 'parameter_values'))) continue;
+                    if (in_array($k, array('alat_ids', 'reagen_ids', 'parameter_values', 'tabel_tahapan'))) continue;
                     $val_str = is_array($v) ? json_encode($v) : (string)$v;
                     if ($val_str !== '') {
                         $hasil_items[] = ucwords(str_replace('_', ' ', $k)) . ': ' . $val_str;
@@ -322,23 +416,20 @@ class CP_Mikrobiologi_PDF extends FPDF
                 $pustaka = !empty($f['pustaka_acuan']) ? $f['pustaka_acuan'] : '-';
                 $metode_kd = !empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['nama_metode']) ? $f['nama_metode'] : (!empty($f['kode_template']) ? $f['kode_template'] : '-'));
 
-                // Baris uji
-                $this->Cell(45, 6, ' ' . substr($nama_uji, 0, 26), 1, 0, 'L');
-                $this->Cell(38, 6, ' ' . substr($hasil_str, 0, 24), 1, 0, 'L');
-                $this->Cell(42, 6, ' ' . substr($syarat, 0, 26), 1, 0, 'L');
-                $this->Cell(45, 6, ' ' . substr($pustaka, 0, 28), 1, 0, 'L');
-                $this->Cell(20, 6, ' ' . substr($metode_kd, 0, 12), 1, 1, 'C');
+                // Cetak baris dengan pembungkusan otomatis jika panjang (MultiCell wrapping)
+                $row_data = array($nama_uji, $hasil_str, $syarat, $pustaka, $metode_kd);
+                $this->RowMultiCell($col_widths, $col_aligns, $row_data, 6);
                 $row_count++;
             }
         }
 
         // Pertahankan minimal 5 baris grid seperti workbook template (Rows 20-26)
         while ($row_count < 5) {
-            $this->Cell(45, 6, '', 1, 0, 'L');
-            $this->Cell(38, 6, '', 1, 0, 'L');
-            $this->Cell(42, 6, '', 1, 0, 'L');
-            $this->Cell(45, 6, '', 1, 0, 'L');
-            $this->Cell(20, 6, '', 1, 1, 'C');
+            $this->Cell($col_widths[0], 6, '', 1, 0, 'L');
+            $this->Cell($col_widths[1], 6, '', 1, 0, 'L');
+            $this->Cell($col_widths[2], 6, '', 1, 0, 'L');
+            $this->Cell($col_widths[3], 6, '', 1, 0, 'L');
+            $this->Cell($col_widths[4], 6, '', 1, 1, 'C');
             $row_count++;
         }
 

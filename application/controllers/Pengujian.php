@@ -200,10 +200,7 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif']          = 'pengujian_antrean';
         $this->data['judul_halaman']          = 'Pilih Zat Aktif & Parameter Monografi (' . $jenis_pengujian . ')';
-        $this->data['breadcrumbs']            = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Pilih Parameter', 'url' => '#')
-        );
+        
         $this->data['sampel']                 = $sampel;
         $this->data['jenis_pengujian']        = $jenis_pengujian;
         $this->data['daftar_zat_aktif']       = $daftar_zat_aktif;
@@ -897,6 +894,128 @@ class Pengujian extends MY_Controller
     }
 
     /**
+     * Preview / Unduh Catatan Pengujian (CP) Kimia PDF
+     * Sesuai struktur resmi CP BBPOM di Bandar Lampung (seragam dengan CP Mikro)
+     *
+     * @param int $session_id
+     * @param string $mode 'inline' (preview) atau 'download' (unduh)
+     */
+    public function cp_kimia_pdf($session_id = NULL, $mode = 'inline')
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $session_id = (int)$session_id;
+        if ($session_id <= 0) {
+            show_404();
+        }
+
+        $allowed_modes = array('inline', 'download');
+        if (!in_array($mode, $allowed_modes, TRUE)) {
+            $mode = 'inline';
+        }
+
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi) {
+            $serumpun_ids = $this->Model_Pengujian->ambil_sample_ids_serumpun($session_id);
+            $sesi_kimia = $this->db->where_in('sample_id', $serumpun_ids)->where('jenis_pengujian', 'Kimia')->order_by('id', 'DESC')->get('testing_sessions')->row_array();
+            if ($sesi_kimia) {
+                redirect('pengujian/cp_kimia_pdf/' . $sesi_kimia['id'] . '/' . $mode);
+                return;
+            }
+            show_404();
+        }
+
+        $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if (!in_array($sesi['status'], $allowed_statuses, TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            redirect('pengujian/riwayat');
+        }
+
+        $sampel_info = $this->Model_Sampel->ambil_by_id($sesi['sample_id']);
+        if (!$sampel_info) {
+            $this->session->set_flashdata('pesan_gagal', 'Data sampel terkait tidak ditemukan.');
+            redirect('pengujian/riwayat');
+        }
+
+        $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        $penguji_id = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;
+        $penguji_info = $penguji_id ? $this->Model_Pengguna->ambil_by_id($penguji_id) : $this->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
+        if ($penguji_info && empty($penguji_id)) {
+            $penguji_id = $penguji_info['id'];
+        }
+
+        $verifier_id = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : null;
+        $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
+        if ($verifier_info && empty($verifier_id)) {
+            $verifier_id = $verifier_info['id'];
+        }
+
+        require_once APPPATH . 'libraries/CP_Kimia_PDF.php';
+        $cp_gen = new CP_Kimia_PDF();
+
+        $val_penguji  = $cp_gen->validateUserSignature($penguji_id);
+        $val_penyelia = $cp_gen->validateUserSignature($verifier_id);
+
+        $err_penguji  = !$val_penguji[0];
+        $err_penyelia = !$val_penyelia[0];
+
+        if ($err_penguji || $err_penyelia) {
+            if ($err_penguji && $err_penyelia) {
+                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
+            } elseif ($err_penguji) {
+                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
+            } else {
+                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+            }
+
+            $this->catat_audit('CP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
+                'session_id'   => $session_id,
+                'penguji_id'   => $sesi['penguji_id'],
+                'verifier_id'  => $sesi['verifier_id'],
+                'err_penguji'  => $err_penguji,
+                'err_penyelia' => $err_penyelia
+            ));
+
+            $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
+            redirect('pengujian/riwayat');
+        }
+
+        // Sanitasi kode sampel untuk nama file
+        $kd_clean = preg_replace('/[^A-Za-z0-9_\-]/', '_', (!empty($sampel_info['kode_sampel_manual']) ? $sampel_info['kode_sampel_manual'] : 'SMP_' . $sesi['sample_id']));
+        $pdf_name = 'CP_Kimia_' . $kd_clean . '_SESI' . $session_id . '.pdf';
+        $pdf_dir  = FCPATH . 'uploads/laporan/';
+        $pdf_path = $pdf_dir . $pdf_name;
+
+        // Generate / Update file CP PDF
+        try {
+            $cp_gen->buat_cp($sampel_info, $sesi, $forms, $penguji_info, $verifier_info, $pdf_path);
+        } catch (Exception $e) {
+            log_message('error', 'Gagal membuat CP Kimia PDF: ' . $e->getMessage());
+            $this->session->set_flashdata('pesan_gagal', 'Terjadi kesalahan saat memproses Catatan Pengujian (CP).');
+            redirect('pengujian/riwayat');
+        }
+
+        if (!file_exists($pdf_path)) {
+            $this->session->set_flashdata('pesan_gagal', 'File CP PDF gagal dibuat di server.');
+            redirect('pengujian/riwayat');
+        }
+
+        $this->catat_audit('DOWNLOAD_CP_KIMIA', 'Pengujian', array(
+            'session_id' => $session_id,
+            'file_name'  => $pdf_name,
+            'mode'       => $mode
+        ));
+
+        $disposition = ($mode === 'download') ? 'attachment' : 'inline';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: ' . $disposition . '; filename="' . $pdf_name . '"');
+        header('Content-Length: ' . filesize($pdf_path));
+        readfile($pdf_path);
+        exit;
+    }
+
+    /**
      * Preview / Unduh Catatan Pengujian (CP) Mikrobiologi PDF
      * Sesuai format workbook resmi "CP mikro.xlsx" BBPOM di Bandar Lampung
      *
@@ -964,9 +1083,27 @@ class Pengujian extends MY_Controller
             $verifier_id = $verifier_info['id'];
         }
 
+        $this->load->model('Model_User_Signature');
+        $signature_penguji  = !empty($penguji_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($penguji_info['id']) : null;
+        $signature_verifier = !empty($verifier_info['id']) ? $this->Model_User_Signature->ambil_by_user_id($verifier_info['id']) : null;
+
+        // Jika dipanggil dari web browser langsung tanpa parameter download, tampilkan view cetak presisi (sama persis seperti CP Kimia)
+        if ($mode === 'inline' && (!isset($_GET['format']) || $_GET['format'] !== 'pdf')) {
+            $view_data = array(
+                'sesi'               => $sesi,
+                'sampel'             => $sampel_info,
+                'forms'              => $forms,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier
+            );
+            $this->load->view('pengujian/cetak_cp_mikro', $view_data);
+            return;
+        }
+
         // GATE KETAT TANDA TANGAN DIGITAL:
         // CP final harus otomatis memuat TTD Penguji dan Penyelia yang sah.
-        // Validasi keberadaan file, keterbacaan, format gambar, dan path yang diizinkan.
         require_once APPPATH . 'libraries/CP_Mikrobiologi_PDF.php';
         $cp_gen = new CP_Mikrobiologi_PDF();
 
@@ -1032,6 +1169,15 @@ class Pengujian extends MY_Controller
     }
 
     /**
+     * Unduh / Preview file PDF CP Mikrobiologi secara langsung
+     */
+    public function cp_mikro_pdf($session_id = NULL, $mode = 'inline')
+    {
+        $_GET['format'] = 'pdf';
+        $this->cp_mikro($session_id, $mode);
+    }
+
+    /**
      * Preview / Unduh Lembar Catatan Pengujian (LCP) Form Spesifik PDF
      *
      * @param int $test_id
@@ -1060,9 +1206,21 @@ class Pengujian extends MY_Controller
         $sesi = $session_id > 0 ? $this->Model_Pengujian->ambil_sesi_by_id($session_id) : array();
 
         $status_uji = !empty($sesi['status']) ? $sesi['status'] : $hasil['status'];
+        
+        // Penyelia/Penguji/Admin diperbolehkan melihat LCP saat status 'Menunggu Verifikasi' untuk tujuan verifikasi & review teknis
+        $can_preview_verification = ($status_uji === 'Menunggu Verifikasi' && (
+            $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify') ||
+            $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_input') ||
+            $this->session->userdata('role_id') == 1
+        ));
+
         $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if ($can_preview_verification) {
+            $allowed_statuses[] = 'Menunggu Verifikasi';
+        }
+
         if (!in_array($status_uji, $allowed_statuses, TRUE)) {
-            $this->session->set_flashdata('pesan_gagal', 'Lembar Catatan Pengujian (LCP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            $this->session->set_flashdata('pesan_gagal', 'Lembar Catatan Pengujian (LCP) hanya dapat diakses setelah pengujian selesai diisi atau siap diverifikasi oleh Penyelia.');
             redirect('pengujian/riwayat');
         }
 
@@ -1104,13 +1262,14 @@ class Pengujian extends MY_Controller
         $val_penyelia = $verifier_id ? $lcp_gen->validateUserSignature($verifier_id) : [false, null, 'Penyelia belum ditentukan'];
 
         $err_penguji  = !$val_penguji[0];
-        $err_penyelia = !$val_penyelia[0];
+        // Saat status masih Menunggu Verifikasi (Penyelia sedang meninjau LCP), ketiadaan TTD penyelia belum memblokir preview
+        $err_penyelia = ($status_uji === 'Menunggu Verifikasi') ? false : !$val_penyelia[0];
 
         if ($err_penguji || $err_penyelia) {
             if ($err_penguji && $err_penyelia) {
                 $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
             } elseif ($err_penguji) {
-                $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
+                $pesan_ttd = 'LCP belum dapat dibuka karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun penguji.';
             } else {
                 $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
             }
@@ -1786,8 +1945,8 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        if ($hasil['status'] !== 'Menunggu Verifikasi') {
-            $this->session->set_flashdata('pesan_gagal', 'Laporan ini tidak dalam status "Menunggu Verifikasi".');
+        if (!in_array($hasil['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Laporan ini tidak dalam status verifikasi.');
             redirect('pengujian/detail/' . $test_id);
         }
 
@@ -1798,7 +1957,7 @@ class Pengujian extends MY_Controller
                 'test_id'          => $test_id,
                 'sample_id'        => $hasil['sample_id'],
                 'verifier_id'      => $verifier_id,
-                'status_sebelum'   => 'Menunggu Verifikasi',
+                'status_sebelum'   => $hasil['status'],
                 'status_sesudah'   => 'Menunggu Approval',
                 'waktu_verifikasi' => date('Y-m-d H:i:s')
             ));
@@ -1813,7 +1972,7 @@ class Pengujian extends MY_Controller
 
     /**
      * FASE 4 — Proses Penolakan Hasil Uji oleh Penyelia
-     * Transisi: "Menunggu Verifikasi" -> "Ditolak"
+     * Transisi: "Menunggu Verifikasi" / "Ditolak MT" -> "Ditolak"
      * Requirement: Alasan penolakan WAJIB diisi.
      * 
      * @param int $test_id
@@ -1831,8 +1990,8 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        if ($hasil['status'] !== 'Menunggu Verifikasi') {
-            $this->session->set_flashdata('pesan_gagal', 'Laporan ini tidak dalam status "Menunggu Verifikasi".');
+        if (!in_array($hasil['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Laporan ini tidak dalam status verifikasi.');
             redirect('pengujian/detail/' . $test_id);
         }
 
@@ -1852,7 +2011,7 @@ class Pengujian extends MY_Controller
                 'sample_id'        => $hasil['sample_id'],
                 'verifier_id'      => $verifier_id,
                 'alasan_penolakan' => $alasan_penolakan,
-                'status_sebelum'   => 'Menunggu Verifikasi',
+                'status_sebelum'   => $hasil['status'],
                 'status_sesudah'   => 'Ditolak',
                 'waktu_verifikasi' => date('Y-m-d H:i:s')
             ));
@@ -1881,8 +2040,8 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        if ($sesi['status'] !== 'Menunggu Verifikasi') {
-            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status "Menunggu Verifikasi".');
+        if (!in_array($sesi['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status yang dapat diverifikasi.');
             redirect('pengujian/detail_sesi/' . $session_id);
         }
 
@@ -1893,7 +2052,7 @@ class Pengujian extends MY_Controller
                 'testing_session_id' => $session_id,
                 'sample_id'          => $sesi['sample_id'],
                 'verifier_id'        => $verifier_id,
-                'status_sebelum'     => 'Menunggu Verifikasi',
+                'status_sebelum'     => $sesi['status'],
                 'status_sesudah'     => 'Menunggu Approval'
             ));
 
@@ -1921,8 +2080,8 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
-        if ($sesi['status'] !== 'Menunggu Verifikasi') {
-            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status "Menunggu Verifikasi".');
+        if (!in_array($sesi['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi ini tidak dalam status yang dapat ditolak oleh penyelia.');
             redirect('pengujian/detail_sesi/' . $session_id);
         }
 
@@ -1940,7 +2099,7 @@ class Pengujian extends MY_Controller
                 'sample_id'          => $sesi['sample_id'],
                 'verifier_id'        => $verifier_id,
                 'alasan_penolakan'   => $alasan_penolakan,
-                'status_sebelum'     => 'Menunggu Verifikasi',
+                'status_sebelum'     => $sesi['status'],
                 'status_sesudah'     => 'Ditolak'
             ));
 
