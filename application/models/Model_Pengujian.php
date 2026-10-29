@@ -45,7 +45,7 @@ class Model_Pengujian extends CI_Model
             }
         }
 
-        $this->db->order_by('s.id', 'ASC');
+        $this->db->order_by('s.id', 'DESC');
         $daftar_sampel = $this->db->get()->result_array();
 
         if (empty($daftar_sampel)) {
@@ -127,7 +127,9 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_dalam_pengujian($penguji_id = NULL)
     {
-        $this->db->select('ts.id as session_id, ts.jenis_pengujian, ts.status as session_status, ts.waktu_mulai, s.*, u.nama_lengkap as nama_penguji');
+        $this->db->select('ts.id as session_id, ts.jenis_pengujian, ts.status as session_status, ts.waktu_mulai, ts.updated_at as session_updated_at, s.*, u.nama_lengkap as nama_penguji,
+            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as total_form,
+            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id AND tr.data_hasil IS NOT NULL AND tr.data_hasil != "" AND tr.data_hasil != "[]") as form_terisi');
         $this->db->from('testing_sessions ts');
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
@@ -253,6 +255,102 @@ class Model_Pengujian extends CI_Model
     }
 
     /**
+     * Memperbarui Sesi Pengujian yang Sedang Berjalan (Ganti Zat Aktif / Tambah / Ubah Parameter LCP)
+     * Data hasil pengujian yang telah diinput sebelumnya tetap dipertahankan dan tidak hilang.
+     * 
+     * @param int $session_id
+     * @param array $items_metode Array associative dari method_id dan template_id yang dipilih baru
+     * @return bool
+     */
+    public function perbarui_sesi_pengujian($session_id, $items_metode)
+    {
+        $this->db->trans_start();
+
+        $sesi = $this->db->get_where('testing_sessions', array('id' => $session_id))->row_array();
+        if (!$sesi || $sesi['status'] !== 'Sedang Diuji') {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+
+        // Ambil hasil pengujian yang sudah ada saat ini di sesi ini
+        $existing_results = $this->db->get_where('test_results', array('session_id' => $session_id))->result_array();
+        $existing_by_method = array();
+        $existing_by_template = array();
+        foreach ($existing_results as $er) {
+            if (!empty($er['method_id'])) {
+                $existing_by_method[(int)$er['method_id']] = $er;
+            }
+            if (!empty($er['template_id'])) {
+                $existing_by_template[(int)$er['template_id']] = $er;
+            }
+        }
+
+        // Kumpulkan id method baru
+        $new_method_ids = array();
+        foreach ($items_metode as $item) {
+            $new_method_ids[] = (int)(is_array($item) ? $item['method_id'] : $item);
+        }
+
+        // Hapus test_results lama yang tidak dipilih lagi
+        if (!empty($new_method_ids)) {
+            $this->db->where('session_id', $session_id);
+            $this->db->where_not_in('method_id', $new_method_ids);
+            $this->db->delete('test_results');
+        }
+
+        // Perbarui atau tambahkan item parameter uji baru
+        foreach ($items_metode as $item) {
+            $m_id = (int)(is_array($item) ? $item['method_id'] : $item);
+            $t_id = !empty($item['template_id']) ? (int)$item['template_id'] : NULL;
+
+            if (isset($existing_by_method[$m_id])) {
+                // Parameter lama sudah ada: Pertahankan data_hasil, kesimpulan, catatan, dll!
+                $existing = $existing_by_method[$m_id];
+                $update_data = array(
+                    'template_id' => $t_id ?: $existing['template_id'],
+                    'updated_at'  => date('Y-m-d H:i:s')
+                );
+                $this->db->where('id', $existing['id']);
+                $this->db->update('test_results', $update_data);
+            } else {
+                // Parameter baru ditambahkan ke sesi
+                // Cek apakah ada data_hasil dari template yang sama untuk di-inherit jika ada
+                $inherit_hasil = '[]';
+                $inherit_kesimpulan = 'Belum Disimpulkan';
+                $inherit_catatan = NULL;
+                if ($t_id && isset($existing_by_template[$t_id])) {
+                    $inherit_hasil = $existing_by_template[$t_id]['data_hasil'];
+                    $inherit_kesimpulan = $existing_by_template[$t_id]['kesimpulan'];
+                    $inherit_catatan = $existing_by_template[$t_id]['catatan'];
+                }
+
+                $new_test_data = array(
+                    'session_id'  => $session_id,
+                    'sample_id'   => $sesi['sample_id'],
+                    'method_id'   => $m_id,
+                    'template_id' => $t_id,
+                    'penguji_id'  => $sesi['penguji_id'],
+                    'data_hasil'  => $inherit_hasil,
+                    'kesimpulan'  => $inherit_kesimpulan,
+                    'catatan'     => $inherit_catatan,
+                    'status'      => 'Sedang Diuji',
+                    'waktu_mulai' => date('Y-m-d H:i:s')
+                );
+                $this->db->insert('test_results', $new_test_data);
+            }
+        }
+
+        // Update timestamp testing_sessions
+        $this->db->where('id', $session_id);
+        $this->db->update('testing_sessions', array(
+            'updated_at' => date('Y-m-d H:i:s')
+        ));
+
+        $this->db->trans_complete();
+        return $this->db->trans_status();
+    }
+
+    /**
      * Mengambil data sesi pengujian berdasarkan ID Sesi
      */
     public function ambil_sesi_by_id($session_id)
@@ -297,8 +395,15 @@ class Model_Pengujian extends CI_Model
     /**
      * Menyimpan hasil pengujian untuk seluruh form dalam satu Sesi Pengujian
      * Menyimpan data parameter uji, instrumen alat, dan reagen terstruktur
+     * Menyimpan seluruh hasil pengujian satu sesi (banyak lembar LCP parameter)
+     * Mendukung simpan sementara (draft) atau simpan final kirim verifikasi
+     * 
+     * @param int $session_id
+     * @param array $hasil_forms
+     * @param bool $is_draft Jika TRUE, status tetap 'Sedang Diuji' dan data_hasil tersimpan sementara
+     * @return bool
      */
-    public function simpan_hasil_sesi($session_id, $hasil_forms)
+    public function simpan_hasil_sesi($session_id, $hasil_forms, $is_draft = FALSE)
     {
         $this->db->trans_start();
         $waktu_sekarang = date('Y-m-d H:i:s');
@@ -331,28 +436,57 @@ class Model_Pengujian extends CI_Model
             $update_data = array(
                 'data_hasil'    => json_encode($payload_hasil, JSON_UNESCAPED_UNICODE),
                 'kesimpulan'    => isset($f_data['kesimpulan']) && !empty($f_data['kesimpulan']) ? $f_data['kesimpulan'] : 'Belum Disimpulkan',
-                'catatan'       => isset($f_data['catatan']) ? $f_data['catatan'] : NULL,
-                'status'        => 'Menunggu Verifikasi',
-                'waktu_selesai' => $waktu_sekarang
+                'catatan'       => isset($f_data['catatan']) ? $f_data['catatan'] : NULL
             );
+
+            // Jika analis mengganti form LCP (template_id)
+            if (isset($f_data['template_id']) && !empty($f_data['template_id'])) {
+                $update_data['template_id'] = (int)$f_data['template_id'];
+            }
+
+            if ($is_draft) {
+                $update_data['status'] = 'Sedang Diuji';
+                $update_data['updated_at'] = $waktu_sekarang;
+            } else {
+                $update_data['status'] = 'Menunggu Verifikasi';
+                $update_data['waktu_selesai'] = $waktu_sekarang;
+            }
+
             $this->db->where('id', $test_id);
             $this->db->where('session_id', $session_id);
             $this->db->update('test_results', $update_data);
         }
 
-        // Update status testing_sessions -> 'Menunggu Verifikasi'
-        $this->db->where('id', $session_id);
-        $this->db->update('testing_sessions', array(
-            'status'        => 'Menunggu Verifikasi',
-            'waktu_selesai' => $waktu_sekarang
-        ));
+        if ($is_draft) {
+            // Update timestamp testing_sessions tanpa mengubah status
+            $this->db->where('id', $session_id);
+            $this->db->update('testing_sessions', array(
+                'status'     => 'Sedang Diuji',
+                'updated_at' => $waktu_sekarang
+            ));
 
-        // Update status samples -> 'Menunggu Verifikasi'
-        $this->db->where('id', $sesi['sample_id']);
-        $this->db->update('samples', array(
-            'status'     => 'Menunggu Verifikasi',
-            'updated_by' => $sesi['penguji_id']
-        ));
+            // Pastikan status sampel tetap 'Sedang Diuji'
+            $this->db->where('id', $sesi['sample_id']);
+            $this->db->update('samples', array(
+                'status'     => 'Sedang Diuji',
+                'updated_at' => $waktu_sekarang,
+                'updated_by' => $sesi['penguji_id']
+            ));
+        } else {
+            // Update status testing_sessions -> 'Menunggu Verifikasi'
+            $this->db->where('id', $session_id);
+            $this->db->update('testing_sessions', array(
+                'status'        => 'Menunggu Verifikasi',
+                'waktu_selesai' => $waktu_sekarang
+            ));
+
+            // Update status samples -> 'Menunggu Verifikasi'
+            $this->db->where('id', $sesi['sample_id']);
+            $this->db->update('samples', array(
+                'status'     => 'Menunggu Verifikasi',
+                'updated_by' => $sesi['penguji_id']
+            ));
+        }
 
         $this->db->trans_complete();
         return $this->db->trans_status();
@@ -444,6 +578,10 @@ class Model_Pengujian extends CI_Model
             GROUP_CONCAT(DISTINCT uv.nama_lengkap SEPARATOR "; ") as nama_verifier,
             GROUP_CONCAT(DISTINCT ua.nama_lengkap SEPARATOR "; ") as nama_approver,
             MAX(ts.waktu_approval) as waktu_approval,
+            MAX(ts.waktu_verifikasi) as waktu_verifikasi,
+            MAX(ts.waktu_selesai) as waktu_selesai,
+            MAX(ts.waktu_mulai) as waktu_mulai,
+            MAX(ts.created_at) as created_at,
             MAX(ts.updated_at) as updated_at,
             COUNT(DISTINCT ts.id) as jumlah_sesi,
             COUNT(DISTINCT tr.id) as jumlah_form,
@@ -465,7 +603,7 @@ class Model_Pengujian extends CI_Model
         }
 
         $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
-        $this->db->order_by('MAX(ts.id)', 'DESC');
+        $this->db->order_by('COALESCE(MAX(ts.updated_at), MAX(ts.created_at), MAX(ts.id)) DESC', '', FALSE);
         $this->db->limit($limit, $offset);
         $res = $this->db->get()->result_array();
 
@@ -614,7 +752,7 @@ class Model_Pengujian extends CI_Model
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->where('ts.status', 'Menunggu Verifikasi');
-        $this->db->order_by('ts.id', 'ASC');
+        $this->db->order_by('COALESCE(ts.waktu_selesai, ts.updated_at, ts.id) DESC', '', FALSE);
         $res = $this->db->get()->result_array();
 
         if (empty($res)) {
@@ -625,7 +763,7 @@ class Model_Pengujian extends CI_Model
             $this->db->join('form_templates t', 't.id = tr.template_id', 'left');
             $this->db->join('users u', 'u.id = tr.penguji_id', 'left');
             $this->db->where('tr.status', 'Menunggu Verifikasi');
-            $this->db->order_by('tr.id', 'ASC');
+            $this->db->order_by('tr.id', 'DESC');
             return $this->db->get()->result_array();
         }
 
@@ -896,7 +1034,26 @@ class Model_Pengujian extends CI_Model
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
         $this->db->where('ts.verifier_id', $verifier_id);
-        $this->db->order_by('ts.waktu_verifikasi', 'DESC');
+        $this->db->order_by('COALESCE(ts.waktu_verifikasi, ts.updated_at, ts.created_at, ts.id) DESC', '', FALSE);
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Mengambil riwayat pengujian/sesi yang diuji oleh penguji tertentu
+     */
+    public function ambil_riwayat_penguji_by_user($penguji_id)
+    {
+        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
+            (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
+            (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
+            (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
+        $this->db->from('testing_sessions ts');
+        $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
+        $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
+        $this->db->where('ts.penguji_id', $penguji_id);
+        $this->db->order_by('COALESCE(ts.waktu_selesai, ts.updated_at, ts.created_at, ts.id) DESC', '', FALSE);
         return $this->db->get()->result_array();
     }
 
@@ -926,7 +1083,7 @@ class Model_Pengujian extends CI_Model
         $this->db->join('test_results tr', 'tr.session_id = ts.id', 'left');
         $this->db->where('ts.approver_id', $approver_id);
         $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
-        $this->db->order_by('MAX(ts.waktu_approval)', 'DESC');
+        $this->db->order_by('MAX(ts.waktu_approval) DESC', '', FALSE);
         return $this->db->get()->result_array();
     }
 
@@ -1350,11 +1507,18 @@ class Model_Pengujian extends CI_Model
                 $kesimpulan_list = [];
                 $sesi_ids = [];
                 $daftar_sesi_siap = [];
+                $waktu_terakhir_list = [];
 
                 foreach ($sesi_sampel as $sesi) {
                     if (isset($sesi['status']) && $sesi['status'] === 'Menunggu Approval') {
                         $sesi_ids[] = (int)$sesi['id'];
                         $daftar_sesi_siap[] = $sesi;
+
+                        if (!empty($sesi['waktu_verifikasi'])) {
+                            $waktu_terakhir_list[] = $sesi['waktu_verifikasi'];
+                        } elseif (!empty($sesi['updated_at'])) {
+                            $waktu_terakhir_list[] = $sesi['updated_at'];
+                        }
 
                         if (!empty($sesi['nama_penguji']) && !in_array($sesi['nama_penguji'], $penguji_list, TRUE)) {
                             $penguji_list[] = $sesi['nama_penguji'];
@@ -1371,6 +1535,7 @@ class Model_Pengujian extends CI_Model
                 $s['kelengkapan']        = $eval;
                 $s['sesi_ids']            = $sesi_ids;
                 $s['daftar_sesi_siap']    = $daftar_sesi_siap;
+                $s['waktu_siap_mt']       = !empty($waktu_terakhir_list) ? max($waktu_terakhir_list) : (!empty($s['updated_at']) ? $s['updated_at'] : (!empty($s['created_at']) ? $s['created_at'] : null));
                 $s['nama_penguji_gabung'] = !empty($penguji_list) ? implode('; ', $penguji_list) : '-';
                 $s['nama_verifier_gabung']= !empty($verifier_list) ? implode('; ', $verifier_list) : '-';
                 $s['kesimpulan_gabung']   = !empty($kesimpulan_list) ? implode(' | ', array_unique($kesimpulan_list)) : '-';
@@ -1379,6 +1544,16 @@ class Model_Pengujian extends CI_Model
                 $antrean_siap[] = $s;
             }
         }
+
+        // Urutkan data antrean approval dari tanggal & waktu terbaru
+        usort($antrean_siap, function ($a, $b) {
+            $time_a = !empty($a['waktu_siap_mt']) ? strtotime($a['waktu_siap_mt']) : 0;
+            $time_b = !empty($b['waktu_siap_mt']) ? strtotime($b['waktu_siap_mt']) : 0;
+            if ($time_a === $time_b) {
+                return (int)$b['id'] - (int)$a['id'];
+            }
+            return $time_b - $time_a;
+        });
 
         return $antrean_siap;
     }
@@ -1397,7 +1572,7 @@ class Model_Pengujian extends CI_Model
         $this->db->join('testing_sessions ts', 'ts.sample_id = s.id', 'inner');
         $this->db->where('ts.status', 'Menunggu Approval');
         $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
-        $this->db->order_by('s.id', 'ASC');
+        $this->db->order_by('s.id', 'DESC');
         $daftar_sampel = $this->db->get()->result_array();
 
         if (empty($daftar_sampel)) {

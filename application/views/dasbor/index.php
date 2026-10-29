@@ -305,6 +305,29 @@
         70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
+
+    /* Media query dashboard mobile */
+    @media (max-width: 575.98px) {
+        .dash-greeting-title {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.5rem;
+        }
+        .dash-card {
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        .kpi-number-main {
+            font-size: 1.6rem;
+        }
+        .kpi-icon-box {
+            width: 32px;
+            height: 32px;
+            font-size: 0.95rem;
+        }
+        .section-card-title {
+            font-size: 0.88rem;
+        }
+    }
 </style>
 
 <div class="dashboard-container">

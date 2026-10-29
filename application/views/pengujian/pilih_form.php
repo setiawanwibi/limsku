@@ -412,6 +412,32 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         transition: all 0.2s ease;
     }
+
+    @media (max-width: 767.98px) {
+        .hero-sample-card {
+            padding: 16px;
+        }
+        .hero-sample-card .d-flex.justify-content-between {
+            flex-direction: column !important;
+            gap: 12px;
+        }
+        .step-header {
+            padding: 12px 14px;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px;
+        }
+        .action-dock-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px;
+            padding: 12px 14px;
+        }
+        .btn-submit-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 
 <div class="pilih-form-page">
@@ -494,6 +520,9 @@
         <div class="zat-aktif-select-wrap">
             <form method="get" action="<?php echo site_url('pengujian/pilih_form/' . $sampel['id']); ?>" id="form-pilih-zat-aktif">
                 <input type="hidden" name="jenis" value="<?php echo html_escape($jenis_pengujian); ?>">
+                <?php if (!empty($session_id_edit)): ?>
+                    <input type="hidden" name="session_id" value="<?php echo (int)$session_id_edit; ?>">
+                <?php endif; ?>
                 <!-- Value aktual yang dikirimkan -->
                 <input type="hidden" name="zat_aktif" id="hidden_zat_aktif" value="<?php echo html_escape($zat_aktif_terpilih); ?>">
 
@@ -556,6 +585,19 @@
             <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
             <input type="hidden" name="jenis_pengujian" value="<?php echo html_escape($jenis_pengujian); ?>">
             <input type="hidden" name="nama_zat_aktif" value="<?php echo html_escape($zat_aktif_terpilih); ?>">
+            <?php if (!empty($session_id_edit)): ?>
+                <input type="hidden" name="session_id" value="<?php echo (int)$session_id_edit; ?>">
+            <?php endif; ?>
+
+            <?php if (!empty($session_id_edit)): ?>
+                <div class="alert alert-info border-info-subtle d-flex align-items-center gap-2 mb-3 py-2 px-3">
+                    <i class="bi bi-info-circle-fill text-info fs-5"></i>
+                    <div>
+                        <strong>Mode Penggantian Pilihan Sesi:</strong> Anda sedang mengubah zat aktif / form parameter untuk sesi pengujian sampel ini. 
+                        Data input pada parameter yang tetap Anda pilih akan <strong>dipertahankan secara utuh</strong> dan tidak akan hilang.
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="step-card">
                 <div class="step-header">
@@ -596,14 +638,18 @@
                             </thead>
                             <tbody>
                                 <?php foreach ($parameter_monografi as $p): ?>
-                                    <?php $is_mapped = !empty($p['template_id']); ?>
-                                    <tr id="row_param_<?php echo $p['id']; ?>">
+                                    <?php 
+                                        $is_mapped = !empty($p['template_id']);
+                                        $is_checked = !empty($sesi_method_ids) && in_array((int)$p['id'], $sesi_method_ids);
+                                    ?>
+                                    <tr id="row_param_<?php echo $p['id']; ?>" class="<?php echo $is_checked ? 'table-active' : ''; ?>">
                                         <td class="text-center">
                                             <input class="form-check-input custom-param-checkbox form-check-parameter" 
                                                    type="checkbox" 
                                                    name="method_ids[]" 
                                                    value="<?php echo $p['id']; ?>" 
-                                                   id="chk_metode_<?php echo $p['id']; ?>">
+                                                   id="chk_metode_<?php echo $p['id']; ?>"
+                                                   <?php echo $is_checked ? 'checked' : ''; ?>>
                                         </td>
                                         <td>
                                             <label for="chk_metode_<?php echo $p['id']; ?>" class="d-block cursor-pointer mb-0">
@@ -644,9 +690,10 @@
                                                     <?php if (!empty($daftar_template_bidang)): ?>
                                                         <?php foreach ($daftar_template_bidang as $tpl_b): ?>
                                                             <?php 
-                                                                $is_default = ($p['template_id'] == $tpl_b['id']);
+                                                                $is_session_custom = !empty($sesi_custom_templates[(int)$p['id']]) && ($sesi_custom_templates[(int)$p['id']] == $tpl_b['id']);
+                                                                $is_default = empty($sesi_custom_templates[(int)$p['id']]) && ($p['template_id'] == $tpl_b['id']);
                                                                 $is_fallback_select = false;
-                                                                if (!$is_mapped) {
+                                                                if (!$is_mapped && empty($sesi_custom_templates[(int)$p['id']])) {
                                                                     if ($jenis_pengujian === 'Mikrobiologi') {
                                                                         if ((stripos($p['parameter_uji'], 'lempeng') !== false || stripos($p['parameter_uji'], 'alt') !== false) && $tpl_b['kode_template'] === 'MIK-01') {
                                                                             $is_fallback_select = true;
@@ -665,10 +712,10 @@
                                                                         $is_fallback_select = true;
                                                                     }
                                                                 }
-                                                                $selected = ($is_default || $is_fallback_select) ? 'selected' : '';
+                                                                $selected = ($is_session_custom || $is_default || $is_fallback_select) ? 'selected' : '';
                                                             ?>
                                                             <option value="<?php echo $tpl_b['id']; ?>" <?php echo $selected; ?>>
-                                                                [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?><?php echo $is_default ? ' ★ (Default)' : ''; ?>
+                                                                [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?><?php echo ($is_default || $p['template_id'] == $tpl_b['id']) ? ' ★ (Default)' : ''; ?>
                                                             </option>
                                                         <?php endforeach; ?>
                                                     <?php endif; ?>
@@ -721,9 +768,15 @@
             <!-- Action Dock Sticky / Bottom Navigation -->
             <div class="action-dock-card">
                 <div class="d-flex align-items-center gap-2">
-                    <a href="<?php echo site_url('pengujian/pilih_jenis/' . $sampel['id']); ?>" class="btn btn-outline-secondary px-3 py-2 fw-semibold" style="border-radius: 8px;">
-                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Bidang
-                    </a>
+                    <?php if (!empty($session_id_edit)): ?>
+                        <a href="<?php echo site_url('pengujian/proses_sesi/' . $session_id_edit); ?>" class="btn btn-outline-secondary px-3 py-2 fw-semibold" style="border-radius: 8px;">
+                            <i class="bi bi-arrow-left me-1"></i> Batal &amp; Kembali ke Sesi
+                        </a>
+                    <?php else: ?>
+                        <a href="<?php echo site_url('pengujian/pilih_jenis/' . $sampel['id']); ?>" class="btn btn-outline-secondary px-3 py-2 fw-semibold" style="border-radius: 8px;">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Bidang
+                        </a>
+                    <?php endif; ?>
                     <span class="text-muted small d-none d-md-inline">| Pastikan parameter kritis yang dicentang sesuai dengan pengujian Anda.</span>
                 </div>
 
@@ -732,7 +785,7 @@
                         0 parameter terpilih
                     </span>
                     <button type="submit" class="btn btn-success btn-submit-action" id="btn-submit-sesi" disabled>
-                        <span>Mulai Sesi Pengujian Parameter</span>
+                        <span><?php echo !empty($session_id_edit) ? 'Simpan Perubahan Sesi &amp; Lanjutkan' : 'Mulai Sesi Pengujian Parameter'; ?></span>
                         <i class="bi bi-arrow-right fs-6"></i>
                     </button>
                 </div>

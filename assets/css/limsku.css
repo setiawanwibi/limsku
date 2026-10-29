@@ -275,6 +275,21 @@ body.sidebar-collapsed #sidebar-toggle-open {
     display: inline-flex;
 }
 
+/* Sidebar Overlay Backdrop untuk Mobile */
+.lims-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 1025;
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+}
+
 @media (max-width: 991.98px) {
     #lims-sidebar {
         transform: translateX(-260px);
@@ -284,13 +299,44 @@ body.sidebar-collapsed #sidebar-toggle-open {
     }
     .lims-topbar {
         left: 0 !important;
+        padding: 0.5rem 1rem !important;
     }
     #sidebar-toggle-open {
         display: inline-flex !important;
     }
-    body:not(.sidebar-collapsed) #lims-sidebar {
-        transform: translateX(0);
-        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
+    /* Ketika sidebar terbuka di mobile */
+    body.sidebar-open-mobile #lims-sidebar {
+        transform: translateX(0) !important;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    body.sidebar-open-mobile .lims-sidebar-backdrop {
+        display: block;
+        opacity: 1;
+    }
+    /* Body tidak bisa scroll ketika sidebar open di mobile */
+    body.sidebar-open-mobile {
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .lims-topbar {
+        height: 52px;
+        padding: 0.4rem 0.75rem !important;
+    }
+    #lims-content {
+        padding-top: 52px;
+    }
+    .topbar-title {
+        font-size: 0.85rem !important;
+        max-width: 180px;
+    }
+    .lims-main-body {
+        padding: 1rem 0.75rem !important;
+    }
+    .lims-footer {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.75rem;
     }
 }
 
@@ -440,3 +486,59 @@ body.sidebar-collapsed #sidebar-toggle-open {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     padding: 2.25rem;
 }
+
+/* =========================================================
+   GLOBAL MOBILE RESPONSIVE ENHANCEMENTS
+   ========================================================= */
+
+/* Pastikan semua tabel datatables atau table-responsive membungkus dengan mulus di mobile */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 767.98px) {
+    /* Mencegah overflow horizontal pada halaman */
+    body, .lims-wrapper, #lims-content {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    /* Penyesuaian heading & card header di HP */
+    .card-header {
+        padding: 0.75rem 1rem !important;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .card-body {
+        padding: 0.85rem !important;
+    }
+
+    /* Tombol-tombol aksi di header halaman membungkus dengan proporsional */
+    .d-flex.justify-content-between.align-items-center {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* Form control & buttons touch friendly */
+    .form-control, .form-select, .btn {
+        font-size: 0.85rem;
+    }
+
+    /* Modal penyesuaian padding mobile */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+    }
+
+    /* Breadcrumbs compact */
+    .breadcrumb {
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem !important;
+    }
+}
+

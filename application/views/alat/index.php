@@ -235,6 +235,27 @@
         background: #e53e3e;
         color: #ffffff;
     }
+
+    @media (max-width: 767.98px) {
+        .instrument-list-page .instrument-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+        }
+        .instrument-list-page .instrument-header .d-flex.align-items-center {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 8px !important;
+        }
+        .btn-import-instrument, .btn-add-instrument {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .instrument-list-page .instrument-body {
+            padding: 16px;
+        }
+    }
 </style>
 
 <div class="instrument-list-page">

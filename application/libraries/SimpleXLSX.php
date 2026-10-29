@@ -156,8 +156,22 @@ class SimpleXLSX
             }
         }
 
-        // Baca Sheet1
-        for ($i = 1; $i <= 10; $i++) {
+        // Baca Workbook untuk memetakan nama sheet dan ID jika ada
+        if (($wbIndex = $zip->locateName('xl/workbook.xml')) !== false) {
+            $wbXml = simplexml_load_string($zip->getFromIndex($wbIndex));
+            if ($wbXml && isset($wbXml->sheets->sheet)) {
+                $idx = 0;
+                foreach ($wbXml->sheets->sheet as $s) {
+                    $sheetName = (string)$s['name'];
+                    $rId = (string)$s['r:id'];
+                    $this->sheetNames[$idx] = $sheetName;
+                    $idx++;
+                }
+            }
+        }
+
+        // Baca Worksheet files
+        for ($i = 1; $i <= 30; $i++) {
             $sheetPath = "xl/worksheets/sheet{$i}.xml";
             if (($index = $zip->locateName($sheetPath)) !== false) {
                 $this->sheets[] = $zip->getFromIndex($index);
@@ -172,5 +186,10 @@ class SimpleXLSX
         }
 
         return true;
+    }
+
+    public function sheetNames()
+    {
+        return !empty($this->sheetNames) ? $this->sheetNames : array_keys($this->sheets);
     }
 }

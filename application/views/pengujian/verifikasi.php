@@ -484,12 +484,59 @@
         justify-content: center;
         gap: 5px;
         white-space: nowrap;
+        transition: .18s ease;
     }
 
     .btn-preview:hover {
         background: #f1f7f7;
         color: #168f8b;
         border-color: #c7e0df;
+    }
+
+    .btn-preview-primary {
+        background: #eaf7f6;
+        border-color: #c2e5e3;
+        color: #158b88;
+    }
+
+    .btn-preview-primary:hover {
+        background: #159b98;
+        border-color: #159b98;
+        color: #fff;
+    }
+
+    .btn-action-lcp {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: #f2f7f9;
+        border: 1px solid #dce6eb;
+        color: #2c526a;
+        font-size: .66rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+    .btn-action-lcp:hover {
+        background: #159b98;
+        border-color: #159b98;
+        color: #fff;
+    }
+
+    .btn-action-lcp-download {
+        background: #fff8eb;
+        border-color: #fae4be;
+        color: #9c6800;
+    }
+
+    .btn-action-lcp-download:hover {
+        background: #d98200;
+        border-color: #d98200;
+        color: #fff;
     }
 
     .report-meta {
@@ -999,14 +1046,16 @@
                                         <?php echo html_escape($kode); ?>
                                     </span>
 
-                                    <small class="queue-time">
-                                        <?php
-                                            echo html_escape(
-                                                $item['waktu_selesai']
-                                                    ? date('H.i', strtotime($item['waktu_selesai']))
-                                                    : '-'
-                                            );
-                                        ?>
+                                    <small class="queue-time text-end" style="font-size: 0.68rem; line-height: 1.2;">
+                                        <?php if (!empty($item['waktu_selesai'])): ?>
+                                            <span class="d-block fw-semibold text-dark"><?php echo date('d/m/y', strtotime($item['waktu_selesai'])); ?></span>
+                                            <span class="text-muted"><?php echo date('H:i', strtotime($item['waktu_selesai'])); ?> WIB</span>
+                                        <?php elseif (!empty($item['created_at'])): ?>
+                                            <span class="d-block fw-semibold text-dark"><?php echo date('d/m/y', strtotime($item['created_at'])); ?></span>
+                                            <span class="text-muted"><?php echo date('H:i', strtotime($item['created_at'])); ?> WIB</span>
+                                        <?php else: ?>
+                                            <span>-</span>
+                                        <?php endif; ?>
                                     </small>
 
                                 </div>
@@ -1122,16 +1171,37 @@
                         </div>
 
 
-                        <div>
-
+                        <div class="d-flex align-items-center flex-wrap gap-2">
                             <a
                                 href="<?php echo site_url('pengujian/detail_sesi/' . $selected_item['id']); ?>"
                                 class="btn-lampiran"
+                                title="Lihat detail lengkap seluruh parameter, instrumen alat, dan reagen"
                             >
-                                <i class="bi bi-folder2-open"></i>
-                                Buka Lampiran
+                                <i class="bi bi-folder2-open text-primary"></i>
+                                Detail Pengujian
                             </a>
 
+                            <?php if (isset($selected_item['jenis_pengujian']) && $selected_item['jenis_pengujian'] === 'Kimia'): ?>
+                                <a
+                                    href="<?php echo site_url('pengujian/cp_kimia/' . $selected_item['id']); ?>"
+                                    class="btn-lampiran btn-cp-preview"
+                                    target="_blank"
+                                    title="Tinjau & Simpan Catatan Pengujian (CP) Kimia BBPOM"
+                                >
+                                    <i class="bi bi-journal-check text-info"></i>
+                                    Catatan Pengujian (CP)
+                                </a>
+                            <?php else: ?>
+                                <a
+                                    href="<?php echo site_url('pengujian/cp_mikro/' . $selected_item['id']); ?>"
+                                    class="btn-lampiran btn-cp-preview"
+                                    target="_blank"
+                                    title="Tinjau & Unduh Catatan Pengujian (CP) Mikrobiologi PDF"
+                                >
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+                                    Unduh CP Mikro
+                                </a>
+                            <?php endif; ?>
                         </div>
 
                     </div>
@@ -1253,15 +1323,38 @@
                         </div>
 
 
-                        <div>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
 
                             <a
                                 href="<?php echo site_url('pengujian/detail_sesi/' . $selected_item['id']); ?>"
                                 class="btn-preview"
+                                title="Lihat detail instrumen dan verifikasi per sesi"
                             >
-                                <i class="bi bi-file-earmark-pdf"></i>
-                                Preview PDF
+                                <i class="bi bi-file-earmark-text"></i>
+                                Detail Sesi
                             </a>
+
+                            <?php if (isset($selected_item['jenis_pengujian']) && $selected_item['jenis_pengujian'] === 'Kimia'): ?>
+                                <a
+                                    href="<?php echo site_url('pengujian/cp_kimia/' . $selected_item['id']); ?>"
+                                    class="btn-preview btn-preview-primary"
+                                    target="_blank"
+                                    title="Tinjau & Simpan Catatan Pengujian (CP) Kimia BBPOM"
+                                >
+                                    <i class="bi bi-journal-check"></i>
+                                    Lihat &amp; Unduh CP
+                                </a>
+                            <?php else: ?>
+                                <a
+                                    href="<?php echo site_url('pengujian/cp_mikro/' . $selected_item['id']); ?>"
+                                    class="btn-preview btn-preview-primary"
+                                    target="_blank"
+                                    title="Tinjau & Unduh Catatan Pengujian (CP) Mikrobiologi PDF"
+                                >
+                                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                                    Lihat &amp; Unduh CP
+                                </a>
+                            <?php endif; ?>
 
                         </div>
 
@@ -1321,8 +1414,12 @@
                                         Persyaratan
                                     </th>
 
-                                    <th class="pe-3">
+                                    <th>
                                         Kesimpulan
+                                    </th>
+
+                                    <th class="pe-3 text-center" style="width: 150px;">
+                                        Dokumen LCP
                                     </th>
 
                                 </tr>
@@ -1397,7 +1494,7 @@
                                             </td>
 
 
-                                            <td class="pe-3">
+                                            <td>
 
                                                 <?php
 
@@ -1435,6 +1532,28 @@
 
                                             </td>
 
+                                            <td class="pe-3 text-center text-nowrap">
+                                                <div class="d-inline-flex align-items-center gap-1">
+                                                    <a
+                                                        href="<?php echo site_url('pengujian/lcp_pdf/' . $form['id'] . '/inline'); ?>"
+                                                        class="btn-action-lcp"
+                                                        target="_blank"
+                                                        title="Lihat / Tinjau Lembar Catatan Pengujian (LCP) form ini"
+                                                    >
+                                                        <i class="bi bi-eye"></i>
+                                                        Lihat LCP
+                                                    </a>
+                                                    <a
+                                                        href="<?php echo site_url('pengujian/lcp_pdf/' . $form['id'] . '/download'); ?>"
+                                                        class="btn-action-lcp btn-action-lcp-download"
+                                                        target="_blank"
+                                                        title="Unduh Lembar Catatan Pengujian (LCP) form ini"
+                                                    >
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+
                                         </tr>
 
                                     <?php endforeach; ?>
@@ -1444,7 +1563,7 @@
                                     <tr>
 
                                         <td
-                                            colspan="4"
+                                            colspan="5"
                                             class="text-center py-4"
                                         >
 

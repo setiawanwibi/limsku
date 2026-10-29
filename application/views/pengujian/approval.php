@@ -782,6 +782,10 @@
                                 Status Kesiapan MT
                             </th>
 
+                            <th style="min-width: 130px;">
+                                Tanggal &amp; Waktu
+                            </th>
+
                             <th width="14%">
                                 Aksi Tinjauan
                             </th>
@@ -901,6 +905,33 @@
                                     </td>
 
 
+                                    <!-- Tanggal & Waktu -->
+                                    <?php
+                                        $raw_approval_time = !empty($v['waktu_siap_mt'])
+                                            ? $v['waktu_siap_mt']
+                                            : (!empty($v['updated_at'])
+                                                ? $v['updated_at']
+                                                : (!empty($v['created_at'])
+                                                    ? $v['created_at']
+                                                    : null));
+                                        $sort_app_ts = $raw_approval_time ? strtotime($raw_approval_time) : 0;
+                                    ?>
+                                    <td data-order="<?php echo $sort_app_ts; ?>">
+                                        <?php if ($raw_approval_time): ?>
+                                            <div class="d-flex flex-column text-nowrap" style="font-size: 0.76rem; line-height: 1.35;">
+                                                <span class="fw-bold text-dark">
+                                                    <i class="bi bi-calendar3 me-1 text-primary"></i><?php echo date('d/m/Y', strtotime($raw_approval_time)); ?>
+                                                </span>
+                                                <span class="text-muted small" style="font-size: 0.68rem;">
+                                                    <i class="bi bi-clock me-1 text-secondary"></i><?php echo date('H:i', strtotime($raw_approval_time)); ?> WIB
+                                                </span>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-muted small">-</span>
+                                        <?php endif; ?>
+                                    </td>
+
+
                                     <!-- Aksi Approval -->
                                     <td>
 
@@ -926,7 +957,7 @@
                             <tr>
 
                                 <td
-                                    colspan="7"
+                                    colspan="8"
                                     class="approval-empty"
                                 >
 
@@ -960,6 +991,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof $.fn.DataTable !== 'undefined') {
 
         $('#tabel-approval').DataTable({
+
+            order: [[7, 'desc']],
+
+            columnDefs: [
+                { orderable: false, targets: [-1] }
+            ],
 
             language: {
                 url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
