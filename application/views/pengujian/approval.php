@@ -895,11 +895,17 @@
                                     <!-- Status Kesiapan MT -->
                                     <td>
 
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
-                                            <i class="bi bi-check-circle me-1"></i>Siap Approval MT
-                                        </span>
+                                        <?php if (!empty($v['kelengkapan']['siap_mt'])): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                                <i class="bi bi-check-circle me-1"></i>Siap Approval MT
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.68rem;">
+                                                <i class="bi bi-hourglass-split me-1"></i>Menunggu Sesi Lain
+                                            </span>
+                                        <?php endif; ?>
                                         <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">
-                                            <?php echo count($v['sesi_ids']); ?> Sesi Siap
+                                            <?php echo count($v['sesi_ids']); ?> Sesi Siap Approval
                                         </div>
 
                                     </td>

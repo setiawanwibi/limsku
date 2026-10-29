@@ -555,7 +555,7 @@
             <div class="col-lg">
                 <div class="proses-sesi-header-main">
                     <h5 class="proses-sesi-title">
-                        Form Input Hasil Pengujian Sesi
+                        <?php echo ($sesi['status'] === 'Ditolak') ? 'Perbaikan &amp; Revisi Hasil Pengujian Sesi' : 'Form Input Hasil Pengujian Sesi'; ?>
                     </h5>
 
                     <p class="proses-sesi-subtitle">
@@ -606,6 +606,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Alert Catatan Penolakan Revisi -->
+    <?php if ($sesi['status'] === 'Ditolak' && !empty($sesi['alasan_penolakan'])): ?>
+        <div class="alert alert-danger border-2 border-danger shadow-sm mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
+                <h6 class="fw-bold mb-0 text-danger">Catatan Penolakan / Poin Perbaikan:</h6>
+            </div>
+            <div class="bg-white p-3 rounded border border-danger-subtle font-monospace text-dark" style="font-size: 0.82rem; line-height: 1.55;">
+                <?php echo nl2br(html_escape($sesi['alasan_penolakan'])); ?>
+            </div>
+            <small class="text-muted d-block mt-2" style="font-size: 0.72rem;">
+                <i class="bi bi-info-circle me-1"></i> Harap perbaiki nilai perhitungan, lampiran, atau data uji sesuai dengan catatan di atas sebelum mengirim ulang.
+            </small>
+        </div>
+    <?php endif; ?>
 
     <!-- Main Form -->
     <div class="proses-sesi-card">

@@ -1169,7 +1169,7 @@
                                 $st_cls =
                                     'badge-approved-final';
 
-                            } elseif ($st === 'Ditolak') {
+                            } elseif ($st === 'Ditolak' || $st === 'Ditolak MT') {
 
                                 $st_cls =
                                     'badge-ditolak';

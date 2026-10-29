@@ -727,7 +727,7 @@
                             </a>
                         <?php endif; ?>
 
-                        <?php if ($sesi['status'] === 'Menunggu Verifikasi' && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify')): ?>
+                        <?php if (in_array($sesi['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE) && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify')): ?>
 
                             <form action="<?php echo site_url('pengujian/verifikasi_sesi/' . $sesi['id']); ?>"
                                   method="post"
@@ -819,7 +819,7 @@
         </div>
 
         <!-- Rejection Notice -->
-        <?php if ($sesi['status'] === 'Ditolak' && !empty($sesi['alasan_penolakan'])): ?>
+        <?php if (in_array($sesi['status'], array('Ditolak', 'Ditolak MT'), TRUE) && !empty($sesi['alasan_penolakan'])): ?>
 
             <div class="detail-sesi-rejection">
                 <div class="detail-sesi-rejection-inner">
@@ -830,7 +830,7 @@
 
                     <div class="flex-grow-1">
                         <p class="detail-sesi-rejection-title">
-                            Sesi Pengujian Ditolak oleh Penyelia
+                            <?php echo ($sesi['status'] === 'Ditolak MT') ? 'Sesi Pengujian Dikembalikan oleh Manajer Teknis (MT)' : 'Sesi Pengujian Ditolak untuk Revisi'; ?>
                         </p>
 
                         <div class="detail-sesi-rejection-text">
@@ -921,7 +921,7 @@
                                     $badge_cls = 'status-approval';
                                 } elseif ($sesi['status'] === 'Approved / Final') {
                                     $badge_cls = 'status-final';
-                                } elseif ($sesi['status'] === 'Ditolak') {
+                                } elseif ($sesi['status'] === 'Ditolak' || $sesi['status'] === 'Ditolak MT') {
                                     $badge_cls = 'status-ditolak';
                                 }
                                 ?>
@@ -1157,16 +1157,19 @@
 
                                 <td class="text-center text-nowrap">
                                     <?php 
-                                        $boleh_lihat_lcp_form = in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE)
-                                            || ($sesi['status'] === 'Menunggu Verifikasi' && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify'));
+                                    $can_view_lcp = in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE) ||
+                                        ($sesi['status'] === 'Menunggu Verifikasi' && (
+                                            $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify') ||
+                                            $this->session->userdata('role_id') == 1
+                                        ));
                                     ?>
-                                    <?php if ($boleh_lihat_lcp_form): ?>
+                                    <?php if ($can_view_lcp): ?>
                                         <a href="<?php echo site_url('pengujian/lcp_pdf/' . $f['id']); ?>"
                                            class="btn btn-sm btn-outline-primary py-1 px-2"
-                                           title="Lihat / Unduh Lembar Catatan Pengujian (LCP) Form Ini"
+                                           title="Lihat / Tinjau Lembar Catatan Pengujian (LCP) Form Ini"
                                            target="_blank"
                                            style="font-size: 0.72rem;">
-                                            <i class="bi bi-file-earmark-ruled me-1"></i>Unduh LCP
+                                            <i class="bi bi-file-earmark-ruled me-1"></i><?php echo ($sesi['status'] === 'Menunggu Verifikasi') ? 'Tinjau LCP' : 'Unduh LCP'; ?>
                                         </a>
                                     <?php else: ?>
                                         <span class="text-muted small" style="font-size: 0.68rem;" title="LCP tersedia setelah diverifikasi Penyelia">
@@ -1207,7 +1210,7 @@
     <!-- =========================
          MODAL PENOLAKAN
     ========================== -->
-    <?php if ($sesi['status'] === 'Menunggu Verifikasi' && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify')): ?>
+    <?php if (in_array($sesi['status'], array('Menunggu Verifikasi', 'Ditolak MT'), TRUE) && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify')): ?>
 
         <div class="modal fade detail-sesi-modal"
              id="modalTolakSesi"
