@@ -802,6 +802,8 @@
 
                             <th>Status</th>
 
+                            <th style="min-width: 120px;">Waktu Mulai</th>
+
                             <th>Aksi</th>
 
                         </tr>
@@ -885,7 +887,7 @@
                                 </td>
 
 
-                                <!-- STATUS -->
+                                <!-- STATUS & DRAFT PROGRESS -->
 
                                 <td>
 
@@ -901,6 +903,52 @@
 
                                     </span>
 
+                                    <?php if (!empty($sd['total_form'])): ?>
+                                        <div class="mt-1" style="font-size: 0.68rem;">
+                                            <?php if ($sd['form_terisi'] > 0): ?>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info" title="Form yang sudah diisi / draft tersimpan">
+                                                    <i class="bi bi-save me-1"></i>Draft: <?php echo (int)$sd['form_terisi']; ?>/<?php echo (int)$sd['total_form']; ?> Form
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary" title="Total form parameter monografi">
+                                                    <i class="bi bi-file-earmark me-1"></i><?php echo (int)$sd['total_form']; ?> Form
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                </td>
+
+
+                                <!-- WAKTU MULAI & UPDATE DRAFT -->
+                                <td>
+                                    <?php
+                                        $waktu_mulai = !empty($sd['waktu_mulai'])
+                                            ? $sd['waktu_mulai']
+                                            : (!empty($sd['updated_at'])
+                                                ? $sd['updated_at']
+                                                : (!empty($sd['created_at'])
+                                                    ? $sd['created_at']
+                                                    : null));
+                                        $waktu_update = !empty($sd['session_updated_at']) ? $sd['session_updated_at'] : null;
+                                    ?>
+                                    <?php if ($waktu_mulai): ?>
+                                        <div class="d-flex flex-column text-nowrap" style="font-size: 0.74rem; line-height: 1.35;">
+                                            <span class="fw-bold text-dark" title="Waktu Mulai Pengujian">
+                                                <i class="bi bi-calendar3 me-1 text-primary"></i><?php echo date('d/m/Y', strtotime($waktu_mulai)); ?>
+                                            </span>
+                                            <span class="text-muted small" style="font-size: 0.68rem;">
+                                                <i class="bi bi-clock me-1 text-secondary"></i><?php echo date('H:i', strtotime($waktu_mulai)); ?> WIB
+                                            </span>
+                                            <?php if ($waktu_update && $waktu_update !== $waktu_mulai): ?>
+                                                <span class="text-info mt-1" style="font-size: 0.65rem;" title="Waktu simpan sementara terakhir">
+                                                    <i class="bi bi-pencil-square me-1"></i>Draft: <?php echo date('H:i', strtotime($waktu_update)); ?> WIB
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted small">-</span>
+                                    <?php endif; ?>
                                 </td>
 
 
@@ -993,6 +1041,8 @@
                         <th>Petugas Input</th>
 
                         <th>Status</th>
+
+                        <th style="min-width: 125px;">Tanggal Masuk</th>
 
                         <th>Aksi</th>
 
@@ -1164,6 +1214,36 @@
 
 
                                 <!-- =================================
+                                     TANGGAL MASUK
+                                     ================================= -->
+
+                                <td>
+                                    <?php
+                                        $tgl_masuk = !empty($s['tanggal_masuk'])
+                                            ? $s['tanggal_masuk']
+                                            : (!empty($s['created_at'])
+                                                ? $s['created_at']
+                                                : (!empty($s['tanggal_terima'])
+                                                    ? $s['tanggal_terima']
+                                                    : null));
+                                        $has_time = ($tgl_masuk && strlen($tgl_masuk) > 10 && strpos($tgl_masuk, ':') !== false);
+                                    ?>
+                                    <?php if ($tgl_masuk): ?>
+                                        <div class="d-flex flex-column text-nowrap" style="font-size: 0.74rem; line-height: 1.35;">
+                                            <span class="fw-bold text-dark">
+                                                <i class="bi bi-calendar3 me-1 text-primary"></i><?php echo date('d/m/Y', strtotime($tgl_masuk)); ?>
+                                            </span>
+                                            <span class="text-muted small" style="font-size: 0.68rem;">
+                                                <i class="bi bi-clock me-1 text-secondary"></i><?php echo $has_time ? date('H:i', strtotime($tgl_masuk)) . ' WIB' : '08:00 WIB'; ?>
+                                            </span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted small">-</span>
+                                    <?php endif; ?>
+                                </td>
+
+
+                                <!-- =================================
                                      AKSI (KLAIM BIDANG)
                                      ================================= -->
 
@@ -1217,7 +1297,7 @@
                         <tr>
 
                             <td
-                                colspan="6"
+                                colspan="7"
                                 class="text-center text-muted py-4"
                             >
 

@@ -9,6 +9,7 @@ $bisa_pengujian_antrean  = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pen
 $bisa_verifikasi         = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify');
 $bisa_approval           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve');
 $bisa_laporan            = $this->Model_Hak_Akses->memiliki_akses($role_id, 'laporan_view');
+$bisa_riwayat_saya       = in_array((int)$role_id, array(1, 3, 4, 5), true) || $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input');
 $bisa_monitoring_rekap   = in_array((int)$role_id, array(1, 4, 5), true); // Hanya Admin TI, Penyelia, dan Manajer Teknis
 
 $bisa_metode             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'metode_view');
@@ -16,6 +17,7 @@ $bisa_kelas_terapi       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'kel
 $bisa_template           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'template_view');
 $bisa_alat               = $this->Model_Hak_Akses->memiliki_akses($role_id, 'alat_view') || $this->Model_Hak_Akses->memiliki_akses($role_id, 'laboratorium_view');
 $bisa_reagen             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'reagen_view');
+$bisa_baku               = $this->Model_Hak_Akses->memiliki_akses($role_id, 'baku_view');
 $bisa_pengguna           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengguna_view');
 $bisa_peran              = $this->Model_Hak_Akses->memiliki_akses($role_id, 'peran_view');
 $bisa_laboratorium       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'laboratorium_view');
@@ -24,8 +26,8 @@ $bisa_audit              = $this->Model_Hak_Akses->memiliki_akses($role_id, 'aud
 
 // Parent Header Visibility Flags
 $ada_menu_registrasi = $bisa_sampel;
-$ada_menu_pengujian  = ($bisa_pengujian_antrean || $bisa_verifikasi || $bisa_approval || $bisa_laporan);
-$ada_menu_master     = ($bisa_metode || $bisa_kelas_terapi || $bisa_template || $bisa_alat || $bisa_reagen || $bisa_pengguna || $bisa_peran);
+$ada_menu_pengujian  = ($bisa_pengujian_antrean || $bisa_verifikasi || $bisa_approval || $bisa_laporan || $bisa_riwayat_saya);
+$ada_menu_master     = ($bisa_metode || $bisa_kelas_terapi || $bisa_template || $bisa_alat || $bisa_reagen || $bisa_baku || $bisa_pengguna || $bisa_peran);
 $ada_menu_sistem     = $bisa_audit;
 
 // Ambil badge notifikasi antrean & workflow laboratorium
@@ -161,6 +163,15 @@ if (!isset($badges)) {
                 </li>
             <?php endif; ?>
 
+            <?php if ($bisa_riwayat_saya): ?>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_saya') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('pengujian/riwayat_saya'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-clock-history me-2 text-primary"></i>
+                        <span>Historical Pengujian Saya</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <?php if ($bisa_laporan): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="nav-link px-3 py-2 rounded">
@@ -252,6 +263,15 @@ if (!isset($badges)) {
                     <a href="<?php echo site_url('reagen'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-eyedropper me-2"></i>
                         <span>Master Reagen</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
+            <?php if ($bisa_baku): ?>
+                <li class="mb-1 <?php echo ($halaman_aktif === 'baku') ? 'active' : ''; ?>">
+                    <a href="<?php echo site_url('baku'); ?>" class="nav-link px-3 py-2 rounded">
+                        <i class="bi bi-droplet-half me-2"></i>
+                        <span>Data Baku</span>
                     </a>
                 </li>
             <?php endif; ?>

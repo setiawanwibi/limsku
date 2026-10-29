@@ -198,6 +198,34 @@ class Pengujian extends MY_Controller
         $this->load->model('Model_Template');
         $daftar_template_bidang = $this->Model_Template->ambil_aktif($jenis_pengujian);
 
+        // Mode Ganti Pilihan Sesi (jika diedit dari sesi yang sedang berjalan)
+        $session_id = (int)$this->input->get('session_id', TRUE);
+        $sesi_edit = NULL;
+        $sesi_method_ids = array();
+        $sesi_custom_templates = array();
+
+        if ($session_id > 0) {
+            $sesi_edit = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+            if ($sesi_edit && $sesi_edit['penguji_id'] == $this->session->userdata('user_id') && $sesi_edit['status'] === 'Sedang Diuji') {
+                $existing_items = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+                foreach ($existing_items as $ei) {
+                    if (!empty($ei['method_id'])) {
+                        $sesi_method_ids[] = (int)$ei['method_id'];
+                        if (!empty($ei['template_id'])) {
+                            $sesi_custom_templates[(int)$ei['method_id']] = (int)$ei['template_id'];
+                        }
+                    }
+                }
+                // Jika belum ada zat aktif di URL, gunakan zat aktif dari sesi yang sedang berjalan
+                if (empty($zat_aktif_terpilih) && !empty($existing_items[0]['nama_zat_aktif'])) {
+                    $zat_aktif_terpilih = $existing_items[0]['nama_zat_aktif'];
+                    $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian);
+                }
+            } else {
+                $session_id = 0;
+            }
+        }
+
         $this->data['halaman_aktif']          = 'pengujian_antrean';
         $this->data['judul_halaman']          = 'Pilih Zat Aktif & Parameter Monografi (' . $jenis_pengujian . ')';
         
@@ -207,6 +235,10 @@ class Pengujian extends MY_Controller
         $this->data['zat_aktif_terpilih']     = $zat_aktif_terpilih;
         $this->data['parameter_monografi']    = $parameter_monografi;
         $this->data['daftar_template_bidang'] = $daftar_template_bidang;
+        $this->data['session_id_edit']        = $session_id;
+        $this->data['sesi_edit']              = $sesi_edit;
+        $this->data['sesi_method_ids']        = $sesi_method_ids;
+        $this->data['sesi_custom_templates']  = $sesi_custom_templates;
 
         $this->muat_tampilan('pengujian/pilih_form');
     }
@@ -304,7 +336,34 @@ class Pengujian extends MY_Controller
         }
 
         $penguji_id = $this->session->userdata('user_id');
+        $session_id_edit = (int)$this->input->post('session_id', TRUE);
 
+        // Jika mode UPDATE/GANTI pada sesi yang sudah berjalan
+        if ($session_id_edit > 0) {
+            $sesi_check = $this->Model_Pengujian->ambil_sesi_by_id($session_id_edit);
+            if ($sesi_check && $sesi_check['penguji_id'] == $penguji_id && $sesi_check['status'] === 'Sedang Diuji') {
+                if ($this->Model_Pengujian->perbarui_sesi_pengujian($session_id_edit, $valid_items_to_create)) {
+                    $this->catat_audit('UPDATE_TESTING_SESSION_CONFIG', 'Pengujian', array(
+                        'testing_session_id' => $session_id_edit,
+                        'sample_id'          => $sample_id,
+                        'jenis_pengujian'    => $jenis_pengujian,
+                        'nama_zat_aktif'     => $nama_zat_aktif,
+                        'parameter_count'    => count($valid_items_to_create),
+                        'penguji_id'         => $penguji_id
+                    ));
+
+                    $this->session->set_flashdata('pesan_sukses', 'Pilihan zat aktif & form LCP parameter berhasil diperbarui. Seluruh data hasil pengujian yang relevan tetap tersimpan dan tidak hilang.');
+                    redirect('pengujian/proses_sesi/' . $session_id_edit);
+                    return;
+                } else {
+                    $this->session->set_flashdata('pesan_gagal', 'Gagal memperbarui konfigurasi sesi pengujian.');
+                    redirect('pengujian/proses_sesi/' . $session_id_edit);
+                    return;
+                }
+            }
+        }
+
+        // Mode INSERT SESI BARU
         $session_id = $this->Model_Pengujian->buat_sesi_pengujian($sample_id, $penguji_id, $jenis_pengujian, $valid_items_to_create);
 
         if ($session_id) {
@@ -388,16 +447,61 @@ class Pengujian extends MY_Controller
                 }
             }
 
-            if ($this->Model_Pengujian->simpan_hasil_sesi($session_id, $forms_input)) {
-                $this->catat_audit('SAVE_SESSION_RESULTS', 'Pengujian', array(
-                    'testing_session_id' => $session_id,
-                    'sample_id'          => $sesi['sample_id'],
-                    'status'             => 'Menunggu Verifikasi'
-                ));
+            $aksi_simpan = $this->input->post('aksi_simpan', TRUE);
+            $is_draft = ($aksi_simpan === 'draft');
+            $is_ajax = $this->input->is_ajax_request();
 
-                $this->session->set_flashdata('pesan_sukses', 'Seluruh lembar LCP parameter monografi berhasil disimpan beserta pencatatan alat & reagen, dan diteruskan ke Penyelia (Menunggu Verifikasi).');
-                redirect('pengujian/detail_sesi/' . $session_id);
+            if ($this->Model_Pengujian->simpan_hasil_sesi($session_id, $forms_input, $is_draft)) {
+                if ($is_draft) {
+                    $this->catat_audit('DRAFT_SESSION_RESULTS', 'Pengujian', array(
+                        'testing_session_id' => $session_id,
+                        'sample_id'          => $sesi['sample_id'],
+                        'status'             => 'Sedang Diuji (Tersimpan Sementara)'
+                    ));
+
+                    if ($is_ajax) {
+                        return $this->output
+                            ->set_content_type('application/json')
+                            ->set_output(json_encode(array(
+                                'status'    => 'success',
+                                'message'   => 'Progres pengujian berhasil disimpan sementara pada ' . date('H:i:s') . ' WIB.',
+                                'waktu'     => date('d/m/Y H:i:s'),
+                                'csrf_hash' => $this->security->get_csrf_hash()
+                            )));
+                    }
+
+                    $this->session->set_flashdata('pesan_sukses', 'Progres pengujian berhasil disimpan sementara. Anda dapat melanjutkan pengisian kapan saja tanpa khawatir data hilang.');
+                    redirect('pengujian/proses_sesi/' . $session_id);
+                } else {
+                    $this->catat_audit('SAVE_SESSION_RESULTS', 'Pengujian', array(
+                        'testing_session_id' => $session_id,
+                        'sample_id'          => $sesi['sample_id'],
+                        'status'             => 'Menunggu Verifikasi'
+                    ));
+
+                    if ($is_ajax) {
+                        return $this->output
+                            ->set_content_type('application/json')
+                            ->set_output(json_encode(array(
+                                'status'       => 'success',
+                                'message'      => 'Seluruh lembar LCP berhasil disimpan dan diteruskan ke Penyelia.',
+                                'redirect_url' => site_url('pengujian/detail_sesi/' . $session_id)
+                            )));
+                    }
+
+                    $this->session->set_flashdata('pesan_sukses', 'Seluruh lembar LCP parameter monografi berhasil disimpan beserta pencatatan alat & reagen, dan diteruskan ke Penyelia (Menunggu Verifikasi).');
+                    redirect('pengujian/detail_sesi/' . $session_id);
+                }
             } else {
+                if ($is_ajax) {
+                    return $this->output
+                        ->set_status_header(500)
+                        ->set_content_type('application/json')
+                        ->set_output(json_encode(array(
+                            'status'  => 'error',
+                            'message' => 'Gagal menyimpan hasil pengujian sesi.'
+                        )));
+                }
                 $this->session->set_flashdata('pesan_gagal', 'Gagal menyimpan hasil pengujian sesi.');
             }
         }
@@ -405,14 +509,17 @@ class Pengujian extends MY_Controller
         // Master Alat & Reagen aktif untuk dipilih pada LCP
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_aktif();
+        $this->load->model('Model_Template');
+        $daftar_template_bidang = $this->Model_Template->ambil_aktif($sesi['jenis_pengujian']);
 
-        $this->data['halaman_aktif'] = 'pengujian_antrean';
-        $this->data['judul_halaman'] = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
-        $this->data['sesi']          = $sesi;
-        $this->data['forms']         = $forms;
-        $this->data['hasil_forms']   = $forms;
-        $this->data['daftar_alat']   = $daftar_alat;
-        $this->data['daftar_reagen'] = $daftar_reagen;
+        $this->data['halaman_aktif']          = 'pengujian_antrean';
+        $this->data['judul_halaman']          = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
+        $this->data['sesi']                   = $sesi;
+        $this->data['forms']                  = $forms;
+        $this->data['hasil_forms']            = $forms;
+        $this->data['daftar_alat']            = $daftar_alat;
+        $this->data['daftar_reagen']          = $daftar_reagen;
+        $this->data['daftar_template_bidang'] = $daftar_template_bidang;
 
         $this->muat_tampilan('pengujian/proses_sesi');
     }
@@ -841,9 +948,13 @@ class Pengujian extends MY_Controller
             show_404();
         }
 
+        $is_penyelia = $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify');
         $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if ($is_penyelia) {
+            $allowed_statuses[] = 'Menunggu Verifikasi';
+        }
         if (!in_array($sesi['status'], $allowed_statuses, TRUE)) {
-            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diisi atau siap diverifikasi.');
             redirect('pengujian/riwayat');
         }
 
@@ -1055,9 +1166,13 @@ class Pengujian extends MY_Controller
         }
 
         // Syarat CP Mikrobiologi: harus telah diverifikasi oleh Penyelia (status 'Menunggu Approval' atau 'Approved / Final')
+        $is_penyelia = $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify');
         $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
+        if ($is_penyelia) {
+            $allowed_statuses[] = 'Menunggu Verifikasi';
+        }
         if (!in_array($sesi['status'], $allowed_statuses, TRUE)) {
-            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diverifikasi oleh Penyelia.');
+            $this->session->set_flashdata('pesan_gagal', 'Catatan Pengujian (CP) hanya dapat diakses setelah hasil pengujian selesai diisi atau siap diverifikasi.');
             redirect('pengujian/riwayat');
         }
 
@@ -1078,6 +1193,9 @@ class Pengujian extends MY_Controller
         }
 
         $verifier_id = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : null;
+        if (empty($verifier_id) && $is_penyelia) {
+            $verifier_id = $this->session->userdata('user_id');
+        }
         $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
         if ($verifier_info && empty($verifier_id)) {
             $verifier_id = $verifier_info['id'];
@@ -1103,7 +1221,8 @@ class Pengujian extends MY_Controller
         }
 
         // GATE KETAT TANDA TANGAN DIGITAL:
-        // CP final harus otomatis memuat TTD Penguji dan Penyelia yang sah.
+        // Validasi keberadaan file, keterbacaan, format gambar, dan path yang diizinkan.
+        // Jika sedang ditinjau sebelum verifikasi oleh Penyelia, bypass pembatasan error verifier agar bisa dipratinjau
         require_once APPPATH . 'libraries/CP_Mikrobiologi_PDF.php';
         $cp_gen = new CP_Mikrobiologi_PDF();
 
@@ -1113,25 +1232,28 @@ class Pengujian extends MY_Controller
         $err_penguji  = !$val_penguji[0];
         $err_penyelia = !$val_penyelia[0];
 
-        if ($err_penguji || $err_penyelia) {
-            if ($err_penguji && $err_penyelia) {
-                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
-            } elseif ($err_penguji) {
-                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
-            } else {
-                $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+        // Jika status sudah diverifikasi / approved, signature penguji & penyelia wajib valid
+        if ($sesi['status'] !== 'Menunggu Verifikasi') {
+            if ($err_penguji || $err_penyelia) {
+                if ($err_penguji && $err_penyelia) {
+                    $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
+                } elseif ($err_penguji) {
+                    $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
+                } else {
+                    $pesan_ttd = 'CP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+                }
+
+                $this->catat_audit('CP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
+                    'session_id'   => $session_id,
+                    'penguji_id'   => $sesi['penguji_id'],
+                    'verifier_id'  => $sesi['verifier_id'],
+                    'err_penguji'  => $err_penguji,
+                    'err_penyelia' => $err_penyelia
+                ));
+
+                $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
+                redirect('pengujian/riwayat');
             }
-
-            $this->catat_audit('CP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
-                'session_id'   => $session_id,
-                'penguji_id'   => $sesi['penguji_id'],
-                'verifier_id'  => $sesi['verifier_id'],
-                'err_penguji'  => $err_penguji,
-                'err_penyelia' => $err_penyelia
-            ));
-
-            $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
-            redirect('pengujian/riwayat');
         }
 
         // Sanitasi kode sampel untuk nama file
@@ -1205,6 +1327,7 @@ class Pengujian extends MY_Controller
         $session_id = !empty($hasil['session_id']) ? (int)$hasil['session_id'] : 0;
         $sesi = $session_id > 0 ? $this->Model_Pengujian->ambil_sesi_by_id($session_id) : array();
 
+        $is_penyelia = $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify');
         $status_uji = !empty($sesi['status']) ? $sesi['status'] : $hasil['status'];
         
         // Penyelia/Penguji/Admin diperbolehkan melihat LCP saat status 'Menunggu Verifikasi' untuk tujuan verifikasi & review teknis
@@ -1215,12 +1338,11 @@ class Pengujian extends MY_Controller
         ));
 
         $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
-        if ($can_preview_verification) {
+        if ($is_penyelia) {
             $allowed_statuses[] = 'Menunggu Verifikasi';
         }
-
         if (!in_array($status_uji, $allowed_statuses, TRUE)) {
-            $this->session->set_flashdata('pesan_gagal', 'Lembar Catatan Pengujian (LCP) hanya dapat diakses setelah pengujian selesai diisi atau siap diverifikasi oleh Penyelia.');
+            $this->session->set_flashdata('pesan_gagal', 'Lembar Catatan Pengujian (LCP) hanya dapat diakses setelah hasil pengujian selesai diisi atau siap diverifikasi.');
             redirect('pengujian/riwayat');
         }
 
@@ -1240,6 +1362,9 @@ class Pengujian extends MY_Controller
 
         // 2. Role Penyelia (role_id = 4)
         $verifier_id   = !empty($sesi['verifier_id']) ? $sesi['verifier_id'] : (!empty($hasil['verifier_id']) ? $hasil['verifier_id'] : null);
+        if (empty($verifier_id) && $is_penyelia) {
+            $verifier_id = $this->session->userdata('user_id');
+        }
         $verifier_info = $verifier_id ? $this->Model_Pengguna->ambil_by_id($verifier_id) : $this->db->get_where('users', ['role_id' => 4, 'status' => 'Aktif'])->row_array();
         if ($verifier_info && empty($verifier_id)) {
             $verifier_id = $verifier_info['id'];
@@ -1265,26 +1390,29 @@ class Pengujian extends MY_Controller
         // Saat status masih Menunggu Verifikasi (Penyelia sedang meninjau LCP), ketiadaan TTD penyelia belum memblokir preview
         $err_penyelia = ($status_uji === 'Menunggu Verifikasi') ? false : !$val_penyelia[0];
 
-        if ($err_penguji || $err_penyelia) {
-            if ($err_penguji && $err_penyelia) {
-                $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
-            } elseif ($err_penguji) {
-                $pesan_ttd = 'LCP belum dapat dibuka karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun penguji.';
-            } else {
-                $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+        // Khusus status selain Menunggu Verifikasi, lakukan validasi ketat TTD
+        if ($status_uji !== 'Menunggu Verifikasi') {
+            if ($err_penguji || $err_penyelia) {
+                if ($err_penguji && $err_penyelia) {
+                    $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji dan Penyelia belum tersedia atau tidak valid di profil akun masing-masing.';
+                } elseif ($err_penguji) {
+                    $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penguji belum tersedia atau tidak valid di profil akun.';
+                } else {
+                    $pesan_ttd = 'LCP final belum dapat diterbitkan karena Tanda Tangan Digital Penyelia belum tersedia atau tidak valid di profil akun.';
+                }
+
+                $this->catat_audit('LCP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
+                    'test_id'      => $test_id,
+                    'session_id'   => $session_id,
+                    'penguji_id'   => $penguji_id,
+                    'verifier_id'  => $verifier_id,
+                    'err_penguji'  => $err_penguji,
+                    'err_penyelia' => $err_penyelia
+                ));
+
+                $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
+                redirect('pengujian/riwayat');
             }
-
-            $this->catat_audit('LCP_SIGNATURE_GATE_BLOCKED', 'Pengujian', array(
-                'test_id'      => $test_id,
-                'session_id'   => $session_id,
-                'penguji_id'   => $penguji_id,
-                'verifier_id'  => $verifier_id,
-                'err_penguji'  => $err_penguji,
-                'err_penyelia' => $err_penyelia
-            ));
-
-            $this->session->set_flashdata('pesan_gagal', $pesan_ttd);
-            redirect('pengujian/riwayat');
         }
 
         // Jika form template adalah Cemaran Mikroba Kualitatif (MIK-04), gunakan view LCP presisi
@@ -2430,6 +2558,55 @@ class Pengujian extends MY_Controller
 
         $user_id = $this->session->userdata('user_id');
         $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id);
+
+        $this->muat_tampilan('pengujian/riwayat');
+    }
+
+    /**
+     * Historical Riwayat Pengujian Sampel Masing-Masing Role (Personal Log)
+     * Hanya menampilkan data sampel/sesi yang bersangkutan dengan user_id yang sedang login:
+     * - Penguji: sesi pengujian di mana ts.penguji_id = user_id
+     * - Penyelia: sesi pengujian di mana ts.verifier_id = user_id
+     * - Manajer Teknis: sesi pengujian di mana ts.approver_id = user_id
+     * - Admin TI: seluruh sesi personal atau sesi pengujian
+     */
+    public function riwayat_saya()
+    {
+        $role_id = (int)$this->session->userdata('role_id');
+        $user_id = (int)$this->session->userdata('user_id');
+
+        // Validasi hak akses (Penguji, Penyelia, MT, atau Admin)
+        $is_penguji  = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input');
+        $is_penyelia = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify');
+        $is_mt       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve');
+        $is_admin    = ($role_id === 1);
+
+        if (!$is_penguji && !$is_penyelia && !$is_mt && !$is_admin) {
+            $this->session->set_flashdata('pesan_gagal', 'Anda tidak memiliki hak akses untuk membuka Historical Pengujian.');
+            redirect('dasbor');
+            return;
+        }
+
+        $this->data['halaman_aktif'] = 'pengujian_riwayat_saya';
+
+        if ($is_penguji && !$is_penyelia && !$is_mt) {
+            $this->data['judul_halaman'] = 'Historical Riwayat Pengujian Saya (Penguji)';
+            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_riwayat_penguji_by_user($user_id);
+            $this->data['tipe_riwayat_saya'] = 'penguji';
+        } elseif ($is_penyelia && !$is_mt) {
+            $this->data['judul_halaman'] = 'Historical Riwayat Verifikasi Saya (Penyelia)';
+            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_riwayat_verifikasi_by_user($user_id);
+            $this->data['tipe_riwayat_saya'] = 'penyelia';
+        } elseif ($is_mt) {
+            $this->data['judul_halaman'] = 'Historical Riwayat Approval Saya (Manajer Teknis)';
+            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id);
+            $this->data['tipe_riwayat_saya'] = 'mt';
+        } else {
+            // Admin atau role superuser
+            $this->data['judul_halaman'] = 'Historical Riwayat Pengujian';
+            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_semua_hasil();
+            $this->data['tipe_riwayat_saya'] = 'all';
+        }
 
         $this->muat_tampilan('pengujian/riwayat');
     }

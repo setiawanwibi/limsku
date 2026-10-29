@@ -128,6 +128,33 @@
         vertical-align: middle;
         border-color: #f1f5f9;
     }
+
+    @media (max-width: 767.98px) {
+        .tinjauan-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 15px;
+            gap: 12px;
+        }
+        .tinjauan-header .d-flex.align-items-center {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 8px !important;
+        }
+        .tinjauan-header .btn {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .tinjauan-body {
+            padding: 15px;
+        }
+        .sesi-section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 14px;
+        }
+    }
 </style>
 
 <?php 

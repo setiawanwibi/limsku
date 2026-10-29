@@ -145,6 +145,9 @@ $route['pengujian/tolak_sampel/(:num)']       = 'pengujian/proses_penolakan_samp
 $route['pengujian/proses_approval/(:num)']    = 'pengujian/proses_approval/$1';
 $route['pengujian/lhu/(:num)']               = 'pengujian/lhu/$1';
 $route['pengujian/cetak_lhu/(:num)']         = 'pengujian/lhu/$1';
+$route['pengujian/riwayat_saya']            = 'pengujian/riwayat_saya';
+$route['pengujian/riwayat_verifikasi']      = 'pengujian/riwayat_verifikasi';
+$route['pengujian/riwayat_approval']        = 'pengujian/riwayat_approval';
 $route['pengujian/pdf_sampel/(:num)']         = 'pengujian/download_pdf_sampel/$1';
 $route['pengujian/pdf_sampel/(:num)/(:any)']  = 'pengujian/download_pdf_sampel/$1/$2';
 

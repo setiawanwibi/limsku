@@ -775,20 +775,24 @@
 
                         <?php endif; ?>
 
-                        <?php if (in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE)): ?>
+                        <?php 
+                            $boleh_lihat_cp = in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE) 
+                                || ($sesi['status'] === 'Menunggu Verifikasi' && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify'));
+                        ?>
+                        <?php if ($boleh_lihat_cp): ?>
                             <?php if (isset($sesi['jenis_pengujian']) && $sesi['jenis_pengujian'] === 'Kimia'): ?>
                                 <a href="<?php echo site_url('pengujian/cp_kimia/' . $sesi['id']); ?>"
                                    class="btn btn-info text-white"
                                    target="_blank">
                                     <i class="bi bi-journal-check me-1"></i>
-                                    Unduh CP Kimia
+                                    <?php echo ($sesi['status'] === 'Menunggu Verifikasi') ? 'Tinjau CP Kimia' : 'Unduh CP Kimia'; ?>
                                 </a>
                             <?php else: ?>
                                 <a href="<?php echo site_url('pengujian/cp_mikro/' . $sesi['id']); ?>"
                                    class="btn btn-info text-white"
                                    target="_blank">
                                     <i class="bi bi-journal-check me-1"></i>
-                                    Unduh CP Mikrobiologi
+                                    <?php echo ($sesi['status'] === 'Menunggu Verifikasi') ? 'Tinjau CP Mikrobiologi' : 'Unduh CP Mikrobiologi'; ?>
                                 </a>
                             <?php endif; ?>
                             <a href="#daftar-lcp"
@@ -947,9 +951,27 @@
                             </div>
 
                             <div class="detail-sesi-value">
-                                <?php echo html_escape($sesi['waktu_mulai'] ?: '-'); ?>
+                                <?php if (!empty($sesi['waktu_mulai'])): ?>
+                                    <i class="bi bi-calendar-event me-1 text-muted"></i><?php echo date('d/m/Y', strtotime($sesi['waktu_mulai'])); ?>
+                                    <span class="text-muted ms-1"><i class="bi bi-clock me-1"></i><?php echo date('H:i', strtotime($sesi['waktu_mulai'])); ?> WIB</span>
+                                <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                <?php endif; ?>
                             </div>
                         </div>
+
+                        <?php if (!empty($sesi['waktu_selesai'])): ?>
+                        <div class="detail-sesi-info-row">
+                            <div class="detail-sesi-label">
+                                Waktu Selesai
+                            </div>
+
+                            <div class="detail-sesi-value">
+                                <i class="bi bi-calendar-check me-1 text-success"></i><?php echo date('d/m/Y', strtotime($sesi['waktu_selesai'])); ?>
+                                <span class="text-muted ms-1"><i class="bi bi-clock me-1"></i><?php echo date('H:i', strtotime($sesi['waktu_selesai'])); ?> WIB</span>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                     </div>
                 </div>

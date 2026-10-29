@@ -291,6 +291,27 @@
         background: #e53e3e;
         color: #ffffff;
     }
+
+    @media (max-width: 767.98px) {
+        .reagent-list-page .reagent-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+        }
+        .reagent-list-page .reagent-header .d-flex.align-items-center {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 8px !important;
+        }
+        .btn-import-reagent, .btn-add-reagent {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .reagent-list-page .reagent-body {
+            padding: 16px;
+        }
+    }
 </style>
 
 <div class="reagent-list-page">

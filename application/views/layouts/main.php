@@ -33,6 +33,8 @@
 <div class="lims-wrapper">
     <!-- Sidebar -->
     <?php $this->load->view('partials/sidebar'); ?>
+    <!-- Sidebar Backdrop Overlay Mobile -->
+    <div id="lims-sidebar-backdrop" class="lims-sidebar-backdrop"></div>
 
     <!-- Page Content -->
     <div id="lims-content">
@@ -225,19 +227,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, true);
 
-    // Sidebar Toggle Handler
+    // Sidebar Toggle Handler (Desktop & Mobile Responsive)
     var toggleClose = document.getElementById('sidebar-toggle-close');
     var toggleOpen = document.getElementById('sidebar-toggle-open');
+    var sidebarBackdrop = document.getElementById('lims-sidebar-backdrop');
 
-    if (document.documentElement.classList.contains('sidebar-collapsed')) {
+    function isMobile() {
+        return window.innerWidth <= 991.98;
+    }
+
+    if (document.documentElement.classList.contains('sidebar-collapsed') && !isMobile()) {
         document.body.classList.add('sidebar-collapsed');
     }
 
-    function setSidebarState(collapsed) {
-        if (collapsed) {
-            document.body.classList.add('sidebar-collapsed');
-            document.documentElement.classList.add('sidebar-collapsed');
-            localStorage.setItem('limsku_sidebar_collapsed', 'true');
+    function openSidebar() {
+        if (isMobile()) {
+            document.body.classList.add('sidebar-open-mobile');
         } else {
             document.body.classList.remove('sidebar-collapsed');
             document.documentElement.classList.remove('sidebar-collapsed');
@@ -245,17 +250,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function closeSidebar() {
+        if (isMobile()) {
+            document.body.classList.remove('sidebar-open-mobile');
+        } else {
+            document.body.classList.add('sidebar-collapsed');
+            document.documentElement.classList.add('sidebar-collapsed');
+            localStorage.setItem('limsku_sidebar_collapsed', 'true');
+        }
+    }
+
     if (toggleClose) {
-        toggleClose.addEventListener('click', function() {
-            setSidebarState(true);
-        });
+        toggleClose.addEventListener('click', closeSidebar);
     }
 
     if (toggleOpen) {
-        toggleOpen.addEventListener('click', function() {
-            setSidebarState(false);
-        });
+        toggleOpen.addEventListener('click', openSidebar);
     }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Auto close sidebar di mobile saat navigasi menu diklik
+    var sidebarLinks = document.querySelectorAll('#lims-sidebar .components a');
+    sidebarLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            if (isMobile()) {
+                closeSidebar();
+            }
+        });
+    });
 });
 </script>
 </body>

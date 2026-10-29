@@ -237,6 +237,31 @@
             font-size: 0.78rem;
             color: #94a3b8;
         }
+
+        @media (max-width: 575.98px) {
+            .portal-nav {
+                padding: 10px 0;
+            }
+            .portal-brand-text h1 {
+                font-size: 1rem;
+            }
+            .portal-brand-text p {
+                display: none;
+            }
+            .portal-hero {
+                padding: 24px 0 16px;
+            }
+            .portal-hero h2 {
+                font-size: 1.35rem;
+            }
+            .portal-hero p {
+                font-size: 0.82rem;
+                padding: 0 10px;
+            }
+            .portal-card-body {
+                padding: 18px;
+            }
+        }
     </style>
 </head>
 <body>

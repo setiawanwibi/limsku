@@ -917,9 +917,23 @@
     <div class="riwayat-header">
 
         <div>
-            <p class="riwayat-description">
-                Melihat riwayat dan hasil pengujian sampel yang telah diproses.
-            </p>
+            <?php if (isset($halaman_aktif) && $halaman_aktif === 'pengujian_riwayat_saya'): ?>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-primary px-2 py-1" style="font-size: 0.72rem;">
+                        <i class="bi bi-person-badge me-1"></i> Data Personal
+                    </span>
+                    <span class="text-muted small fw-semibold">
+                        <?php echo html_escape($this->session->userdata('nama_lengkap') ?: $this->session->userdata('username')); ?>
+                    </span>
+                </div>
+                <p class="riwayat-description">
+                    Menampilkan riwayat pengujian sampel yang khusus ditugaskan dan diproses oleh Anda sendiri.
+                </p>
+            <?php else: ?>
+                <p class="riwayat-description">
+                    Melihat riwayat dan hasil pengujian sampel yang telah diproses.
+                </p>
+            <?php endif; ?>
         </div>
 
         <div class="d-flex align-items-center gap-2">
@@ -1095,6 +1109,10 @@
 
                             <th>
                                 Status
+                            </th>
+
+                            <th style="min-width: 130px;">
+                                Tanggal &amp; Waktu
                             </th>
 
                             <th
@@ -1426,6 +1444,40 @@
                                 </td>
 
 
+                                <!-- TANGGAL & WAKTU -->
+                                <?php
+                                    // Resolusi timestamp riwayat pengujian
+                                    $raw_time = !empty($h['waktu_approval'])
+                                        ? $h['waktu_approval']
+                                        : (!empty($h['waktu_verifikasi'])
+                                            ? $h['waktu_verifikasi']
+                                            : (!empty($h['waktu_selesai'])
+                                                ? $h['waktu_selesai']
+                                                : (!empty($h['waktu_mulai'])
+                                                    ? $h['waktu_mulai']
+                                                    : (!empty($h['updated_at'])
+                                                        ? $h['updated_at']
+                                                        : (!empty($h['created_at'])
+                                                            ? $h['created_at']
+                                                            : null)))));
+                                    $sort_timestamp = $raw_time ? strtotime($raw_time) : 0;
+                                ?>
+                                <td data-order="<?php echo $sort_timestamp; ?>">
+                                    <?php if ($raw_time): ?>
+                                        <div class="d-flex flex-column text-nowrap" style="font-size: 0.76rem; line-height: 1.35;">
+                                            <span class="fw-bold text-dark">
+                                                <i class="bi bi-calendar3 me-1 text-primary"></i><?php echo date('d/m/Y', strtotime($raw_time)); ?>
+                                            </span>
+                                            <span class="text-muted small" style="font-size: 0.68rem;">
+                                                <i class="bi bi-clock me-1 text-secondary"></i><?php echo date('H:i', strtotime($raw_time)); ?> WIB
+                                            </span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted small">-</span>
+                                    <?php endif; ?>
+                                </td>
+
+
                                 <!-- AKSI -->
 
                                 <td>
@@ -1433,8 +1485,14 @@
                                     <div class="riwayat-actions">
 
 
-                                        <?php if (isset($halaman_aktif) && $halaman_aktif === 'pengujian_riwayat_verifikasi'): ?>
-                                            <!-- RIWAYAT VERIFIKASI (PENYELIA): HANYA DETAIL, LCP, DAN CP (TANPA LHU & TANPA PDF) -->
+                                        <?php 
+                                            $is_single_session_table = (
+                                                (isset($halaman_aktif) && $halaman_aktif === 'pengujian_riwayat_verifikasi')
+                                                || (isset($halaman_aktif) && $halaman_aktif === 'pengujian_riwayat_saya' && isset($tipe_riwayat_saya) && in_array($tipe_riwayat_saya, array('penguji', 'penyelia'), true))
+                                            );
+                                        ?>
+                                        <?php if ($is_single_session_table): ?>
+                                            <!-- RIWAYAT PER SESI (PENGUJI / PENYELIA): DETAIL, LCP, DAN CP (SESUAI SESI) -->
                                             <a
                                                 href="<?php echo site_url('pengujian/detail_sesi/' . $h['id']); ?>"
                                                 class="
@@ -1498,7 +1556,7 @@
                                             <!-- RIWAYAT HASIL UJI & RIWAYAT APPROVAL (DIGABUNG PER KODE SAMPEL, TANPA PDF) -->
                                             <?php
                                                 $is_sample_row = (
-                                                    (isset($halaman_aktif) && in_array($halaman_aktif, ['pengujian_riwayat', 'pengujian_riwayat_approval'], true))
+                                                    (isset($halaman_aktif) && in_array($halaman_aktif, ['pengujian_riwayat', 'pengujian_riwayat_approval', 'pengujian_riwayat_saya'], true))
                                                     || (isset($h['sample_id']) && $h['id'] == $h['sample_id'])
                                                 );
                                                 $target_sample_id = !empty($h['sample_id']) ? $h['sample_id'] : $h['id'];
@@ -1833,7 +1891,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         table = $('#tabel-riwayat').DataTable({
 
-            order: [[0, 'asc']],
+            order: [[8, 'desc']],
 
             pageLength: 25,
 

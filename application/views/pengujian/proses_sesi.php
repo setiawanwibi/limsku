@@ -353,6 +353,44 @@
         transform: translateY(-1px);
     }
 
+    .proses-btn-draft {
+        border: 1px solid #0284c7;
+        background: #f0f9ff;
+        color: #0369a1;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, .08);
+    }
+
+    .proses-btn-draft:hover {
+        border-color: #0369a1;
+        background: #e0f2fe;
+        color: #0c4a6e;
+        transform: translateY(-1px);
+    }
+
+    .draft-save-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        color: #64748b;
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        padding: 5px 10px;
+        border-radius: 6px;
+    }
+
+    .draft-save-indicator.saving {
+        color: #0284c7;
+        border-color: #7dd3fc;
+        background: #f0f9ff;
+    }
+
+    .draft-save-indicator.saved {
+        color: #15803d;
+        border-color: #86efac;
+        background: #f0fdf4;
+    }
+
     /* Searchable Pickers (Alat & Reagen) */
     .searchable-picker-box {
         background: #ffffff;
@@ -468,6 +506,35 @@
         .info-item-grid {
             grid-template-columns: 1fr;
         }
+        .proses-sesi-header {
+            padding: 12px 14px;
+        }
+        .proses-sesi-header .d-flex.justify-content-between {
+            flex-direction: column !important;
+            gap: 10px;
+        }
+        .proses-sesi-badges {
+            justify-content: flex-start;
+        }
+        .proses-sesi-body {
+            padding: 14px;
+        }
+        .uji-form-head {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 6px;
+        }
+        .uji-form-method {
+            text-align: left;
+        }
+        .proses-sesi-actions {
+            flex-direction: column-reverse !important;
+            align-items: stretch !important;
+            gap: 8px;
+        }
+        .proses-sesi-actions .btn {
+            width: 100%;
+        }
     }
 </style>
 
@@ -516,6 +583,25 @@
                         <?php echo count($hasil_forms); ?> Form Uji
                     </span>
 
+                    <span class="draft-save-indicator" id="headerDraftIndicator" title="Data pengujian otomatis dicadangkan">
+                        <i class="bi bi-cloud-check text-primary"></i>
+                        <span id="headerDraftText">Tersedia Simpan Sementara</span>
+                    </span>
+
+                    <!-- Opsi Ganti Zat Aktif / Form Parameter Uji -->
+                    <?php 
+                        $first_za = !empty($hasil_forms[0]['nama_zat_aktif']) ? $hasil_forms[0]['nama_zat_aktif'] : '';
+                        $url_ganti_pilihan = site_url('pengujian/pilih_form/' . $sesi['sample_id'] . '?jenis=' . urlencode($sesi['jenis_pengujian']) . '&session_id=' . $sesi['id'] . '&zat_aktif=' . urlencode($first_za));
+                    ?>
+                    <a href="<?php echo $url_ganti_pilihan; ?>" 
+                       class="btn btn-sm btn-outline-primary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                       style="font-size: 0.72rem; font-weight: 600;"
+                       title="Ganti zat aktif atau ubah formulir parameter pengujian untuk sesi ini tanpa kehilangan data yang sudah diisi"
+                       onclick="return konfirmasiGantiZatAktif(this.href);">
+                        <i class="bi bi-arrow-left-right"></i>
+                        Ganti Zat Aktif / Parameter
+                    </a>
+
                 </div>
             </div>
         </div>
@@ -541,13 +627,15 @@
     <div class="proses-sesi-card">
         <div class="proses-sesi-body">
 
-            <form action="<?php echo site_url('pengujian/proses_sesi/' . $sesi['id']); ?>" method="post" enctype="multipart/form-data">
+            <form id="formProsesSesi" action="<?php echo site_url('pengujian/proses_sesi/' . $sesi['id']); ?>" method="post" enctype="multipart/form-data">
 
                 <input
                     type="hidden"
+                    id="limskuCsrfToken"
                     name="<?php echo $this->security->get_csrf_token_name(); ?>"
                     value="<?php echo $this->security->get_csrf_hash(); ?>"
                 >
+                <input type="hidden" name="aksi_simpan" id="inputAksiSimpan" value="submit">
 
                 <!-- Form Tabs Navigation -->
                 <div class="proses-sesi-tabs-wrap">
@@ -606,10 +694,30 @@
                                     </div>
 
                                     <div class="uji-form-method">
-                                        Parameter:
-                                        <strong class="text-primary">
-                                            <?php echo html_escape($f['parameter_uji'] ?: $f['nama_metode']); ?>
-                                        </strong>
+                                        <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap mb-1">
+                                            <span>Parameter: <strong class="text-primary"><?php echo html_escape($f['parameter_uji'] ?: $f['nama_metode']); ?></strong></span>
+                                            
+                                            <!-- Opsi Ganti Form LCP untuk Parameter Ini -->
+                                            <?php if (!empty($daftar_template_bidang)): ?>
+                                                <div class="d-inline-flex align-items-center gap-1 ms-2 p-1 bg-white rounded border" style="font-size: 0.72rem;">
+                                                    <label for="select_lcp_<?php echo $f['id']; ?>" class="text-secondary fw-semibold mb-0 text-nowrap">
+                                                        <i class="bi bi-file-earmark-ruled text-primary me-1"></i>Form LCP:
+                                                    </label>
+                                                    <select class="form-select form-select-sm py-0 ps-2 pe-4 border-0 bg-transparent fw-bold text-dark select-ganti-lcp-direct" 
+                                                            name="forms[<?php echo $f['id']; ?>][template_id]" 
+                                                            id="select_lcp_<?php echo $f['id']; ?>" 
+                                                            style="font-size: 0.74rem; width: auto; max-width: 250px; cursor: pointer;"
+                                                            title="Ganti Formulir LCP untuk parameter ini">
+                                                        <?php foreach ($daftar_template_bidang as $tpl_b): ?>
+                                                            <option value="<?php echo $tpl_b['id']; ?>" <?php echo ($f['template_id'] == $tpl_b['id']) ? 'selected' : ''; ?>>
+                                                                [<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
                                         <?php if (!empty($f['nama_zat_aktif'])): ?>
                                             <span class="d-block small text-muted">
                                                 Zat: <?php echo html_escape($f['nama_zat_aktif']); ?>
@@ -1246,17 +1354,32 @@
                         class="proses-btn proses-btn-cancel"
                     >
                         <i class="bi bi-arrow-left"></i>
-                        Batal
+                        Kembali ke Antrean
                     </a>
 
-                    <button
-                        type="submit"
-                        class="proses-btn proses-btn-submit"
-                        onclick="return confirm('Apakah Anda yakin ingin menyimpan seluruh hasil pengujian sesi ini dan meneruskannya ke Verifikasi Penyelia?');"
-                    >
-                        <i class="bi bi-check2-circle"></i>
-                        Simpan Seluruh Hasil Sesi &amp; Kirim Verifikasi
-                    </button>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                        <button
+                            type="button"
+                            id="btnSimpanSementara"
+                            class="proses-btn proses-btn-draft"
+                            title="Simpan progres pengisian saat ini ke database tanpa mengirim ke penyelia. Anda bisa melanjutkannya kapan saja."
+                        >
+                            <i class="bi bi-save2"></i>
+                            <span id="btnDraftText">Simpan Sementara (Draft)</span>
+                        </button>
+
+                        <button
+                            type="submit"
+                            id="btnKirimVerifikasi"
+                            class="proses-btn proses-btn-submit"
+                            onclick="return konfirmasiKirimVerifikasi();"
+                        >
+                            <i class="bi bi-check2-circle"></i>
+                            Simpan Seluruh Hasil Sesi &amp; Kirim Verifikasi
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -1468,6 +1591,18 @@
             updateReagenInfo(el); // trigger awal saat halaman dimuat
         });
 
+        // Helper untuk parse float yang aman dari koma (format Indonesia seperti 432,49) maupun titik
+        function parseNum(val) {
+            if (val === undefined || val === null) return 0;
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            var str = val.toString().trim();
+            if (!str) return 0;
+            // Ganti koma dengan titik jika koma dipakai sebagai pemisah desimal
+            str = str.replace(',', '.');
+            var num = parseFloat(str);
+            return isNaN(num) ? 0 : num;
+        }
+
         // =========================================================================
         // Auto-Calculator Engine untuk Formulir Keragaman Bobot (KIM-02)
         // Sesuai Formula Resmi Excel: POM-06.02/CFM.01/SOP.01/F.01A.02
@@ -1478,9 +1613,13 @@
             var etiketInput = document.querySelector('input[name*="[etiket]"]');
             var tahap2Select = document.querySelector('select[name*="[lakukan_tahap2]"]');
 
-            var G14 = bobotRataInput ? parseFloat(bobotRataInput.value) || 0 : 0; // Bobot rata-rata (mg)
-            var G15 = kadarHasilInput ? parseFloat(kadarHasilInput.value) || 0 : 0; // Kadar dari hasil uji (mg/tab)
-            var G16 = etiketInput ? parseFloat(etiketInput.value) || 0 : 0; // Etiket (mg/tab)
+            if (!bobotRataInput && !kadarHasilInput && !etiketInput) {
+                return; // Bukan form Keragaman Bobot
+            }
+
+            var G14 = bobotRataInput ? parseNum(bobotRataInput.value) : 0; // Bobot rata-rata (mg)
+            var G15 = kadarHasilInput ? parseNum(kadarHasilInput.value) : 0; // Kadar dari hasil uji (mg/tab)
+            var G16 = etiketInput ? parseNum(etiketInput.value) : 0; // Etiket (mg/tab)
             var isTahap2 = tahap2Select && tahap2Select.value === 'Ya';
 
             // 1. Hitung Baris Tahap 1 (n = 10)
@@ -1493,22 +1632,28 @@
                 var kadarMgEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_mg]"]');
                 var kadarPersenEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_persen]"]');
 
-                if (brutoEl && nettoEl) {
-                    var bruto = parseFloat(brutoEl.value) || 0;
-                    var cangkang = cangkangEl ? (parseFloat(cangkangEl.value) || 0) : 0;
-                    var netto = bruto > 0 ? (bruto - cangkang) : 0;
+                if (nettoEl) {
+                    var bruto = brutoEl ? parseNum(brutoEl.value) : 0;
+                    var cangkang = cangkangEl ? parseNum(cangkangEl.value) : 0;
+                    var netto = 0;
+
+                    if (bruto > 0) {
+                        netto = bruto - cangkang;
+                        nettoEl.value = netto.toFixed(2);
+                    } else if (nettoEl.value) {
+                        netto = parseNum(nettoEl.value);
+                    }
 
                     if (netto > 0) {
-                        nettoEl.value = netto.toFixed(2);
                         if (G14 > 0 && G15 > 0) {
-                            var kadarMg = (netto / G14) * G15; // H20
+                            var kadarMg = (netto / G14) * G15; // H20 = G20 / $G$14 * $G$15
                             if (kadarMgEl) kadarMgEl.value = kadarMg.toFixed(2);
 
-                            var kadarPersen = G16 > 0 ? (kadarMg / G16) * 100 : (netto / G14) * 100; // I20
+                            var kadarPersen = G16 > 0 ? (kadarMg / G16) * 100 : (netto / G14) * 100; // I20 = H20 / $G$16 * 100
                             if (kadarPersenEl) kadarPersenEl.value = kadarPersen.toFixed(2);
                             kadarPersenT1.push(kadarPersen);
-                        } else if (kadarPersenEl && parseFloat(kadarPersenEl.value)) {
-                            kadarPersenT1.push(parseFloat(kadarPersenEl.value));
+                        } else if (kadarPersenEl && parseNum(kadarPersenEl.value) > 0) {
+                            kadarPersenT1.push(parseNum(kadarPersenEl.value));
                         }
                     }
                 }
@@ -1536,29 +1681,37 @@
 
             // 2. Hitung Baris Tahap 2 (No. 11 - 30) jika diaktifkan
             var kadarPersenT2 = [];
-            for (var j = 0; j < 20; j++) {
-                var bruto2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][bruto]"]');
-                var cangkang2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][cangkang]"]');
-                var netto2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][netto]"]');
-                var kadarMg2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_mg]"]');
-                var kadarPersen2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_persen]"]');
+            if (isTahap2) {
+                for (var j = 0; j < 20; j++) {
+                    var bruto2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][bruto]"]');
+                    var cangkang2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][cangkang]"]');
+                    var netto2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][netto]"]');
+                    var kadarMg2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_mg]"]');
+                    var kadarPersen2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_persen]"]');
 
-                if (bruto2El && netto2El) {
-                    var bruto2 = parseFloat(bruto2El.value) || 0;
-                    var cangkang2 = cangkang2El ? (parseFloat(cangkang2El.value) || 0) : 0;
-                    var netto2 = bruto2 > 0 ? (bruto2 - cangkang2) : 0;
+                    if (netto2El) {
+                        var bruto2 = bruto2El ? parseNum(bruto2El.value) : 0;
+                        var cangkang2 = cangkang2El ? parseNum(cangkang2El.value) : 0;
+                        var netto2 = 0;
 
-                    if (netto2 > 0) {
-                        netto2El.value = netto2.toFixed(2);
-                        if (G14 > 0 && G15 > 0) {
-                            var kadarMg2 = (netto2 / G14) * G15;
-                            if (kadarMg2El) kadarMg2El.value = kadarMg2.toFixed(2);
+                        if (bruto2 > 0) {
+                            netto2 = bruto2 - cangkang2;
+                            netto2El.value = netto2.toFixed(2);
+                        } else if (netto2El.value) {
+                            netto2 = parseNum(netto2El.value);
+                        }
 
-                            var kadarPersen2 = G16 > 0 ? (kadarMg2 / G16) * 100 : (netto2 / G14) * 100;
-                            if (kadarPersen2El) kadarPersen2El.value = kadarPersen2.toFixed(2);
-                            kadarPersenT2.push(kadarPersen2);
-                        } else if (kadarPersen2El && parseFloat(kadarPersen2El.value)) {
-                            kadarPersenT2.push(parseFloat(kadarPersen2El.value));
+                        if (netto2 > 0) {
+                            if (G14 > 0 && G15 > 0) {
+                                var kadarMg2 = (netto2 / G14) * G15;
+                                if (kadarMg2El) kadarMg2El.value = kadarMg2.toFixed(2);
+
+                                var kadarPersen2 = G16 > 0 ? (kadarMg2 / G16) * 100 : (netto2 / G14) * 100;
+                                if (kadarPersen2El) kadarPersen2El.value = kadarPersen2.toFixed(2);
+                                kadarPersenT2.push(kadarPersen2);
+                            } else if (kadarPersen2El && parseNum(kadarPersen2El.value) > 0) {
+                                kadarPersenT2.push(parseNum(kadarPersen2El.value));
+                            }
                         }
                     }
                 }
@@ -1585,7 +1738,7 @@
             }
 
             // 3. Evaluasi Acceptance Value (AV)
-            // Rumus Farmakope Indonesia & Form BPOM:
+            // Rumus Farmakope Indonesia & Form BPOM POM-06.02/CFM.01/SOP.01/F.01A.02:
             // Jika n=10 => k = 2.4 | Jika n=30 => k = 2.0
             var finalMean = (isTahap2 && mean30 > 0) ? mean30 : meanT1;
             var finalSD = (isTahap2 && sd30 > 0) ? sd30 : sdT1;
@@ -1634,6 +1787,9 @@
                 hitungKeragamanBobot();
             }
         });
+
+        // Jalankan kalkulasi awal saat dokumen selesai dimuat
+        hitungKeragamanBobot();
 
         // =========================================================================
         // Auto-Calculator Engine untuk Formulir Keseragaman Kandungan (KIM-03)
@@ -2310,5 +2466,317 @@
                 hitungBobotJenis();
             }
         });
+
+        // =========================================================================
+        // FITUR SIMPAN SEMENTARA (DRAFT) & AUTO-SAVE PROGRES PENGUJIAN
+        // Menjaga data tidak hilang saat gangguan sinyal, timeout, atau jeda kerja
+        // =========================================================================
+        var formProses = document.getElementById('formProsesSesi');
+        var btnSimpanSementara = document.getElementById('btnSimpanSementara');
+        var btnDraftText = document.getElementById('btnDraftText');
+        var inputAksiSimpan = document.getElementById('inputAksiSimpan');
+        var headerDraftIndicator = document.getElementById('headerDraftIndicator');
+        var headerDraftText = document.getElementById('headerDraftText');
+        var autoSaveTimer = null;
+        var isSavingDraft = false;
+
+        function updateDraftIndicator(status, message) {
+            if (!headerDraftIndicator) return;
+            headerDraftIndicator.classList.remove('saving', 'saved');
+            if (status === 'saving') {
+                headerDraftIndicator.classList.add('saving');
+                headerDraftIndicator.innerHTML = '<span class="spinner-border spinner-border-sm text-primary" style="width:0.75rem;height:0.75rem;"></span> Menyimpan draft...';
+            } else if (status === 'saved') {
+                headerDraftIndicator.classList.add('saved');
+                headerDraftIndicator.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> ' + (message || 'Tersimpan sementara');
+            } else if (status === 'error') {
+                headerDraftIndicator.innerHTML = '<i class="bi bi-exclamation-triangle text-danger"></i> Gagal simpan draft';
+            }
+        }
+
+        function lakukanSimpanSementara(isAutoSave) {
+            if (isSavingDraft || !formProses) return;
+            isSavingDraft = true;
+
+            if (btnSimpanSementara && !isAutoSave) {
+                btnSimpanSementara.disabled = true;
+                btnDraftText.innerHTML = '<span class="spinner-border spinner-border-sm me-1" style="width:0.8rem;height:0.8rem;"></span> Menyimpan...';
+            }
+            updateDraftIndicator('saving');
+
+            function getCookie(name) {
+                var value = "; " + document.cookie;
+                var parts = value.split("; " + name + "=");
+                if (parts.length === 2) return parts.pop().split(";").shift();
+                return null;
+            }
+
+            var csrfCookieName = '<?php echo $this->config->item("csrf_cookie_name"); ?>';
+            var currentCsrf = getCookie(csrfCookieName);
+            var csrfInput = document.getElementById('limskuCsrfToken');
+            if (currentCsrf && csrfInput) {
+                csrfInput.value = currentCsrf;
+            }
+
+            var formData = new FormData(formProses);
+            formData.set('aksi_simpan', 'draft');
+            if (currentCsrf) {
+                formData.set('<?php echo $this->security->get_csrf_token_name(); ?>', currentCsrf);
+            }
+
+            fetch(formProses.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(function(res) {
+                if (!res.ok && res.status === 403) {
+                    throw new Error('CSRF_ERROR');
+                }
+                return res.json().catch(function() {
+                    return { status: res.ok ? 'success' : 'error' };
+                });
+            })
+            .then(function(data) {
+                isSavingDraft = false;
+                if (btnSimpanSementara && !isAutoSave) {
+                    btnSimpanSementara.disabled = false;
+                    btnDraftText.innerHTML = 'Simpan Sementara (Draft)';
+                }
+
+                if (data.csrf_hash && csrfInput) {
+                    csrfInput.value = data.csrf_hash;
+                }
+
+                if (data.status === 'success') {
+                    var waktuStr = data.waktu ? ('Tersimpan (' + data.waktu.split(' ')[1] + ' WIB)') : 'Tersimpan sementara';
+                    updateDraftIndicator('saved', waktuStr);
+                    if (!isAutoSave) {
+                        alert('Progres seluruh form pengujian berhasil disimpan sementara.\nData Anda aman dan dapat dilanjutkan kembali kapan saja di menu Antrean Pengujian.');
+                    }
+                } else {
+                    updateDraftIndicator('error');
+                    if (!isAutoSave) {
+                        alert('Gagal menyimpan sementara: ' + (data.message || 'Terjadi kesalahan sistem.'));
+                    }
+                }
+            })
+            .catch(function(err) {
+                isSavingDraft = false;
+                if (btnSimpanSementara && !isAutoSave) {
+                    btnSimpanSementara.disabled = false;
+                    btnDraftText.innerHTML = 'Simpan Sementara (Draft)';
+                }
+                updateDraftIndicator('error');
+                if (!isAutoSave) {
+                    if (err.message === 'CSRF_ERROR') {
+                        alert('Sesi keamanan CSRF kedaluwarsa. Halaman akan dimuat ulang untuk memperbarui token keamanan.');
+                        location.reload();
+                    } else {
+                        alert('Gagal menyimpan sementara. Periksa koneksi internet Anda atau coba beberapa saat lagi.');
+                    }
+                }
+            });
+        }
+
+        if (btnSimpanSementara) {
+            btnSimpanSementara.addEventListener('click', function(e) {
+                e.preventDefault();
+                lakukanSimpanSementara(false);
+            });
+        }
+
+        // Auto-save debounced saat penguji mengetik input form (setelah 2.5 detik idle)
+        formProses.addEventListener('input', function(e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                if (headerDraftText) {
+                    headerDraftText.textContent = 'Ada perubahan belum disimpan...';
+                    if (headerDraftIndicator) headerDraftIndicator.classList.remove('saved');
+                }
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(function() {
+                    lakukanSimpanSementara(true);
+                }, 2500);
+            }
+        });
+
+        // Trigger change pada instrumen alat / reagen juga memicu auto-save
+        formProses.addEventListener('change', function(e) {
+            if (e.target && (e.target.tagName === 'SELECT')) {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(function() {
+                    lakukanSimpanSementara(true);
+                }, 1500);
+            }
+        });
+
+        // Listener ketika analis langsung mengganti Form LCP pada kartu parameter
+        document.querySelectorAll('.select-ganti-lcp-direct').forEach(function(selectEl) {
+            selectEl.addEventListener('change', function() {
+                var newTplText = selectEl.options[selectEl.selectedIndex].text;
+                if (confirm('Anda memilih untuk mengganti Form LCP parameter ini ke "' + newTplText + '".\nSistem akan menyimpan sementara progres inputan Anda saat ini dan memuat formulir LCP yang baru. Lanjutkan?')) {
+                    // Simpan draft terlebih dahulu, lalu reload form untuk memuat skema template yang baru
+                    updateDraftIndicator('saving');
+                    var formData = new FormData(formProses);
+                    formData.set('aksi_simpan', 'draft');
+
+                    fetch(formProses.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    })
+                    .then(function() {
+                        location.reload();
+                    })
+                    .catch(function() {
+                        // Fallback submit form draft biasa
+                        inputAksiSimpan.value = 'draft';
+                        formProses.submit();
+                    });
+                } else {
+                    location.reload();
+                }
+            });
+        });
+
+        // =========================================================================
+        // EXCEL-LIKE KEYBOARD NAVIGATION & VALUE STEPPING PADA TABEL PENGUJIAN
+        // Memungkinkan analis navigasi Panah Atas/Bawah/Kiri/Kanan & Enter
+        // serta Shift+Panah Atas/Bawah untuk menaikkan/menurunkan angka secara cepat
+        // =========================================================================
+        function initExcelTableNavigation() {
+            document.addEventListener('keydown', function(e) {
+                var input = e.target;
+                if (!input || input.tagName !== 'INPUT') return;
+
+                // Hanya berlaku untuk input yang berada di dalam tabel (subtabel LCP)
+                var cell = input.closest('td, th');
+                var row = input.closest('tr');
+                var table = input.closest('table');
+                if (!cell || !row || !table) return;
+
+                var key = e.key;
+                var isArrowUp = (key === 'ArrowUp');
+                var isArrowDown = (key === 'ArrowDown');
+                var isArrowLeft = (key === 'ArrowLeft');
+                var isArrowRight = (key === 'ArrowRight');
+                var isEnter = (key === 'Enter');
+
+                if (!isArrowUp && !isArrowDown && !isArrowLeft && !isArrowRight && !isEnter) {
+                    return;
+                }
+
+                // 1. FITUR MENAIKKAN / MENURUNKAN NILAI ANGKA (Jika menekan Shift + Panah Atas/Bawah, ATAU input bertipe number)
+                var isNumericInput = input.type === 'number' || (!isNaN(parseFloat(input.value)) && isFinite(input.value)) || input.name.indexOf('[bobot') !== -1 || input.name.indexOf('[kadar') !== -1 || input.name.indexOf('[hasil') !== -1 || input.name.indexOf('[area') !== -1 || input.name.indexOf('[netto') !== -1 || input.name.indexOf('[bruto') !== -1;
+
+                if (e.shiftKey && (isArrowUp || isArrowDown) && isNumericInput) {
+                    e.preventDefault();
+                    var curVal = parseFloat(input.value.replace(',', '.')) || 0;
+                    var step = input.step ? parseFloat(input.step) : 1;
+                    if (input.value.indexOf('.') !== -1) {
+                        var decimals = input.value.split('.')[1].length;
+                        step = Math.pow(10, -decimals);
+                    }
+                    var newVal = isArrowUp ? (curVal + step) : (curVal - step);
+                    if (input.min && newVal < parseFloat(input.min)) newVal = parseFloat(input.min);
+                    if (input.max && newVal > parseFloat(input.max)) newVal = parseFloat(input.max);
+                    
+                    var decCount = (step.toString().split('.')[1] || '').length;
+                    input.value = newVal.toFixed(decCount > 0 ? decCount : 0);
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    return;
+                }
+
+                // 2. NAVIGASI EXCEL DENGAN PANAH KEYBOARD (Atas, Bawah, Kiri, Kanan, Enter)
+                // Cek posisi kursor untuk Kiri / Kanan agar tidak mengganggu pengeditan teks di tengah string
+                var atStart = (input.selectionStart === 0 && input.selectionEnd === 0);
+                var atEnd = (input.selectionStart === input.value.length && input.selectionEnd === input.value.length);
+
+                if (isArrowLeft && !atStart && input.type !== 'number') return;
+                if (isArrowRight && !atEnd && input.type !== 'number') return;
+
+                var allInputsInTable = Array.from(table.querySelectorAll('input:not([type="hidden"]):not([disabled]):not([readonly])'));
+                var curIndex = allInputsInTable.indexOf(input);
+                if (curIndex === -1) return;
+
+                // Cari baris dan kolom sel saat ini
+                var allRows = Array.from(table.querySelectorAll('tbody tr'));
+                var rowIndex = allRows.indexOf(row);
+                var cellsInRow = Array.from(row.querySelectorAll('td'));
+                var colIndex = cellsInRow.indexOf(cell);
+
+                var targetInput = null;
+
+                if (isArrowDown || isEnter) {
+                    e.preventDefault();
+                    // Pindah ke baris persis di bawahnya pada kolom yang sama (Excel style)
+                    if (rowIndex !== -1 && rowIndex + 1 < allRows.length) {
+                        var nextRow = allRows[rowIndex + 1];
+                        var nextCells = Array.from(nextRow.querySelectorAll('td'));
+                        if (nextCells[colIndex]) {
+                            targetInput = nextCells[colIndex].querySelector('input:not([type="hidden"]):not([disabled]):not([readonly])');
+                        }
+                    }
+                    // Jika tidak ada di kolom sama persis, gunakan input berikutnya secara sekuensial
+                    if (!targetInput && curIndex + 1 < allInputsInTable.length) {
+                        targetInput = allInputsInTable[curIndex + 1];
+                    }
+                } else if (isArrowUp) {
+                    e.preventDefault();
+                    // Pindah ke baris persis di atasnya pada kolom yang sama (Excel style)
+                    if (rowIndex > 0) {
+                        var prevRow = allRows[rowIndex - 1];
+                        var prevCells = Array.from(prevRow.querySelectorAll('td'));
+                        if (prevCells[colIndex]) {
+                            targetInput = prevCells[colIndex].querySelector('input:not([type="hidden"]):not([disabled]):not([readonly])');
+                        }
+                    }
+                    // Jika tidak ada di kolom sama persis, gunakan input sebelumnya secara sekuensial
+                    if (!targetInput && curIndex > 0) {
+                        targetInput = allInputsInTable[curIndex - 1];
+                    }
+                } else if (isArrowRight) {
+                    if (curIndex + 1 < allInputsInTable.length) {
+                        e.preventDefault();
+                        targetInput = allInputsInTable[curIndex + 1];
+                    }
+                } else if (isArrowLeft) {
+                    if (curIndex > 0) {
+                        e.preventDefault();
+                        targetInput = allInputsInTable[curIndex - 1];
+                    }
+                }
+
+                if (targetInput) {
+                    targetInput.focus();
+                    if (targetInput.select && typeof targetInput.select === 'function') {
+                        targetInput.select(); // Auto-select text saat mendarat di cell seperti Excel
+                    }
+                }
+            });
+        }
+
+        initExcelTableNavigation();
+
+        // Peringatkan penguji sebelum menutup tab jika masih ada perubahan belum tersimpan
+        window.addEventListener('beforeunload', function(e) {
+            if (isSavingDraft) {
+                e.preventDefault();
+                e.returnValue = 'Data pengujian sedang disimpan sementara, mohon tunggu beberapa detik.';
+            }
+        });
     });
+
+    function konfirmasiKirimVerifikasi() {
+        var inputAksiSimpan = document.getElementById('inputAksiSimpan');
+        if (inputAksiSimpan) inputAksiSimpan.value = 'submit';
+        return confirm('Apakah Anda yakin ingin menyimpan seluruh hasil pengujian sesi ini dan meneruskannya ke Verifikasi Penyelia?');
+    }
+
+    function konfirmasiGantiZatAktif(targetUrl) {
+        return confirm('Apakah Anda ingin mengganti pilihan Zat Aktif atau parameter pengujian untuk sesi ini?\n\nSemua data yang telah Anda isi pada parameter yang tetap dipilih akan tersimpan aman dan tidak akan hilang.');
+    }
 </script>

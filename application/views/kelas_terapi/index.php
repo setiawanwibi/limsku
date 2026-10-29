@@ -183,6 +183,22 @@
         background: #e53e3e;
         color: #ffffff;
     }
+
+    @media (max-width: 767.98px) {
+        .kt-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+        }
+        .btn-add-kt {
+            width: 100%;
+            justify-content: center;
+        }
+        .kt-body {
+            padding: 16px;
+        }
+    }
 </style>
 
 <div class="kt-list-page">

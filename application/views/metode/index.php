@@ -19,6 +19,27 @@
     .badge-lcp-unmapped { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
     .action-btn-group { display: inline-flex; gap: 5px; }
     .action-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; font-size: 0.82rem; border: 1px solid transparent; }
+
+    @media (max-width: 991.98px) {
+        .metode-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+        }
+        .metode-header .d-flex.align-items-center {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 8px !important;
+        }
+        .btn-import-excel, .btn-add-metode, .metode-header .btn {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .metode-body {
+            padding: 16px;
+        }
+    }
 </style>
 
 <div class="metode-page">

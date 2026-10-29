@@ -2,7 +2,7 @@
 
 <style>
     /* =========================================================
-       MONITORING & LAPORAN EKSEKUTIF LABORATORIUM (PREMIUM DESIGN)
+        EKSEKUTIF LABORATORIUM (PREMIUM DESIGN)
        Standar Visual ISO 17025 BBPOM Bandar Lampung
        ========================================================= */
 
@@ -390,6 +390,33 @@
 
     #tabel-monitoring_wrapper .dataTables_paginate {
         padding-top: 10px;
+    }
+
+    @media (max-width: 767.98px) {
+        .laporan-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .laporan-header .d-flex.align-items-center {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 8px !important;
+        }
+        .laporan-btn-export, .laporan-header .btn {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .chart-grid {
+            grid-template-columns: 1fr;
+        }
+        .filter-panel {
+            padding: 14px;
+        }
     }
 </style>
 
