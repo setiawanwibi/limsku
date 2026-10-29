@@ -918,7 +918,11 @@ class Model_Pengujian extends CI_Model
             GROUP_CONCAT(DISTINCT uv.nama_lengkap SEPARATOR "; ") as nama_verifier,
             ua.nama_lengkap as nama_approver,
             MAX(ts.waktu_approval) as waktu_approval,
-            "Approved / Final" as status,
+            (CASE 
+                WHEN SUM(CASE WHEN ts.status LIKE "%Ditolak%" THEN 1 ELSE 0 END) > 0 THEN "Ditolak"
+                WHEN SUM(CASE WHEN ts.status = "Approved / Final" THEN 1 ELSE 0 END) > 0 THEN "Approved / Final"
+                ELSE MAX(ts.status)
+            END) as status,
             COUNT(DISTINCT ts.id) as jumlah_sesi,
             COUNT(DISTINCT tr.id) as jumlah_form,
             GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") as kesimpulan,
