@@ -1359,23 +1359,29 @@ class Model_Pengujian extends CI_Model
             }
         }
 
-        // Hitung sesi yang siap diapprove MT dan sesi yang sedang bermasalah / pending
+        // Hitung sesi yang siap diapprove MT dan sesi yang sedang bermasalah / pending / belum selesai
         $jumlah_sesi_siap = 0;
         $ada_sesi_berjalan_atau_konflik = FALSE;
+        $ada_wajib_belum_selesai = FALSE;
 
         foreach ($status_per_jenis as $jenis => $info) {
             if ($info['status'] === 'Menunggu Approval' || $info['status'] === 'Approved / Final') {
                 $jumlah_sesi_siap++;
             } elseif ($info['status'] === 'SESI_GANDA_AMBIGU' || $info['status'] === 'Ditolak' || $info['status'] === 'Sedang Diuji' || $info['status'] === 'Menunggu Verifikasi') {
                 $ada_sesi_berjalan_atau_konflik = TRUE;
+                $ada_wajib_belum_selesai = TRUE;
+            } elseif ($info['status'] === 'BELUM_DIBUAT') {
+                // Sesi untuk bidang wajib ini (Kimia / Mikro) belum dibuat oleh analis
+                $ada_wajib_belum_selesai = TRUE;
             }
         }
 
         // Syarat Sampel Siap Ditinjau / Diapprove MT:
-        // 1. Terdapat minimal 1 sesi yang siap (status 'Menunggu Approval' atau 'Approved / Final').
-        // 2. Tidak ada sesi yang sedang konflik (SESI_GANDA_AMBIGU), ditolak, atau masih berjalan ('Sedang Diuji' / 'Menunggu Verifikasi').
-        // Ketiadaan sesi pada jenis pengujian lain ('BELUM_DIBUAT') tidak lagi memblokir approval, karena sampel bisa saja hanya diuji salah satu (Kimia saja atau Mikro saja).
-        if ($jumlah_sesi_siap > 0 && !$ada_sesi_berjalan_atau_konflik) {
+        // 1. Seluruh pengujian yang diwajibkan untuk sampel ini ($semua_wajib_terpenuhi === TRUE) harus sudah tuntas.
+        // 2. Setiap sesi pengujian wajib harus sudah berstatus 'Menunggu Approval' atau 'Approved / Final'.
+        // 3. Jika sampel wajib Kimia & Mikro, approval MT ditahan sampai kedua sesi selesai diverifikasi oleh Penyelia,
+        //    sehingga slot pengujian di bidang lainnya tidak hangus/hilang dari antrean penguji.
+        if ($semua_wajib_terpenuhi && $jumlah_sesi_siap > 0 && !$ada_sesi_berjalan_atau_konflik && !$ada_wajib_belum_selesai) {
             $jenis_siap = [];
             foreach ($status_per_jenis as $jenis => $info) {
                 if ($info['status'] === 'Menunggu Approval' || $info['status'] === 'Approved / Final') {
@@ -1386,7 +1392,7 @@ class Model_Pengujian extends CI_Model
             return [
                 'siap_mt'          => TRUE,
                 'status_agregat'   => 'SIAP_APPROVAL_MT',
-                'alasan'           => 'Sesi pengujian (' . implode(', ', $jenis_siap) . ') telah selesai dan disetujui Penyelia, siap ditinjau/diapprove Manajer Teknis',
+                'alasan'           => 'Seluruh sesi pengujian wajib (' . implode(', ', $jenis_siap) . ') telah selesai dan disetujui Penyelia, siap disahkan Manajer Teknis',
                 'is_ambigu'        => FALSE,
                 'wajib_kimia'      => $wajib_kimia,
                 'wajib_mikro'      => $wajib_mikro,
@@ -1398,7 +1404,7 @@ class Model_Pengujian extends CI_Model
         return [
             'siap_mt'          => FALSE,
             'status_agregat'   => 'BELUM_LENGKAP',
-            'alasan'           => 'Belum siap diajukan ke MT: ' . (!empty($alasan_kendala) ? implode('; ', $alasan_kendala) : 'Belum ada sesi pengujian yang berstatus Menunggu Approval'),
+            'alasan'           => 'Belum siap disahkan MT: ' . (!empty($alasan_kendala) ? implode('; ', $alasan_kendala) : 'Menunggu seluruh sesi pengujian wajib diselesaikan dan diverifikasi Penyelia'),
             'is_ambigu'        => FALSE,
             'wajib_kimia'      => $wajib_kimia,
             'wajib_mikro'      => $wajib_mikro,

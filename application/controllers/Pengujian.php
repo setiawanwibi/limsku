@@ -2566,50 +2566,28 @@ class Pengujian extends MY_Controller
     }
 
     /**
-     * Historical Riwayat Pengujian Sampel Masing-Masing Role (Personal Log)
-     * Hanya menampilkan data sampel/sesi yang bersangkutan dengan user_id yang sedang login:
+     * Historical Riwayat Pengujian Khusus Role Penguji (Personal Log)
+     * Hanya menampilkan data sesi pengujian yang dilakukan oleh Penguji yang sedang login:
      * - Penguji: sesi pengujian di mana ts.penguji_id = user_id
-     * - Penyelia: sesi pengujian di mana ts.verifier_id = user_id
-     * - Manajer Teknis: sesi pengujian di mana ts.approver_id = user_id
-     * - Admin TI: seluruh sesi personal atau sesi pengujian
      */
     public function riwayat_saya()
     {
         $role_id = (int)$this->session->userdata('role_id');
         $user_id = (int)$this->session->userdata('user_id');
 
-        // Validasi hak akses (Penguji, Penyelia, MT, atau Admin)
-        $is_penguji  = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input');
-        $is_penyelia = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify');
-        $is_mt       = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve');
-        $is_admin    = ($role_id === 1);
+        // Validasi hak akses: Khusus Penguji (role_id 3 atau permission pengujian_input murni)
+        $is_penguji  = ($role_id === 3) || ($this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input') && !$this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify') && !$this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve'));
 
-        if (!$is_penguji && !$is_penyelia && !$is_mt && !$is_admin) {
-            $this->session->set_flashdata('pesan_gagal', 'Anda tidak memiliki hak akses untuk membuka Historical Pengujian.');
+        if (!$is_penguji) {
+            $this->session->set_flashdata('pesan_gagal', 'Historical Pengujian Saya khusus hanya untuk akun Penguji.');
             redirect('dasbor');
             return;
         }
 
-        $this->data['halaman_aktif'] = 'pengujian_riwayat_saya';
-
-        if ($is_penguji && !$is_penyelia && !$is_mt) {
-            $this->data['judul_halaman'] = 'Historical Riwayat Pengujian Saya (Penguji)';
-            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_riwayat_penguji_by_user($user_id);
-            $this->data['tipe_riwayat_saya'] = 'penguji';
-        } elseif ($is_penyelia && !$is_mt) {
-            $this->data['judul_halaman'] = 'Historical Riwayat Verifikasi Saya (Penyelia)';
-            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_riwayat_verifikasi_by_user($user_id);
-            $this->data['tipe_riwayat_saya'] = 'penyelia';
-        } elseif ($is_mt) {
-            $this->data['judul_halaman'] = 'Historical Riwayat Approval Saya (Manajer Teknis)';
-            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id);
-            $this->data['tipe_riwayat_saya'] = 'mt';
-        } else {
-            // Admin atau role superuser
-            $this->data['judul_halaman'] = 'Historical Riwayat Pengujian';
-            $this->data['daftar_hasil']  = $this->Model_Pengujian->ambil_semua_hasil();
-            $this->data['tipe_riwayat_saya'] = 'all';
-        }
+        $this->data['halaman_aktif']      = 'pengujian_riwayat_saya';
+        $this->data['judul_halaman']      = 'Historical Riwayat Pengujian Saya';
+        $this->data['daftar_hasil']       = $this->Model_Pengujian->ambil_riwayat_penguji_by_user($user_id);
+        $this->data['tipe_riwayat_saya']  = 'penguji';
 
         $this->muat_tampilan('pengujian/riwayat');
     }
