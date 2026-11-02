@@ -177,7 +177,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
             padding: 3px 6px 4px 6px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             flex-grow: 1;
         }
 
@@ -223,7 +223,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
                 box-shadow: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 297mm !important;
+                
                 page-break-after: always !important;
                 page-break-inside: avoid !important;
             }
@@ -490,7 +490,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
             </div>
 
             <!-- TANDA TANGAN HALAMAN 1 -->
-            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 2px double #000; margin-top: auto;">
+            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 2px double #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
@@ -537,7 +537,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.18</td>
+                <td></td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 1 dari 2 halaman</td>
             </tr>
         </table>
@@ -857,7 +857,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
             </div>
 
             <!-- TANDA TANGAN HALAMAN 2 -->
-            <table class="excel-table" style="border-bottom: 2px double #000; margin-top: auto;">
+            <table class="excel-table" style="border-bottom: 2px double #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
@@ -904,11 +904,26 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.18</td>
+                <td></td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 2 dari 2 halaman</td>
             </tr>
         </table>
     </div>
 
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>

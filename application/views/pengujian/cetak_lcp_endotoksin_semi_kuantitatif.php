@@ -157,7 +157,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
             padding: 4px 7px 5px 7px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             flex-grow: 1;
         }
 
@@ -203,7 +203,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 box-shadow: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 297mm !important;
+                
                 page-break-after: always !important;
                 page-break-inside: avoid !important;
             }
@@ -396,7 +396,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
             </div>
 
             <!-- TTD HALAMAN 1 -->
-            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 1pt solid #000; margin-top: auto;">
+            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 1pt solid #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
@@ -443,7 +443,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.19</td>
+                <td></td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 1 dari 3 halaman</td>
             </tr>
         </table>
@@ -573,7 +573,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <?php echo !empty($p['skema_pengenceran_ksp']) ? nl2br(html_escape($p['skema_pengenceran_ksp'])) : '@ 0,9 mL Sampel (sesuai tingkat pengenceran) + @ 0,1 mL 20&lambda;'; ?>
             </div>
 
-            <div style="margin-top: auto;"></div>
+            <div style="margin-top: 10px;"></div>
 
         </div><!-- /.outer-border-box -->
 
@@ -584,7 +584,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.19</td>
+                <td></td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 2 dari 3 halaman</td>
             </tr>
         </table>
@@ -1011,7 +1011,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
             </div>
 
             <!-- TANDA TANGAN HALAMAN 3 -->
-            <table class="excel-table" style="border-bottom: 1pt solid #000; margin-top: auto;">
+            <table class="excel-table" style="border-bottom: 1pt solid #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
@@ -1058,11 +1058,26 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.19</td>
+                <td></td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 3 dari 3 halaman</td>
             </tr>
         </table>
     </div>
 
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>

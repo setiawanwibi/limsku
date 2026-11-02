@@ -170,7 +170,7 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
             padding: 3px 5px 3px 5px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             flex-grow: 1;
         }
 
@@ -216,7 +216,7 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: hidden !important;
+                overflow: visible !important;
                 background: none !important;
             }
             .no-print {
@@ -228,8 +228,8 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
                 box-shadow: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 297mm !important;
-                page-break-after: avoid !important;
+                
+                page-break-after: auto !important;
                 page-break-inside: avoid !important;
             }
         }
@@ -820,12 +820,27 @@ $tgl_pengamatan_koloni = !empty($p['tanggal_pengamatan'])
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 11pt;">
-                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.02</td>
+                <td></td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 1 dari 1 halaman</td>
             </tr>
         </table>
 
     </div><!-- /.document-wrapper -->
 
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>

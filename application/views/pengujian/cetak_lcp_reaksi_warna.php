@@ -175,7 +175,7 @@ if (!empty($p['foto_pengamatan'])) {
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: hidden !important;
+                overflow: visible !important;
                 background: none !important;
             }
             .no-print {
@@ -187,8 +187,8 @@ if (!empty($p['foto_pengamatan'])) {
                 box-shadow: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 297mm !important;
-                page-break-after: avoid !important;
+                
+                page-break-after: auto !important;
                 page-break-inside: avoid !important;
                 page-break-before: avoid !important;
             }
@@ -561,10 +561,23 @@ if (!empty($p['foto_pengamatan'])) {
                 <td style="font-size: 7.5pt; font-style: italic;">Ket: *Coret yang tidak perlu</td>
                 <td class="text-right" style="font-size: 7.5pt;">Lembar 1 dari 1 Halaman</td>
             </tr>
-            <tr>
-                <td colspan="2" style="font-size: 8pt; font-weight: bold; padding-top: 2px;">POM-06.02/CFM.01/SOP.01/F.01A.01</td>
-            </tr>
+            
         </table>
     </div>
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>

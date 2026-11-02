@@ -350,7 +350,7 @@ $bj_val = ($bobot_zat !== null && $bobot_air !== null && $bobot_air > 0) ? ($bob
     </table>
 
     <!-- TANDA TANGAN -->
-    <table style="width: 100%; border-collapse: collapse; margin-top: 40px; font-size: 8.5pt;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 8.5pt;">
         <tr>
             <td style="width: 50%; padding-left: 20px;">
                 Penguji :<br>
@@ -388,13 +388,26 @@ $bj_val = ($bobot_zat !== null && $bobot_air !== null && $bobot_air > 0) ? ($bob
                 <td style="font-style: italic;">Ket: *Coret yang tidak perlu</td>
                 <td style="text-align: right;">Lembar 1 dari 1 Halaman</td>
             </tr>
-            <tr>
-                <td colspan="2" style="font-weight: bold; padding-top: 2px;">POM-06.02/CFM.01/SOP.01/F.01A.28</td>
-            </tr>
+            
         </table>
     </div>
 
 </div>
 
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>

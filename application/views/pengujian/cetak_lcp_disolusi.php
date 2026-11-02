@@ -113,7 +113,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
         }
 
         table.lcp-table {
@@ -159,8 +159,8 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                 box-shadow: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 297mm !important;
-                page-break-after: avoid !important;
+                
+                page-break-after: auto !important;
             }
         }
     </style>
@@ -488,8 +488,8 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
             </div>
         </div>
 
-        <!-- Bagian Pengesahan & Dokumen Resmi Persis Excel -->
-        <div>
+        <!-- Bagian Pengesahan -->
+        <div style="margin-top: 8px;">
             <table class="lcp-table border-all" style="margin-bottom: 3px;">
                 <colgroup>
                     <col style="width: 50%;">
@@ -539,14 +539,25 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td style="width: 50%;">Ket: *Coret yang tidak perlu</td>
                     <td style="width: 50%; text-align: right;">Lembar 1 dari 1 Halaman</td>
                 </tr>
-                <tr>
-                    <td colspan="2" style="font-weight: bold; font-family: monospace; font-size: 6.8pt; color: #000; padding-top: 1px;">
-                        POM-06.02/CFM.01/SOP.01/F.01A.08
-                    </td>
-                </tr>
+                
             </table>
         </div>
     </div>
 
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>

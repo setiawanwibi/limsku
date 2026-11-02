@@ -1489,6 +1489,67 @@
 
                                             </div>
 
+                                            <!-- Kotak Upload Lampiran Hasil Alat Laboratorium -->
+                                            <?php
+                                                $cur_lampiran = !empty($data_hasil['lampiran_alat']) 
+                                                    ? $data_hasil['lampiran_alat'] 
+                                                    : (!empty($saved_param_values['lampiran_alat']) ? $saved_param_values['lampiran_alat'] : '');
+                                                $has_lampiran = !empty($cur_lampiran) && file_exists(FCPATH . $cur_lampiran);
+                                                $lampiran_ext = $has_lampiran ? strtolower(pathinfo($cur_lampiran, PATHINFO_EXTENSION)) : '';
+                                                $is_lampiran_pdf = ($lampiran_ext === 'pdf');
+                                            ?>
+                                            <div class="col-12 mt-3 pt-3 border-top">
+                                                <div class="p-3 bg-light rounded border">
+                                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                                        <label for="lampiran_alat_<?php echo $f['id']; ?>" class="form-label fw-bold mb-0 text-dark" style="font-size: 0.82rem;">
+                                                            <i class="bi bi-paperclip text-primary me-1"></i>Lampiran Hasil Alat Laboratorium (PDF, JPG, PNG)
+                                                        </label>
+                                                        <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                                            Otomatis Digabung ke Halaman Akhir LCP
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-muted small mb-2" style="font-size: 0.72rem; line-height: 1.4;">
+                                                        Unggah printout / scan hasil instrumen pengujian alat (contoh: kromatogram HPLC, spektrum Spektrofotometri, hasil dissolution tester, foto cawan petri, dsb). Berkas akan otomatis digabungkan pada halaman kosong terakhir cetak LCP.
+                                                    </p>
+                                                    <div class="row align-items-center g-2">
+                                                        <div class="col-md-7">
+                                                            <input
+                                                                type="file"
+                                                                class="form-control form-control-sm"
+                                                                id="lampiran_alat_<?php echo $f['id']; ?>"
+                                                                name="file_<?php echo $f['id']; ?>_lampiran_alat"
+                                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                            >
+                                                            <input
+                                                                type="hidden"
+                                                                name="forms[<?php echo $f['id']; ?>][hasil][lampiran_alat]"
+                                                                value="<?php echo html_escape($cur_lampiran); ?>"
+                                                            >
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <?php if ($has_lampiran): ?>
+                                                                <div class="d-flex align-items-center gap-2 p-1 px-2 bg-white rounded border">
+                                                                    <i class="bi <?php echo $is_lampiran_pdf ? 'bi-file-earmark-pdf text-danger' : 'bi-file-earmark-image text-success'; ?> fs-5"></i>
+                                                                    <div class="flex-grow-1 overflow-hidden" style="line-height: 1.2;">
+                                                                        <span class="d-block text-truncate fw-semibold text-dark" style="font-size: 0.72rem;" title="<?php echo html_escape(basename($cur_lampiran)); ?>">
+                                                                            <?php echo html_escape(basename($cur_lampiran)); ?>
+                                                                        </span>
+                                                                        <small class="text-success" style="font-size: 0.65rem;"><i class="bi bi-check-circle-fill me-1"></i>Tersimpan</small>
+                                                                    </div>
+                                                                    <a href="<?php echo base_url($cur_lampiran); ?>" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.7rem;" title="Lihat Berkas Lampiran">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </a>
+                                                                </div>
+                                                            <?php else: ?>
+                                                                <small class="text-muted fst-italic" style="font-size: 0.72rem;">
+                                                                    <i class="bi bi-info-circle me-1"></i>Belum ada lampiran diunggah.
+                                                                </small>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
 
                                     </div>
@@ -1889,7 +1950,14 @@
          */
         function safeHtml(str) {
             if (!str) return '';
-            return String(str)
+            // Unescape entitas lama jika sebelumnya tersimpan sebagai entity
+            var unescaped = String(str)
+                .replace(/&lt;/gi, '<')
+                .replace(/&gt;/gi, '>')
+                .replace(/&amp;/gi, '&')
+                .replace(/&quot;/gi, '"')
+                .replace(/&#039;/gi, "'");
+            return unescaped
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')

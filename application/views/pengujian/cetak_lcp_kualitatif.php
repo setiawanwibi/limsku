@@ -152,7 +152,7 @@ $ttd_approver_img = $resolve_ttd($signature_approver ?? null);
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: hidden !important;
+                overflow: visible !important;
                 background: none !important;
             }
             .no-print {
@@ -164,8 +164,8 @@ $ttd_approver_img = $resolve_ttd($signature_approver ?? null);
                 box-shadow: none !important;
                 width: 100% !important;
                 height: 100% !important;
-                max-height: 297mm !important;
-                page-break-after: avoid !important;
+                
+                page-break-after: auto !important;
                 page-break-inside: avoid !important;
                 page-break-before: avoid !important;
             }
@@ -1129,5 +1129,20 @@ $ttd_approver_img = $resolve_ttd($signature_approver ?? null);
             </tbody>
         </table>
     </div>
+    <?php
+    $lampiran_alat = $p['lampiran_alat'] ?? ($p['file_lampiran_alat'] ?? '');
+    if (!empty($lampiran_alat)) {
+        $this->load->view('pengujian/partials_lampiran_lcp', array(
+            'lampiran_alat'     => $lampiran_alat,
+            'sampel'            => $sampel,
+            'hasil'             => $hasil,
+            'penguji'           => $penguji,
+            'verifier'          => $verifier,
+            'ttd_penguji_img'   => $ttd_penguji_img ?? '',
+            'ttd_penyelia_img'  => $ttd_penyelia_img ?? '',
+            'status_sesi'       => $status_sesi ?? 'Draft'
+        ));
+    }
+    ?>
 </body>
 </html>
