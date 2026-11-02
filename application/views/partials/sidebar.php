@@ -9,7 +9,8 @@ $bisa_pengujian_antrean  = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pen
 $bisa_verifikasi         = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify');
 $bisa_approval           = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve');
 $bisa_laporan            = $this->Model_Hak_Akses->memiliki_akses($role_id, 'laporan_view');
-$bisa_riwayat_saya       = in_array((int)$role_id, array(1, 3, 4, 5), true) || $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input');
+// Historical Pengujian Saya khusus hanya untuk role Penguji
+$bisa_riwayat_saya       = ((int)$role_id === 3) || ($this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_input') && !$this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_verify') && !$this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_approve'));
 $bisa_monitoring_rekap   = in_array((int)$role_id, array(1, 4, 5), true); // Hanya Admin TI, Penyelia, dan Manajer Teknis
 
 $bisa_metode             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'metode_view');

@@ -73,16 +73,6 @@
         color: #7c3aed;
     }
 
-    .kpi-icon-rose {
-        background-color: #ffe4e6;
-        color: #e11d48;
-    }
-
-    .action-rose {
-        background-color: #ffe4e6;
-        color: #9f1239;
-    }
-
     .kpi-header-row {
         display: flex;
         align-items: center;
@@ -305,29 +295,6 @@
         70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
-
-    /* Media query dashboard mobile */
-    @media (max-width: 575.98px) {
-        .dash-greeting-title {
-            font-size: 1.25rem !important;
-            margin-bottom: 0.5rem;
-        }
-        .dash-card {
-            padding: 1rem;
-            border-radius: 10px;
-        }
-        .kpi-number-main {
-            font-size: 1.6rem;
-        }
-        .kpi-icon-box {
-            width: 32px;
-            height: 32px;
-            font-size: 0.95rem;
-        }
-        .section-card-title {
-            font-size: 0.88rem;
-        }
-    }
 </style>
 
 <div class="dashboard-container">
@@ -347,10 +314,10 @@
         </div>
     </div>
 
-    <!-- 5 KPI Cards Horizontal Grid -->
+    <!-- 4 KPI Cards Horizontal Grid -->
     <div class="row g-3 mb-4">
         <!-- Card 1: Sampel Diterima -->
-        <div class="col-12 col-sm-6 col-xl">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dash-card">
                 <div class="kpi-header-row">
                     <div class="kpi-icon-box kpi-icon-teal mb-0">
@@ -383,7 +350,7 @@
         </div>
 
         <!-- Card 2: Pengujian -->
-        <div class="col-12 col-sm-6 col-xl">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dash-card">
                 <div class="kpi-header-row">
                     <div class="kpi-icon-box kpi-icon-blue mb-0">
@@ -412,7 +379,7 @@
         </div>
 
         <!-- Card 3: Melewati SLA -->
-        <div class="col-12 col-sm-6 col-xl">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dash-card">
                 <div class="kpi-header-row">
                     <div class="kpi-icon-box kpi-icon-yellow mb-0">
@@ -438,7 +405,7 @@
         </div>
 
         <!-- Card 4: Perlu Tindakan -->
-        <div class="col-12 col-sm-6 col-xl">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="dash-card">
                 <div class="kpi-header-row">
                     <div class="kpi-icon-box kpi-icon-purple mb-0">
@@ -459,42 +426,6 @@
                     <div class="kpi-trend-text" style="color: #7c3aed;" id="kpi-tindakan-subtext">
                         <i class="bi bi-list-task"></i> Menunggu proses
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 5: Reagen Mendekati Kadaluarsa -->
-        <div class="col-12 col-sm-6 col-xl">
-            <div class="dash-card">
-                <div class="kpi-header-row">
-                    <div class="kpi-icon-box kpi-icon-rose mb-0">
-                        <i class="bi bi-shield-exclamation"></i>
-                    </div>
-                    <div>
-                        <h4 class="kpi-title">Reagen Kritis</h4>
-                        <p class="kpi-subtitle">Mendekati ED (&le; 60 hari)</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-baseline justify-content-between mt-2">
-                    <div>
-                        <div class="d-flex align-items-baseline gap-2">
-                            <span class="kpi-number-main text-danger" id="kpi-reagen-exp">
-                                <?php echo (int) ($ringkasan['reagen_kedaluwarsa']['mendekati_exp'] ?? 0); ?>
-                            </span>
-                            <span class="text-muted small">reagen</span>
-                        </div>
-                        <div class="kpi-trend-text" style="color: #e11d48;" id="kpi-reagen-subtext">
-                            <a href="<?php echo site_url('reagen'); ?>" class="text-decoration-none" style="color: #e11d48;">
-                                <i class="bi bi-arrow-right-circle"></i> Cek Master Reagen &rarr;
-                            </a>
-                        </div>
-                    </div>
-                    <?php if (!empty($ringkasan['reagen_kedaluwarsa']['exp_30_hari']) && $ringkasan['reagen_kedaluwarsa']['exp_30_hari'] > 0): ?>
-                        <div class="kpi-sub-badge" style="background: #ffe4e6;" title="Kadaluarsa dalam &le; 30 hari">
-                            <span class="sub-label" style="color: #9f1239;">&le; 30 Hari</span>
-                            <span class="sub-val" style="color: #e11d48;" id="kpi-reagen-exp-30"><?php echo (int) $ringkasan['reagen_kedaluwarsa']['exp_30_hari']; ?></span>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -605,12 +536,6 @@
                     <span>Approval</span>
                     <span class="action-badge-val" id="tindakan-approval"><?php echo (int) $ringkasan['pekerjaan_tindakan']['approval']; ?></span>
                 </div>
-
-                <!-- Reagen Mendekati ED -->
-                <a href="<?php echo site_url('reagen'); ?>" class="action-badge-item action-rose text-decoration-none" title="Lihat Master Reagen">
-                    <span>Reagen Kritis (&le;60h)</span>
-                    <span class="action-badge-val" id="tindakan-reagen-exp"><?php echo (int) ($ringkasan['reagen_kedaluwarsa']['mendekati_exp'] ?? 0); ?></span>
-                </a>
             </div>
         </div>
     </div>
@@ -833,15 +758,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     $('#kpi-pengujian-selesai').text(d.kpi.pengujian.selesai);
                     $('#kpi-melewati-sla').text(d.kpi.melewati_sla.jumlah);
                     $('#kpi-perlu-tindakan').text(d.kpi.perlu_tindakan.jumlah);
-
-                    // Update KPI Reagen Mendekati Kadaluarsa
-                    if (d.reagen_kedaluwarsa) {
-                        $('#kpi-reagen-exp').text(d.reagen_kedaluwarsa.mendekati_exp);
-                        if ($('#kpi-reagen-exp-30').length) {
-                            $('#kpi-reagen-exp-30').text(d.reagen_kedaluwarsa.exp_30_hari);
-                        }
-                        $('#tindakan-reagen-exp').text(d.reagen_kedaluwarsa.mendekati_exp);
-                    }
 
                     // Update Status Pekerjaan
                     $('#count-entry').text(d.status_pekerjaan.counts.entry);

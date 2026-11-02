@@ -1613,25 +1613,15 @@
                                             </td>
 
                                             <td class="pe-3 text-center text-nowrap">
-                                                <div class="d-inline-flex align-items-center gap-1">
-                                                    <a
-                                                        href="<?php echo site_url('pengujian/lcp_pdf/' . $form['id'] . '/inline'); ?>"
-                                                        class="btn-action-lcp"
-                                                        target="_blank"
-                                                        title="Lihat / Tinjau Lembar Catatan Pengujian (LCP) form ini"
-                                                    >
-                                                        <i class="bi bi-eye"></i>
-                                                        Lihat LCP
-                                                    </a>
-                                                    <a
-                                                        href="<?php echo site_url('pengujian/lcp_pdf/' . $form['id'] . '/download'); ?>"
-                                                        class="btn-action-lcp btn-action-lcp-download"
-                                                        target="_blank"
-                                                        title="Unduh Lembar Catatan Pengujian (LCP) form ini"
-                                                    >
-                                                        <i class="bi bi-download"></i>
-                                                    </a>
-                                                </div>
+                                                <a
+                                                    href="<?php echo site_url('pengujian/lcp_pdf/' . $form['id'] . '/inline'); ?>"
+                                                    class="btn-action-lcp"
+                                                    target="_blank"
+                                                    title="Lihat / Tinjau Lembar Catatan Pengujian (LCP) form ini"
+                                                >
+                                                    <i class="bi bi-eye"></i>
+                                                    Lihat LCP
+                                                </a>
                                             </td>
 
                                         </tr>

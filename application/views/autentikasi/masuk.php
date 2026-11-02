@@ -46,7 +46,7 @@
             flex: 1.15;
             position: relative;
             background: linear-gradient(135deg, rgba(8, 38, 57, 0.88) 0%, rgba(13, 59, 74, 0.82) 100%), 
-                        url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;
+                        url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;
             color: #ffffff;
             padding: 3.5rem 4rem;
             display: flex;
@@ -593,3 +593,4 @@
 
 </body>
 </html>
+

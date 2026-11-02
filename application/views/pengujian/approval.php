@@ -107,11 +107,14 @@
     .approval-table-wrap {
         border: 1px solid #e3eaee;
         border-radius: 8px;
-        overflow: hidden;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
         background: #fff;
     }
 
     .approval-table {
+        width: 100% !important;
+        min-width: 1100px;
         margin: 0;
         color: #536b79;
         font-size: .74rem;
@@ -963,7 +966,7 @@
                             <tr>
 
                                 <td
-                                    colspan="8"
+                                    colspan="9"
                                     class="approval-empty"
                                 >
 
