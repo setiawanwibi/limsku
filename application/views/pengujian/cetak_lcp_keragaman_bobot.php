@@ -247,7 +247,8 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                 </tr>
             </table>
 
-            <!-- Tabel Pengukuran Tahap 1 & Tahap 2 Bersebelahan Persis Excel -->
+            <?php if ($is_tahap2): ?>
+            <!-- Tabel Pengukuran Tahap 1 & Tahap 2 Bersebelahan Persis Excel (Jika Tahap 2 Diaktifkan) -->
             <table class="lcp-table" style="margin-bottom: 5px;">
                 <colgroup>
                     <col style="width: 48.5%;">
@@ -375,6 +376,63 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     </td>
                 </tr>
             </table>
+            <?php else: ?>
+            <!-- Tabel Pengukuran Tahap 1 Tunggal (Tahap 2 Tidak Dilakukan / Hasil Tahap 1 Memenuhi Syarat) -->
+            <table class="lcp-table border-all" style="margin-bottom: 5px; width: 100%;">
+                <colgroup>
+                    <col style="width: 8%;">
+                    <col style="width: 22%;">
+                    <col style="width: 22%;">
+                    <col style="width: 22%;">
+                    <col style="width: 13%;">
+                    <col style="width: 13%;">
+                </colgroup>
+                <thead>
+                    <tr class="bg-light-gray">
+                        <th class="border-all text-center fw-bold" colspan="4">Hasil Pengujian Tahap 1 (n = 10)</th>
+                        <th class="border-all text-center fw-bold" colspan="2">Tanggal Uji: <?php echo html_escape($p['tgl_uji_tahap1'] ?? ($p['tgl_uji'] ?? '')); ?></th>
+                    </tr>
+                    <tr class="bg-light-gray">
+                        <th rowspan="2" class="border-all text-center">No.</th>
+                        <th colspan="3" class="border-all text-center">Bobot (mg)</th>
+                        <th colspan="2" class="border-all text-center">Kadar</th>
+                    </tr>
+                    <tr class="bg-light-gray">
+                        <th class="border-all text-center">Bruto</th>
+                        <th class="border-all text-center">Cangkang</th>
+                        <th class="border-all text-center">NETTO</th>
+                        <th class="border-all text-center"><?php echo html_escape($satuan); ?></th>
+                        <th class="border-all text-center">%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php for ($i = 0; $i < 10; $i++): 
+                        $row = $tabel_t1[$i] ?? array();
+                    ?>
+                        <tr style="height: 18px;">
+                            <td class="border-all text-center"><?php echo ($i + 1); ?></td>
+                            <td class="border-all text-right" style="padding-right: 5px;"><?php echo html_escape($row['bruto'] ?? ''); ?></td>
+                            <td class="border-all text-right" style="padding-right: 5px;"><?php echo html_escape($row['cangkang'] ?? ''); ?></td>
+                            <td class="border-all text-right fw-bold" style="padding-right: 5px;"><?php echo html_escape($row['netto'] ?? ''); ?></td>
+                            <td class="border-all text-right" style="padding-right: 5px;"><?php echo html_escape($row['kadar_mg'] ?? ''); ?></td>
+                            <td class="border-all text-right" style="padding-right: 5px;"><?php echo html_escape($row['kadar_persen'] ?? ''); ?></td>
+                        </tr>
+                    <?php endfor; ?>
+                    <tr class="bg-light-gray">
+                        <td colspan="4" class="border-all fw-bold text-right" style="padding-right: 8px;">X<sub>rerata</sub> (Rata-rata Tahap 1)</td>
+                        <td colspan="2" class="border-all text-center fw-bold"><?php echo html_escape($p['x_rerata_tahap1'] ?? '-'); ?></td>
+                    </tr>
+                    <tr class="bg-light-gray">
+                        <td colspan="4" class="border-all fw-bold text-right" style="padding-right: 8px;">Standar Deviasi / SD (s)</td>
+                        <td colspan="2" class="border-all text-center fw-bold"><?php echo html_escape($p['sd_tahap1'] ?? '-'); ?></td>
+                    </tr>
+                    <tr class="bg-light-gray">
+                        <td colspan="4" class="border-all fw-bold text-right" style="padding-right: 8px;">Relatif Standar Deviasi / RSD (%)</td>
+                        <td colspan="2" class="border-all text-center fw-bold"><?php echo html_escape(!empty($p['rsd_tahap1']) ? $p['rsd_tahap1'] . ' %' : '-'); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            <?php endif; ?>
 
             <!-- Tabel Evaluasi Matriks AV Persis Formula Excel -->
             <table class="lcp-table border-all" style="margin-bottom: 5px;">

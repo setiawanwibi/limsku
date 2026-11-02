@@ -271,9 +271,9 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td class="border-l border-b" style="padding-left: 4px;">Pelarut / Blanko</td>
                     <td class="border-b">:</td>
                     <td class="border-r border-b"><?php echo html_escape($p['pelarut'] ?? '-'); ?> / <?php echo html_escape($p['blanko'] ?? '-'); ?></td>
-                    <td class="border-l border-b" style="padding-left: 4px;">Spektrum</td>
+                    <td class="border-l border-b" style="padding-left: 4px;">Faktor Koreksi BM</td>
                     <td class="border-b">:</td>
-                    <td class="border-r border-b">Terlampir</td>
+                    <td class="border-r border-b fw-bold"><?php echo html_escape(!empty($p['faktor_konversi_bm']) ? $p['faktor_konversi_bm'] : '1.0'); ?></td>
                 </tr>
             </table>
 
@@ -307,7 +307,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="border-all fw-bold">Baku Pembanding</td>
+                        <td class="border-all fw-bold"><?php echo html_escape(!empty($baku_row['nama_zat']) ? $baku_row['nama_zat'] : 'Baku Pembanding'); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($baku_row['wadah_zat'] ?? ''); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($baku_row['wadah_sisa'] ?? ''); ?></td>
                         <td class="border-all text-right fw-bold"><?php echo html_escape($baku_row['bobot_zat'] ?? ''); ?></td>
@@ -317,7 +317,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                         <td class="border-all text-right fw-bold"><?php echo html_escape($baku_row['serapan'] ?? ''); ?></td>
                     </tr>
                     <tr>
-                        <td class="border-all fw-bold">Zat Uji 1</td>
+                        <td class="border-all fw-bold"><?php echo html_escape(!empty($uji1_row['nama_zat']) ? $uji1_row['nama_zat'] : 'Zat Uji 1'); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($uji1_row['wadah_zat'] ?? ''); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($uji1_row['wadah_sisa'] ?? ''); ?></td>
                         <td class="border-all text-right fw-bold"><?php echo html_escape($uji1_row['bobot_zat'] ?? ''); ?></td>
@@ -327,7 +327,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                         <td class="border-all text-right fw-bold"><?php echo html_escape($uji1_row['serapan'] ?? ''); ?></td>
                     </tr>
                     <tr>
-                        <td class="border-all fw-bold">Zat Uji 2</td>
+                        <td class="border-all fw-bold"><?php echo html_escape(!empty($uji2_row['nama_zat']) ? $uji2_row['nama_zat'] : 'Zat Uji 2'); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($uji2_row['wadah_zat'] ?? ''); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($uji2_row['wadah_sisa'] ?? ''); ?></td>
                         <td class="border-all text-right fw-bold"><?php echo html_escape($uji2_row['bobot_zat'] ?? ''); ?></td>
@@ -341,7 +341,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
 
             <!-- Rumus Perhitungan & Sub-Perhitungan Uji 1 & Uji 2 Persis Excel -->
             <div style="font-weight: bold; margin-bottom: 2px;">
-                Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Bu &times; Fu/Fb &times; Br/Ke &times; Kb &times; 100%</span>
+                Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Bu &times; Fu/Fb &times; Br/Ke &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
             </div>
 
             <table class="lcp-table border-all" style="margin-bottom: 4px;">
@@ -358,6 +358,9 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                         <span class="fraction"><span><?php echo html_escape($uji1_row['faktor_pengenceran'] ?? 'Fu1'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
                         <span class="fraction"><span><?php echo html_escape($p['bobot_rata_rata_tablet'] ?? 'Br'); ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
                         <span><?php echo html_escape($p['kadar_baku_persen'] ?? 'Kb'); ?>%</span>
+                        <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>
+                            &times; <span>(<?php echo html_escape($p['faktor_konversi_bm']); ?>)</span>
+                        <?php endif; ?>
                     </td>
                     <td class="border-all text-right fw-bold" style="padding-right: 6px;">
                         = <?php echo html_escape($p['kadar_uji_1'] ?? '-'); ?> %
@@ -371,6 +374,9 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                         <span class="fraction"><span><?php echo html_escape($uji2_row['faktor_pengenceran'] ?? 'Fu2'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
                         <span class="fraction"><span><?php echo html_escape($p['bobot_rata_rata_tablet'] ?? 'Br'); ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
                         <span><?php echo html_escape($p['kadar_baku_persen'] ?? 'Kb'); ?>%</span>
+                        <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>
+                            &times; <span>(<?php echo html_escape($p['faktor_konversi_bm']); ?>)</span>
+                        <?php endif; ?>
                     </td>
                     <td class="border-all text-right fw-bold" style="padding-right: 6px;">
                         = <?php echo html_escape($p['kadar_uji_2'] ?? '-'); ?> %

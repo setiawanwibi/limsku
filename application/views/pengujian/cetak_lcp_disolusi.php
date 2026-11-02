@@ -14,8 +14,12 @@ if (isset($p['parameter_values']) && is_array($p['parameter_values'])) {
     $p = array_merge($p, $p['parameter_values']);
 }
 
-// Data tabel 6 bejana disolusi Tahap S1
+// Data tabel disolusi Tahap S1, S2, dan S3
 $tabel_s1 = isset($p['tabel_s1']) && is_array($p['tabel_s1']) ? $p['tabel_s1'] : array();
+$tabel_s2 = isset($p['tabel_s2']) && is_array($p['tabel_s2']) ? $p['tabel_s2'] : array();
+$tabel_s3 = isset($p['tabel_s3']) && is_array($p['tabel_s3']) ? $p['tabel_s3'] : array();
+$is_s2 = (!empty($p['lakukan_tahap_s2']) && $p['lakukan_tahap_s2'] === 'Ya');
+$is_s3 = (!empty($p['lakukan_tahap_s3']) && $p['lakukan_tahap_s3'] === 'Ya');
 
 // Helper resolve TTD digital
 $resolve_ttd = function($sig) {
@@ -264,13 +268,28 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td>:</td>
                     <td class="border-r"><?php echo html_escape($p['baku_pembanding'] ?? '-'); ?></td>
                 </tr>
+                <?php
+                    $raw_kb = floatval($p['kadar_baku'] ?? 100);
+                    $sp = floatval($p['susut_pengeringan'] ?? 0);
+                    $kb_calc = (100 - $sp) * ($raw_kb / 100);
+                    $kb_display = !empty($p['kadar_baku_terkoreksi']) ? $p['kadar_baku_terkoreksi'] : number_format($kb_calc, 2, '.', '');
+                    $bm_display = !empty($p['faktor_konversi_bm']) ? $p['faktor_konversi_bm'] : '1.0';
+                ?>
                 <tr>
-                    <td class="border-l border-b" style="padding-left: 4px;">Parameter Baku (Bb/Ab)</td>
-                    <td class="border-b">:</td>
-                    <td class="border-r border-b">Bb: <?php echo html_escape($p['bobot_baku_mg'] ?? '-'); ?> mg | Ab: <?php echo html_escape($p['hasil_ukur_baku_ab'] ?? '-'); ?></td>
+                    <td class="border-l" style="padding-left: 4px;">Parameter Baku (Bb/Ab)</td>
+                    <td>:</td>
+                    <td class="border-r">Bb: <?php echo html_escape($p['bobot_baku_mg'] ?? '-'); ?> mg | Ab: <?php echo html_escape($p['hasil_ukur_baku_ab'] ?? '-'); ?></td>
+                    <td class="border-l" style="padding-left: 4px;">Kadar Baku &amp; Kb</td>
+                    <td>:</td>
+                    <td class="border-r"><?php echo html_escape($p['kadar_baku'] ?? '100'); ?>% (SP: <?php echo html_escape($p['susut_pengeringan'] ?? '0'); ?>%) | <span class="fw-bold">Kb: <?php echo html_escape($kb_display); ?>%</span></td>
+                </tr>
+                <tr>
                     <td class="border-l border-b" style="padding-left: 4px;">Pengenceran (Fb/Fu)</td>
                     <td class="border-b">:</td>
                     <td class="border-r border-b">Fb: <?php echo html_escape($p['faktor_pengenceran_baku'] ?? '-'); ?> | Fu: <?php echo html_escape($p['faktor_pengenceran_uji'] ?? '-'); ?></td>
+                    <td class="border-l border-b" style="padding-left: 4px;">Koreksi BM (BM1/BM2)</td>
+                    <td class="border-b">:</td>
+                    <td class="border-r border-b fw-bold"><?php echo html_escape($bm_display); ?></td>
                 </tr>
             </table>
 
@@ -280,7 +299,145 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                 &nbsp;&nbsp;=&nbsp;&nbsp;<span style="color: #0284c7; font-weight: bold;"><?php echo html_escape($p['faktor_perkalian_fk'] ?? '-'); ?></span>
             </div>
 
-            <!-- Tabel Pengamatan Tahap S1 (6 Bejana) Persis Excel -->
+            <?php if ($is_s2): ?>
+            <!-- Tabel Pengamatan Tahap S1 & Tahap S2 Bersebelahan (Jika Tahap S2 Diaktifkan) -->
+            <table class="lcp-table" style="margin-bottom: 4px;">
+                <colgroup>
+                    <col style="width: 49%;">
+                    <col style="width: 2%;">
+                    <col style="width: 49%;">
+                </colgroup>
+                <tr>
+                    <!-- Kolom Kiri: Tahap S1 (Bejana 1 - 6) -->
+                    <td style="vertical-align: top; padding: 0;">
+                        <table class="lcp-table border-all">
+                            <colgroup>
+                                <col style="width: 26%;">
+                                <col style="width: 37%;">
+                                <col style="width: 37%;">
+                            </colgroup>
+                            <thead>
+                                <tr class="bg-light-gray" style="height: 18px;">
+                                    <th class="border-all text-center fw-bold">Tahap S1</th>
+                                    <th class="border-all text-center fw-bold">Au / Area</th>
+                                    <th class="border-all text-center fw-bold">% Dx</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php for ($v = 1; $v <= 6; $v++): 
+                                    $r_v = $tabel_s1[$v - 1] ?? array();
+                                ?>
+                                    <tr style="height: 15px;">
+                                        <td class="border-all text-center fw-bold">Bejana <?php echo $v; ?></td>
+                                        <td class="border-all text-right" style="padding-right: 6px;"><?php echo html_escape($r_v['pengukuran_au'] ?? ''); ?></td>
+                                        <td class="border-all text-right fw-bold" style="padding-right: 6px;"><?php echo html_escape($r_v['persen_terlarut'] ?? ''); ?> %</td>
+                                    </tr>
+                                <?php endfor; ?>
+                                <tr class="bg-light-gray" style="height: 16px;">
+                                    <td class="border-all fw-bold text-center">Rerata S1</td>
+                                    <td class="border-all text-center text-muted">-</td>
+                                    <td class="border-all text-right fw-bold" style="padding-right: 6px; color: #0284c7;"><?php echo html_escape($p['rata_rata_s1'] ?? '-'); ?> %</td>
+                                </tr>
+                                <tr class="bg-light-gray" style="height: 16px;">
+                                    <td class="border-all fw-bold text-center">Min S1</td>
+                                    <td class="border-all text-center text-muted">-</td>
+                                    <td class="border-all text-right fw-bold" style="padding-right: 6px; color: #e11d48;"><?php echo html_escape($p['nilai_minimum_s1'] ?? '-'); ?> %</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+
+                    <!-- Spacer -->
+                    <td></td>
+
+                    <!-- Kolom Kanan: Tahap S2 (Bejana 7 - 12) -->
+                    <td style="vertical-align: top; padding: 0;">
+                        <table class="lcp-table border-all">
+                            <colgroup>
+                                <col style="width: 26%;">
+                                <col style="width: 37%;">
+                                <col style="width: 37%;">
+                            </colgroup>
+                            <thead>
+                                <tr class="bg-light-gray" style="height: 18px;">
+                                    <th class="border-all text-center fw-bold">Tahap S2</th>
+                                    <th class="border-all text-center fw-bold">Au / Area</th>
+                                    <th class="border-all text-center fw-bold">% Dx</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php for ($s2_idx = 0; $s2_idx < 6; $s2_idx++): 
+                                    $r_s2 = $tabel_s2[$s2_idx] ?? array();
+                                ?>
+                                    <tr style="height: 15px;">
+                                        <td class="border-all text-center fw-bold">Bejana <?php echo ($s2_idx + 7); ?></td>
+                                        <td class="border-all text-right" style="padding-right: 6px;"><?php echo html_escape($r_s2['pengukuran_au'] ?? ''); ?></td>
+                                        <td class="border-all text-right fw-bold" style="padding-right: 6px;"><?php echo html_escape($r_s2['persen_terlarut'] ?? ''); ?> %</td>
+                                    </tr>
+                                <?php endfor; ?>
+                                <tr class="bg-light-gray" style="height: 16px;">
+                                    <td class="border-all fw-bold text-center">Rerata 12 Unit</td>
+                                    <td class="border-all text-center text-muted">-</td>
+                                    <td class="border-all text-right fw-bold" style="padding-right: 6px; color: #0284c7;"><?php echo html_escape($p['rata_rata_12_unit'] ?? '-'); ?> %</td>
+                                </tr>
+                                <tr class="bg-light-gray" style="height: 16px;">
+                                    <td class="border-all fw-bold text-center">Min 12 Unit</td>
+                                    <td class="border-all text-center text-muted">-</td>
+                                    <td class="border-all text-right fw-bold" style="padding-right: 6px; color: #e11d48;"><?php echo html_escape($p['nilai_minimum_12_unit'] ?? '-'); ?> %</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <?php if ($is_s3): ?>
+            <!-- Tabel Pengamatan Tahap S3 (Bejana 13 - 24) -->
+            <table class="lcp-table border-all" style="margin-bottom: 4px;">
+                <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 35%;">
+                    <col style="width: 35%;">
+                    <col style="width: 15%;">
+                </colgroup>
+                <thead>
+                    <tr class="bg-light-gray" style="height: 18px;">
+                        <th class="border-all text-center fw-bold" colspan="4">Tahap S3 (12 Bejana Tambahan: Bejana 13 – 24)</th>
+                    </tr>
+                    <tr class="bg-light-gray" style="height: 16px;">
+                        <th class="border-all text-center">Bejana</th>
+                        <th class="border-all text-center">Pengukuran (Au / Area)</th>
+                        <th class="border-all text-center">% Dx (Zat Aktif Terlarut)</th>
+                        <th class="border-all text-center">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php for ($s3_idx = 0; $s3_idx < 12; $s3_idx++): 
+                        $r_s3 = $tabel_s3[$s3_idx] ?? array();
+                    ?>
+                        <tr style="height: 14px;">
+                            <td class="border-all text-center fw-bold"><?php echo ($s3_idx + 13); ?></td>
+                            <td class="border-all text-right" style="padding-right: 15px;"><?php echo html_escape($r_s3['pengukuran_au'] ?? ''); ?></td>
+                            <td class="border-all text-right fw-bold" style="padding-right: 15px;"><?php echo html_escape($r_s3['persen_terlarut'] ?? ''); ?> %</td>
+                            <td class="border-all text-center text-muted">-</td>
+                        </tr>
+                    <?php endfor; ?>
+                    <tr class="bg-light-gray" style="height: 16px;">
+                        <td class="border-all fw-bold text-center" colspan="2">Rata-rata 24 Unit (S1 + S2 + S3)</td>
+                        <td class="border-all text-right fw-bold" style="padding-right: 15px; color: #0284c7;"><?php echo html_escape($p['rata_rata_24_unit'] ?? '-'); ?> %</td>
+                        <td class="border-all text-center text-muted">&ge; Q</td>
+                    </tr>
+                    <tr class="bg-light-gray" style="height: 16px;">
+                        <td class="border-all fw-bold text-center" colspan="2">Nilai Terendah 24 Unit</td>
+                        <td class="border-all text-right fw-bold" style="padding-right: 15px; color: #e11d48;"><?php echo html_escape($p['nilai_minimum_24_unit'] ?? '-'); ?> %</td>
+                        <td class="border-all text-center text-muted">&ge; Q - 25%</td>
+                    </tr>
+                </tbody>
+            </table>
+            <?php endif; ?>
+
+            <?php else: ?>
+            <!-- Tabel Pengamatan Tahap S1 Tunggal (6 Bejana) - Tahap S2 Tidak Diperlukan / Tahap S1 Memenuhi Syarat -->
             <table class="lcp-table border-all" style="margin-bottom: 4px;">
                 <colgroup>
                     <col style="width: 20%;">
@@ -316,6 +473,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     </tr>
                 </tbody>
             </table>
+            <?php endif; ?>
 
             <!-- Syarat, Pustaka & Kesimpulan Persis Excel -->
             <div style="font-size: 6.8pt; margin-bottom: 3px;">

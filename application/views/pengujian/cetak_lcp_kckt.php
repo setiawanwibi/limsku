@@ -296,7 +296,39 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
                 <?php if (($p['tipe_elusi'] ?? 'Isokratik') === 'Isokratik'): ?>
                     <?php echo html_escape($p['fase_gerak_isokratik'] ?? '-'); ?>
                 <?php else: ?>
-                    <?php echo nl2br(html_escape($p['gradient_komposisi'] ?? '-')); ?>
+                    <?php 
+                    $gradTable = !empty($tabel_gradient) ? $tabel_gradient : (!empty($p['tabel_gradient']) ? $p['tabel_gradient'] : null);
+                    if (!empty($gradTable) && is_array($gradTable)): 
+                    ?>
+                        <div style="margin-top: 3px;">
+                            <table class="table-bordered" style="width: 60%; font-size: 6.8pt; margin: 2px 0;">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu (menit)</th>
+                                        <th>Fase A (%)</th>
+                                        <th>Fase B (%)</th>
+                                        <th>Fase C (%)</th>
+                                        <th>Laju Alir (mL/menit)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($gradTable as $g): 
+                                        if (empty($g['waktu_menit']) && empty($g['fase_a']) && empty($g['fase_b'])) continue;
+                                    ?>
+                                    <tr>
+                                        <td class="text-center"><?php echo html_escape($g['waktu_menit'] ?? '-'); ?></td>
+                                        <td class="text-center"><?php echo html_escape($g['fase_a'] ?? '-'); ?></td>
+                                        <td class="text-center"><?php echo html_escape($g['fase_b'] ?? '-'); ?></td>
+                                        <td class="text-center"><?php echo html_escape(!empty($g['fase_c']) ? $g['fase_c'] : '-'); ?></td>
+                                        <td class="text-center"><?php echo html_escape(!empty($g['laju_alir']) ? $g['laju_alir'] : ($p['laju_aliran'] ?? '-')); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <?php echo nl2br(html_escape($p['gradient_komposisi'] ?? '-')); ?>
+                    <?php endif; ?>
                 <?php endif; ?>
             </td>
         </tr>
@@ -341,6 +373,15 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
                 Kurva Regresi: <em><?php echo html_escape($p['status_regresi'] ?? 'Terlampir'); ?></em>
             </td>
         </tr>
+        <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>
+        <tr>
+            <td>Faktor Koreksi BM/BR</td>
+            <td>:</td>
+            <td colspan="4">
+                <strong><?php echo html_escape($p['faktor_konversi_bm']); ?></strong> (BM1 / BM2)
+            </td>
+        </tr>
+        <?php endif; ?>
     </table>
 
     <!-- TABEL PENIMBANGAN & PENGUKURAN HPLC -->
@@ -368,13 +409,14 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
                 array('kategori' => 'Baku Pembanding'),
                 array('kategori' => 'Baku Internal'),
                 array('kategori' => 'Zat Uji Replikasi 1'),
-                array('kategori' => 'Zat Uji Replikasi 2'),
-                array('kategori' => 'Spiked Sample: Zat Uji'),
-                array('kategori' => 'Spiked Sample: Baku')
+                array('kategori' => 'Zat Uji Replikasi 2')
             );
 
             foreach ($rows as $r):
                 $kat = $r['kategori'] ?? '-';
+                // Hapus spiked sample jika ada di data lama
+                if (stripos($kat, 'spiked') !== false) continue;
+
                 $w_zat = isset($r['wadah_zat']) && is_numeric($r['wadah_zat']) ? number_format((float)$r['wadah_zat'], 4, '.', '') : '-';
                 $w_sisa = isset($r['wadah_sisa']) && is_numeric($r['wadah_sisa']) ? number_format((float)$r['wadah_sisa'], 4, '.', '') : '-';
                 
@@ -410,9 +452,9 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
     <!-- RUMUS DAN DETAIL PERHITUNGAN -->
     <div class="rumus-box">
         <strong>Rumus Perhitungan:</strong><br>
-        <code>Kadar Rata-rata = (Lu / Lb) &times; (Bb / Bu) &times; (Fu / Fb) &times; (Br / Ke) &times; Kb &times; 100%</code><br>
+        <code>Kadar Rata-rata = (Lu / Lb) &times; (Bb / Bu) &times; (Fu / Fb) &times; (Br / Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</code><br>
         <span style="font-size: 6.8pt; color: #555;">
-            Lu = Respon Puncak Uji | Lb = Respon Puncak Baku | Bb = Bobot Baku | Bu = Bobot Uji | Fu = Faktor Pengenceran Uji | Fb = Faktor Pengenceran Baku | Br = Bobot Rata-rata Tablet (<strong><?php echo html_escape($p['bobot_rata_tablet'] ?? '-'); ?> mg</strong>) | Ke = Klaim Etiket (<strong><?php echo html_escape($p['klaim_etiket'] ?? '-'); ?> mg</strong>) | Kb = Kadar Baku Terkoreksi (<strong><?php echo html_escape($p['baku_kadar_terkoreksi'] ?? '-'); ?>%</strong>)
+            Lu = Respon Puncak Uji | Lb = Respon Puncak Baku | Bb = Bobot Baku | Bu = Bobot Uji | Fu = Faktor Pengenceran Uji | Fb = Faktor Pengenceran Baku | Br = Bobot Rata-rata Tablet (<strong><?php echo html_escape($p['bobot_rata_tablet'] ?? '-'); ?> mg</strong>) | Ke = Klaim Etiket (<strong><?php echo html_escape($p['klaim_etiket'] ?? '-'); ?> mg</strong>) | Kb = Kadar Baku Terkoreksi (<strong><?php echo html_escape($p['baku_kadar_terkoreksi'] ?? '-'); ?>%</strong>)<?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?> | Faktor Koreksi BM/BR = <strong><?php echo html_escape($p['faktor_konversi_bm']); ?></strong><?php endif; ?>
         </span>
     </div>
 

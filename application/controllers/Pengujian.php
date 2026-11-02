@@ -506,11 +506,13 @@ class Pengujian extends MY_Controller
             }
         }
 
-        // Master Alat & Reagen aktif untuk dipilih pada LCP
+        // Master Alat, Reagen, dan Baku aktif untuk dipilih pada LCP
         $daftar_alat   = $this->Model_Alat->ambil_semua();
         $daftar_reagen = $this->Model_Reagen->ambil_aktif();
         $this->load->model('Model_Template');
+        $this->load->model('Model_Baku');
         $daftar_template_bidang = $this->Model_Template->ambil_aktif($sesi['jenis_pengujian']);
+        $daftar_baku   = $this->Model_Baku->ambil_semua();
 
         $this->data['halaman_aktif']          = 'pengujian_antrean';
         $this->data['judul_halaman']          = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
@@ -519,6 +521,7 @@ class Pengujian extends MY_Controller
         $this->data['hasil_forms']            = $forms;
         $this->data['daftar_alat']            = $daftar_alat;
         $this->data['daftar_reagen']          = $daftar_reagen;
+        $this->data['daftar_baku']            = $daftar_baku;
         $this->data['daftar_template_bidang'] = $daftar_template_bidang;
 
         $this->muat_tampilan('pengujian/proses_sesi');
