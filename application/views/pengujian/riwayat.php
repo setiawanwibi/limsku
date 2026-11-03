@@ -1506,12 +1506,13 @@
                                             </a>
 
                                             <a
-                                                href="<?php echo site_url('pengujian/detail_sesi/' . $h['id'] . '#daftar-lcp'); ?>"
+                                                href="<?php echo site_url('pengujian/lcp_sesi/' . $h['id']); ?>"
                                                 class="
                                                     riwayat-action-btn
                                                     riwayat-action-lcp
                                                 "
-                                                title="Lihat / Unduh Lembar Catatan Pengujian (LCP)"
+                                                title="Preview Lembar Catatan Pengujian (LCP)"
+                                                target="_blank"
                                             >
                                                 <i class="bi bi-file-earmark-ruled me-1"></i>
                                                 LCP
@@ -1624,12 +1625,12 @@
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.75rem;">
                                                         <li>
-                                                            <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/detail_sesi/' . $h['sesi_kimia_id'] . '#daftar-lcp'); ?>">
+                                                            <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/lcp_sesi/' . $h['sesi_kimia_id']); ?>" target="_blank">
                                                                 <i class="bi bi-file-earmark-ruled me-1 text-primary"></i> LCP Kimia (Sesi #<?php echo $h['sesi_kimia_id']; ?>)
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/detail_sesi/' . $h['sesi_mikro_id'] . '#daftar-lcp'); ?>">
+                                                            <a class="dropdown-item py-1" href="<?php echo site_url('pengujian/lcp_sesi/' . $h['sesi_mikro_id']); ?>" target="_blank">
                                                                 <i class="bi bi-file-earmark-ruled me-1 text-info"></i> LCP Mikro (Sesi #<?php echo $h['sesi_mikro_id']; ?>)
                                                             </a>
                                                         </li>
@@ -1640,9 +1641,10 @@
                                                     $lcp_sid = !empty($h['sesi_kimia_id']) ? $h['sesi_kimia_id'] : (!empty($h['sesi_mikro_id']) ? $h['sesi_mikro_id'] : (!empty($h['first_session_id']) ? $h['first_session_id'] : $h['id']));
                                                 ?>
                                                 <a
-                                                    href="<?php echo site_url('pengujian/detail_sesi/' . $lcp_sid . '#daftar-lcp'); ?>"
+                                                    href="<?php echo site_url('pengujian/lcp_sesi/' . $lcp_sid); ?>"
                                                     class="riwayat-action-btn riwayat-action-lcp"
-                                                    title="Lihat / Unduh Lembar Catatan Pengujian (LCP)"
+                                                    title="Preview Lembar Catatan Pengujian (LCP)"
+                                                    target="_blank"
                                                 >
                                                     <i class="bi bi-file-earmark-ruled me-1"></i> LCP
                                                 </a>

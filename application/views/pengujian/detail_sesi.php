@@ -795,12 +795,12 @@
                                     <?php echo ($sesi['status'] === 'Menunggu Verifikasi') ? 'Tinjau CP Mikrobiologi' : 'Unduh CP Mikrobiologi'; ?>
                                 </a>
                             <?php endif; ?>
-                            <a href="#daftar-lcp"
-                               class="btn btn-outline-primary">
-                                <i class="bi bi-file-earmark-ruled me-1"></i>
-                                Lembar LCP Form (<?php echo count($forms); ?>)
-                            </a>
                         <?php endif; ?>
+                        <a href="#daftar-lcp"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-file-earmark-ruled me-1"></i>
+                            Lembar LCP Form (<?php echo count($forms); ?>)
+                        </a>
 
                         <?php if ($sesi['penguji_id'] == $this->session->userdata('user_id') && $sesi['status'] === 'Ditolak'): ?>
 
@@ -1157,11 +1157,8 @@
 
                                 <td class="text-center text-nowrap">
                                     <?php 
-                                    $can_view_lcp = in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final'), TRUE) ||
-                                        ($sesi['status'] === 'Menunggu Verifikasi' && (
-                                            $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify') ||
-                                            $this->session->userdata('role_id') == 1
-                                        ));
+                                    $can_view_lcp = in_array($sesi['status'], array('Menunggu Approval', 'Approved / Final', 'Menunggu Verifikasi'), TRUE) ||
+                                        !empty($f['data_hasil']);
                                     ?>
                                     <?php if ($can_view_lcp): ?>
                                         <a href="<?php echo site_url('pengujian/lcp_pdf/' . $f['id']); ?>"
@@ -1169,11 +1166,11 @@
                                            title="Lihat / Tinjau Lembar Catatan Pengujian (LCP) Form Ini"
                                            target="_blank"
                                            style="font-size: 0.72rem;">
-                                            <i class="bi bi-file-earmark-ruled me-1"></i><?php echo ($sesi['status'] === 'Menunggu Verifikasi') ? 'Tinjau LCP' : 'Unduh LCP'; ?>
+                                            <i class="bi bi-file-earmark-ruled me-1"></i><?php echo in_array($sesi['status'], array('Approved / Final', 'Selesai'), TRUE) ? 'Unduh LCP' : 'Buka LCP'; ?>
                                         </a>
                                     <?php else: ?>
-                                        <span class="text-muted small" style="font-size: 0.68rem;" title="LCP tersedia setelah diverifikasi Penyelia">
-                                            <i class="bi bi-hourglass-split me-1"></i>Menunggu Verifikasi
+                                        <span class="text-muted small" style="font-size: 0.68rem;" title="LCP tersedia setelah form hasil pengujian diisi">
+                                            <i class="bi bi-dash-circle me-1"></i>Belum Diisi
                                         </span>
                                     <?php endif; ?>
                                 </td>

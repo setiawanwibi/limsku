@@ -1303,6 +1303,41 @@ class Pengujian extends MY_Controller
     }
 
     /**
+     * Preview LCP Sesi Pengujian Langsung
+     * Mengarahkan langsung ke LCP form pertama dari sesi pengujian tersebut.
+     *
+     * @param int $session_id
+     * @param string $mode 'inline' atau 'download'
+     */
+    public function lcp_sesi($session_id = NULL, $mode = 'inline')
+    {
+        $this->cek_hak_akses('laporan_view');
+
+        $session_id = (int)$session_id;
+        if ($session_id <= 0) {
+            show_404();
+        }
+
+        $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+        if (empty($forms)) {
+            $this->session->set_flashdata('pesan_gagal', 'Belum ada form LCP yang terdaftar pada sesi pengujian ini.');
+            redirect('pengujian/detail_sesi/' . $session_id);
+            return;
+        }
+
+        // Ambil form pertama (atau form yang sudah diisi/memiliki data)
+        $target_form = $forms[0];
+        foreach ($forms as $f) {
+            if (!empty($f['data_hasil'])) {
+                $target_form = $f;
+                break;
+            }
+        }
+
+        redirect('pengujian/lcp_pdf/' . $target_form['id'] . '/' . $mode);
+    }
+
+    /**
      * Preview / Unduh Lembar Catatan Pengujian (LCP) Form Spesifik PDF
      *
      * @param int $test_id
@@ -1331,18 +1366,14 @@ class Pengujian extends MY_Controller
         $sesi = $session_id > 0 ? $this->Model_Pengujian->ambil_sesi_by_id($session_id) : array();
 
         $is_penyelia = $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify');
-        $status_uji = !empty($sesi['status']) ? $sesi['status'] : $hasil['status'];
+        $is_penguji  = $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_input');
+        $is_admin    = ($this->session->userdata('role_id') == 1);
+        $status_uji  = !empty($sesi['status']) ? $sesi['status'] : $hasil['status'];
         
-        // Penyelia/Penguji/Admin diperbolehkan melihat LCP saat status 'Menunggu Verifikasi' untuk tujuan verifikasi & review teknis
-        $can_preview_verification = ($status_uji === 'Menunggu Verifikasi' && (
-            $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_verify') ||
-            $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_input') ||
-            $this->session->userdata('role_id') == 1
-        ));
-
-        $allowed_statuses = array('Menunggu Approval', 'Approved / Final');
-        if ($is_penyelia) {
-            $allowed_statuses[] = 'Menunggu Verifikasi';
+        // Penguji, Penyelia, dan Admin diperbolehkan melihat LCP saat status 'Menunggu Verifikasi' atau 'Sedang Diuji'
+        $allowed_statuses = array('Menunggu Approval', 'Approved / Final', 'Menunggu Verifikasi');
+        if ($is_penguji || $is_penyelia || $is_admin) {
+            $allowed_statuses[] = 'Sedang Diuji';
         }
         if (!in_array($status_uji, $allowed_statuses, TRUE)) {
             $this->session->set_flashdata('pesan_gagal', 'Lembar Catatan Pengujian (LCP) hanya dapat diakses setelah hasil pengujian selesai diisi atau siap diverifikasi.');
