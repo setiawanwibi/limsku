@@ -143,7 +143,7 @@ if ($rata_e === '' && is_numeric($e1) && is_numeric($e2) && is_numeric($e3) && i
 
         /* Outer Border Medium Solid sesuai Excel Template */
         .outer-border-box {
-            border: 1.75pt solid #000;
+            border: 1.5pt solid #000;
             padding: 4px 7px 5px 7px;
             display: flex;
             flex-direction: column;
@@ -494,7 +494,7 @@ if ($rata_e === '' && is_numeric($e1) && is_numeric($e2) && is_numeric($e3) && i
             </div>
 
             <!-- 8. TANDA TANGAN (BARIS 43-47 EXCEL) -->
-            <table class="excel-table" style="border-bottom: 2px double #000; margin-top: 10px;">
+            <table class="excel-table" style="border-bottom: 1pt solid #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">

@@ -1484,8 +1484,9 @@ class Pengujian extends MY_Controller
         $is_alt = (
             (!empty($hasil['kode_template']) && $hasil['kode_template'] === 'MIK-01') ||
             (!empty($hasil['nama_template']) && (
-                stripos($hasil['nama_template'], 'Lempeng') !== false || 
-                stripos($hasil['nama_template'], 'ALT') !== false
+                stripos($hasil['nama_template'], 'Angka Lempeng Total') !== false || 
+                stripos($hasil['nama_template'], 'ALT') !== false ||
+                (stripos($hasil['nama_template'], 'Lempeng') !== false && stripos($hasil['nama_template'], 'Potensi') === false)
             ))
         );
 

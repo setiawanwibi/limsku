@@ -173,7 +173,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
         }
 
         .outer-border-box {
-            border: 3px double #000;
+            border: 1.5pt solid #000;
             padding: 3px 6px 4px 6px;
             display: flex;
             flex-direction: column;
@@ -490,7 +490,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
             </div>
 
             <!-- TANDA TANGAN HALAMAN 1 -->
-            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 2px double #000; margin-top: 10px;">
+            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 1pt solid #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
@@ -857,7 +857,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
             </div>
 
             <!-- TANDA TANGAN HALAMAN 2 -->
-            <table class="excel-table" style="border-bottom: 2px double #000; margin-top: 10px;">
+            <table class="excel-table" style="border-bottom: 1pt solid #000; margin-top: 10px;">
                 <colgroup>
                     <col style="width: 50%;">
                     <col style="width: 50%;">
