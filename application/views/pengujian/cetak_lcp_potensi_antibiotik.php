@@ -537,7 +537,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td></td>
+                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.18</td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 1 dari 2 halaman</td>
             </tr>
         </table>
@@ -904,7 +904,7 @@ if ($kurva_r !== '' && is_numeric($kurva_r)) {
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td></td>
+                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.18</td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 2 dari 2 halaman</td>
             </tr>
         </table>

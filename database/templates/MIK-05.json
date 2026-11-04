@@ -3,7 +3,7 @@
     "nama_template": "Uji Endotoksin Bakteri Semi Kuantitatif",
     "kategori": "Mikrobiologi",
     "skema_form": {
-        "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01B.19",
+        "kode_dokumen": "POM-06.02\/CFM.01\/SOP.01\/F.01B.19",
         "judul": "ENDOTOKSIN BAKTERI SEMI KUANTITATIF",
         "kategori": "Mikrobiologi",
         "sections": [
@@ -21,27 +21,27 @@
                     },
                     {
                         "id": "mikropipet_1",
-                        "label": "No. ID / Tgl Kalibrasi Mikropipet 1",
+                        "label": "No. ID \/ Tgl Kalibrasi Mikropipet 1",
                         "type": "text",
-                        "placeholder": "Contoh: MP-01 / 15-01-2026 (100 uL)"
+                        "placeholder": "Contoh: MP-01 \/ 15-01-2026 (100 uL)"
                     },
                     {
                         "id": "mikropipet_2",
-                        "label": "No. ID / Tgl Kalibrasi Mikropipet 2",
+                        "label": "No. ID \/ Tgl Kalibrasi Mikropipet 2",
                         "type": "text",
-                        "placeholder": "Contoh: MP-02 / 15-01-2026 (1000 uL)"
+                        "placeholder": "Contoh: MP-02 \/ 15-01-2026 (1000 uL)"
                     },
                     {
                         "id": "oven_id",
-                        "label": "No. ID / Tgl Kalibrasi Oven",
+                        "label": "No. ID \/ Tgl Kalibrasi Oven",
                         "type": "text",
-                        "placeholder": "Contoh: OVN-01 / 10-02-2026"
+                        "placeholder": "Contoh: OVN-01 \/ 10-02-2026"
                     },
                     {
                         "id": "inkubator_id",
-                        "label": "No. ID / Tgl Kalibrasi Inkubator",
+                        "label": "No. ID \/ Tgl Kalibrasi Inkubator",
                         "type": "text",
-                        "placeholder": "Contoh: INK-01 / 12-02-2026"
+                        "placeholder": "Contoh: INK-01 \/ 12-02-2026"
                     },
                     {
                         "id": "depirogenasi_suhu",
@@ -64,21 +64,21 @@
                 "fields": [
                     {
                         "id": "nama_reagen",
-                        "label": "Nama Reagen LAL / TAL",
+                        "label": "Nama Reagen LAL \/ TAL",
                         "type": "text",
                         "placeholder": "Contoh: Limulus Amebocyte Lysate (LAL)"
                     },
                     {
                         "id": "lot_cse",
-                        "label": "No. Lot CSE / CoA / Kadaluarsa",
+                        "label": "No. Lot CSE \/ CoA \/ Kadaluarsa",
                         "type": "text",
-                        "placeholder": "No. Lot / No. CoA / Tgl Exp"
+                        "placeholder": "No. Lot \/ No. CoA \/ Tgl Exp"
                     },
                     {
                         "id": "lot_lal",
-                        "label": "No. Lot LAL/TAL / CoA / Kadaluarsa",
+                        "label": "No. Lot LAL\/TAL \/ CoA \/ Kadaluarsa",
                         "type": "text",
-                        "placeholder": "No. Lot / No. CoA / Tgl Exp"
+                        "placeholder": "No. Lot \/ No. CoA \/ Tgl Exp"
                     },
                     {
                         "id": "jenis_lisin",
@@ -92,24 +92,24 @@
                     },
                     {
                         "id": "potensi_cse",
-                        "label": "Potensi Endotoksin CSE (EU/mL)",
+                        "label": "Potensi Endotoksin CSE (EU\/mL)",
                         "type": "text",
                         "placeholder": "Contoh: 100"
                     },
                     {
                         "id": "kepekaan_lambda",
-                        "label": "Kepekaan Lisin (λ) (EU/mL)",
+                        "label": "Kepekaan Lisin (λ) (EU\/mL)",
                         "type": "text",
                         "placeholder": "Contoh: 0.03"
                     },
                     {
                         "id": "tgl_uji_konfirmasi",
-                        "label": "Tgl Uji Konfirmasi CSE / LAL-TAL",
+                        "label": "Tgl Uji Konfirmasi CSE \/ LAL-TAL",
                         "type": "date"
                     },
                     {
                         "id": "tgl_rekonstitusi",
-                        "label": "Tgl Rekonstitusi CSE / LAL-TAL",
+                        "label": "Tgl Rekonstitusi CSE \/ LAL-TAL",
                         "type": "date"
                     },
                     {
@@ -120,9 +120,15 @@
                     },
                     {
                         "id": "suhu_simpan_lal",
-                        "label": "Suhu Penyimpanan LAL/TAL (°C)",
+                        "label": "Suhu Penyimpanan LAL\/TAL (°C)",
                         "type": "text",
                         "default": "2 - 8"
+                    },
+                    {
+                        "id": "konversi_potensi_cse",
+                        "label": "Konversi Potensi CSE (= Potensi CSE \/ λ)",
+                        "type": "text",
+                        "placeholder": "Contoh: 3333.33 λ"
                     }
                 ]
             },
@@ -154,11 +160,11 @@
                         "label": "Satuan Batas Endotoksin",
                         "type": "select",
                         "options": [
-                            "EU/mL",
-                            "EU/mg",
-                            "EU/Dosis"
+                            "EU\/mL",
+                            "EU\/mg",
+                            "EU\/Dosis"
                         ],
-                        "default": "EU/mL"
+                        "default": "EU\/mL"
                     },
                     {
                         "id": "konsentrasi_larutan_sampel",
@@ -189,7 +195,7 @@
             {
                 "id": "inkubasi_dan_pengamatan",
                 "title": "Kondisi Inkubasi & Tabel Hasil Pengamatan",
-                "description": "Hasil pembentukan gel (+/-) pada LRW, Kontrol Positif (2λ, λ, 1/2λ, 1/4λ), KSP, dan Sampel.",
+                "description": "Hasil pembentukan gel (+\/-) pada LRW, Kontrol Positif (2λ, λ, 1\/2λ, 1\/4λ), KSP, dan Sampel.",
                 "fields": [
                     {
                         "id": "waktu_inkubasi",
@@ -205,7 +211,7 @@
                     },
                     {
                         "id": "hasil_lrw_1",
-                        "label": "Hasil LRW / WFI Duplo 1",
+                        "label": "Hasil LRW \/ WFI Duplo 1",
                         "type": "select",
                         "options": [
                             "-",
@@ -215,7 +221,7 @@
                     },
                     {
                         "id": "hasil_lrw_2",
-                        "label": "Hasil LRW / WFI Duplo 2",
+                        "label": "Hasil LRW \/ WFI Duplo 2",
                         "type": "select",
                         "options": [
                             "-",
@@ -265,7 +271,7 @@
                     },
                     {
                         "id": "hasil_kp_setengah_1",
-                        "label": "Kontrol Positif 1/2λ Duplo 1",
+                        "label": "Kontrol Positif 1\/2λ Duplo 1",
                         "type": "select",
                         "options": [
                             "+",
@@ -275,7 +281,7 @@
                     },
                     {
                         "id": "hasil_kp_setengah_2",
-                        "label": "Kontrol Positif 1/2λ Duplo 2",
+                        "label": "Kontrol Positif 1\/2λ Duplo 2",
                         "type": "select",
                         "options": [
                             "+",
@@ -285,7 +291,7 @@
                     },
                     {
                         "id": "hasil_kp_seperempat_1",
-                        "label": "Kontrol Positif 1/4λ Duplo 1",
+                        "label": "Kontrol Positif 1\/4λ Duplo 1",
                         "type": "select",
                         "options": [
                             "+",
@@ -295,7 +301,7 @@
                     },
                     {
                         "id": "hasil_kp_seperempat_2",
-                        "label": "Kontrol Positif 1/4λ Duplo 2",
+                        "label": "Kontrol Positif 1\/4λ Duplo 2",
                         "type": "select",
                         "options": [
                             "+",
@@ -304,16 +310,444 @@
                         "default": "-"
                     },
                     {
-                        "id": "tabel_pengamatan_ksp",
-                        "label": "Pengamatan KSP (Duplo)",
-                        "type": "textarea",
-                        "placeholder": "Hasil tiap tingkat pengenceran KSP (Neat, 1:2, dll)..."
+                        "id": "ksp_f1_neat",
+                        "label": "KSP f=1 Neat",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
                     },
                     {
-                        "id": "tabel_pengamatan_sampel",
-                        "label": "Pengamatan Sampel (Duplo)",
-                        "type": "textarea",
-                        "placeholder": "Hasil tiap tingkat pengenceran Sampel (Neat, 1:2, dll)..."
+                        "id": "ksp_f1_c1",
+                        "label": "KSP f=1 Pengenceran 1",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c2",
+                        "label": "KSP f=1 Pengenceran 2",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c3",
+                        "label": "KSP f=1 Pengenceran 3",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c4",
+                        "label": "KSP f=1 Pengenceran 4",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c5",
+                        "label": "KSP f=1 Pengenceran 5",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c6",
+                        "label": "KSP f=1 Pengenceran 6",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c7",
+                        "label": "KSP f=1 Pengenceran 7",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c8",
+                        "label": "KSP f=1 Pengenceran 8",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c9",
+                        "label": "KSP f=1 Pengenceran 9",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f1_c10",
+                        "label": "KSP f=1 Pengenceran 10",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_neat",
+                        "label": "KSP f=2 Neat",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c1",
+                        "label": "KSP f=2 Pengenceran 1",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c2",
+                        "label": "KSP f=2 Pengenceran 2",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c3",
+                        "label": "KSP f=2 Pengenceran 3",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c4",
+                        "label": "KSP f=2 Pengenceran 4",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c5",
+                        "label": "KSP f=2 Pengenceran 5",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c6",
+                        "label": "KSP f=2 Pengenceran 6",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c7",
+                        "label": "KSP f=2 Pengenceran 7",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c8",
+                        "label": "KSP f=2 Pengenceran 8",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c9",
+                        "label": "KSP f=2 Pengenceran 9",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "ksp_f2_c10",
+                        "label": "KSP f=2 Pengenceran 10",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "+"
+                    },
+                    {
+                        "id": "smp_f1_neat",
+                        "label": "Sampel f=1 Neat",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c1",
+                        "label": "Sampel f=1 Pengenceran 1",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c2",
+                        "label": "Sampel f=1 Pengenceran 2",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c3",
+                        "label": "Sampel f=1 Pengenceran 3",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c4",
+                        "label": "Sampel f=1 Pengenceran 4",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c5",
+                        "label": "Sampel f=1 Pengenceran 5",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c6",
+                        "label": "Sampel f=1 Pengenceran 6",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c7",
+                        "label": "Sampel f=1 Pengenceran 7",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c8",
+                        "label": "Sampel f=1 Pengenceran 8",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c9",
+                        "label": "Sampel f=1 Pengenceran 9",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f1_c10",
+                        "label": "Sampel f=1 Pengenceran 10",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_neat",
+                        "label": "Sampel f=2 Neat",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c1",
+                        "label": "Sampel f=2 Pengenceran 1",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c2",
+                        "label": "Sampel f=2 Pengenceran 2",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c3",
+                        "label": "Sampel f=2 Pengenceran 3",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c4",
+                        "label": "Sampel f=2 Pengenceran 4",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c5",
+                        "label": "Sampel f=2 Pengenceran 5",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c6",
+                        "label": "Sampel f=2 Pengenceran 6",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c7",
+                        "label": "Sampel f=2 Pengenceran 7",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c8",
+                        "label": "Sampel f=2 Pengenceran 8",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c9",
+                        "label": "Sampel f=2 Pengenceran 9",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
+                    },
+                    {
+                        "id": "smp_f2_c10",
+                        "label": "Sampel f=2 Pengenceran 10",
+                        "type": "select",
+                        "options": [
+                            "+",
+                            "-"
+                        ],
+                        "default": "-"
                     }
                 ]
             },
@@ -323,20 +757,56 @@
                 "description": "Perhitungan kadar endotoksin sampel uji, acuan pustaka, dan keputusan akhir.",
                 "fields": [
                     {
-                        "id": "kadar_endotoksin_eu_ml",
-                        "label": "Kadar Endotoksin Sampel Uji (< EU/mL)",
+                        "id": "kadar_endotoksin_f1",
+                        "label": "Kadar Endotoksin (E) f=1 (EU\/mL)",
                         "type": "text",
-                        "placeholder": "Contoh: < 0.03 atau < 0.2"
+                        "placeholder": "Contoh: 0.03"
                     },
                     {
-                        "id": "kadar_endotoksin_konversi",
-                        "label": "Kadar Endotoksin Terkonversi (jika bukan EU/mL)",
+                        "id": "kadar_endotoksin_f2",
+                        "label": "Kadar Endotoksin (E) f=2 (EU\/mL)",
                         "type": "text",
-                        "placeholder": "Hasil konversi sesuai dosis atau berat"
+                        "placeholder": "Contoh: 0.03"
+                    },
+                    {
+                        "id": "kadar_endotoksin_rata",
+                        "label": "Kadar Endotoksin (E) Rata-rata (EU\/mL)",
+                        "type": "text",
+                        "placeholder": "Rata-rata E f1 & f2"
+                    },
+                    {
+                        "id": "kadar_endotoksin_eu_ml",
+                        "label": "Kadar Endotoksin Sampel Uji (< EU\/mL)",
+                        "type": "text",
+                        "placeholder": "Contoh: < 0.03"
+                    },
+                    {
+                        "id": "konversi_e_val",
+                        "label": "Konversi: Nilai E (EU\/mL)",
+                        "type": "text",
+                        "placeholder": "Nilai E rata-rata"
+                    },
+                    {
+                        "id": "konversi_potensi_val",
+                        "label": "Konversi: Potensi Sampel",
+                        "type": "text",
+                        "placeholder": "Contoh: 500"
+                    },
+                    {
+                        "id": "satuan_potensi_sampel",
+                        "label": "Konversi: Satuan Potensi Sampel",
+                        "type": "text",
+                        "placeholder": "Contoh: mg\/mL atau Dosis"
+                    },
+                    {
+                        "id": "konversi_hasil_angka",
+                        "label": "Konversi: Hasil Terhitung (< Nilai)",
+                        "type": "text",
+                        "placeholder": "Hasil = E \/ Potensi Sampel"
                     },
                     {
                         "id": "pustaka_metode",
-                        "label": "Pustaka / Metode Acuan",
+                        "label": "Pustaka \/ Metode Acuan",
                         "type": "text",
                         "default": "Farmakope Indonesia VI Tahun 2020"
                     },
@@ -344,7 +814,7 @@
                         "id": "syarat_endotoksin",
                         "label": "Syarat Batas Endotoksin",
                         "type": "text",
-                        "placeholder": "Contoh: < 0.2 EU/mL"
+                        "placeholder": "Contoh: < 0.2 EU\/mL"
                     }
                 ]
             }

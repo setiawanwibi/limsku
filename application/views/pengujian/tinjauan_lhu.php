@@ -158,19 +158,31 @@
 </style>
 
 <?php 
-// Periksa apakah sampel atau salah satu sesi telah ditolak (baik oleh MT maupun Penyelia)
-$is_ditolak = ($sampel['status'] === 'Ditolak' || $sampel['status'] === 'Ditolak MT');
+// Klasifikasikan status sesi secara detail
+$sesi_menunggu_approval = [];
+$sesi_ditolak_list = [];
+$sesi_berjalan_list = [];
 $alasan_penolakan_list = [];
+
 if (!empty($sesi_list)) {
     foreach ($sesi_list as $s_item) {
-        if (in_array($s_item['status'], ['Ditolak', 'Ditolak MT', 'Ditolak Penyelia'], TRUE)) {
-            $is_ditolak = TRUE;
-        }
-        if (!empty($s_item['alasan_penolakan'])) {
-            $alasan_penolakan_list[] = $s_item['alasan_penolakan'];
+        $st = isset($s_item['status']) ? trim($s_item['status']) : '';
+        if (in_array($st, ['Ditolak', 'Ditolak MT', 'Ditolak Penyelia'], TRUE)) {
+            $sesi_ditolak_list[] = $s_item;
+            if (!empty($s_item['alasan_penolakan'])) {
+                $alasan_penolakan_list[] = '[' . $s_item['jenis_pengujian'] . '] ' . $s_item['alasan_penolakan'];
+            }
+        } elseif ($st === 'Menunggu Approval') {
+            $sesi_menunggu_approval[] = $s_item;
+        } else {
+            $sesi_berjalan_list[] = $s_item;
         }
     }
 }
+
+$is_ditolak = ($sampel['status'] === 'Ditolak' || $sampel['status'] === 'Ditolak MT' || !empty($sesi_ditolak_list));
+$ada_sesi_siap = !empty($sesi_menunggu_approval);
+$ada_sesi_ditolak = !empty($sesi_ditolak_list);
 ?>
 
 <div class="tinjauan-lhu-page">
@@ -236,7 +248,24 @@ if (!empty($sesi_list)) {
         <div class="tinjauan-body">
 
             <!-- Banner Status Kesiapan -->
-            <?php if ($is_ditolak): ?>
+            <?php if ($ada_sesi_ditolak && $ada_sesi_siap): ?>
+                <div class="alert alert-warning border border-warning-subtle d-flex align-items-start mb-4 p-3 rounded" role="alert" style="background: #fffbeb;">
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-3 me-3 flex-shrink-0 mt-1"></i>
+                    <div>
+                        <strong class="text-dark fs-6">Sebagian Sesi Pengujian Masih Memerlukan Perbaikan</strong>
+                        <p class="small text-muted mb-2 mt-1">
+                            Sampel ini memerlukan pengujian gabungan (Kimia & Mikrobiologi). Sesi 
+                            <strong><?php echo implode(', ', array_map(function($s){ return $s['jenis_pengujian']; }, $sesi_menunggu_approval)); ?></strong> 
+                            telah selesai diverifikasi Penyelia, namun sesi 
+                            <strong class="text-danger"><?php echo implode(', ', array_map(function($s){ return $s['jenis_pengujian']; }, $sesi_ditolak_list)); ?></strong> 
+                            saat ini masih berstatus <strong>Ditolak</strong> dan sedang dalam proses revisi oleh analis/penyelia.
+                        </p>
+                        <div class="badge bg-danger-subtle text-danger border border-danger-subtle small px-2 py-1">
+                            <i class="bi bi-lock-fill me-1"></i> Pengesahan LHU MT ditangguhkan hingga seluruh sesi wajib selesai diverifikasi Penyelia
+                        </div>
+                    </div>
+                </div>
+            <?php elseif ($is_ditolak): ?>
                 <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
                     <i class="bi bi-x-circle-fill text-danger fs-4 me-3"></i>
                     <div>
@@ -501,13 +530,25 @@ if (!empty($sesi_list)) {
                                             <div><strong>Jumlah Form:</strong> <?php echo count(!empty($sesi['forms']) ? $sesi['forms'] : []); ?> form LCP</div>
                                         </div>
 
-                                        <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                                        <div class="d-flex align-items-center justify-content-between pt-2 border-top flex-wrap gap-2">
                                             <span class="text-muted small">
                                                 <?php echo !empty($sesi['kode_sesi']) ? html_escape($sesi['kode_sesi']) : 'SESI-' . $sesi['id']; ?>
                                             </span>
-                                            <a href="<?php echo site_url('pengujian/detail_sesi/' . $sesi['id']); ?>" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
-                                                <i class="bi bi-box-arrow-up-right me-1"></i>Detail Sesi & CP
-                                            </a>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <a href="<?php echo site_url('pengujian/detail_sesi/' . $sesi['id']); ?>" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
+                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Detail Sesi & CP
+                                                </a>
+                                                <?php if (!empty($is_mt) && $sesi['status'] === 'Menunggu Approval'): ?>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger py-0 px-2 btn-tolak-spesifik"
+                                                            style="font-size: 0.75rem;"
+                                                            data-sesi-id="<?php echo $sesi['id']; ?>"
+                                                            data-sesi-jenis="<?php echo html_escape($sesi['jenis_pengujian']); ?>"
+                                                            title="Tolak hanya pengujian <?php echo html_escape($sesi['jenis_pengujian']); ?>">
+                                                        <i class="bi bi-x-circle me-1"></i>Tolak <?php echo html_escape($sesi['jenis_pengujian']); ?>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -565,18 +606,29 @@ if (!empty($sesi_list)) {
                             </div>
                         </div>
                     <?php elseif ($is_ditolak): ?>
-                        <div class="p-3 rounded border border-danger-subtle" style="background: #fef2f2;">
+                        <div class="p-3 rounded border <?php echo ($ada_sesi_siap) ? 'border-warning-subtle' : 'border-danger-subtle'; ?>" style="<?php echo ($ada_sesi_siap) ? 'background: #fffdf5;' : 'background: #fef2f2;'; ?>">
                             <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
                                 <div>
-                                    <div class="text-danger fw-bold mb-1">
-                                        <i class="bi bi-x-circle-fill me-1 fs-6"></i>
-                                        Pengujian Sampel Telah Ditolak
-                                    </div>
-                                    <p class="text-muted small mb-2">
-                                        Sampel ini telah ditolak oleh Manajer Teknis / Penyelia dan telah dikembalikan ke analis/penyelia terkait untuk dilakukan perbaikan atau pengujian ulang. Tidak ada tindakan persetujuan lebih lanjut yang dapat dilakukan saat ini.
-                                    </p>
+                                    <?php if ($ada_sesi_siap): ?>
+                                        <div class="text-warning-emphasis fw-bold mb-1">
+                                            <i class="bi bi-hourglass-split me-1 fs-6"></i>
+                                            Menunggu Penyelesaian Sesi Pengujian yang Ditolak
+                                        </div>
+                                        <p class="text-muted small mb-2">
+                                            Persetujuan LHU gabungan belum dapat dilakukan karena sesi <strong><?php echo implode(', ', array_map(function($s){ return $s['jenis_pengujian']; }, $sesi_ditolak_list)); ?></strong> masih dalam status <strong>Ditolak</strong> dan sedang diperbaiki oleh analis/penyelia. Manajer Teknis baru dapat menyetujui laporan setelah semua sesi pengujian wajib berhasil diverifikasi.
+                                        </p>
+                                    <?php else: ?>
+                                        <div class="text-danger fw-bold mb-1">
+                                            <i class="bi bi-x-circle-fill me-1 fs-6"></i>
+                                            Pengujian Sampel Telah Ditolak
+                                        </div>
+                                        <p class="text-muted small mb-2">
+                                            Sampel ini telah ditolak oleh Manajer Teknis / Penyelia dan telah dikembalikan ke analis/penyelia terkait untuk dilakukan perbaikan atau pengujian ulang. Tidak ada tindakan persetujuan lebih lanjut yang dapat dilakukan saat ini.
+                                        </p>
+                                    <?php endif; ?>
+
                                     <?php if (!empty($alasan_penolakan_list)): ?>
-                                        <div class="p-2 rounded bg-white border border-danger-subtle small mt-2">
+                                        <div class="p-2 rounded bg-white border border-secondary-subtle small mt-2">
                                             <div class="fw-bold text-danger mb-1"><i class="bi bi-chat-left-text me-1"></i>Catatan / Alasan Penolakan:</div>
                                             <div class="text-secondary" style="white-space: pre-line;"><?php echo html_escape(implode("\n---\n", array_unique($alasan_penolakan_list))); ?></div>
                                         </div>
@@ -659,7 +711,7 @@ if (!empty($sesi_list)) {
 
 </div>
 
-<!-- Modal Penolakan MT Tingkat Sampel -->
+<!-- Modal Penolakan MT (Mendukung Penolakan Per Sesi Kimia / Mikro / Semua) -->
 <div class="modal fade" id="modalTolakSampel" tabindex="-1" aria-labelledby="modalTolakSampelLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -677,8 +729,39 @@ if (!empty($sesi_list)) {
 
                 <div class="modal-body py-3">
                     <p class="text-muted small mb-3">
-                        Seluruh sesi pengujian aktif pada sampel ini akan dikembalikan dengan status <strong>Ditolak</strong> untuk direvisi oleh analis dan penyelia.
+                        Pilih jenis pengujian yang ingin ditolak. Pengujian yang ditolak akan dikembalikan dengan status <strong>Ditolak MT</strong> ke Penyelia terkait untuk ditinjau dan direvisi oleh analis.
                     </p>
+
+                    <!-- Pilihan Lingkup Pengujian yang Ditolak -->
+                    <div class="mb-3">
+                        <label for="select_target_sesi" class="form-label small fw-bold text-secondary">
+                            Lingkup Pengujian yang Ditolak <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select form-select-sm" id="select_target_sesi" name="target_sesi" required>
+                            <?php
+                            $sesi_bisa_ditolak = [];
+                            foreach ($sesi_list as $s_item) {
+                                if ($s_item['status'] === 'Menunggu Approval') {
+                                    $sesi_bisa_ditolak[] = $s_item;
+                                }
+                            }
+                            ?>
+                            <?php if (count($sesi_bisa_ditolak) > 1): ?>
+                                <option value="semua">Semua Pengujian (Kimia & Mikrobiologi Sekaligus)</option>
+                            <?php endif; ?>
+                            <?php foreach ($sesi_bisa_ditolak as $s_bisa): ?>
+                                <option value="<?php echo $s_bisa['id']; ?>">
+                                    Hanya Pengujian <?php echo html_escape($s_bisa['jenis_pengujian']); ?> (Sesi #<?php echo $s_bisa['id']; ?>)
+                                </option>
+                            <?php endforeach; ?>
+                            <?php if (empty($sesi_bisa_ditolak)): ?>
+                                <option value="semua">Semua Pengujian</option>
+                            <?php endif; ?>
+                        </select>
+                        <small class="text-muted" style="font-size: 0.72rem;">
+                            *Jika Anda hanya menolak satu bidang (misal Mikrobiologi saja), data pengujian bidang lainnya (Kimia) tetap aman dan tidak perlu diulang.
+                        </small>
+                    </div>
 
                     <div class="mb-3">
                         <label for="alasan_penolakan" class="form-label small fw-bold text-secondary">
@@ -777,3 +860,28 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php endif; ?>
 
 
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handler untuk tombol "Tolak Sesi Ini" pada kartu sesi pengujian
+    const btnTolakSpesifik = document.querySelectorAll('.btn-tolak-spesifik');
+    const selectTargetSesi = document.getElementById('select_target_sesi');
+    const modalTolakEl = document.getElementById('modalTolakSampel');
+
+    if (btnTolakSpesifik && selectTargetSesi && modalTolakEl) {
+        btnTolakSpesifik.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sesiId = this.getAttribute('data-sesi-id');
+                if (sesiId) {
+                    selectTargetSesi.value = sesiId;
+                }
+                if (typeof bootstrap !== 'undefined') {
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalTolakEl);
+                    modalInstance.show();
+                }
+            });
+        });
+    }
+});
+</script>

@@ -770,6 +770,64 @@
 
 
     <!-- =====================================================
+         SESI PERLU REVISI / DITOLAK PENYELIA
+         ===================================================== -->
+    <?php if (!empty($sesi_ditolak)): ?>
+        <div class="alert alert-danger border-danger shadow-sm mb-4 p-3" role="alert" style="border-radius: 10px; background: #fff5f5;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2 pb-2 border-bottom border-danger-subtle">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-octagon-fill text-danger fs-4"></i>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-danger">
+                            Perhatian: Terdapat <?php echo count($sesi_ditolak); ?> Sesi Pengujian yang Ditolak & Memerlukan Perbaikan
+                        </h6>
+                        <small class="text-danger-emphasis">
+                            Penyelia / Manajer Teknis mengembalikan sesi pengujian di bawah ini untuk diperbaiki sebelum pengujian dapat dilanjutkan.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive bg-white rounded border border-danger-subtle mt-2">
+                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                    <thead style="background: #fee2e2; color: #991b1b;">
+                        <tr>
+                            <th class="ps-3 py-2">Kode Sampel</th>
+                            <th class="py-2">Nama Sampel</th>
+                            <th class="py-2">Bidang Uji</th>
+                            <th class="py-2">Catatan Penolakan</th>
+                            <th class="text-center pe-3 py-2">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($sesi_ditolak as $s_dit): ?>
+                            <tr>
+                                <td class="ps-3 fw-bold text-primary">
+                                    <?php echo html_escape($s_dit['kode_sampel_manual'] ?: 'SMP-' . $s_dit['sample_id']); ?>
+                                </td>
+                                <td><?php echo html_escape($s_dit['nama_sampel']); ?></td>
+                                <td>
+                                    <span class="badge <?php echo ($s_dit['jenis_pengujian'] === 'Kimia') ? 'bg-primary' : 'bg-info text-dark'; ?>">
+                                        <?php echo html_escape($s_dit['jenis_pengujian']); ?>
+                                    </span>
+                                </td>
+                                <td class="text-danger small" style="max-width: 320px; white-space: pre-line;">
+                                    <?php echo html_escape($s_dit['alasan_penolakan'] ?: 'Silakan periksa kembali parameter hasil uji.'); ?>
+                                </td>
+                                <td class="text-center pe-3">
+                                    <a href="<?php echo site_url('pengujian/revisi_sesi/' . $s_dit['id']); ?>" class="btn btn-sm btn-danger px-3 shadow-sm">
+                                        <i class="bi bi-pencil-square me-1"></i> Perbaiki Sesi Ini
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- =====================================================
          SAMPEL SAYA
          ===================================================== -->
 

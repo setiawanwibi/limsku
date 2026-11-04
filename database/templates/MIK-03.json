@@ -3,7 +3,7 @@
     "nama_template": "Potensi Antibiotika Metode Lempeng-Silinder 5 Dosis",
     "kategori": "Mikrobiologi",
     "skema_form": {
-        "kode_dokumen": "POM-06.02/CFM.01/SOP.01/F.01B.18",
+        "kode_dokumen": "POM-06.02\/CFM.01\/SOP.01\/F.01B.18",
         "judul": "POTENSI ANTIBIOTIKA METODE LEMPENG-SILINDER 5 DOSIS",
         "kategori": "Mikrobiologi",
         "sections": [
@@ -20,13 +20,13 @@
                     },
                     {
                         "id": "bobot_contoh",
-                        "label": "2. Penimbangan / Pemipetan Contoh",
+                        "label": "2. Penimbangan \/ Pemipetan Contoh",
                         "type": "text",
                         "placeholder": "Nilai bobot atau volume contoh"
                     },
                     {
                         "id": "satuan_contoh",
-                        "label": "Satuan Bobot/Volume",
+                        "label": "Satuan Bobot\/Volume",
                         "type": "select",
                         "options": [
                             "g",
@@ -118,7 +118,7 @@
                     },
                     {
                         "id": "no_kontrol_baku",
-                        "label": "No. Kontrol / Lot",
+                        "label": "No. Kontrol \/ Lot",
                         "type": "text"
                     },
                     {
@@ -132,10 +132,10 @@
                         "label": "Satuan Potensi Baku",
                         "type": "select",
                         "options": [
-                            "µg/mg",
-                            "SI/mg"
+                            "µg\/mg",
+                            "SI\/mg"
                         ],
-                        "default": "SI/mg"
+                        "default": "SI\/mg"
                     },
                     {
                         "id": "penimbangan_baku",
@@ -167,7 +167,7 @@
                     },
                     {
                         "id": "dosis_s3",
-                        "label": "Dosis S3 (Dosis Acuan / Tengah)",
+                        "label": "Dosis S3 (Dosis Acuan \/ Tengah)",
                         "type": "text"
                     },
                     {
@@ -185,10 +185,10 @@
                         "label": "Satuan Dosis",
                         "type": "select",
                         "options": [
-                            "µg/mL",
-                            "SI/mL"
+                            "µg\/mL",
+                            "SI\/mL"
                         ],
-                        "default": "SI/mL"
+                        "default": "SI\/mL"
                     },
                     {
                         "id": "metode_pengukuran_zona",
@@ -251,9 +251,22 @@
                 "description": "Perhitungan %RSD presisi respons daerah hambatan antar cawan Petri (Syarat ≤ 10%).",
                 "fields": [
                     {
+                        "id": "sd_s1",
+                        "label": "SD S1",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi S1"
+                    },
+                    {
+                        "id": "avg_s1",
+                        "label": "Average S1",
+                        "type": "text",
+                        "placeholder": "Rata-rata S1"
+                    },
+                    {
                         "id": "rsd_s1_nilai",
                         "label": "RSD S1 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
                     },
                     {
                         "id": "rsd_s1_status",
@@ -266,9 +279,22 @@
                         "default": "Memenuhi"
                     },
                     {
+                        "id": "sd_s2",
+                        "label": "SD S2",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi S2"
+                    },
+                    {
+                        "id": "avg_s2",
+                        "label": "Average S2",
+                        "type": "text",
+                        "placeholder": "Rata-rata S2"
+                    },
+                    {
                         "id": "rsd_s2_nilai",
                         "label": "RSD S2 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
                     },
                     {
                         "id": "rsd_s2_status",
@@ -281,9 +307,22 @@
                         "default": "Memenuhi"
                     },
                     {
+                        "id": "sd_s4",
+                        "label": "SD S4",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi S4"
+                    },
+                    {
+                        "id": "avg_s4",
+                        "label": "Average S4",
+                        "type": "text",
+                        "placeholder": "Rata-rata S4"
+                    },
+                    {
                         "id": "rsd_s4_nilai",
                         "label": "RSD S4 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
                     },
                     {
                         "id": "rsd_s4_status",
@@ -296,9 +335,22 @@
                         "default": "Memenuhi"
                     },
                     {
+                        "id": "sd_s5",
+                        "label": "SD S5",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi S5"
+                    },
+                    {
+                        "id": "avg_s5",
+                        "label": "Average S5",
+                        "type": "text",
+                        "placeholder": "Rata-rata S5"
+                    },
+                    {
                         "id": "rsd_s5_nilai",
                         "label": "RSD S5 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
                     },
                     {
                         "id": "rsd_s5_status",
@@ -311,9 +363,22 @@
                         "default": "Memenuhi"
                     },
                     {
+                        "id": "sd_uji",
+                        "label": "SD Uji",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi Uji"
+                    },
+                    {
+                        "id": "avg_uji",
+                        "label": "Average Uji",
+                        "type": "text",
+                        "placeholder": "Rata-rata Uji"
+                    },
+                    {
                         "id": "rsd_uji_nilai",
                         "label": "RSD Uji (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
                     },
                     {
                         "id": "rsd_uji_status",
@@ -326,29 +391,94 @@
                         "default": "Memenuhi"
                     },
                     {
+                        "id": "sd_tengah_s1",
+                        "label": "SD S3 pada S1",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi"
+                    },
+                    {
+                        "id": "avg_tengah_s1",
+                        "label": "Average S3 pada S1",
+                        "type": "text",
+                        "placeholder": "Rata-rata"
+                    },
+                    {
                         "id": "rsd_tengah_s1_nilai",
                         "label": "RSD Dosis Tengah S3 pada S1 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
+                    },
+                    {
+                        "id": "sd_tengah_s2",
+                        "label": "SD S3 pada S2",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi"
+                    },
+                    {
+                        "id": "avg_tengah_s2",
+                        "label": "Average S3 pada S2",
+                        "type": "text",
+                        "placeholder": "Rata-rata"
                     },
                     {
                         "id": "rsd_tengah_s2_nilai",
                         "label": "RSD Dosis Tengah S3 pada S2 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
+                    },
+                    {
+                        "id": "sd_tengah_s4",
+                        "label": "SD S3 pada S4",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi"
+                    },
+                    {
+                        "id": "avg_tengah_s4",
+                        "label": "Average S3 pada S4",
+                        "type": "text",
+                        "placeholder": "Rata-rata"
                     },
                     {
                         "id": "rsd_tengah_s4_nilai",
                         "label": "RSD Dosis Tengah S3 pada S4 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
+                    },
+                    {
+                        "id": "sd_tengah_s5",
+                        "label": "SD S3 pada S5",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi"
+                    },
+                    {
+                        "id": "avg_tengah_s5",
+                        "label": "Average S3 pada S5",
+                        "type": "text",
+                        "placeholder": "Rata-rata"
                     },
                     {
                         "id": "rsd_tengah_s5_nilai",
                         "label": "RSD Dosis Tengah S3 pada S5 (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
+                    },
+                    {
+                        "id": "sd_tengah_uji",
+                        "label": "SD S3 pada Uji",
+                        "type": "text",
+                        "placeholder": "Standar Deviasi"
+                    },
+                    {
+                        "id": "avg_tengah_uji",
+                        "label": "Average S3 pada Uji",
+                        "type": "text",
+                        "placeholder": "Rata-rata"
                     },
                     {
                         "id": "rsd_tengah_uji_nilai",
                         "label": "RSD Dosis Tengah S3 pada Uji (%)",
-                        "type": "text"
+                        "type": "text",
+                        "placeholder": "Auto: SD\/Avg * 100%"
                     }
                 ]
             },
@@ -393,7 +523,7 @@
                     },
                     {
                         "id": "pustaka_metode",
-                        "label": "Pustaka / Metode Acuan",
+                        "label": "Pustaka \/ Metode Acuan",
                         "type": "text",
                         "default": "Farmakope Indonesia Edisi VI"
                     },

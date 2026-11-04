@@ -552,13 +552,31 @@
                                 <div class="za-dropdown-list" id="za_dropdown_list">
                                     <?php foreach ($daftar_zat_aktif as $za): ?>
                                         <?php $isSelected = ($zat_aktif_terpilih === $za['nama_zat_aktif']); ?>
-                                        <div class="za-dropdown-item <?php echo $isSelected ? 'is-selected' : ''; ?>" data-value="<?php echo html_escape($za['nama_zat_aktif']); ?>">
-                                            <span class="za-name"><?php echo html_escape($za['nama_zat_aktif']); ?></span>
-                                            <?php if ($isSelected): ?>
-                                                <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Terpilih
-                                                </span>
-                                            <?php endif; ?>
+                                        <div class="za-dropdown-item <?php echo $isSelected ? 'is-selected' : ''; ?>" 
+                                             data-value="<?php echo html_escape($za['nama_zat_aktif']); ?>"
+                                             data-sediaan="<?php echo html_escape($za['daftar_sediaan'] ?? ''); ?>">
+                                            <div class="d-flex align-items-center justify-content-between w-100 gap-2">
+                                                <div>
+                                                    <span class="za-name fw-semibold"><?php echo html_escape($za['nama_zat_aktif']); ?></span>
+                                                    <?php if (!empty($za['daftar_sediaan'])): ?>
+                                                        <small class="text-muted d-block" style="font-size: 0.76rem; font-weight: normal;">
+                                                            <i class="bi bi-capsule me-1 text-primary"></i><?php echo html_escape($za['daftar_sediaan']); ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                    <?php if (isset($za['total_parameter'])): ?>
+                                                        <span class="badge bg-light text-secondary border rounded-pill px-2 py-1 small" style="font-size: 0.72rem;">
+                                                            <?php echo (int)$za['total_parameter']; ?> parameter
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <?php if ($isSelected): ?>
+                                                        <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">
+                                                            <i class="bi bi-check-circle-fill me-1"></i> Terpilih
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -653,9 +671,16 @@
                                         </td>
                                         <td>
                                             <label for="chk_metode_<?php echo $p['id']; ?>" class="d-block cursor-pointer mb-0">
-                                                <strong class="text-dark d-block mb-1" style="font-size: 0.88rem;">
-                                                    <?php echo html_escape($p['parameter_uji']); ?>
-                                                </strong>
+                                                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                                                    <strong class="text-dark" style="font-size: 0.88rem;">
+                                                        <?php echo html_escape($p['parameter_uji']); ?>
+                                                    </strong>
+                                                    <?php if (!empty($p['bentuk_sediaan'])): ?>
+                                                        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill" style="font-size: 0.72rem;">
+                                                            <i class="bi bi-capsule me-1"></i><?php echo html_escape($p['bentuk_sediaan']); ?><?php echo !empty($p['jenis_sediaan']) ? ' (' . html_escape($p['jenis_sediaan']) . ')' : ''; ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
                                                 <span class="badge-kode-metode">
                                                     <i class="bi bi-bookmark me-1"></i><?php echo html_escape($p['kode_metode']); ?>
                                                 </span>
@@ -882,9 +907,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         zaItems.forEach(function(item) {
             const rawText = item.getAttribute('data-value') || '';
+            const sediaanText = item.getAttribute('data-sediaan') || '';
             const nameSpan = item.querySelector('.za-name');
 
-            if (query === '' || rawText.toLowerCase().includes(query)) {
+            if (query === '' || rawText.toLowerCase().includes(query) || sediaanText.toLowerCase().includes(query)) {
                 item.style.display = 'flex';
                 if (nameSpan) {
                     nameSpan.innerHTML = highlightText(rawText, query);

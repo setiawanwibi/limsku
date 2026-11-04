@@ -1123,7 +1123,7 @@ $ttd_approver_img = $resolve_ttd($signature_approver ?? null);
             <tbody>
                 <tr style="height: 9.8pt;">
                     <td style="border: none;"></td>
-                    <td colspan="15" style="border: none; font-size: 6.5pt;"></td>
+                    <td colspan="15" style="border: none; font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.13</td>
                     <td colspan="4" style="border: none; font-size: 6.5pt; text-align: right;">Lembar 1 dari 1 halaman</td>
                 </tr>
             </tbody>

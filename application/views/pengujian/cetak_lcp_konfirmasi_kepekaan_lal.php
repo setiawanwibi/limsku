@@ -542,7 +542,7 @@ if ($rata_e === '' && is_numeric($e1) && is_numeric($e2) && is_numeric($e3) && i
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td></td>
+                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.20</td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 1 dari 1 halaman</td>
             </tr>
         </table>

@@ -214,15 +214,15 @@ class Model_Metode extends CI_Model
      */
     public function ambil_daftar_zat_aktif($bidang = 'Kimia')
     {
-        $this->db->distinct();
-        $this->db->select('nama_zat_aktif, jenis_sediaan, bentuk_sediaan');
+        $this->db->select('TRIM(nama_zat_aktif) as nama_zat_aktif, COUNT(*) as total_parameter, GROUP_CONCAT(DISTINCT NULLIF(TRIM(bentuk_sediaan), "") ORDER BY bentuk_sediaan ASC SEPARATOR ", ") as daftar_sediaan');
         $this->db->group_start();
         $this->db->where('bidang_pengujian', $bidang);
         $this->db->or_where('kategori', $bidang);
         $this->db->group_end();
         $this->db->where('status', 'Aktif');
-        $this->db->where("nama_zat_aktif IS NOT NULL AND nama_zat_aktif != ''", NULL, FALSE);
-        $this->db->order_by('nama_zat_aktif', 'ASC');
+        $this->db->where("nama_zat_aktif IS NOT NULL AND TRIM(nama_zat_aktif) != ''", NULL, FALSE);
+        $this->db->group_by('TRIM(nama_zat_aktif)');
+        $this->db->order_by('TRIM(nama_zat_aktif)', 'ASC');
         return $this->db->get($this->tabel)->result_array();
     }
 
@@ -235,16 +235,18 @@ class Model_Metode extends CI_Model
      */
     public function ambil_parameter_by_zat_aktif($zat_aktif, $bidang = 'Kimia')
     {
+        $clean_za = trim(preg_replace('/\s+/', ' ', (string)$zat_aktif));
         $this->db->select('m.*, tc.nama_kelas_terapi, ft.kode_template, ft.nama_template, ft.kategori as kategori_template, ft.skema_form');
         $this->db->from($this->tabel . ' m');
         $this->db->join('therapeutic_classes tc', 'tc.id = m.kelas_terapi_id', 'left');
         $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
-        $this->db->where('m.nama_zat_aktif', $zat_aktif);
+        $this->db->where('TRIM(m.nama_zat_aktif)', $clean_za);
         $this->db->group_start();
         $this->db->where('m.bidang_pengujian', $bidang);
         $this->db->or_where('m.kategori', $bidang);
         $this->db->group_end();
         $this->db->where('m.status', 'Aktif');
+        $this->db->order_by('m.bentuk_sediaan', 'ASC');
         $this->db->order_by('m.parameter_uji', 'ASC');
         return $this->db->get()->result_array();
     }

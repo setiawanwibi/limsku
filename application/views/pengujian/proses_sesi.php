@@ -3705,6 +3705,323 @@
             }
         });
 
+                // =========================================================================
+        // Auto-Calculator Engine untuk Formulir Mikrobiologi (MIK-01 s/d MIK-06)
+        // Replikasi presisi 100% SOP & Template Resmi BPOM
+        // =========================================================================
+
+        // --- 1. MIK-01: Uji Angka Lempeng Total (ALT) Sediaan Farmasi ---
+        function hitungMikroALT(pane) {
+            if (!pane) return;
+            var rows = pane.querySelectorAll('tr:has(input[name*="[cawan_a]"])');
+            var validRow = null;
+
+            rows.forEach(function(tr) {
+                var cA = tr.querySelector('input[name*="[cawan_a]"]');
+                var cB = tr.querySelector('input[name*="[cawan_b]"]');
+                var cTot = tr.querySelector('input[name*="[total_koloni]"]');
+                var cPeng = tr.querySelector('input[name*="[pengenceran]"]');
+
+                if (cA && cB) {
+                    var vA = parseFloat(cA.value);
+                    var vB = parseFloat(cB.value);
+                    if (!isNaN(vA) && !isNaN(vB)) {
+                        var tot = vA + vB;
+                        if (cTot) cTot.value = tot;
+                        if (tot > 0 && !validRow) {
+                            validRow = { vA: vA, vB: vB, tot: tot, peng: cPeng ? cPeng.value : '' };
+                        }
+                    } else if (!isNaN(vA)) {
+                        if (cTot) cTot.value = vA;
+                        if (!validRow) validRow = { vA: vA, vB: 0, tot: vA, peng: cPeng ? cPeng.value : '' };
+                    }
+                }
+            });
+
+            var rAtas = pane.querySelector('input[name*="[perhitungan_alt_rumus_atas]"]');
+            var rBawah = pane.querySelector('input[name*="[perhitungan_alt_rumus_bawah]"]');
+            var hAngka = pane.querySelector('input[name*="[hasil_alt_angka]"]');
+
+            if (validRow) {
+                var pengStr = validRow.peng || '10^-2';
+                var match = pengStr.match(/10\^?-?(\d+)/);
+                var exp = match ? parseInt(match[1]) : 2;
+                var factor = Math.pow(10, exp);
+                var avg = validRow.tot / 2;
+                var cfu = avg * factor;
+
+                if (rAtas) rAtas.value = '(' + validRow.vA + ' + ' + validRow.vB + ') x 10^' + exp;
+                if (rBawah) rBawah.value = '2';
+                if (hAngka) {
+                    var sc = cfu.toExponential(1);
+                    var parts = sc.split('e+');
+                    var formatted = parts.length === 2 ? parts[0].replace('.', ',') + ' x 10^' + parts[1] : cfu;
+                    hAngka.value = formatted;
+                }
+            }
+        }
+
+        // --- 2. MIK-02: Uji Angka Kapang Khamir (AKK) Sediaan Farmasi ---
+        function hitungMikroAKK(pane) {
+            if (!pane) return;
+            var rows = pane.querySelectorAll('tr:has(input[name*="[cawan_a]"])');
+            var validRow = null;
+
+            rows.forEach(function(tr) {
+                var cA = tr.querySelector('input[name*="[cawan_a]"]');
+                var cB = tr.querySelector('input[name*="[cawan_b]"]');
+                var cTot = tr.querySelector('input[name*="[total_koloni]"]');
+                var cPeng = tr.querySelector('input[name*="[pengenceran]"]');
+
+                if (cA && cB) {
+                    var vA = parseFloat(cA.value);
+                    var vB = parseFloat(cB.value);
+                    if (!isNaN(vA) && !isNaN(vB)) {
+                        var tot = vA + vB;
+                        if (cTot) cTot.value = tot;
+                        if (tot > 0 && !validRow) {
+                            validRow = { vA: vA, vB: vB, tot: tot, peng: cPeng ? cPeng.value : '' };
+                        }
+                    } else if (!isNaN(vA)) {
+                        if (cTot) cTot.value = vA;
+                        if (!validRow) validRow = { vA: vA, vB: 0, tot: vA, peng: cPeng ? cPeng.value : '' };
+                    }
+                }
+            });
+
+            var rAtas = pane.querySelector('input[name*="[perhitungan_akk_rumus_atas]"]');
+            var rBawah = pane.querySelector('input[name*="[perhitungan_akk_rumus_bawah]"]');
+            var hAngka = pane.querySelector('input[name*="[hasil_akk_angka]"]');
+
+            if (validRow) {
+                var pengStr = validRow.peng || '10^-1';
+                var match = pengStr.match(/10\^?-?(\d+)/);
+                var exp = match ? parseInt(match[1]) : 1;
+                var factor = Math.pow(10, exp);
+                var avg = validRow.tot / 2;
+                var cfu = avg * factor;
+
+                if (rAtas) rAtas.value = '(' + validRow.vA + ' + ' + validRow.vB + ') x 10^' + exp;
+                if (rBawah) rBawah.value = '2';
+                if (hAngka) {
+                    var sc = cfu.toExponential(1);
+                    var parts = sc.split('e+');
+                    var formatted = parts.length === 2 ? parts[0].replace('.', ',') + ' x 10^' + parts[1] : cfu;
+                    hAngka.value = formatted;
+                }
+            }
+        }
+
+        // --- 3. MIK-03: Potensi Antibiotika 5 Dosis ---
+        function hitungMikroPotensi(pane) {
+            if (!pane) return;
+            var calcRsdField = function(sdId, avgId, rsdId, statusId) {
+                var sdInp = pane.querySelector('input[name*="[' + sdId + ']"]');
+                var avgInp = pane.querySelector('input[name*="[' + avgId + ']"]');
+                var rsdInp = pane.querySelector('input[name*="[' + rsdId + ']"]');
+                var statSel = pane.querySelector('select[name*="[' + statusId + ']"]');
+
+                if (sdInp && avgInp && rsdInp) {
+                    var sd = parseFloat(sdInp.value);
+                    var avg = parseFloat(avgInp.value);
+                    if (!isNaN(sd) && !isNaN(avg) && avg > 0) {
+                        var rsd = (sd / avg) * 100;
+                        rsdInp.value = rsd.toFixed(2);
+                        if (statSel) {
+                            statSel.value = rsd <= 10.0 ? 'Memenuhi' : 'Tidak Memenuhi';
+                        }
+                    }
+                }
+            };
+
+            calcRsdField('sd_s1', 'avg_s1', 'rsd_s1_nilai', 'rsd_s1_status');
+            calcRsdField('sd_s2', 'avg_s2', 'rsd_s2_nilai', 'rsd_s2_status');
+            calcRsdField('sd_s4', 'avg_s4', 'rsd_s4_nilai', 'rsd_s4_status');
+            calcRsdField('sd_s5', 'avg_s5', 'rsd_s5_nilai', 'rsd_s5_status');
+            calcRsdField('sd_uji', 'avg_uji', 'rsd_uji_nilai', 'rsd_uji_status');
+
+            calcRsdField('sd_tengah_s1', 'avg_tengah_s1', 'rsd_tengah_s1_nilai');
+            calcRsdField('sd_tengah_s2', 'avg_tengah_s2', 'rsd_tengah_s2_nilai');
+            calcRsdField('sd_tengah_s4', 'avg_tengah_s4', 'rsd_tengah_s4_nilai');
+            calcRsdField('sd_tengah_s5', 'avg_tengah_s5', 'rsd_tengah_s5_nilai');
+            calcRsdField('sd_tengah_uji', 'avg_tengah_uji', 'rsd_tengah_uji_nilai');
+
+            var rInp = pane.querySelector('input[name*="[kurva_r]"]');
+            var r2Inp = pane.querySelector('input[name*="[kurva_r2]"]');
+            var pr2Inp = pane.querySelector('input[name*="[kurva_persen_r2]"]');
+            var kurvaStat = pane.querySelector('select[name*="[kurva_status]"]');
+
+            var r = parseFloat(rInp ? rInp.value : NaN);
+            var r2 = parseFloat(r2Inp ? r2Inp.value : NaN);
+
+            if (!isNaN(r) && isNaN(r2)) {
+                r2 = Math.pow(r, 2);
+                if (r2Inp) r2Inp.value = r2.toFixed(4);
+            }
+            if (!isNaN(r2)) {
+                var pr2 = r2 * 100;
+                if (pr2Inp) pr2Inp.value = pr2.toFixed(2);
+                if (kurvaStat) {
+                    kurvaStat.value = pr2 >= 95.0 ? 'Memenuhi' : 'Tidak Memenuhi';
+                }
+            }
+        }
+
+        // --- 4. MIK-05: Uji Endotoksin Bakteri Semi Kuantitatif ---
+        function hitungMikroEndotoksin(pane) {
+            if (!pane) return;
+            var potCse = parseFloat((pane.querySelector('input[name*="[potensi_cse]"]') || {}).value);
+            var lam = parseFloat((pane.querySelector('input[name*="[kepekaan_lambda]"]') || {}).value);
+            var konvCse = pane.querySelector('input[name*="[konversi_potensi_cse]"]');
+
+            if (!isNaN(potCse) && !isNaN(lam) && lam > 0 && konvCse) {
+                konvCse.value = (potCse / lam).toFixed(2) + ' λ';
+            }
+
+            var batas = parseFloat((pane.querySelector('input[name*="[batas_endotoksin]"]') || {}).value);
+            var kons = parseFloat((pane.querySelector('input[name*="[konsentrasi_larutan_sampel]"]') || {}).value);
+            if (isNaN(kons) || kons <= 0) kons = 1;
+            var pmaInp = pane.querySelector('input[name*="[nilai_pma]"]');
+
+            if (!isNaN(batas) && !isNaN(lam) && lam > 0 && pmaInp) {
+                var pma = (batas * kons) / lam;
+                pmaInp.value = pma.toFixed(2);
+            }
+
+            var f1 = parseFloat((pane.querySelector('input[name*="[kadar_endotoksin_f1]"]') || {}).value);
+            var f2 = parseFloat((pane.querySelector('input[name*="[kadar_endotoksin_f2]"]') || {}).value);
+            var rataInp = pane.querySelector('input[name*="[kadar_endotoksin_rata]"]');
+            var euMlInp = pane.querySelector('input[name*="[kadar_endotoksin_eu_ml]"]');
+            var konvEInp = pane.querySelector('input[name*="[konversi_e_val]"]');
+
+            var rata = null;
+            if (!isNaN(f1) && !isNaN(f2)) {
+                rata = (f1 + f2) / 2;
+            } else if (!isNaN(f1)) {
+                rata = f1;
+            }
+
+            if (rata !== null) {
+                if (rataInp) rataInp.value = rata.toFixed(4);
+                if (euMlInp && !euMlInp.value) euMlInp.value = '< ' + rata.toFixed(4);
+                if (konvEInp && !konvEInp.value) konvEInp.value = rata.toFixed(4);
+            }
+
+            var eVal = parseFloat((konvEInp ? konvEInp.value : '') || (rataInp ? rataInp.value : ''));
+            var potVal = parseFloat((pane.querySelector('input[name*="[konversi_potensi_val]"]') || {}).value);
+            var konvHasilInp = pane.querySelector('input[name*="[konversi_hasil_angka]"]');
+            var konvKadarInp = pane.querySelector('input[name*="[kadar_endotoksin_konversi]"]');
+
+            if (!isNaN(eVal) && !isNaN(potVal) && potVal > 0) {
+                var hasilKonv = (eVal / potVal).toFixed(4);
+                if (konvHasilInp) konvHasilInp.value = hasilKonv;
+                if (konvKadarInp) konvKadarInp.value = '< ' + hasilKonv;
+            }
+        }
+
+        // --- 5. MIK-06: Konfirmasi Kepekaan LAL Semi Kuantitatif ---
+        function hitungMikroKepekaanLAL(pane) {
+            if (!pane) return;
+            var lam = parseFloat((pane.querySelector('input[name*="[kepekaan_etiket_lambda]"]') || {}).value);
+            var logE = [];
+
+            for (var i = 1; i <= 4; i++) {
+                var taInp = pane.querySelector('input[name*="[titik_akhir_' + i + ']"]');
+                var leInp = pane.querySelector('input[name*="[log_e_' + i + ']"]');
+
+                if (taInp && (!taInp.value || isNaN(parseFloat(taInp.value))) && !isNaN(lam) && lam > 0) {
+                    var r2 = (pane.querySelector('select[name*="[cse_2lambda_' + i + ']"]') || {}).value;
+                    var r1 = (pane.querySelector('select[name*="[cse_lambda_' + i + ']"]') || {}).value;
+                    var rh = (pane.querySelector('select[name*="[cse_half_lambda_' + i + ']"]') || {}).value;
+                    var rq = (pane.querySelector('select[name*="[cse_quarter_lambda_' + i + ']"]') || {}).value;
+
+                    if (rq === '+') taInp.value = (0.25 * lam).toFixed(4);
+                    else if (rh === '+') taInp.value = (0.5 * lam).toFixed(4);
+                    else if (r1 === '+') taInp.value = (1.0 * lam).toFixed(4);
+                    else if (r2 === '+') taInp.value = (2.0 * lam).toFixed(4);
+                }
+
+                if (taInp) {
+                    var ta = parseFloat(taInp.value);
+                    if (!isNaN(ta) && ta > 0) {
+                        var eVal = Math.log10(ta);
+                        if (leInp) leInp.value = eVal.toFixed(4);
+                        logE.push(eVal);
+                    }
+                }
+            }
+
+            var rataEInp = pane.querySelector('input[name*="[rata_rata_e]"]');
+            var gmInp = pane.querySelector('input[name*="[nilai_gm]"]');
+            var rentangInp = pane.querySelector('input[name*="[rentang_syarat_angka]"]');
+
+            if (logE.length === 4) {
+                var sum = logE.reduce(function(a, b) { return a + b; }, 0);
+                var avgE = sum / 4;
+                var gm = Math.pow(10, avgE);
+
+                if (rataEInp) rataEInp.value = avgE.toFixed(4);
+                if (gmInp) gmInp.value = gm.toFixed(4);
+
+                if (!isNaN(lam) && lam > 0 && rentangInp) {
+                    var minL = (0.5 * lam).toFixed(4);
+                    var maxL = (2.0 * lam).toFixed(4);
+                    rentangInp.value = minL + ' ≤ ' + gm.toFixed(4) + ' ≤ ' + maxL;
+                }
+            }
+        }
+
+        // Global Event Listeners untuk Formulir Mikrobiologi
+        document.addEventListener('input', function(e) {
+            var pane = e.target.closest('.form-tab-pane-uji');
+            if (!pane) return;
+            var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+            var targetName = e.target.name || '';
+
+            if (kodeTpl === 'MIK-01' || targetName.indexOf('[perhitungan_alt') !== -1 || targetName.indexOf('[cawan_') !== -1) {
+                hitungMikroALT(pane);
+            }
+            if (kodeTpl === 'MIK-02' || targetName.indexOf('[perhitungan_akk') !== -1 || targetName.indexOf('[cawan_') !== -1) {
+                hitungMikroAKK(pane);
+            }
+            if (kodeTpl === 'MIK-03' || targetName.indexOf('[rsd_') !== -1 || targetName.indexOf('[kurva_') !== -1 || targetName.indexOf('[sd_') !== -1 || targetName.indexOf('[avg_') !== -1) {
+                hitungMikroPotensi(pane);
+            }
+            if (kodeTpl === 'MIK-05' || targetName.indexOf('[kadar_endotoksin') !== -1 || targetName.indexOf('[konversi_') !== -1 || targetName.indexOf('[batas_endotoksin]') !== -1 || targetName.indexOf('[potensi_cse]') !== -1) {
+                hitungMikroEndotoksin(pane);
+            }
+            if (kodeTpl === 'MIK-06' || targetName.indexOf('[titik_akhir') !== -1 || targetName.indexOf('[kepekaan_etiket') !== -1) {
+                hitungMikroKepekaanLAL(pane);
+            }
+        });
+
+        document.addEventListener('change', function(e) {
+            var pane = e.target.closest('.form-tab-pane-uji');
+            if (!pane) return;
+            var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+            var targetName = e.target.name || '';
+
+            if (kodeTpl === 'MIK-06' || targetName.indexOf('[cse_') !== -1) {
+                hitungMikroKepekaanLAL(pane);
+            }
+            if (kodeTpl === 'MIK-05') {
+                hitungMikroEndotoksin(pane);
+            }
+            if (kodeTpl === 'MIK-03') {
+                hitungMikroPotensi(pane);
+            }
+        });
+
+        // Inisialisasi awal saat halaman dimuat
+        document.querySelectorAll('.form-tab-pane-uji').forEach(function(pane) {
+            var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+            if (kodeTpl === 'MIK-01') hitungMikroALT(pane);
+            if (kodeTpl === 'MIK-02') hitungMikroAKK(pane);
+            if (kodeTpl === 'MIK-03') hitungMikroPotensi(pane);
+            if (kodeTpl === 'MIK-05') hitungMikroEndotoksin(pane);
+            if (kodeTpl === 'MIK-06') hitungMikroKepekaanLAL(pane);
+        });
+
         // =========================================================================
         // FITUR SIMPAN SEMENTARA (DRAFT) & AUTO-SAVE PROGRES PENGUJIAN
         // Menjaga data tidak hilang saat gangguan sinyal, timeout, atau jeda kerja

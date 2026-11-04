@@ -131,15 +131,11 @@ class Model_Notifikasi extends CI_Model
         // Sampel yang menunggu approval final / pengesahan Manajer Teknis
         // =========================================================================
         if ($bisa_approval) {
-            $this->db->where('status', 'Menunggu Approval');
-            $jml_approval = $this->db->count_all_results('samples');
-            if ($jml_approval === 0) {
-                // Fallback cek sesi jika sampel belum diagregat
-                $this->db->where('status', 'Menunggu Approval');
-                $jml_approval = $this->db->count_all_results('testing_sessions');
-            }
+            $this->load->model('Model_Pengujian');
+            $antrean_approval = $this->Model_Pengujian->ambil_antrean_approval_sampel();
+            $jml_approval = count($antrean_approval);
             $badges['pengujian_approval'] = (int) $jml_approval;
-            $badges['pengujian_approval_label'] = $jml_approval . ' laporan menunggu persetujuan Manajer Teknis';
+            $badges['pengujian_approval_label'] = $jml_approval . ' laporan siap disahkan Manajer Teknis';
             $badges['pengujian_approval_type']  = 'danger';
         }
 

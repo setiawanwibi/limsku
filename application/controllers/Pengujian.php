@@ -39,8 +39,11 @@ class Pengujian extends MY_Controller
         $this->data['judul_halaman'] = 'Antrean Pengujian Laboratorium';
 
         $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        $user_id = $this->session->userdata('user_id');
+
         $this->data['antrean_sampel'] = $this->Model_Pengujian->ambil_antrean($komoditi_akses);
-        $this->data['sedang_diuji']   = $this->Model_Pengujian->ambil_dalam_pengujian($this->session->userdata('user_id'));
+        $this->data['sedang_diuji']   = $this->Model_Pengujian->ambil_dalam_pengujian($user_id);
+        $this->data['sesi_ditolak']   = $this->Model_Pengujian->ambil_sesi_ditolak_penguji($user_id);
 
         $this->muat_tampilan('pengujian/antrean');
     }
@@ -301,7 +304,7 @@ class Pengujian extends MY_Controller
             }
 
             // Validasi konsistensi Zat Aktif
-            if ($metode_item['nama_zat_aktif'] !== $nama_zat_aktif) {
+            if (trim(preg_replace('/\s+/', ' ', (string)$metode_item['nama_zat_aktif'])) !== trim(preg_replace('/\s+/', ' ', (string)$nama_zat_aktif))) {
                 $this->session->set_flashdata('pesan_gagal', 'Seluruh parameter dalam 1 sesi harus berasal dari zat aktif yang sama (' . html_escape($nama_zat_aktif) . ').');
                 redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
             }
@@ -2550,11 +2553,18 @@ class Pengujian extends MY_Controller
             redirect('pengujian/tinjauan_lhu/' . $sample_id);
         }
 
-        $alasan = $this->input->post('alasan_penolakan', TRUE);
+        $sample_id   = (int)$sample_id;
+        $alasan      = $this->input->post('alasan_penolakan', TRUE);
+        $target_sesi = $this->input->post('target_sesi', TRUE);
         $approver_id = (int)$this->session->userdata('user_id');
         $username    = (string)$this->session->userdata('username');
 
-        $hasil = $this->Model_Pengujian->tolak_sampel_mt($sample_id, $approver_id, $alasan, $username);
+        // Dukungan Penolakan Parsial: Tolak sesi spesifik (Kimia saja / Mikrobiologi saja) atau Tolak Semua Sesi
+        if (!empty($target_sesi) && $target_sesi !== 'semua' && is_numeric($target_sesi)) {
+            $hasil = $this->Model_Pengujian->tolak_sesi_mt((int)$target_sesi, $approver_id, $alasan, $username);
+        } else {
+            $hasil = $this->Model_Pengujian->tolak_sampel_mt($sample_id, $approver_id, $alasan, $username);
+        }
 
         if ($hasil['sukses']) {
             $this->session->set_flashdata('pesan_sukses', $hasil['pesan']);

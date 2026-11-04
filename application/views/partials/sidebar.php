@@ -197,6 +197,17 @@ if (!isset($badges)) {
             <?php endif; ?>
         <?php endif; ?>
 
+        <!-- Logbook Laboratorium: Tersedia untuk seluruh peran/role -->
+        <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold">
+            Logbook Laboratorium
+        </li>
+        <li class="mb-1 <?php echo ($halaman_aktif === 'logbook_alat') ? 'active' : ''; ?>">
+            <a href="<?php echo site_url('logbook'); ?>" class="nav-link px-3 py-2 rounded">
+                <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>
+                <span>Logbook Alat</span>
+            </a>
+        </li>
+
         <!-- Master Data -->
         <?php if ($ada_menu_master): ?>
             <li class="nav-header px-3 pt-3 pb-1 text-uppercase text-muted fw-bold">

@@ -54,6 +54,13 @@ if (($pma_calc === '' || $pma_calc === '-') && is_numeric($batas_et) && is_numer
     $pma_calc = round(((float)$batas_et * $kons_val) / (float)$lambda, 2);
 }
 
+// Auto-calculate Konversi Potensi CSE (Hal 2): Potensi CSE / Kepekaan Lambda
+$potensi_cse_num = isset($p['potensi_cse']) && is_numeric($p['potensi_cse']) ? (float)$p['potensi_cse'] : null;
+$kepekaan_lambda_num = isset($p['kepekaan_lambda']) && is_numeric($p['kepekaan_lambda']) ? (float)$p['kepekaan_lambda'] : null;
+$konversi_cse_calc = ($potensi_cse_num !== null && $kepekaan_lambda_num !== null && $kepekaan_lambda_num > 0) 
+    ? round($potensi_cse_num / $kepekaan_lambda_num, 2) 
+    : ($p['konversi_potensi_cse'] ?? '#DIV/0!');
+
 // Auto-calculate Konversi Potensi Sampel (Hal 3) jika ada rata-rata kadar endotoksin (E) & potensi sampel
 $kadar_e_val = $p['konversi_e_val'] ?? '';
 $potensi_smp_val = $p['konversi_potensi_val'] ?? '';
@@ -443,7 +450,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td></td>
+                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.19</td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 1 dari 3 halaman</td>
             </tr>
         </table>
@@ -507,73 +514,354 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
 
             <div style="height: 6px;"></div>
 
-            <!-- PROSEDUR METODE JENDAL -->
-            <table class="excel-table">
+            <!-- ========================================== -->
+            <!-- PROSEDUR METODE JENDAL                    -->
+            <!-- ========================================== -->
+            <table class="excel-table" style="margin-top: 1px;">
                 <colgroup>
-                    <col style="width: 30%;">
+                    <col style="width: 25%;">
                     <col style="width: 2%;">
-                    <col style="width: 68%;">
+                    <col style="width: 73%;">
                 </colgroup>
-                <tr style="height: 14pt;">
-                    <td colspan="3" class="text-bold">Prosedur Metode Jendal</td>
+                <tr style="height: 11pt;">
+                    <td colspan="3" class="text-bold" style="font-size: 7.2pt;">Prosedur Metode Jendal</td>
                 </tr>
-                <tr style="height: 13pt;">
-                    <td>Pemerian Contoh</td>
+                <tr style="height: 10.5pt;">
+                    <td style="padding-left: 6px;">Pemerian Contoh</td>
                     <td class="text-center">:</td>
                     <td><?php echo html_escape($p['pemerian_contoh'] ?? '-'); ?></td>
                 </tr>
-                <tr style="height: 13pt;">
-                    <td>pH Contoh</td>
+                <tr style="height: 10.5pt;">
+                    <td style="padding-left: 6px;">pH Contoh</td>
                     <td class="text-center">:</td>
                     <td><?php echo html_escape($p['ph_contoh'] ?? '-'); ?></td>
                 </tr>
-                <tr style="height: 13pt;">
+            </table>
+
+            <!-- ========================================== -->
+            <!-- PENGENCERAN BAKU ENDOTOKSIN (CSE)          -->
+            <!-- ========================================== -->
+            <div style="font-weight: bold; margin-top: 3px; font-size: 7.2pt;">Pengenceran Baku Endotoksin (CSE)</div>
+            <div style="font-weight: bold; margin-top: 1px; padding-left: 6px; font-size: 7pt;">Pengenceran CSE</div>
+
+            <table class="excel-table" style="margin-left: 6px; width: 98%;">
+                <colgroup>
+                    <col style="width: 25%;">
+                    <col style="width: 2%;">
+                    <col style="width: 73%;">
+                </colgroup>
+                <tr style="height: 10.5pt;">
                     <td>Potensi CSE</td>
                     <td class="text-center">:</td>
-                    <td><?php echo html_escape($p['potensi_cse'] ?? '-'); ?> EU/mL dalam LRW</td>
+                    <td><?php echo html_escape($p['potensi_cse'] ?? 'xxxx'); ?> EU/mL dalam <?php echo html_escape($p['vol_lrw_cse'] ?? ($p['vol_lrw'] ?? 'xxxx')); ?> mL LRW</td>
                 </tr>
-                <tr style="height: 13pt;">
-                    <td>Kepekaan LAL/TAL*) (λ)</td>
+                <tr style="height: 10.5pt;">
+                    <td>Kepekaan LAL/TAL*) (&lambda;)</td>
                     <td class="text-center">:</td>
-                    <td><?php echo html_escape($p['kepekaan_lambda'] ?? '-'); ?> EU/mL</td>
+                    <td><?php echo html_escape($p['kepekaan_lambda'] ?? 'xxxx'); ?> EU/mL</td>
+                </tr>
+                <tr style="height: 20pt;">
+                    <td style="vertical-align: middle;">Konversi Potensi CSE:</td>
+                    <td colspan="2" style="vertical-align: middle;">
+                        <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 6.8pt;">
+                            <div style="display: inline-flex; flex-direction: column; align-items: center; text-align: center; vertical-align: middle; line-height: 1.1;">
+                                <span style="border-bottom: 0.8pt solid #000; padding: 0 4px;"><?php echo html_escape($p['potensi_cse'] ?? '0'); ?> EU/mL</span>
+                                <span style="padding: 0 4px;"><?php echo html_escape($p['kepekaan_lambda'] ?? '0,000'); ?> EU/mL</span>
+                            </div>
+                            <span>=</span>
+                            <span class="text-bold" style="padding: 0 2px;"><?php echo html_escape($konversi_cse_calc); ?></span>
+                            <span>&lambda;</span>
+                        </div>
+                    </td>
                 </tr>
             </table>
 
-            <div style="height: 4px;"></div>
+            <div style="font-weight: bold; margin-top: 2px; padding-left: 6px; font-size: 7pt;">Pengenceran</div>
 
-            <!-- PERHITUNGAN PMA -->
-            <div style="border: 1pt solid #000; padding: 4px 6px; margin: 4px 0;">
-                <table class="excel-table">
-                    <colgroup>
-                        <col style="width: 15%;">
-                        <col style="width: 85%;">
-                    </colgroup>
-                    <tr>
-                        <td class="text-bold" style="vertical-align: top;">Perhitungan PMA :</td>
-                        <td>
-                            <div style="font-size: 7pt;">
-                                PMA = &nbsp;<u>Batas Endotoksin &times; Konsentrasi Larutan Sampel</u><br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kepekaan pereaksi (&lambda;)
+            <!-- DIAGRAM PENGENCERAN CSE (8 TABUNG) -->
+            <table class="excel-table" style="width: 98%; margin: 0 auto 3px auto; text-align: center;">
+                <colgroup>
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 10.75%;">
+                    <col style="width: 14%;">
+                </colgroup>
+                <!-- BARIS VOLUME TRANSFER CSE (DI ATAS PANAH) -->
+                <tr style="height: 9pt; font-size: 6.3pt; font-weight: bold;">
+                    <td></td>
+                    <td style="padding-left: 3px;">0.1</td>
+                    <td style="padding-left: 3px;">0.1</td>
+                    <td style="padding-left: 3px;">1.0</td>
+                    <td style="padding-left: 3px;">0.1</td>
+                    <td style="padding-left: 3px;">0.5</td>
+                    <td style="padding-left: 3px;">0.5</td>
+                    <td style="padding-left: 3px;">0.5</td>
+                    <td class="text-left" style="font-size: 6.8pt; padding-left: 6px;">CSE (mL)</td>
+                </tr>
+                <!-- GAMBAR 8 TABUNG DENGAN PANAH -->
+                <tr>
+                    <td colspan="8" style="padding: 0; text-align: center;">
+                        <img src="<?php echo base_url('assets/img/pengujian/endotoksin/tubes_cse_8.png'); ?>" style="width: 100%; max-height: 42px; object-fit: contain; display: block;" alt="Diagram Pengenceran CSE">
+                    </td>
+                    <td></td>
+                </tr>
+                <!-- TITIK KONSENTRASI / TITER -->
+                <tr style="height: 9.5pt; font-size: 6.3pt; font-weight: bold;">
+                    <td>xxxx &lambda;</td>
+                    <td>xxxx &lambda;</td>
+                    <td>xx &lambda;</td>
+                    <td>20 &lambda;</td>
+                    <td>2 &lambda;</td>
+                    <td>&lambda;</td>
+                    <td>1/2&lambda;</td>
+                    <td>1/4&lambda;</td>
+                    <td></td>
+                </tr>
+                <!-- VOLUME LRW -->
+                <tr style="height: 9.5pt; font-size: 6.3pt;">
+                    <td></td>
+                    <td>0.9</td>
+                    <td>0.9</td>
+                    <td>3.0</td>
+                    <td>0.9</td>
+                    <td>0.5</td>
+                    <td>0.5</td>
+                    <td>0.5</td>
+                    <td class="text-left text-bold" style="font-size: 6.8pt; padding-left: 6px;">LRW (mL)</td>
+                </tr>
+            </table>
+
+            <!-- ========================================== -->
+            <!-- PERHITUNGAN PMA                            -->
+            <!-- ========================================== -->
+            <div style="font-weight: bold; margin-top: 3px; font-size: 7.2pt;">Perhitungan PMA :</div>
+            <table class="excel-table" style="margin-left: 6px; width: 98%;">
+                <colgroup>
+                    <col style="width: 8%;">
+                    <col style="width: 2%;">
+                    <col style="width: 38%;">
+                    <col style="width: 52%;">
+                </colgroup>
+                <tr style="height: 20pt;">
+                    <td class="text-bold" style="vertical-align: middle;">PMA</td>
+                    <td class="text-center" style="vertical-align: middle;">=</td>
+                    <td style="vertical-align: middle;">
+                        <div style="display: inline-flex; flex-direction: column; align-items: center; text-align: center; vertical-align: middle; line-height: 1.1; font-size: 6.8pt;">
+                            <span style="border-bottom: 0.8pt solid #000; padding: 0 4px;">Batas Endotoksin &times; Konsentrasi Larutan Sampel</span>
+                            <span style="padding: 0 4px;">Kepekaan pereaksi (&lambda;)</span>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr style="height: 20pt;">
+                    <td></td>
+                    <td class="text-center" style="vertical-align: middle;">=</td>
+                    <td style="vertical-align: middle;">
+                        <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 6.8pt;">
+                            <div style="display: inline-flex; flex-direction: column; align-items: center; text-align: center; vertical-align: middle; line-height: 1.1;">
+                                <span style="border-bottom: 0.8pt solid #000; padding: 0 4px;"><?php echo html_escape($p['batas_endotoksin'] ?? '0.2'); ?> <?php echo html_escape($p['satuan_batas_endotoksin'] ?? 'EU/mL'); ?> &times; <?php echo html_escape($p['konsentrasi_larutan_sampel'] ?? '1'); ?></span>
+                                <span style="padding: 0 4px;"><?php echo html_escape($p['kepekaan_lambda'] ?? '0.03'); ?> EU/mL</span>
                             </div>
-                            <div style="margin-top: 3px; font-size: 7.2pt;">
-                                = &nbsp;<u><?php echo html_escape($p['batas_endotoksin'] ?? '0.2'); ?> <?php echo html_escape($p['satuan_batas_endotoksin'] ?? 'EU/mL'); ?> &times; <?php echo html_escape($p['konsentrasi_larutan_sampel'] ?? '1'); ?></u> &nbsp;=&nbsp; <strong><?php echo html_escape($pma_calc !== '' ? $pma_calc : '-'); ?></strong>
-                            </div>
-                            <small class="text-muted" style="font-size: 6.5pt;">*(jika satuan batas endotoksin adalah EU/mL maka konsentrasi ditulis 1)</small>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                            <span>=</span>
+                            <span class="text-bold" style="font-size: 7pt;"><?php echo html_escape($pma_calc !== '' ? $pma_calc : '#DIV/0!'); ?></span>
+                        </div>
+                    </td>
+                    <td style="vertical-align: middle; font-size: 6.3pt; font-style: italic; color: #333;">
+                        (jika satuan batas endotoksin adalah EU/mL maka konsentrasi ditulis 1)
+                    </td>
+                </tr>
+            </table>
 
-            <!-- SKEMA PENGENCERAN SAMPEL & KSP -->
-            <div style="border: 1pt solid #000; padding: 4px 6px; margin: 4px 0; font-size: 6.8pt;">
-                <strong>Pengenceran Sampel :</strong><br>
-                <?php echo !empty($p['skema_pengenceran_sampel']) ? nl2br(html_escape($p['skema_pengenceran_sampel'])) : 'Neat &nbsp;&rarr;&nbsp; 1:2 &nbsp;&rarr;&nbsp; 1:4 &nbsp;&rarr;&nbsp; 1:8 &nbsp;&rarr;&nbsp; 1:16 (sesuai nilai PMA)'; ?>
-                <div style="height: 4px;"></div>
-                <strong>Pengenceran KSP (Kontrol Sampel Positif) :</strong><br>
-                <?php echo !empty($p['skema_pengenceran_ksp']) ? nl2br(html_escape($p['skema_pengenceran_ksp'])) : '@ 0,9 mL Sampel (sesuai tingkat pengenceran) + @ 0,1 mL 20&lambda;'; ?>
-            </div>
+            <!-- ========================================== -->
+            <!-- PENGENCERAN SAMPEL (10 TABUNG)             -->
+            <!-- ========================================== -->
+            <div style="font-weight: bold; margin-top: 3px; font-size: 7.2pt;">Pengenceran Sampel</div>
 
-            <div style="margin-top: 10px;"></div>
+            <table class="excel-table" style="width: 98%; margin: 0 auto 3px auto; text-align: center;">
+                <colgroup>
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 14%;">
+                </colgroup>
+                <!-- VOLUME TRANSFER SAMPEL -->
+                <tr style="height: 9pt; font-size: 6.3pt; font-weight: bold;">
+                    <td></td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td>xx</td>
+                    <td class="text-left" style="font-size: 6.8pt; padding-left: 6px;">Sampel</td>
+                </tr>
+                <!-- GAMBAR 10 TABUNG PENGENCERAN SAMPEL -->
+                <tr>
+                    <td colspan="10" style="padding: 0; text-align: center;">
+                        <img src="<?php echo base_url('assets/img/pengujian/endotoksin/tubes_sample_10.png'); ?>" style="width: 100%; max-height: 40px; object-fit: contain; display: block;" alt="Diagram Pengenceran Sampel">
+                    </td>
+                    <td></td>
+                </tr>
+                <!-- TINGKAT PENGENCERAN SAMPEL -->
+                <tr style="height: 9.5pt; font-size: 6.3pt; font-weight: bold;">
+                    <td>Neat</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td></td>
+                </tr>
+                <!-- WFI -->
+                <tr style="height: 9.5pt; font-size: 6.3pt;">
+                    <td></td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td class="text-left text-bold" style="font-size: 6.8pt; padding-left: 6px;">WFI</td>
+                </tr>
+            </table>
+
+            <!-- ========================================== -->
+            <!-- PENGENCERAN KSP (3 TAHAP)                  -->
+            <!-- ========================================== -->
+            <div style="font-weight: bold; margin-top: 3px; font-size: 7.2pt;">Pengenceran KSP</div>
+
+            <!-- TAHAP 1: TINGKAT PENGENCERAN SAMPEL (10 TABUNG HITAM) -->
+            <table class="excel-table" style="width: 98%; margin: 0 auto 1px auto; text-align: center;">
+                <colgroup>
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 8.6%;">
+                    <col style="width: 14%;">
+                </colgroup>
+                <tr>
+                    <td colspan="10" style="padding: 0; text-align: center;">
+                        <img src="<?php echo base_url('assets/img/pengujian/endotoksin/tubes_ksp_black_10.png'); ?>" style="width: 100%; max-height: 32px; object-fit: contain; display: block;" alt="Tingkat Pengenceran Sampel KSP">
+                    </td>
+                    <td></td>
+                </tr>
+                <tr style="height: 9.5pt; font-size: 6.3pt; font-weight: bold;">
+                    <td>Neat</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td>xxx</td>
+                    <td class="text-left" style="font-size: 6.8pt; padding-left: 6px;">Tingkat Pengenceran Sampel</td>
+                </tr>
+            </table>
+
+            <!-- TAHAP 2: KSP (@ 0,9 mL SAMPEL + @ 0,1 mL 20lambda) (10 TABUNG BIRU) -->
+            <div style="font-size: 6.5pt; margin-left: 6px; font-weight: bold; margin-top: 2px;">
+                @ 0,9 mL Sampel (sesuai tingkat pengenceran) &nbsp;+&nbsp; @ 0,1 mL 20&lambda;
+            </div>
+            <table class="excel-table" style="width: 98%; margin: 0 auto 1px auto; text-align: center;">
+                <colgroup>
+                    <col style="width: 86%;">
+                    <col style="width: 14%;">
+                </colgroup>
+                <tr>
+                    <td style="padding: 0; text-align: center;">
+                        <img src="<?php echo base_url('assets/img/pengujian/endotoksin/tubes_ksp_blue_10.png'); ?>" style="width: 100%; max-height: 30px; object-fit: contain; display: block;" alt="KSP Blue Tubes">
+                    </td>
+                    <td class="text-left text-bold" style="font-size: 6.8pt; padding-left: 6px; vertical-align: middle;">KSP</td>
+                </tr>
+            </table>
+
+            <!-- TAHAP 3: 20 TABUNG DUPLO MERAH DENGAN LAL -->
+            <div style="font-size: 6.5pt; margin-left: 6px; font-weight: bold; margin-top: 2px;">
+                0,1 mL masing-masing tingkat pengenceran yang telah ditambah 20&lambda;
+            </div>
+            <table class="excel-table" style="width: 98%; margin: 0 auto 3px auto; text-align: center;">
+                <colgroup>
+                    <col style="width: 86%;">
+                    <col style="width: 14%;">
+                </colgroup>
+                <tr>
+                    <td style="padding: 0; text-align: center;">
+                        <img src="<?php echo base_url('assets/img/pengujian/endotoksin/tubes_ksp_duplo_20.png'); ?>" style="width: 100%; max-height: 38px; object-fit: contain; display: block;" alt="Duplo Red Tubes KSP">
+                    </td>
+                    <td class="text-left text-bold" style="font-size: 6.8pt; padding-left: 6px; vertical-align: bottom; padding-bottom: 3px;">@ 0,1 mL LAL</td>
+                </tr>
+            </table>
+
+            <!-- ========================================== -->
+            <!-- TANDA TANGAN HALAMAN 2                     -->
+            <!-- ========================================== -->
+            <table class="excel-table" style="border-top: 1pt solid #000; border-bottom: 1pt solid #000; margin-top: 5px;">
+                <colgroup>
+                    <col style="width: 50%;">
+                    <col style="width: 50%;">
+                </colgroup>
+                <tr style="height: 12pt;">
+                    <td class="b-right text-bold" style="padding-left: 4px;">Tanda Tangan Penguji :</td>
+                    <td class="text-bold" style="padding-left: 10px;">Diperiksa Oleh :</td>
+                </tr>
+                <tr style="height: 36pt;">
+                    <td class="b-right text-center" style="vertical-align: middle;">
+                        <?php if (!empty($ttd_penguji_img)): ?>
+                            <img src="<?php echo $ttd_penguji_img; ?>" style="max-height: 28px; max-width: 110px; object-fit: contain;" alt="TTD Penguji">
+                            <div style="font-size: 6.5pt; font-weight: bold; margin-top: 1px;"><?php echo html_escape($nama_penguji); ?></div>
+                        <?php else: ?>
+                            <div style="font-size: 6.8pt; font-weight: bold; color: #198754;">[ TERCATAT DIGITAL ]</div>
+                            <div style="font-size: 6.5pt; font-weight: bold; margin-top: 1px;"><?php echo html_escape($nama_penguji); ?></div>
+                        <?php endif; ?>
+                    </td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        <?php if ($status_sesi === 'Approved / Final' || $status_sesi === 'Menunggu Approval'): ?>
+                            <?php if (!empty($ttd_penyelia_img)): ?>
+                                <img src="<?php echo $ttd_penyelia_img; ?>" style="max-height: 28px; max-width: 110px; object-fit: contain;" alt="TTD Penyelia">
+                            <?php else: ?>
+                                <div style="font-size: 6.8pt; font-weight: bold; color: #198754;">[ VERIFIED DIGITAL ]</div>
+                            <?php endif; ?>
+                            <div style="font-size: 6.5pt; font-weight: bold; margin-top: 1px;"><?php echo html_escape($verifier['nama_lengkap'] ?? ($sesi['nama_verifier'] ?? 'Penyelia')); ?></div>
+                        <?php else: ?>
+                            <div style="font-size: 6.5pt; color: #888; font-style: italic;">(Menunggu Verifikasi Penyelia)</div>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr style="height: 11.5pt;">
+                    <td class="b-right" style="padding-left: 4px;">Tanggal : &nbsp;<?php echo html_escape($tgl_selesai); ?></td>
+                    <td style="padding-left: 10px;">Tanggal : &nbsp;<?php echo ($status_sesi === 'Approved / Final' || $status_sesi === 'Menunggu Approval') ? html_escape($tgl_verif) : '-'; ?></td>
+                </tr>
+            </table>
 
         </div><!-- /.outer-border-box -->
 
@@ -584,7 +872,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td></td>
+                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.19</td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 2 dari 3 halaman</td>
             </tr>
         </table>
@@ -1058,7 +1346,7 @@ if (($hasil_angka === '' || $hasil_angka === '###') && is_numeric($kadar_e_val) 
                 <col style="width: 30%;">
             </colgroup>
             <tr style="height: 12pt;">
-                <td></td>
+                <td style="font-size: 7pt; font-weight: bold; padding-left: 2px;">POM-06.02/CFM.01/SOP.01/F.01B.19</td>
                 <td class="text-right" style="font-size: 7pt; padding-right: 2px;">Lembar 3 dari 3 halaman</td>
             </tr>
         </table>
