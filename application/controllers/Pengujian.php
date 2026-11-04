@@ -2675,4 +2675,128 @@ class Pengujian extends MY_Controller
             redirect('pengujian/detail/' . $test_id);
         }
     }
+
+
+    /**
+     * Endpoint AJAX untuk mengambil riwayat preparasi dari sesi/sampel sebelumnya
+     * berdasarkan template_id formulir pengujian yang sedang dibuka.
+     */
+    public function ajax_riwayat_preparasi()
+    {
+        $this->cek_hak_akses('pengujian_input');
+
+        $template_id = (int)$this->input->get('template_id');
+        $current_session_id = (int)$this->input->get('session_id');
+
+        if ($template_id <= 0) {
+            return $this->output
+                ->set_status_header(400)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('status' => 'error', 'message' => 'Template ID tidak valid.')));
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $raw_list = $this->Model_Pengujian->ambil_riwayat_preparasi_by_template($template_id, $current_session_id, NULL);
+
+        // Blacklist key yang TIDAK BOLEH disalin (identitas sampel, hasil pengujian, tabel hitung hasil, lampiran)
+        $blacklist_keys = array(
+            'csrf_token',
+            'lampiran_alat',
+            'file_lampiran_alat',
+            'kesimpulan_status',
+            'kesimpulan_lcp',
+            'kesimpulan',
+            'catatan',
+            'tabel_koloni',
+            'total_koloni',
+            'cawan_a',
+            'cawan_b',
+            'hasil_alt_angka',
+            'hasil_akk_angka',
+            'hasil_uji',
+            'tabel_s1',
+            'tabel_s2',
+            'tabel_s3',
+            'rata_rata_s1',
+            'nilai_minimum_s1',
+            'rata_rata_s2',
+            'nilai_minimum_s2',
+            'rata_rata_s3',
+            'nilai_minimum_s3',
+            'lakukan_tahap_s2',
+            'lakukan_tahap_s3',
+            'tabel_hplc',
+            'kadar_replikasi_1',
+            'kadar_replikasi_2',
+            'kadar_rata_persen',
+            'kadar_rata_mg',
+            'tabel_penimbangan',
+            'tabel_pengukuran',
+            'ksp_f1_neat',
+            'smp_f1_neat',
+            'smp_f2_neat',
+            'ksp_f2_neat',
+            'bobot_sampel',
+            'bobot_contoh_sampel',
+            'bobot_contoh_uji'
+        );
+
+        $results = array();
+        foreach ($raw_list as $row) {
+            $dh = !empty($row['data_hasil']) ? json_decode($row['data_hasil'], true) : array();
+            if (!is_array($dh)) continue;
+
+            $p_vals = isset($dh['parameter_values']) && is_array($dh['parameter_values']) ? $dh['parameter_values'] : $dh;
+            
+            // Filter nilai yang aman untuk disalin (hanya preparasi, baku, pelarut, instrumen)
+            $preparasi_clean = array();
+            foreach ($p_vals as $k => $val) {
+                if (in_array($k, $blacklist_keys, true)) continue;
+                // Jangan salin jika key mengandung kata hasil atau replikasi
+                if (stripos($k, 'hasil_') === 0 && stripos($k, 'hasil_ukur_baku') === false) continue;
+                if (stripos($k, 'replikasi_') !== false) continue;
+                if (stripos($k, 'tabel_pengamatan') !== false) continue;
+                $preparasi_clean[$k] = $val;
+            }
+
+            // Identifikasi info ringkas baku atau preparasi
+            $baku_info = '-';
+            if (!empty($preparasi_clean['baku_pembanding'])) {
+                $baku_info = $preparasi_clean['baku_pembanding'];
+            } elseif (!empty($preparasi_clean['baku_nama'])) {
+                $baku_info = $preparasi_clean['baku_nama'];
+            } elseif (!empty($preparasi_clean['nama_baku'])) {
+                $baku_info = $preparasi_clean['nama_baku'];
+            } elseif (!empty($preparasi_clean['pelarut'])) {
+                $baku_info = 'Pelarut: ' . $preparasi_clean['pelarut'];
+            } elseif (!empty($preparasi_clean['media_agar'])) {
+                $baku_info = 'Media: ' . $preparasi_clean['media_agar'];
+            }
+
+            $tgl_display = !empty($row['waktu_selesai']) 
+                ? date('d M Y, H:i', strtotime($row['waktu_selesai']))
+                : (!empty($row['updated_at']) ? date('d M Y, H:i', strtotime($row['updated_at'])) : date('d M Y', strtotime($row['created_at'])));
+
+            $results[] = array(
+                'test_result_id'    => (int)$row['test_result_id'],
+                'session_id'        => (int)$row['session_id'],
+                'nama_sampel'       => $row['nama_sampel'],
+                'kode_sampel'       => !empty($row['kode_sampel_manual']) ? $row['kode_sampel_manual'] : (!empty($row['no_sampel']) ? 'NO-' . $row['no_sampel'] : 'SMP-' . $row['sample_id']),
+                'tanggal_display'   => $tgl_display,
+                'nama_penguji'      => $row['nama_penguji'] ?: 'Penguji',
+                'info_baku'         => $baku_info,
+                'alat_ids'          => isset($dh['alat_ids']) && is_array($dh['alat_ids']) ? array_values(array_map('intval', $dh['alat_ids'])) : array(),
+                'reagen_ids'        => isset($dh['reagen_ids']) && is_array($dh['reagen_ids']) ? array_values(array_map('intval', $dh['reagen_ids'])) : array(),
+                'preparasi_data'    => $preparasi_clean
+            );
+        }
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array(
+                'status' => 'success',
+                'count'  => count($results),
+                'data'   => $results
+            )));
+    }
 }

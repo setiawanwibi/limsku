@@ -2213,4 +2213,42 @@ class Model_Pengujian extends CI_Model
         ];
     }
 
+
+    /**
+     * Mengambil daftar riwayat pengujian sebelumnya yang memiliki template yang sama
+     * untuk keperluan fitur 'Salin Preparasi dari Sampel Lain'.
+     *
+     * @param int $template_id
+     * @param int $exclude_session_id Sesi pengujian yang sedang aktif (dikecualikan)
+     * @param int|null $penguji_id Opsional filter penguji (default NULL = semua penguji di lab)
+     * @return array
+     */
+    public function ambil_riwayat_preparasi_by_template($template_id, $exclude_session_id = 0, $penguji_id = NULL)
+    {
+        $this->db->select('tr.id as test_result_id, tr.session_id, tr.template_id, tr.data_hasil, tr.updated_at,
+                           ts.id as sesi_id, ts.status as status_sesi, ts.waktu_mulai, ts.waktu_selesai, ts.created_at,
+                           s.id as sample_id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt,
+                           t.kode_template, t.nama_template, u.nama_lengkap as nama_penguji');
+        $this->db->from('test_results tr');
+        $this->db->join('testing_sessions ts', 'ts.id = tr.session_id', 'inner');
+        $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+        $this->db->join('form_templates t', 't.id = tr.template_id', 'left');
+        $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
+        
+        $this->db->where('tr.template_id', (int)$template_id);
+        if ($exclude_session_id > 0) {
+            $this->db->where('tr.session_id !=', (int)$exclude_session_id);
+        }
+        if (!empty($penguji_id)) {
+            $this->db->where('ts.penguji_id', (int)$penguji_id);
+        }
+        $this->db->where('tr.data_hasil IS NOT NULL', NULL, FALSE);
+        $this->db->where("tr.data_hasil != ''", NULL, FALSE);
+        $this->db->where("tr.data_hasil != '{}'", NULL, FALSE);
+        
+        $this->db->order_by('COALESCE(ts.waktu_selesai, tr.updated_at, ts.created_at, tr.id) DESC', '', FALSE);
+        $this->db->limit(30);
+        
+        return $this->db->get()->result_array();
+    }
 }

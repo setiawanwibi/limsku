@@ -2,19 +2,19 @@
 <style>
     .logbook-page {
         color: #1e293b;
-        font-size: 0.88rem;
+        font-size: 0.86rem;
     }
     .stat-card-custom {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 18px;
-        transition: all 0.25s ease;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        border-radius: 10px;
+        padding: 14px 18px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
     .stat-card-custom:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px -3px rgba(0,0,0,0.06);
         border-color: #cbd5e1;
     }
     .stat-icon-wrap {
@@ -131,33 +131,14 @@
         </div>
     <?php endif; ?>
 
-    <!-- Header Halaman -->
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small">
-                    <i class="bi bi-shield-check me-1"></i> GLP &amp; ISO 17025 Compliant
-                </span>
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small">
-                    <i class="bi bi-lightning-charge me-1"></i> Auto-Logged on Submit
-                </span>
-            </div>
-            <h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-                <i class="bi bi-journal-bookmark-fill text-primary"></i>
-                <span>Logbook Digital Penggunaan Alat</span>
-            </h4>
-            <p class="text-muted small mb-0">
-                Pencatatan riwayat pemakaian instrumen laboratorium secara otomatis saat analis mengirimkan hasil pengujian ke penyelia.
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="<?php echo site_url('logbook/cetak' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')); ?>" 
-               target="_blank" 
-               class="btn btn-outline-primary btn-sm px-3 shadow-sm rounded-pill d-inline-flex align-items-center gap-2 fw-semibold">
-                <i class="bi bi-printer-fill"></i>
-                <span>Cetak / Ekspor Logbook</span>
-            </a>
-        </div>
+    <!-- Tombol Aksi Cepat Header Bersih -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="<?php echo site_url('logbook/cetak' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')); ?>" 
+           target="_blank" 
+           class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs d-inline-flex align-items-center gap-2 fw-semibold" style="font-size: 0.8rem;">
+            <i class="bi bi-printer"></i>
+            <span>Cetak / Ekspor Logbook</span>
+        </a>
     </div>
 
     <!-- Kartu Statistik Penggunaan -->
