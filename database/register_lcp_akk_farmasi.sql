@@ -181,7 +181,7 @@ INSERT INTO `form_templates` (
       "fields": [
         {
           "id": "spike_candida_jumlah",
-          "label": "Jumlah Spike C. albicans (koloni)",
+          "label": "Jumlah Spike C. albicans (koloni) 10^-1",
           "type": "text",
           "placeholder": "Contoh: 50"
         },
@@ -202,7 +202,7 @@ INSERT INTO `form_templates` (
         },
         {
           "id": "spike_aspergillus_jumlah",
-          "label": "Jumlah Spike A. niger / brasiliensis (koloni)",
+          "label": "Jumlah Spike A. niger / brasiliensis (koloni) 10^-1",
           "type": "text",
           "placeholder": "Contoh: 45"
         },
@@ -279,7 +279,7 @@ INSERT INTO `form_templates` (
         },
         {
           "id": "perhitungan_akk_rumus_atas",
-          "label": "Rumus Pembilang (Contoh: (2+3) x 10^1)",
+          "label": "Rumus Pembilang",
           "type": "text",
           "placeholder": "(A + B) x faktor pengenceran"
         },

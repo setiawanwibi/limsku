@@ -868,7 +868,7 @@
                                                     <i class="bi bi-search me-1"></i> Tidak ada alat yang cocok dengan pencarian
                                                 </div>
                                             </div>
-                                            <small class="text-muted d-block mt-1">Tahan tombol <em>Ctrl</em> (Windows) untuk memilih lebih dari 1 alat.</small>
+                                            <small class="text-muted d-block mt-1"><i class="bi bi-cursor me-1"></i>Klik pada item untuk memilih atau membatalkan pilihan.</small>
 
                                             <!-- Container Detail Alat Terpilih -->
                                             <div id="info-alat-<?php echo $f['id']; ?>" class="mt-2 info-detail-container"></div>
@@ -904,21 +904,19 @@
                                                                 $is_expired = (strtotime($rg['expired_date']) < strtotime('today'));
                                                             }
 
-                                                            // Tentukan apakah reagen tidak dapat dipilih
-                                                            $is_disabled = ($is_stok_kosong || $is_expired);
+                                                            // Tetap dapat dipilih oleh penguji (fleksibel ketersediaan di lab)
                                                             $status_keterangan = '';
                                                             if ($is_expired && $is_stok_kosong) {
-                                                                $status_keterangan = ' [KEDALUWARSA & STOK KOSONG]';
+                                                                $status_keterangan = ' [Kedaluwarsa & Stok Gudang Kosong]';
                                                             } elseif ($is_expired) {
-                                                                $status_keterangan = ' [KEDALUWARSA - ' . date('d/m/Y', strtotime($rg['expired_date'])) . ']';
+                                                                $status_keterangan = ' [Kedaluwarsa - ' . date('d/m/Y', strtotime($rg['expired_date'])) . ']';
                                                             } elseif ($is_stok_kosong) {
-                                                                $status_keterangan = ' [STOK HABIS]';
+                                                                $status_keterangan = ' [Stok Gudang Kosong]';
                                                             }
                                                             $nama_tampil = !empty($rg['nama_barang']) ? $rg['nama_barang'] : $rg['nama_reagen'];
                                                             ?>
                                                             <option value="<?php echo $rg['id']; ?>" 
                                                                 <?php echo in_array($rg['id'], $saved_reagen_ids) ? 'selected' : ''; ?>
-                                                                <?php echo $is_disabled ? 'disabled' : ''; ?>
                                                                 data-kode="<?php echo html_escape($rg['kode_barang'] ?: '-'); ?>"
                                                                 data-katalog="<?php echo html_escape($rg['katalog'] ?: '-'); ?>"
                                                                 data-nama="<?php echo html_escape($nama_tampil); ?>"
@@ -940,9 +938,9 @@
                                                 </div>
                                             </div>
                                             <small class="text-muted d-block mt-1">
-                                                Tahan tombol <em>Ctrl</em> (Windows) untuk memilih lebih dari 1 reagen.
-                                                <span class="text-danger fw-semibold d-inline-block ms-1">
-                                                    <i class="bi bi-slash-circle me-1"></i>Reagen kedaluwarsa atau stok habis dinonaktifkan otomatis.
+                                                <i class="bi bi-cursor me-1"></i>Klik pada item untuk memilih atau membatalkan pilihan.
+                                                <span class="text-secondary d-inline-block ms-1">
+                                                    <i class="bi bi-info-circle me-1"></i>Reagen tetap dapat dipilih jika persediaan fisik di lab masih tersedia.
                                                 </span>
                                             </small>
 
@@ -1911,6 +1909,30 @@
                 });
             }
         }
+
+        // Fitur klik langsung toggle pilihan (tanpa perlu tekan Ctrl)
+        function enableEasyMultiSelect(selectElem) {
+            selectElem.addEventListener('mousedown', function(e) {
+                var opt = e.target;
+                if (!opt || opt.tagName !== 'OPTION' || opt.disabled) return;
+                
+                e.preventDefault(); // Mencegah perilaku default browser yang mereset pilihan lain jika tanpa Ctrl
+                
+                // Toggle status selected
+                opt.selected = !opt.selected;
+                
+                // Fokuskan ke select agar keyboard navigation tetap hidup jika dibutuhkan
+                selectElem.focus();
+                
+                // Trigger event change secara manual agar listener pembaruan panel info berjalan
+                var evt = new Event('change', { bubbles: true });
+                selectElem.dispatchEvent(evt);
+            });
+        }
+
+        document.querySelectorAll('.select-alat-instrument, .select-reagen-material').forEach(function(el) {
+            enableEasyMultiSelect(el);
+        });
 
         // Inisialisasi semua picker alat & reagen di semua formulir
         document.querySelectorAll('.searchable-picker-box').forEach(function(box) {
@@ -4020,6 +4042,207 @@
             if (kodeTpl === 'MIK-03') hitungMikroPotensi(pane);
             if (kodeTpl === 'MIK-05') hitungMikroEndotoksin(pane);
             if (kodeTpl === 'MIK-06') hitungMikroKepekaanLAL(pane);
+        });
+
+        // =========================================================================
+        // Auto-Calculator Engine untuk Tabel Pengamatan Koloni (ALT & AKK)
+        // Menghitung Total Koloni = 1 ml (A) + 1 ml (B)
+        // Dan Rata-rata Spike Mikroba (A + B) / 2
+        // =========================================================================
+        function hitungRumusAKK(pane) {
+            if (!pane) return;
+            // Pastikan ini formulir AKK (MIK-02)
+            var pembilangInput = pane.querySelector('input[name*="[perhitungan_akk_rumus_atas]"]');
+            var penyebutInput  = pane.querySelector('input[name*="[perhitungan_akk_rumus_bawah]"]');
+            var hasilInput     = pane.querySelector('input[name*="[hasil_akk_angka]"]');
+
+            if (!pembilangInput) return; // Bukan form AKK
+
+            // Cari semua baris tabel koloni pada pane ini
+            var rows = pane.querySelectorAll('table tbody tr');
+            var selectedDilution = null;
+            var selectedA = null;
+            var selectedB = null;
+            var selectedFactor = null;
+
+            // Aturan AKK: cari baris pengenceran di mana nilai per cawannya (A dan B) masing-masing < 50
+            // Urut dari 10^-1, 10^-2, 10^-3, dst.
+            rows.forEach(function(row) {
+                if (selectedDilution !== null) return; // sudah ketemu baris yang memenuhi syarat
+
+                var pengenceranInput = row.querySelector('input[name*="[pengenceran]"]');
+                var inputA = row.querySelector('input[name*="[cawan_a]"]');
+                var inputB = row.querySelector('input[name*="[cawan_b]"]');
+
+                if (pengenceranInput && inputA && inputB) {
+                    var pengenceranStr = pengenceranInput.value.trim();
+                    var valAStr = inputA.value.trim().replace(',', '.');
+                    var valBStr = inputB.value.trim().replace(',', '.');
+
+                    if (valAStr !== '' && valBStr !== '') {
+                        var numA = parseFloat(valAStr);
+                        var numB = parseFloat(valBStr);
+
+                        if (!isNaN(numA) && !isNaN(numB)) {
+                            // Cek syarat AKK: masing-masing nilai A < 50 dan B < 50
+                            if (numA < 50 && numB < 50) {
+                                selectedA = numA;
+                                selectedB = numB;
+                                selectedDilution = pengenceranStr;
+
+                                // Cari faktor eksponen pengenceran, misal 10^-1 -> 10^1, 10^-2 -> 10^2
+                                var matchExp = pengenceranStr.match(/10\^[-–]?(\d+)/);
+                                if (matchExp) {
+                                    selectedFactor = matchExp[1]; // misal '1', '2', '3'
+                                } else {
+                                    selectedFactor = '1';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (selectedDilution !== null && selectedA !== null && selectedB !== null) {
+                // Susun Rumus Pembilang: (A+B) x 10^n
+                var strPembilang = '(' + selectedA + '+' + selectedB + ') x 10^' + selectedFactor;
+                pembilangInput.value = strPembilang;
+
+                if (penyebutInput && (!penyebutInput.value || penyebutInput.value === '')) {
+                    penyebutInput.value = '2';
+                }
+
+                // Hitung Hasil AKK: nilai total koloni sebenarnya = rata * 10^factor
+                var rata = (selectedA + selectedB) / 2;
+                var totalAktual = rata * Math.pow(10, parseInt(selectedFactor, 10));
+                
+                // Format selalu dinormalisasi ke pangkat 10^2: nilai / 100
+                var nilaiBasis102 = totalAktual / 100;
+                
+                // Rapikan tampilan desimal (maksimal 2 angka di belakang koma tanpa trailing zero berlebih)
+                var rounded102 = Math.round(nilaiBasis102 * 100) / 100;
+                var strHasil102 = String(rounded102).replace('.', ',');
+                
+                var strHasil = strHasil102 + ' x 10^2';
+                if (hasilInput) {
+                    hasilInput.value = strHasil;
+                    hasilInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                pembilangInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        function hitungBarisKoloni(tr) {
+            if (!tr) return;
+            var inputA = tr.querySelector('input[name*="[cawan_a]"]');
+            var inputB = tr.querySelector('input[name*="[cawan_b]"]');
+            var inputTotal = tr.querySelector('input[name*="[total_koloni]"]');
+
+            if (inputA && inputB && inputTotal) {
+                var valA = inputA.value.trim();
+                var valB = inputB.value.trim();
+
+                if (valA !== '' && valB !== '') {
+                    var numA = parseFloat(valA.replace(',', '.'));
+                    var numB = parseFloat(valB.replace(',', '.'));
+
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        inputTotal.value = (numA + numB);
+                        // Trigger input event pada inputTotal agar terdeteksi autosave
+                        inputTotal.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                } else if (valA !== '' && valB === '') {
+                    var numA = parseFloat(valA.replace(',', '.'));
+                    if (!isNaN(numA)) {
+                        inputTotal.value = numA;
+                    }
+                } else if (valA === '' && valB !== '') {
+                    var numB = parseFloat(valB.replace(',', '.'));
+                    if (!isNaN(numB)) {
+                        inputTotal.value = numB;
+                    }
+                }
+            }
+        }
+
+        // Auto hitung rata-rata spike mikroba kesesuaian metode (Candida, Aspergillus, dll)
+        function hitungSpikeRata(inputElem) {
+            var name = inputElem.name || '';
+            var pane = inputElem.closest('.form-tab-pane-uji') || document;
+            
+            // Cek apakah Candida
+            if (name.indexOf('[spike_candida_a]') !== -1 || name.indexOf('[spike_candida_b]') !== -1) {
+                var a = pane.querySelector('input[name*="[spike_candida_a]"]');
+                var b = pane.querySelector('input[name*="[spike_candida_b]"]');
+                var r = pane.querySelector('input[name*="[spike_candida_rata]"]');
+                if (a && b && r) {
+                    var na = parseFloat(a.value.replace(',', '.'));
+                    var nb = parseFloat(b.value.replace(',', '.'));
+                    if (!isNaN(na) && !isNaN(nb)) r.value = ((na + nb) / 2);
+                }
+            }
+            // Cek apakah Aspergillus
+            if (name.indexOf('[spike_aspergillus_a]') !== -1 || name.indexOf('[spike_aspergillus_b]') !== -1) {
+                var a = pane.querySelector('input[name*="[spike_aspergillus_a]"]');
+                var b = pane.querySelector('input[name*="[spike_aspergillus_b]"]');
+                var r = pane.querySelector('input[name*="[spike_aspergillus_rata]"]');
+                if (a && b && r) {
+                    var na = parseFloat(a.value.replace(',', '.'));
+                    var nb = parseFloat(b.value.replace(',', '.'));
+                    if (!isNaN(na) && !isNaN(nb)) r.value = ((na + nb) / 2);
+                }
+            }
+            // Cek ALT: S. aureus
+            if (name.indexOf('[spike_saureus_a]') !== -1 || name.indexOf('[spike_saureus_b]') !== -1) {
+                var a = pane.querySelector('input[name*="[spike_saureus_a]"]');
+                var b = pane.querySelector('input[name*="[spike_saureus_b]"]');
+                var r = pane.querySelector('input[name*="[spike_saureus_rata]"]');
+                if (a && b && r) {
+                    var na = parseFloat(a.value.replace(',', '.'));
+                    var nb = parseFloat(b.value.replace(',', '.'));
+                    if (!isNaN(na) && !isNaN(nb)) r.value = ((na + nb) / 2);
+                }
+            }
+            // Cek ALT: P. aeruginosa
+            if (name.indexOf('[spike_paeruginosa_a]') !== -1 || name.indexOf('[spike_paeruginosa_b]') !== -1) {
+                var a = pane.querySelector('input[name*="[spike_paeruginosa_a]"]');
+                var b = pane.querySelector('input[name*="[spike_paeruginosa_b]"]');
+                var r = pane.querySelector('input[name*="[spike_paeruginosa_rata]"]');
+                if (a && b && r) {
+                    var na = parseFloat(a.value.replace(',', '.'));
+                    var nb = parseFloat(b.value.replace(',', '.'));
+                    if (!isNaN(na) && !isNaN(nb)) r.value = ((na + nb) / 2);
+                }
+            }
+            // Cek ALT: E. coli
+            if (name.indexOf('[spike_ecoli_a]') !== -1 || name.indexOf('[spike_ecoli_b]') !== -1) {
+                var a = pane.querySelector('input[name*="[spike_ecoli_a]"]');
+                var b = pane.querySelector('input[name*="[spike_ecoli_b]"]');
+                var r = pane.querySelector('input[name*="[spike_ecoli_rata]"]');
+                if (a && b && r) {
+                    var na = parseFloat(a.value.replace(',', '.'));
+                    var nb = parseFloat(b.value.replace(',', '.'));
+                    if (!isNaN(na) && !isNaN(nb)) r.value = ((na + nb) / 2);
+                }
+            }
+        }
+
+        // Listener otomatis untuk input tabel koloni dan spike
+        document.addEventListener('input', function(e) {
+            if (!e.target || !e.target.name) return;
+            var name = e.target.name;
+            if (name.indexOf('[cawan_a]') !== -1 || name.indexOf('[cawan_b]') !== -1) {
+                var tr = e.target.closest('tr');
+                if (tr) {
+                    hitungBarisKoloni(tr);
+                    var pane = tr.closest('.form-tab-pane-uji') || document;
+                    hitungRumusAKK(pane);
+                }
+            }
+            if (name.indexOf('[spike_') !== -1) {
+                hitungSpikeRata(e.target);
+            }
         });
 
         // =========================================================================

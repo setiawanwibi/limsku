@@ -403,7 +403,7 @@ class Laporan_PDF extends FPDF
 
         $semua_ms = true;
         $ada_tms = false;
-        $nama_balai = !empty($sampel['balai_penguji']) ? 'BALAI BESAR POM DI ' . strtoupper($sampel['balai_penguji']) : 'BALAI BESAR POM DI PEKANBARU';
+        $nama_balai = 'BALAI BESAR POM DI BANDAR LAMPUNG';
 
         foreach ($urutan_jenis as $jenis) {
             if (empty($sesi_by_jenis[$jenis])) continue;

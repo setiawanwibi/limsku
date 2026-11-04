@@ -443,7 +443,7 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
                                             $pustaka_item = !empty($f['pustaka_acuan']) ? $f['pustaka_acuan'] : (!empty($f['pustaka_metode']) ? $f['pustaka_metode'] : '-');
                                             $metode_item  = !empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['nama_metode']) ? $f['nama_metode'] : '-');
                                             $syarat_item  = !empty($f['persyaratan']) ? $f['persyaratan'] : '-';
-                                            $balai_item   = !empty($sampel['balai_penguji']) ? 'Balai Besar POM di ' . ucwords(strtolower($sampel['balai_penguji'])) : 'Balai Besar POM di Bandar Lampung';
+                                            $balai_item   = 'Balai Besar POM di Bandar Lampung';
 
                                             // Ringkasan data hasil
                                             $raw_data = !empty($f['data_hasil']) ? json_decode($f['data_hasil'], true) : [];

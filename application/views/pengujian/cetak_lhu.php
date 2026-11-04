@@ -423,7 +423,7 @@ $ttd_approver_img = $resolve_ttd($signature_approver ?? null);
             if (empty($sesi_by_jenis[$jenis])) continue;
 
             $judul_seksi = ($jenis === 'Mikrobiologi') ? 'PENGUJIAN MIKRO' : 'PENGUJIAN ' . strtoupper($jenis);
-            $nama_balai = !empty($sampel['balai_penguji']) ? 'BALAI BESAR POM DI ' . strtoupper($sampel['balai_penguji']) : 'BALAI BESAR POM DI BANDAR LAMPUNG';
+            $nama_balai = 'BALAI BESAR POM DI BANDAR LAMPUNG';
         ?>
 
             <div class="section-title"><?php echo html_escape($judul_seksi); ?></div>
