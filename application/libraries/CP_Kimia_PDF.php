@@ -426,11 +426,48 @@ class CP_Kimia_PDF extends FPDF
         // ==========================================
         // BARIS 27: 10 Kesimpulan (Row 27)
         // ==========================================
-        $kesimpulan_sesi = !empty($sesi['kesimpulan']) ? $sesi['kesimpulan'] : 'MS terhadap Uji yang dilakukan';
+        $kesimpulan_sesi = !empty($sesi['kesimpulan']) ? $sesi['kesimpulan'] : '';
+        if (empty($kesimpulan_sesi) || $kesimpulan_sesi === '-' || $kesimpulan_sesi === 'MS terhadap Uji yang dilakukan') {
+            $ci =& get_instance();
+            if (isset($ci->Model_Pengujian)) {
+                $eval = $ci->Model_Pengujian->evaluasi_kesimpulan_sesi($forms);
+                $kesimpulan_sesi = $eval['kesimpulan'];
+            } else {
+                $tms_list = array();
+                $ms_list = array();
+                $pending_list = array();
+                foreach ($forms as $f_item) {
+                    $p_name = !empty($f_item['parameter_uji']) ? $f_item['parameter_uji'] : (!empty($f_item['nama_template']) ? $f_item['nama_template'] : 'Parameter');
+                    $k = !empty($f_item['kesimpulan']) ? $f_item['kesimpulan'] : '';
+                    if (stripos($k, 'tidak memenuhi') !== false || strtoupper($k) === 'TMS') {
+                        $tms_list[] = $p_name;
+                    } elseif (stripos($k, 'memenuhi') !== false || strtoupper($k) === 'MS') {
+                        $ms_list[] = $p_name;
+                    } else {
+                        $pending_list[] = $p_name;
+                    }
+                }
+                if (!empty($tms_list)) {
+                    $kesimpulan_sesi = 'Tidak Memenuhi Syarat (TMS) pada hasil pengujian ' . implode(', ', array_unique($tms_list));
+                } elseif (!empty($ms_list) && empty($pending_list)) {
+                    $kesimpulan_sesi = 'Memenuhi Syarat (MS)';
+                } elseif (!empty($pending_list) || !empty($ms_list)) {
+                    $kesimpulan_sesi = 'Belum Disimpulkan';
+                } else {
+                    $kesimpulan_sesi = '-';
+                }
+            }
+        }
         $this->SetFont('Arial', '', 9);
         $this->Cell(7, 6, '10', 1, 0, 'C');
         $this->Cell(75, 6, 'Kesimpulan', 1, 0, 'L');
-        $this->SetFont('Arial', 'B', 8.5);
+        if (strlen($kesimpulan_sesi) > 75) {
+            $this->SetFont('Arial', 'B', 7.5);
+        } elseif (strlen($kesimpulan_sesi) > 60) {
+            $this->SetFont('Arial', 'B', 8.0);
+        } else {
+            $this->SetFont('Arial', 'B', 8.5);
+        }
         $this->Cell(108, 6, ' ' . $kesimpulan_sesi, 1, 1, 'L');
 
         // ==========================================

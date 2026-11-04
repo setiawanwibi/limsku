@@ -181,6 +181,11 @@ class FPDF
         $this->PageBreakTrigger = $this->h-$margin;
     }
 
+    public function AcceptPageBreak()
+    {
+        return $this->AutoPageBreak;
+    }
+
     public function SetDisplayMode($zoom, $layout='default')
     {
         if($zoom=='fullpage' || $zoom=='fullwidth' || $zoom=='real' || $zoom=='default' || !is_string($zoom))

@@ -383,6 +383,113 @@ class Model_Pengujian extends CI_Model
     }
 
     /**
+     * Evaluasi kesimpulan keseluruhan sesi pengujian berdasarkan seluruh form parameter uji.
+     * Aturan evaluasi resmi BPOM & permintaan pengguna:
+     * 1. Jika ada salah satu parameter yang Tidak Memenuhi Syarat (TMS),
+     *    maka sampel dinyatakan TMS di Catatan Pengujian (CP) dengan format:
+     *    "Tidak Memenuhi Syarat (TMS) pada hasil pengujian [daftar parameter yg TMS]"
+     * 2. Jika seluruh parameter Memenuhi Syarat (MS), maka dinyatakan:
+     *    "Memenuhi Syarat (MS)"
+     * 3. Jika belum ada parameter yang disimpulkan / masih pengujian:
+     *    "Belum Disimpulkan"
+     * 4. Jika forms kosong: "-"
+     *
+     * @param array $forms
+     * @return array ['kesimpulan' => string, 'status_kesimpulan' => 'TMS'|'MS'|'BELUM'|'-', 'tms_parameters' => array, 'ms_parameters' => array]
+     */
+    public function evaluasi_kesimpulan_sesi($forms)
+    {
+        if (empty($forms) || !is_array($forms)) {
+            return array(
+                'kesimpulan'        => '-',
+                'status_kesimpulan' => '-',
+                'tms_parameters'    => array(),
+                'ms_parameters'     => array()
+            );
+        }
+
+        $tms_params     = array();
+        $ms_params      = array();
+        $pending_params = array();
+
+        foreach ($forms as $f) {
+            $param_nama = '';
+            if (!empty($f['parameter_uji'])) {
+                $param_nama = trim($f['parameter_uji']);
+            } elseif (!empty($f['nama_template'])) {
+                $param_nama = trim($f['nama_template']);
+            } elseif (!empty($f['nama_parameter'])) {
+                $param_nama = trim($f['nama_parameter']);
+            } elseif (!empty($f['nama_metode'])) {
+                $param_nama = trim($f['nama_metode']);
+            } else {
+                $param_nama = 'Parameter Uji';
+            }
+
+            // Ambil kesimpulan dari row test_results atau payload data_hasil
+            $kes = isset($f['kesimpulan']) ? trim($f['kesimpulan']) : '';
+            if (empty($kes) || $kes === 'Belum Disimpulkan') {
+                if (!empty($f['data_hasil'])) {
+                    $dh = is_array($f['data_hasil']) ? $f['data_hasil'] : json_decode($f['data_hasil'], true);
+                    if (!empty($dh['kesimpulan'])) {
+                        $kes = trim($dh['kesimpulan']);
+                    } elseif (!empty($dh['parameter_values']['kesimpulan'])) {
+                        $kes = trim($dh['parameter_values']['kesimpulan']);
+                    } elseif (!empty($dh['kesimpulan_lcp'])) {
+                        $kes = trim($dh['kesimpulan_lcp']);
+                    } elseif (!empty($dh['parameter_values']['kesimpulan_lcp'])) {
+                        $kes = trim($dh['parameter_values']['kesimpulan_lcp']);
+                    }
+                }
+            }
+
+            if (stripos($kes, 'tidak memenuhi') !== false || strtoupper($kes) === 'TMS') {
+                $tms_params[] = $param_nama;
+            } elseif (stripos($kes, 'memenuhi') !== false || strtoupper($kes) === 'MS') {
+                $ms_params[] = $param_nama;
+            } else {
+                $pending_params[] = $param_nama;
+            }
+        }
+
+        if (!empty($tms_params)) {
+            $unique_tms = array_values(array_unique($tms_params));
+            $kesimpulan_str = 'Tidak Memenuhi Syarat (TMS) pada hasil pengujian ' . implode(', ', $unique_tms);
+            return array(
+                'kesimpulan'        => $kesimpulan_str,
+                'status_kesimpulan' => 'TMS',
+                'tms_parameters'    => $unique_tms,
+                'ms_parameters'     => array_values(array_unique($ms_params))
+            );
+        }
+
+        if (!empty($ms_params) && empty($pending_params)) {
+            return array(
+                'kesimpulan'        => 'Memenuhi Syarat (MS)',
+                'status_kesimpulan' => 'MS',
+                'tms_parameters'    => array(),
+                'ms_parameters'     => array_values(array_unique($ms_params))
+            );
+        }
+
+        if (!empty($pending_params) || !empty($ms_params)) {
+            return array(
+                'kesimpulan'        => 'Belum Disimpulkan',
+                'status_kesimpulan' => 'BELUM',
+                'tms_parameters'    => array(),
+                'ms_parameters'     => array_values(array_unique($ms_params))
+            );
+        }
+
+        return array(
+            'kesimpulan'        => '-',
+            'status_kesimpulan' => '-',
+            'tms_parameters'    => array(),
+            'ms_parameters'     => array()
+        );
+    }
+
+    /**
      * Mengambil sesi pengujian aktif untuk sampel tertentu
      */
     public function ambil_sesi_by_sample($sample_id)

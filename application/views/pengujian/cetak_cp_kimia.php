@@ -90,8 +90,39 @@ $bulan_indo = [
 $tgl_lapor = !empty($sesi['waktu_selesai']) ? strtr(date('d F Y', strtotime($sesi['waktu_selesai'])), $bulan_indo) : '-';
 $tgl_periksa = !empty($sesi['waktu_verifikasi']) ? strtr(date('d F Y', strtotime($sesi['waktu_verifikasi'])), $bulan_indo) : '-';
 
-// Kesimpulan Sesi
-$kesimpulan_sesi = !empty($sesi['kesimpulan']) ? $sesi['kesimpulan'] : 'MS terhadap Uji yang dilakukan';
+// Kesimpulan Sesi (Evaluasi dinamis dari parameter pengujian)
+$kesimpulan_sesi = !empty($sesi['kesimpulan']) ? $sesi['kesimpulan'] : '';
+if (empty($kesimpulan_sesi) || $kesimpulan_sesi === '-' || $kesimpulan_sesi === 'MS terhadap Uji yang dilakukan') {
+    $ci =& get_instance();
+    if (isset($ci->Model_Pengujian)) {
+        $eval = $ci->Model_Pengujian->evaluasi_kesimpulan_sesi($forms);
+        $kesimpulan_sesi = $eval['kesimpulan'];
+    } else {
+        $tms_list = array();
+        $ms_list = array();
+        $pending_list = array();
+        foreach ($forms as $f_item) {
+            $p_name = !empty($f_item['parameter_uji']) ? $f_item['parameter_uji'] : (!empty($f_item['nama_template']) ? $f_item['nama_template'] : 'Parameter');
+            $k = !empty($f_item['kesimpulan']) ? $f_item['kesimpulan'] : '';
+            if (stripos($k, 'tidak memenuhi') !== false || strtoupper($k) === 'TMS') {
+                $tms_list[] = $p_name;
+            } elseif (stripos($k, 'memenuhi') !== false || strtoupper($k) === 'MS') {
+                $ms_list[] = $p_name;
+            } else {
+                $pending_list[] = $p_name;
+            }
+        }
+        if (!empty($tms_list)) {
+            $kesimpulan_sesi = 'Tidak Memenuhi Syarat (TMS) pada hasil pengujian ' . implode(', ', array_unique($tms_list));
+        } elseif (!empty($ms_list) && empty($pending_list)) {
+            $kesimpulan_sesi = 'Memenuhi Syarat (MS)';
+        } elseif (!empty($pending_list) || !empty($ms_list)) {
+            $kesimpulan_sesi = 'Belum Disimpulkan';
+        } else {
+            $kesimpulan_sesi = '-';
+        }
+    }
+}
 $catatan_sesi    = (isset($sesi['catatan']) && $sesi['catatan'] !== '') ? $sesi['catatan'] : ((isset($sesi['catatan_pengujian']) && $sesi['catatan_pengujian'] !== '') ? $sesi['catatan_pengujian'] : '-');
 $sisa_smp        = (isset($sampel['jumlah_arsip']) && $sampel['jumlah_arsip'] !== '') ? $sampel['jumlah_arsip'] : '-';
 

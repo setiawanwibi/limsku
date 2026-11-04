@@ -31,6 +31,11 @@ class LCP_Mikrobiologi_PDF extends FPDF
         $this->SetTextColor(0, 0, 0);
     }
 
+    public function AcceptPageBreak()
+    {
+        return $this->AutoPageBreak;
+    }
+
     /**
      * Helper validasi tanda tangan digital user dari direktori aman
      *
@@ -47,7 +52,7 @@ class LCP_Mikrobiologi_PDF extends FPDF
             return [false, null, 'Instance sistem tidak tersedia.'];
         }
 
-        $ci =& get_instance();
+        $ci = get_instance();
         if (!$ci) {
             return [false, null, 'Instance sistem tidak tersedia.'];
         }
@@ -372,7 +377,7 @@ class LCP_Mikrobiologi_PDF extends FPDF
             $this->AddPage('P', 'A4');
         }
 
-        $ci =& get_instance();
+        $ci = get_instance();
         $pid = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;
         if (!$pid) {
             $u3 = $ci->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();

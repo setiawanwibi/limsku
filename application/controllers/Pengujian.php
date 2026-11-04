@@ -972,6 +972,10 @@ class Pengujian extends MY_Controller
 
         $forms         = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
 
+        // Evaluasi Kesimpulan Otomatis Seluruh Parameter Pengujian (Sesuai Regulasi BPOM)
+        $eval_kes           = $this->Model_Pengujian->evaluasi_kesimpulan_sesi($forms);
+        $sesi['kesimpulan'] = $eval_kes['kesimpulan'];
+
         $this->load->model('Model_User_Signature');
 
         // Resolusi Pengguna & Tanda Tangan Sesuai Role
@@ -1055,6 +1059,10 @@ class Pengujian extends MY_Controller
         }
 
         $forms = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        // Evaluasi Kesimpulan Otomatis Seluruh Parameter Pengujian (Sesuai Regulasi BPOM)
+        $eval_kes           = $this->Model_Pengujian->evaluasi_kesimpulan_sesi($forms);
+        $sesi['kesimpulan'] = $eval_kes['kesimpulan'];
 
         $penguji_id = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;
         $penguji_info = $penguji_id ? $this->Model_Pengguna->ambil_by_id($penguji_id) : $this->db->get_where('users', ['role_id' => 3, 'status' => 'Aktif'])->row_array();
@@ -1190,6 +1198,10 @@ class Pengujian extends MY_Controller
         }
 
         $forms         = $this->Model_Pengujian->ambil_hasil_by_session($session_id);
+
+        // Evaluasi Kesimpulan Otomatis Seluruh Parameter Pengujian (Sesuai Regulasi BPOM)
+        $eval_kes           = $this->Model_Pengujian->evaluasi_kesimpulan_sesi($forms);
+        $sesi['kesimpulan'] = $eval_kes['kesimpulan'];
 
         // Resolusi Pengguna Sesuai Role
         $penguji_id = !empty($sesi['penguji_id']) ? $sesi['penguji_id'] : null;

@@ -4781,6 +4781,34 @@
     function konfirmasiKirimVerifikasi() {
         var inputAksiSimpan = document.getElementById('inputAksiSimpan');
         if (inputAksiSimpan) inputAksiSimpan.value = 'submit';
+
+        // Deteksi apakah ada parameter uji yang Tidak Memenuhi Syarat (TMS)
+        var tmsList = [];
+        var selects = document.querySelectorAll('.select-kesimpulan-auto');
+        selects.forEach(function(sel) {
+            var val = (sel.value || '').trim();
+            if (val === 'Tidak Memenuhi Syarat (TMS)' || val === 'TMS' || val.toLowerCase().indexOf('tidak memenuhi') !== -1) {
+                var formId = sel.getAttribute('data-form-id');
+                var tabBtn = document.getElementById('tab-btn-' + formId);
+                var paramTitle = 'Form #' + formId;
+                if (tabBtn) {
+                    var rawTxt = tabBtn.textContent.replace(/\s+/g, ' ').trim();
+                    paramTitle = rawTxt.replace(/^Form #\d+:\s*/i, '');
+                }
+                tmsList.push(paramTitle);
+            }
+        });
+
+        if (tmsList.length > 0) {
+            var msg = 'PERHATIAN - VALIDASI KESIMPULAN SAMPEL:\n\n' +
+                      'Terdapat parameter uji yang dinyatakan TIDAK MEMENUHI SYARAT (TMS):\n' +
+                      '• ' + tmsList.join('\n• ') + '\n\n' +
+                      'Sesuai ketentuan, status sampel pada Catatan Pengujian (CP) akan dinyatakan:\n' +
+                      '"Tidak Memenuhi Syarat (TMS) pada hasil pengujian ' + tmsList.join(', ') + '"\n\n' +
+                      'Apakah Anda yakin ingin menyimpan dan meneruskannya ke Verifikasi Penyelia?';
+            return confirm(msg);
+        }
+
         return confirm('Apakah Anda yakin ingin menyimpan seluruh hasil pengujian sesi ini dan meneruskannya ke Verifikasi Penyelia?');
     }
 
