@@ -130,10 +130,6 @@ class Laboratorium extends MY_Controller
 
         $this->data['halaman_aktif'] = 'laboratorium';
         $this->data['judul_halaman'] = 'Edit Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Laboratorium', 'url' => site_url('laboratorium')),
-            array('label' => 'Edit', 'url' => '#')
-        );
         $this->data['lab']           = $lab;
 
         $this->muat_tampilan('laboratorium/edit');

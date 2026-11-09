@@ -52,15 +52,15 @@ if (!isset($badges)) {
         </button>
     </div>
 
-    <!-- Active Workspace Bar -->
-    <div class="px-3 py-2 bg-light border-bottom d-flex align-items-center justify-content-between">
+    <!-- Active Workspace Bar (Clean Pill Style) -->
+    <div class="px-3 py-2 bg-white border-bottom d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2 overflow-hidden">
-            <span class="badge bg-primary px-2 py-1" style="font-size: 0.65rem;">
-                <i class="bi bi-capsule me-1"></i> LAB OBAT
+            <span class="badge rounded-pill px-2 py-1 shadow-xs" style="font-size: 0.65rem; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+                <i class="bi bi-capsule me-1 text-primary"></i> LAB OBAT
             </span>
-            <span class="text-muted small text-truncate" style="font-size: 0.72rem;">Farmasi & Uji</span>
+            <span class="text-secondary small text-truncate" style="font-size: 0.72rem; font-weight: 500;">Farmasi &amp; Uji</span>
         </div>
-        <a href="<?php echo site_url('portal'); ?>" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 0.68rem;" title="Beralih Modul">
+        <a href="<?php echo site_url('portal'); ?>" class="btn btn-xs rounded-pill py-0 px-2" style="font-size: 0.68rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; font-weight: 500;" title="Beralih Modul">
             Ganti
         </a>
     </div>
@@ -69,13 +69,13 @@ if (!isset($badges)) {
         <!-- Dasbor: Tampil untuk semua authenticated user -->
         <li class="mb-1 <?php echo ($halaman_aktif === 'dasbor') ? 'active' : ''; ?>">
             <a href="<?php echo site_url('dasbor'); ?>" class="nav-link px-3 py-2 rounded">
-                <i class="bi bi-grid-1x2 me-2"></i>
+                <i class="bi bi-speedometer2 me-2"></i>
                 <span>Dasbor Utama</span>
             </a>
         </li>
         <li class="mb-1 <?php echo ($halaman_aktif === 'akun') ? 'active' : ''; ?>">
             <a href="<?php echo site_url('akun'); ?>" class="nav-link px-3 py-2 rounded">
-                <i class="bi bi-person-circle me-2"></i>
+                <i class="bi bi-person-badge me-2"></i>
                 <span><?php echo in_array((int)$role_id, array(2, 3, 4, 5)) ? 'Profil &amp; TTD Digital' : 'Profil &amp; Keamanan Akun'; ?></span>
                 <?php if (!empty($badges['akun']) && $badges['akun'] > 0): ?>
                     <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['akun_label']); ?>">!</span>
@@ -92,7 +92,7 @@ if (!isset($badges)) {
             <?php if ($bisa_sampel): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'sampel') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('sampel'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-box-seam me-2"></i>
+                        <i class="bi bi-box2 me-2"></i>
                         <span>Data Sampel</span>
                         <?php if (!empty($badges['sampel']) && $badges['sampel'] > 0): ?>
                             <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['sampel_label']); ?>">
@@ -113,7 +113,7 @@ if (!isset($badges)) {
             <?php if ($bisa_pengujian_antrean): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_antrean') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/antrean'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-list-task me-2"></i>
+                        <i class="bi bi-clipboard2-pulse me-2"></i>
                         <span>Antrean Pengujian</span>
                         <?php if (!empty($badges['pengujian_antrean']) && $badges['pengujian_antrean'] > 0): ?>
                             <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_antrean_label']); ?>">
@@ -127,7 +127,7 @@ if (!isset($badges)) {
             <?php if ($bisa_verifikasi): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_verifikasi') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/verifikasi'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-check2-square me-2"></i>
+                        <i class="bi bi-clipboard2-check me-2"></i>
                         <span>Verifikasi Laporan</span>
                         <?php if (!empty($badges['pengujian_verifikasi']) && $badges['pengujian_verifikasi'] > 0): ?>
                             <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_verifikasi_label']); ?>">
@@ -147,7 +147,7 @@ if (!isset($badges)) {
             <?php if ($bisa_approval): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_approval') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/approval'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-shield-check me-2"></i>
+                        <i class="bi bi-patch-check me-2"></i>
                         <span>Approval Laporan</span>
                         <?php if (!empty($badges['pengujian_approval']) && $badges['pengujian_approval'] > 0): ?>
                             <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_approval_label']); ?>">
@@ -158,7 +158,7 @@ if (!isset($badges)) {
                 </li>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_approval') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="nav-link px-3 py-2 rounded ps-4 small">
-                        <i class="bi bi-file-earmark-check me-2"></i>
+                        <i class="bi bi-journal-check me-2"></i>
                         <span>Riwayat Approval</span>
                     </a>
                 </li>
@@ -167,7 +167,7 @@ if (!isset($badges)) {
             <?php if ($bisa_riwayat_saya): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat_saya') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/riwayat_saya'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-clock-history me-2 text-primary"></i>
+                        <i class="bi bi-clock-history me-2"></i>
                         <span>Historical Pengujian Saya</span>
                     </a>
                 </li>
@@ -176,7 +176,7 @@ if (!isset($badges)) {
             <?php if ($bisa_laporan): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'pengujian_riwayat') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-file-earmark-text me-2"></i>
+                        <i class="bi bi-file-earmark-bar-graph me-2"></i>
                         <span>Riwayat Hasil Uji</span>
                         <?php if (!empty($badges['pengujian_riwayat']) && $badges['pengujian_riwayat'] > 0): ?>
                             <span class="sidebar-badge-notif" title="<?php echo html_escape($badges['pengujian_riwayat_label']); ?>">
@@ -203,7 +203,7 @@ if (!isset($badges)) {
         </li>
         <li class="mb-1 <?php echo ($halaman_aktif === 'logbook_alat') ? 'active' : ''; ?>">
             <a href="<?php echo site_url('logbook'); ?>" class="nav-link px-3 py-2 rounded">
-                <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>
+                <i class="bi bi-journal-text me-2"></i>
                 <span>Logbook Alat</span>
             </a>
         </li>
@@ -264,7 +264,7 @@ if (!isset($badges)) {
             <?php if ($bisa_alat): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'alat') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('alat'); ?>" class="nav-link px-3 py-2 rounded">
-                        <i class="bi bi-tools me-2"></i>
+                        <i class="bi bi-cpu me-2"></i>
                         <span>Alat Laboratorium</span>
                     </a>
                 </li>

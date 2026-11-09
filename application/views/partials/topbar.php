@@ -11,51 +11,52 @@
             </span>
         </div>
 
-        <div class="d-flex align-items-center ms-auto flex-shrink-0">
+        <div class="d-flex align-items-center ms-auto flex-shrink-0 gap-2">
             <?php if ($this->session->userdata('logged_in')): ?>
                 <!-- Tombol Portal Cepat (Desktop & Tablet) -->
-                <a href="<?php echo site_url('portal'); ?>" class="btn btn-sm btn-outline-primary me-2 fw-semibold d-none d-md-inline-flex align-items-center" title="Beralih Portal Modul Laboratorium">
-                    <i class="bi bi-grid-fill me-1"></i> <span>Portal</span>
+                <a href="<?php echo site_url('portal'); ?>" class="topbar-portal-btn d-none d-md-inline-flex" title="Beralih Portal Modul Laboratorium">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Portal</span>
                 </a>
 
                 <!-- User Dropdown Menu (Universal & Mobile Friendly) -->
                 <div class="dropdown">
-                    <button class="btn btn-sm p-1 d-flex align-items-center border-0 text-decoration-none shadow-none" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px; font-weight: 700; font-size: 0.85rem;">
+                    <button class="topbar-user-btn" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="topbar-user-avatar">
                             <?php echo strtoupper(substr($this->session->userdata('nama_lengkap') ?: 'U', 0, 1)); ?>
                         </div>
-                        <div class="text-start ms-2 d-none d-lg-block">
-                            <span class="d-block fw-bold text-dark small leading-none text-truncate" style="max-width: 140px;">
+                        <div class="text-start ms-2 d-none d-lg-block me-2">
+                            <span class="d-block topbar-user-name text-truncate" style="max-width: 150px;">
                                 <?php echo html_escape($this->session->userdata('nama_lengkap')); ?>
                             </span>
-                            <span class="badge bg-light text-secondary border mt-1" style="font-size: 0.65rem;">
+                            <span class="topbar-role-badge mt-1">
                                 <?php echo html_escape($this->session->userdata('role_name')); ?>
                             </span>
                         </div>
-                        <i class="bi bi-chevron-down ms-1 text-muted small d-none d-sm-inline"></i>
+                        <i class="bi bi-chevron-down topbar-user-chevron ms-1 d-none d-sm-inline"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-2 mt-2" aria-labelledby="userMenuDropdown" style="min-width: 210px; border-radius: 10px;">
-                        <li class="px-3 py-2 border-bottom d-lg-none">
+                    <ul class="dropdown-menu dropdown-menu-end topbar-dropdown-menu" aria-labelledby="userMenuDropdown">
+                        <li class="px-3 py-2 border-bottom d-lg-none mb-1">
                             <div class="fw-bold text-dark small text-truncate">
                                 <?php echo html_escape($this->session->userdata('nama_lengkap')); ?>
                             </div>
-                            <span class="badge bg-light text-secondary border mt-1" style="font-size: 0.65rem;">
+                            <span class="topbar-role-badge mt-1">
                                 <?php echo html_escape($this->session->userdata('role_name')); ?>
                             </span>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 d-flex align-items-center gap-2 small text-dark d-md-none" href="<?php echo site_url('portal'); ?>">
+                            <a class="dropdown-item d-flex align-items-center gap-2 d-md-none" href="<?php echo site_url('portal'); ?>">
                                 <i class="bi bi-grid-fill text-primary"></i> Beralih Portal Lab
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 d-flex align-items-center gap-2 small text-dark" href="<?php echo site_url('akun'); ?>">
-                                <i class="bi bi-person-gear text-secondary"></i> Profil &amp; TTD Digital
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="<?php echo site_url('akun'); ?>">
+                                <i class="bi bi-person-badge text-secondary"></i> Profil &amp; TTD Digital
                             </a>
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>
-                            <a class="dropdown-item py-2 d-flex align-items-center gap-2 small text-danger fw-semibold" href="<?php echo site_url('keluar'); ?>" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');">
+                            <a class="dropdown-item d-flex align-items-center gap-2 text-danger fw-semibold" href="<?php echo site_url('keluar'); ?>" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');">
                                 <i class="bi bi-box-arrow-right text-danger"></i> Keluar
                             </a>
                         </li>

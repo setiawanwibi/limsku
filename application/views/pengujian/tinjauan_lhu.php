@@ -274,11 +274,33 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
                     </div>
                 </div>
             <?php else: ?>
-                <div class="alert <?php echo (!empty($kelengkapan['siap_mt']) ? 'alert-success' : 'alert-warning'); ?> d-flex align-items-center mb-4" role="alert">
-                    <i class="bi <?php echo (!empty($kelengkapan['siap_mt']) ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-warning'); ?> fs-4 me-3"></i>
+                <?php
+                    $status_raw = !empty($kelengkapan['status_agregat']) ? $kelengkapan['status_agregat'] : '';
+                    $status_labels = array(
+                        'SIAP_APPROVAL_MT'          => 'Siap Pengesahan Manajer Teknis',
+                        'BELUM_LENGKAP'             => 'Menunggu Kelengkapan Pengujian',
+                        'TIDAK_ADA_PENGUJIAN_WAJIB' => 'Tidak Ada Pengujian Wajib',
+                        'KUANTITAS_AMBIGU'          => 'Kuantitas Sampel Ambigu',
+                        'INVALID_SAMPLE'            => 'Sampel Tidak Valid',
+                        'SAMPEL_TIDAK_DITEMUKAN'    => 'Sampel Tidak Ditemukan',
+                    );
+                    $status_label = isset($status_labels[$status_raw]) ? $status_labels[$status_raw] : ucwords(strtolower(str_replace('_', ' ', $status_raw)));
+                    $is_siap_mt = !empty($kelengkapan['siap_mt']);
+                ?>
+                <div class="alert <?php echo $is_siap_mt ? 'alert-success border-success-subtle' : 'alert-warning border-warning-subtle'; ?> d-flex align-items-center mb-4 p-3 rounded-3 shadow-sm" role="alert" style="background: <?php echo $is_siap_mt ? '#f0fdf4' : '#fffbeb'; ?>;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px; background: <?php echo $is_siap_mt ? '#dcfce7' : '#fef3c7'; ?>;">
+                        <i class="bi <?php echo $is_siap_mt ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-warning'; ?> fs-5"></i>
+                    </div>
                     <div>
-                        <strong>Status Kesiapan LHU MT:</strong> <?php echo html_escape($kelengkapan['status_agregat']); ?><br>
-                        <small class="text-muted"><?php echo html_escape($kelengkapan['alasan']); ?></small>
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <span class="text-dark fw-bold" style="font-size: 0.92rem;">Status Kesiapan LHU MT:</span>
+                            <span class="badge <?php echo $is_siap_mt ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'; ?> px-2 py-1 rounded-pill" style="font-size: 0.76rem;">
+                                <?php echo html_escape($status_label); ?>
+                            </span>
+                        </div>
+                        <div class="text-muted" style="font-size: 0.80rem; line-height: 1.4;">
+                            <?php echo html_escape($kelengkapan['alasan']); ?>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
@@ -559,12 +581,17 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
             </div>
 
             <!-- Panel Keputusan Manajer Teknis (MT) Tingkat Sampel -->
-            <div class="card border-0 shadow-sm mt-4" style="background: #f8fafc; border: 1px solid #e2e8f0 !important; border-radius: 9px;">
+            <div class="card border border-0 shadow-sm mt-4 overflow-hidden rounded-3" style="background: #ffffff; border: 1px solid #e2e8f0 !important;">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold mb-2 text-dark">
-                        <i class="bi bi-shield-check me-1 text-primary"></i> Keputusan Manajer Teknis (Tingkat Sampel)
-                    </h6>
-                    <p class="text-muted small mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                            <i class="bi bi-shield-check text-primary" style="font-size: 0.95rem;"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                            Keputusan Manajer Teknis (Tingkat Sampel)
+                        </h6>
+                    </div>
+                    <p class="text-muted small mb-3 ms-4 ps-1" style="font-size: 0.80rem;">
                         Persetujuan atau penolakan diproses sekaligus untuk seluruh sesi pengujian wajib sampel ini.
                     </p>
 
@@ -585,28 +612,28 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
                     ?>
 
                     <?php if ($sampel['status'] === 'Approved / Final'): ?>
-                        <div class="d-flex align-items-center justify-content-between p-3 rounded border border-success flex-wrap gap-2" style="background: #f0fdf4;">
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border border-success-subtle flex-wrap gap-2" style="background: #f0fdf4;">
                             <div class="text-success small">
                                 <i class="bi bi-patch-check-fill me-1 fs-6"></i>
                                 <strong>LHU Sampel Telah Disahkan:</strong> Seluruh sesi pengujian telah disetujui Manajer Teknis dan berkas LHU PDF final resmi telah diterbitkan. Laporan tersimpan di <strong>Riwayat Approval</strong>.
                             </div>
                             <div class="d-flex gap-2">
-                                <a href="<?php echo site_url('pengujian/lhu/' . $sampel['id']); ?>" class="btn btn-primary btn-sm px-3" target="_blank">
+                                <a href="<?php echo site_url('pengujian/lhu/' . $sampel['id']); ?>" class="btn btn-primary btn-sm px-3 rounded-pill" target="_blank">
                                     <i class="bi bi-printer me-1"></i> Cetak LHU Final
                                 </a>
                                 <?php if (!empty($is_mt)): ?>
-                                    <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm px-3">
+                                    <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-success btn-sm px-3 rounded-pill">
                                         <i class="bi bi-file-earmark-check me-1"></i> Buka Riwayat Approval
                                     </a>
                                 <?php else: ?>
-                                    <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-success btn-sm px-3">
+                                    <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-success btn-sm px-3 rounded-pill">
                                         <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat
                                     </a>
                                 <?php endif; ?>
                             </div>
                         </div>
                     <?php elseif ($is_ditolak): ?>
-                        <div class="p-3 rounded border <?php echo ($ada_sesi_siap) ? 'border-warning-subtle' : 'border-danger-subtle'; ?>" style="<?php echo ($ada_sesi_siap) ? 'background: #fffdf5;' : 'background: #fef2f2;'; ?>">
+                        <div class="p-3 rounded-3 border <?php echo ($ada_sesi_siap) ? 'border-warning-subtle' : 'border-danger-subtle'; ?>" style="<?php echo ($ada_sesi_siap) ? 'background: #fffdf5;' : 'background: #fef2f2;'; ?>">
                             <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
                                 <div>
                                     <?php if ($ada_sesi_siap): ?>
@@ -636,14 +663,14 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
                                 </div>
                                 <div class="d-flex gap-2 align-self-start">
                                     <?php if (!empty($is_mt)): ?>
-                                        <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-outline-danger btn-sm px-3">
+                                        <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-outline-danger btn-sm px-3 rounded-pill">
                                             <i class="bi bi-file-earmark-check me-1"></i> Riwayat Approval
                                         </a>
-                                        <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-secondary btn-sm px-3">
+                                        <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-secondary btn-sm px-3 rounded-pill">
                                             <i class="bi bi-arrow-left me-1"></i> Kembali ke Antrean
                                         </a>
                                     <?php else: ?>
-                                        <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-secondary btn-sm px-3">
+                                        <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-secondary btn-sm px-3 rounded-pill">
                                             <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat
                                         </a>
                                     <?php endif; ?>
@@ -651,7 +678,7 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
                             </div>
                         </div>
                     <?php elseif (!empty($kelengkapan['siap_mt']) && $this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve')): ?>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
                             <!-- Form Setujui Sampel -->
                             <form id="formApproveSampel"
                                   action="<?php echo site_url('pengujian/approve_sampel/' . $sampel['id']); ?>"
@@ -663,27 +690,31 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
 
                                 <?php if (!empty($param_belum_disimpulkan)): ?>
                                     <!-- Jika ada parameter yang belum disimpulkan, tombol buka pop-up peringatan terlebih dahulu -->
-                                    <button type="button" class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#modalPeringatanBelumDisimpulkan">
-                                        <i class="bi bi-check-circle me-1"></i> Setujui Seluruh Hasil Uji Sampel
+                                    <button type="button" class="btn btn-success rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm" style="font-size: 0.88rem; font-weight: 500;" data-bs-toggle="modal" data-bs-target="#modalPeringatanBelumDisimpulkan">
+                                        <i class="bi bi-check2-circle fs-6"></i>
+                                        <span>Setujui Seluruh Hasil Uji Sampel</span>
                                     </button>
                                 <?php else: ?>
                                     <!-- Jika seluruh parameter sudah ada hasil (MS/TMS), alur standar langsung konfirmasi -->
-                                    <button type="submit" class="btn btn-success px-4" onclick="return confirm('Apakah Anda yakin ingin menyetujui seluruh hasil pengujian untuk sampel ini? LHU PDF final resmi akan diterbitkan dengan tanda tangan digital.');">
-                                        <i class="bi bi-check-circle me-1"></i> Setujui Seluruh Hasil Uji Sampel
+                                    <button type="submit" class="btn btn-success rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm" style="font-size: 0.88rem; font-weight: 500;" onclick="return confirm('Apakah Anda yakin ingin menyetujui seluruh hasil pengujian untuk sampel ini? LHU PDF final resmi akan diterbitkan dengan tanda tangan digital.');">
+                                        <i class="bi bi-check2-circle fs-6"></i>
+                                        <span>Setujui Seluruh Hasil Uji Sampel</span>
                                     </button>
                                 <?php endif; ?>
                             </form>
 
                             <!-- Tombol Tolak Sampel (Buka Modal) -->
                             <button type="button"
-                                    class="btn btn-outline-danger px-4"
+                                    class="btn btn-outline-danger rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2"
+                                    style="font-size: 0.88rem; font-weight: 500; border-color: #fca5a5;"
                                     data-bs-toggle="modal"
                                     data-bs-target="#modalTolakSampel">
-                                <i class="bi bi-x-circle me-1"></i> Tolak Pengujian Sampel
+                                <i class="bi bi-x-circle fs-6"></i>
+                                <span>Tolak Pengujian Sampel</span>
                             </button>
                         </div>
                     <?php else: ?>
-                        <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: #f1f5f9;">
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
                             <div class="text-muted small">
                                 <i class="bi bi-info-circle me-1"></i>
                                 <?php if (empty($kelengkapan['siap_mt'])): ?>
@@ -711,75 +742,89 @@ $ada_sesi_ditolak = !empty($sesi_ditolak_list);
 
 </div>
 
-<!-- Modal Penolakan MT (Mendukung Penolakan Per Sesi Kimia / Mikro / Semua) -->
+<!-- Modal Penolakan MT (Clean & Modern Design) -->
 <div class="modal fade" id="modalTolakSampel" tabindex="-1" aria-labelledby="modalTolakSampelLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
             <form action="<?php echo site_url('pengujian/tolak_sampel/' . $sampel['id']); ?>" method="post">
                 <input type="hidden"
                        name="<?php echo $this->security->get_csrf_token_name(); ?>"
                        value="<?php echo $this->security->get_csrf_hash(); ?>">
 
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title text-danger fw-bold fs-6" id="modalTolakSampelLabel">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Penolakan Pengujian oleh MT
-                    </h5>
+                <!-- Header Bersih -->
+                <div class="modal-header bg-white border-bottom px-4 py-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-danger-subtle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
+                            <i class="bi bi-x-circle text-danger fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalTolakSampelLabel">Penolakan Pengujian Sampel</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">Pengujian yang ditolak akan dikembalikan ke Penyelia terkait</small>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body py-3">
-                    <p class="text-muted small mb-3">
-                        Pilih jenis pengujian yang ingin ditolak. Pengujian yang ditolak akan dikembalikan dengan status <strong>Ditolak MT</strong> ke Penyelia terkait untuk ditinjau dan direvisi oleh analis.
-                    </p>
+                <div class="modal-body p-4 bg-light">
+                    <!-- Card Kontainer Form -->
+                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-0">
+                        <div class="alert alert-danger-subtle border-danger-subtle d-flex align-items-start gap-2 p-2 px-3 rounded-2 mb-3" style="font-size: 0.76rem; color: #991b1b;">
+                            <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+                            <div>Status pengujian yang dipilih akan diubah menjadi <strong>Ditolak MT</strong> untuk direvisi oleh analis dan penyelia.</div>
+                        </div>
 
-                    <!-- Pilihan Lingkup Pengujian yang Ditolak -->
-                    <div class="mb-3">
-                        <label for="select_target_sesi" class="form-label small fw-bold text-secondary">
-                            Lingkup Pengujian yang Ditolak <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select form-select-sm" id="select_target_sesi" name="target_sesi" required>
-                            <?php
-                            $sesi_bisa_ditolak = [];
-                            foreach ($sesi_list as $s_item) {
-                                if ($s_item['status'] === 'Menunggu Approval') {
-                                    $sesi_bisa_ditolak[] = $s_item;
+                        <!-- Pilihan Lingkup Pengujian yang Ditolak -->
+                        <div class="mb-3">
+                            <label for="select_target_sesi" class="form-label small fw-semibold text-dark mb-1">
+                                Lingkup Pengujian yang Ditolak <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-sm rounded-2" id="select_target_sesi" name="target_sesi" required style="font-size: 0.82rem;">
+                                <?php
+                                $sesi_bisa_ditolak = [];
+                                foreach ($sesi_list as $s_item) {
+                                    if ($s_item['status'] === 'Menunggu Approval') {
+                                        $sesi_bisa_ditolak[] = $s_item;
+                                    }
                                 }
-                            }
-                            ?>
-                            <?php if (count($sesi_bisa_ditolak) > 1): ?>
-                                <option value="semua">Semua Pengujian (Kimia & Mikrobiologi Sekaligus)</option>
-                            <?php endif; ?>
-                            <?php foreach ($sesi_bisa_ditolak as $s_bisa): ?>
-                                <option value="<?php echo $s_bisa['id']; ?>">
-                                    Hanya Pengujian <?php echo html_escape($s_bisa['jenis_pengujian']); ?> (Sesi #<?php echo $s_bisa['id']; ?>)
-                                </option>
-                            <?php endforeach; ?>
-                            <?php if (empty($sesi_bisa_ditolak)): ?>
-                                <option value="semua">Semua Pengujian</option>
-                            <?php endif; ?>
-                        </select>
-                        <small class="text-muted" style="font-size: 0.72rem;">
-                            *Jika Anda hanya menolak satu bidang (misal Mikrobiologi saja), data pengujian bidang lainnya (Kimia) tetap aman dan tidak perlu diulang.
-                        </small>
-                    </div>
+                                ?>
+                                <?php if (count($sesi_bisa_ditolak) > 1): ?>
+                                    <option value="semua">Semua Pengujian (Kimia & Mikrobiologi Sekaligus)</option>
+                                <?php endif; ?>
+                                <?php foreach ($sesi_bisa_ditolak as $s_bisa): ?>
+                                    <option value="<?php echo $s_bisa['id']; ?>">
+                                        Hanya Pengujian <?php echo html_escape($s_bisa['jenis_pengujian']); ?> (Sesi #<?php echo $s_bisa['id']; ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                                <?php if (empty($sesi_bisa_ditolak)): ?>
+                                    <option value="semua">Semua Pengujian</option>
+                                <?php endif; ?>
+                            </select>
+                            <div class="text-muted mt-1" style="font-size: 0.72rem; line-height: 1.35;">
+                                *Jika hanya satu bidang ditolak, bidang lainnya tetap tersimpan dan tidak perlu diuji ulang.
+                            </div>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="alasan_penolakan" class="form-label small fw-bold text-secondary">
-                            Alasan Penolakan <span class="text-danger">*</span>
-                        </label>
-                        <textarea class="form-control form-control-sm"
-                                  id="alasan_penolakan"
-                                  name="alasan_penolakan"
-                                  rows="4"
-                                  placeholder="Tuliskan catatan teknis dan alasan penolakan secara jelas (minimal 5 karakter)..."
-                                  required></textarea>
+                        <!-- Alasan Penolakan -->
+                        <div>
+                            <label for="alasan_penolakan" class="form-label small fw-semibold text-dark mb-1">
+                                Alasan &amp; Catatan Teknis <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control form-control-sm rounded-2"
+                                      id="alasan_penolakan"
+                                      name="alasan_penolakan"
+                                      rows="4"
+                                      placeholder="Tuliskan catatan teknis dan alasan penolakan secara jelas (minimal 5 karakter)..."
+                                      required
+                                      style="font-size: 0.82rem; resize: vertical;"></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger btn-sm px-3">
-                        <i class="bi bi-send-x me-1"></i> Kirim Penolakan
+                <div class="modal-footer py-2 px-4 bg-white border-top d-flex justify-content-end align-items-center gap-2">
+                    <button type="button" class="btn btn-light btn-sm px-3 rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger btn-sm px-4 rounded-pill d-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-send-x"></i>
+                        <span>Kirim Penolakan</span>
                     </button>
                 </div>
             </form>

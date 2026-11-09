@@ -6,11 +6,11 @@
     }
     .stat-card-custom {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 14px 18px;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        padding: 16px 20px;
         transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     .stat-card-custom:hover {
         transform: translateY(-2px);
@@ -29,14 +29,69 @@
     }
     .filter-card {
         background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .filter-input-clean {
+        background-color: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        border-radius: 8px;
+        color: #334155;
+        font-size: 0.82rem;
+        padding: 0.45rem 0.75rem;
+        transition: all 0.2s ease;
+    }
+    .filter-input-clean:focus {
+        background-color: #ffffff;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        color: #0f172a;
+    }
+    .filter-label-clean {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .filter-btn-search {
+        background: #0284c7;
+        border: 1px solid #0284c7;
+        border-radius: 8px;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.82rem;
+        padding: 0.45rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .filter-btn-search:hover {
+        background: #0369a1;
+        border-color: #0369a1;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+    .filter-btn-reset {
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        color: #64748b;
+        padding: 0.45rem 0.75rem;
+        transition: all 0.2s ease;
+    }
+    .filter-btn-reset:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        border-color: #cbd5e1;
     }
     .main-table-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         overflow: hidden;
     }
@@ -195,13 +250,13 @@
     <!-- Card Filter & Pencarian -->
     <div class="card filter-card mb-4">
         <div class="card-body p-3">
-            <form method="get" action="<?php echo site_url('logbook'); ?>" class="row g-2 align-items-end">
+            <form method="get" action="<?php echo site_url('logbook'); ?>" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-secondary mb-1">
-                        <i class="bi bi-tools me-1 text-primary"></i> Filter Alat Laboratorium
+                    <label class="filter-label-clean">
+                        <i class="bi bi-cpu text-primary"></i> Filter Alat
                     </label>
-                    <select class="form-select form-select-sm" name="instrument_id" id="instrument_id">
-                        <option value="">-- Semua Instrumen Laboratorium --</option>
+                    <select class="form-select filter-input-clean" name="instrument_id" id="instrument_id">
+                        <option value="">Semua Instrumen</option>
                         <?php foreach ($daftar_alat as $alt): ?>
                             <option value="<?php echo $alt['id']; ?>" <?php echo (!empty($filter['instrument_id']) && $filter['instrument_id'] == $alt['id']) ? 'selected' : ''; ?>>
                                 [<?php echo html_escape($alt['kode_barang']); ?>] <?php echo html_escape($alt['nama_barang']); ?> <?php echo !empty($alt['nomor_seri']) ? '(SN: ' . html_escape($alt['nomor_seri']) . ')' : ''; ?>
@@ -211,31 +266,32 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label small fw-bold text-secondary mb-1">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Dari Tanggal
+                    <label class="filter-label-clean">
+                        <i class="bi bi-calendar3 text-primary"></i> Dari Tanggal
                     </label>
-                    <input type="date" class="form-control form-control-sm" name="tanggal_mulai" value="<?php echo html_escape(!empty($filter['tanggal_mulai']) ? $filter['tanggal_mulai'] : ''); ?>">
+                    <input type="date" class="form-control filter-input-clean" name="tanggal_mulai" value="<?php echo html_escape(!empty($filter['tanggal_mulai']) ? $filter['tanggal_mulai'] : ''); ?>">
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label small fw-bold text-secondary mb-1">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Sampai Tanggal
+                    <label class="filter-label-clean">
+                        <i class="bi bi-calendar3 text-primary"></i> Sampai Tanggal
                     </label>
-                    <input type="date" class="form-control form-control-sm" name="tanggal_selesai" value="<?php echo html_escape(!empty($filter['tanggal_selesai']) ? $filter['tanggal_selesai'] : ''); ?>">
+                    <input type="date" class="form-control filter-input-clean" name="tanggal_selesai" value="<?php echo html_escape(!empty($filter['tanggal_selesai']) ? $filter['tanggal_selesai'] : ''); ?>">
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-secondary mb-1">
-                        <i class="bi bi-search me-1 text-primary"></i> Kata Kunci
+                    <label class="filter-label-clean">
+                        <i class="bi bi-search text-primary"></i> Kata Kunci
                     </label>
-                    <input type="text" class="form-control form-control-sm" name="q" placeholder="Cari nama alat, kode sampel, analis..." value="<?php echo html_escape(!empty($filter['q']) ? $filter['q'] : ''); ?>">
+                    <input type="text" class="form-control filter-input-clean" name="q" placeholder="Cari nama alat, sampel, analis..." value="<?php echo html_escape(!empty($filter['q']) ? $filter['q'] : ''); ?>">
                 </div>
 
-                <div class="col-md-2 d-flex gap-1">
-                    <button type="submit" class="btn btn-primary btn-sm w-100 fw-semibold">
-                        <i class="bi bi-filter me-1"></i> Filter
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn filter-btn-search w-100 d-inline-flex align-items-center justify-content-center gap-1">
+                        <i class="bi bi-funnel"></i>
+                        <span>Filter</span>
                     </button>
-                    <a href="<?php echo site_url('logbook'); ?>" class="btn btn-outline-secondary btn-sm" title="Reset Filter">
+                    <a href="<?php echo site_url('logbook'); ?>" class="btn filter-btn-reset d-inline-flex align-items-center justify-content-center" title="Reset Filter">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>

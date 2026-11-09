@@ -648,19 +648,25 @@
         </div>
     </div>
 
-    <!-- Alert Catatan Penolakan Revisi -->
+    <!-- Alert Catatan Penolakan Revisi (Clean & Modern Design) -->
     <?php if ($sesi['status'] === 'Ditolak' && !empty($sesi['alasan_penolakan'])): ?>
-        <div class="alert alert-danger border-2 border-danger shadow-sm mb-4">
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
-                <h6 class="fw-bold mb-0 text-danger">Catatan Penolakan / Poin Perbaikan:</h6>
+        <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden" style="background: #fff8f8; border: 1px solid #fecaca !important;">
+            <div class="p-3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="rounded-circle bg-danger-subtle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">
+                        <i class="bi bi-exclamation-circle text-danger" style="font-size: 0.88rem;"></i>
+                    </div>
+                    <div>
+                        <strong class="text-danger" style="font-size: 0.88rem;">Catatan Penolakan / Poin Perbaikan:</strong>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-2 border border-danger-subtle text-dark" style="font-size: 0.82rem; line-height: 1.6;">
+                    <?php echo nl2br(html_escape($sesi['alasan_penolakan'])); ?>
+                </div>
+                <div class="text-muted d-flex align-items-center gap-1 mt-2 ps-1" style="font-size: 0.74rem;">
+                    <i class="bi bi-info-circle me-1"></i> Harap perbaiki nilai perhitungan, lampiran, atau data uji sesuai dengan catatan di atas sebelum mengirim ulang.
+                </div>
             </div>
-            <div class="bg-white p-3 rounded border border-danger-subtle font-monospace text-dark" style="font-size: 0.82rem; line-height: 1.55;">
-                <?php echo nl2br(html_escape($sesi['alasan_penolakan'])); ?>
-            </div>
-            <small class="text-muted d-block mt-2" style="font-size: 0.72rem;">
-                <i class="bi bi-info-circle me-1"></i> Harap perbaiki nilai perhitungan, lampiran, atau data uji sesuai dengan catatan di atas sebelum mengirim ulang.
-            </small>
         </div>
     <?php endif; ?>
 

@@ -2359,11 +2359,6 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat';
         $this->data['judul_halaman'] = 'Revisi Hasil Pengujian Sesi: ' . html_escape($sesi['nama_sampel']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian/riwayat')),
-            array('label' => 'Detail Sesi', 'url' => site_url('pengujian/detail_sesi/' . $session_id)),
-            array('label' => 'Revisi Sesi', 'url' => '#')
-        );
         $this->data['sesi']          = $sesi;
         $this->data['forms']         = $forms;
         $this->data['hasil_forms']   = $forms;

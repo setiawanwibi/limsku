@@ -354,7 +354,7 @@
             <div class="dash-card">
                 <div class="kpi-header-row">
                     <div class="kpi-icon-box kpi-icon-blue mb-0">
-                        <i class="bi bi-flask"></i>
+                        <i class="bi bi-clipboard2-pulse"></i>
                     </div>
                     <div>
                         <h4 class="kpi-title">Pengujian</h4>
@@ -366,13 +366,17 @@
                         <div class="kpi-number-main text-primary" id="kpi-pengujian-aktif">
                             <?php echo (int) $ringkasan['kpi']['pengujian']['aktif']; ?>
                         </div>
-                        <small class="text-muted fw-semibold">Aktif</small>
+                        <small class="text-muted fw-semibold d-flex align-items-center gap-1">
+                            <i class="bi bi-hourglass-split text-primary"></i> Aktif
+                        </small>
                     </div>
                     <div>
                         <div class="kpi-number-main text-dark" id="kpi-pengujian-selesai">
                             <?php echo (int) $ringkasan['kpi']['pengujian']['selesai']; ?>
                         </div>
-                        <small class="text-muted fw-semibold">Selesai</small>
+                        <small class="text-muted fw-semibold d-flex align-items-center gap-1">
+                            <i class="bi bi-check-circle-fill text-success"></i> Selesai
+                        </small>
                     </div>
                 </div>
             </div>
