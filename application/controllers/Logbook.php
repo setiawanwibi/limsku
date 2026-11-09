@@ -24,48 +24,45 @@ class Logbook extends MY_Controller
     }
 
     /**
-     * Halaman Utama Logbook Penggunaan Alat Laboratorium (Tabel Komprehensif)
+     * Halaman Utama Logbook Penggunaan Alat Laboratorium (Berbasis Masing-Masing Alat)
+     * Default menampilkan alat yang sudah pernah digunakan terlebih dahulu (tab: 'terpakai'),
+     * dan dapat beralih melihat 'semua' alat (238 alat) maupun yang 'belum_terpakai'.
      */
     public function index()
     {
         // Jalankan auto-sync dari pengujian lama jika diperlukan agar logbook terisi
         $this->Model_Logbook->sinkronisasi_historis();
 
-        $instrument_id   = $this->input->get('instrument_id', TRUE);
-        $tanggal_mulai   = $this->input->get('tanggal_mulai', TRUE);
-        $tanggal_selesai = $this->input->get('tanggal_selesai', TRUE);
-        $q               = $this->input->get('q', TRUE);
-        $jenis_pengujian = $this->input->get('jenis_pengujian', TRUE);
-
-        $filter = array(
-            'instrument_id'   => !empty($instrument_id) ? (int)$instrument_id : NULL,
-            'tanggal_mulai'   => !empty($tanggal_mulai) ? $tanggal_mulai : NULL,
-            'tanggal_selesai' => !empty($tanggal_selesai) ? $tanggal_selesai : NULL,
-            'q'               => !empty($q) ? trim($q) : NULL,
-            'jenis_pengujian' => !empty($jenis_pengujian) ? trim($jenis_pengujian) : NULL
-        );
-
-        $daftar_logbook = $this->Model_Logbook->ambil_logbook($filter);
-        $statistik      = $this->Model_Logbook->ambil_statistik();
-        $daftar_alat    = $this->Model_Alat->ambil_semua();
-
-        // Data instrumen terpilih jika filter spesifik
-        $alat_terpilih = NULL;
-        if (!empty($filter['instrument_id'])) {
-            $alat_terpilih = $this->Model_Alat->ambil_by_id($filter['instrument_id']);
+        $tab     = $this->input->get('tab', TRUE);
+        if (!in_array($tab, array('terpakai', 'semua', 'belum_terpakai'), TRUE)) {
+            $tab = 'terpakai'; // Default menampilkan alat yang sudah pernah digunakan
         }
 
-        $this->data['halaman_aktif']  = 'logbook_alat';
-        $this->data['judul_halaman']  = 'Logbook Alat Laboratorium';
-        $this->data['daftar_logbook'] = $daftar_logbook;
-        $this->data['statistik']      = $statistik;
-        $this->data['daftar_alat']    = $daftar_alat;
-        $this->data['filter']         = $filter;
-        $this->data['alat_terpilih']  = $alat_terpilih;
+        $ruangan = $this->input->get('ruangan', TRUE);
+        $q       = $this->input->get('q', TRUE);
+
+        $filter = array(
+            'status_penggunaan' => $tab,
+            'ruangan'           => !empty($ruangan) ? trim($ruangan) : NULL,
+            'q'                 => !empty($q) ? trim($q) : NULL
+        );
+
+        $daftar_alat_stat = $this->Model_Logbook->ambil_alat_dengan_stat($filter);
+        $daftar_ruangan   = $this->Model_Logbook->ambil_daftar_ruangan();
+        $statistik        = $this->Model_Logbook->ambil_statistik();
+
+        $this->data['halaman_aktif']    = 'logbook_alat';
+        $this->data['judul_halaman']    = 'Buku Log Penggunaan Alat Laboratorium';
+        $this->data['tab_aktif']        = $tab;
+        $this->data['daftar_alat_stat'] = $daftar_alat_stat;
+        $this->data['daftar_ruangan']   = $daftar_ruangan;
+        $this->data['statistik']        = $statistik;
+        $this->data['filter']           = $filter;
 
         $this->catat_audit('VIEW_INSTRUMENT_LOGBOOK', 'Logbook', array(
+            'tab'    => $tab,
             'filter' => $filter,
-            'total'  => count($daftar_logbook)
+            'total'  => count($daftar_alat_stat)
         ));
 
         $this->muat_tampilan('logbook/index');

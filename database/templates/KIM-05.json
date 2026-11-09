@@ -127,18 +127,41 @@
                         "placeholder": "M25: Contoh 99.8"
                     },
                     {
+                        "id": "metode_perhitungan_kadar",
+                        "label": "Metode Perhitungan Kadar Sediaan",
+                        "type": "select",
+                        "options": [
+                            "Tablet / Kapsul BR (Metode 20 Tablet Digerus)",
+                            "Tablet Cemplung (Direct Dissolution / Effervescent)",
+                            "Sirup / Suspensi / Cairan Oral (Volume mL)"
+                        ],
+                        "default": "Tablet / Kapsul BR (Metode 20 Tablet Digerus)",
+                        "keterangan": "Pilih metode perhitungan sesuai bentuk sediaan & preparasi sampel uji."
+                    },
+                    {
+                        "id": "volume_takaran_etiket",
+                        "label": "Volume Takaran Saji Etiket (mL)",
+                        "type": "number",
+                        "step": "any",
+                        "default": "5.0",
+                        "placeholder": "Contoh: 5.0 (sendok takar 5 mL)",
+                        "keterangan": "Hanya untuk metode Sirup / Cairan Oral. Misal 5 mL atau 15 mL."
+                    },
+                    {
                         "id": "bobot_rata_rata_tablet",
                         "label": "Bobot Rata-rata Tablet (Br / K46) (mg)",
                         "type": "number",
                         "step": "any",
-                        "placeholder": "K46 (Br): Contoh 650.0"
+                        "placeholder": "K46 (Br): Contoh 650.0",
+                        "keterangan": "Hanya untuk metode Tablet / Kapsul BR."
                     },
                     {
                         "id": "klaim_etiket",
-                        "label": "Klaim Etiket (Ke / K47) (mg/tablet)",
+                        "label": "Klaim Etiket (Ke / K47) (mg)",
                         "type": "number",
                         "step": "any",
-                        "placeholder": "K47 (Ke): Contoh 500.0"
+                        "placeholder": "K47 (Ke): Contoh 500.0",
+                        "keterangan": "Kandungan zat aktif per tablet atau per volume takaran saji etiket."
                     }
                 ]
             },

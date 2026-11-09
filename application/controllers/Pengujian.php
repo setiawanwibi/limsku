@@ -194,12 +194,20 @@ class Pengujian extends MY_Controller
         $zat_aktif_terpilih = $this->input->get('zat_aktif', TRUE);
         $parameter_monografi = array();
 
+        $bentuk_sediaan_hint = !empty($sampel['bentuk_sediaan']) ? $sampel['bentuk_sediaan'] : (!empty($sampel['kemasan']) ? $sampel['kemasan'] : ($sampel['nama_sampel'] ?? ''));
+
         if (!empty($zat_aktif_terpilih)) {
-            $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian);
+            $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian, $bentuk_sediaan_hint);
         }
 
         $this->load->model('Model_Template');
         $daftar_template_bidang = $this->Model_Template->ambil_aktif($jenis_pengujian);
+
+        // Evaluasi Rekomendasi Pintar (khusus Mikrobiologi: Oral Nonsteril ALT/AKK/E. coli vs Nistatin Potensi vs Antibiotik Lainnya)
+        $rekomendasi_mikro = NULL;
+        if ($jenis_pengujian === 'Mikrobiologi' && !empty($zat_aktif_terpilih)) {
+            $rekomendasi_mikro = Model_Metode::evaluasi_rekomendasi_mikro($zat_aktif_terpilih, $bentuk_sediaan_hint, $sampel['nama_sampel'] ?? '');
+        }
 
         // Mode Ganti Pilihan Sesi (jika diedit dari sesi yang sedang berjalan)
         $session_id = (int)$this->input->get('session_id', TRUE);
@@ -222,7 +230,10 @@ class Pengujian extends MY_Controller
                 // Jika belum ada zat aktif di URL, gunakan zat aktif dari sesi yang sedang berjalan
                 if (empty($zat_aktif_terpilih) && !empty($existing_items[0]['nama_zat_aktif'])) {
                     $zat_aktif_terpilih = $existing_items[0]['nama_zat_aktif'];
-                    $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian);
+                    $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian, $bentuk_sediaan_hint);
+                    if ($jenis_pengujian === 'Mikrobiologi') {
+                        $rekomendasi_mikro = Model_Metode::evaluasi_rekomendasi_mikro($zat_aktif_terpilih, $bentuk_sediaan_hint, $sampel['nama_sampel'] ?? '');
+                    }
                 }
             } else {
                 $session_id = 0;
@@ -238,10 +249,12 @@ class Pengujian extends MY_Controller
         $this->data['zat_aktif_terpilih']     = $zat_aktif_terpilih;
         $this->data['parameter_monografi']    = $parameter_monografi;
         $this->data['daftar_template_bidang'] = $daftar_template_bidang;
+        $this->data['rekomendasi_mikro']      = $rekomendasi_mikro;
         $this->data['session_id_edit']        = $session_id;
         $this->data['sesi_edit']              = $sesi_edit;
         $this->data['sesi_method_ids']        = $sesi_method_ids;
         $this->data['sesi_custom_templates']  = $sesi_custom_templates;
+        $this->data['daftar_master_bidang']   = $this->Model_Metode->ambil_master_parameter_untuk_picker($jenis_pengujian, NULL, 300);
 
         $this->muat_tampilan('pengujian/pilih_form');
     }
@@ -304,7 +317,7 @@ class Pengujian extends MY_Controller
             }
 
             // Validasi konsistensi Zat Aktif
-            if (trim(preg_replace('/\s+/', ' ', (string)$metode_item['nama_zat_aktif'])) !== trim(preg_replace('/\s+/', ' ', (string)$nama_zat_aktif))) {
+            if ($jenis_pengujian !== 'Mikrobiologi' && trim(preg_replace('/\s+/', ' ', (string)$metode_item['nama_zat_aktif'])) !== trim(preg_replace('/\s+/', ' ', (string)$nama_zat_aktif))) {
                 $this->session->set_flashdata('pesan_gagal', 'Seluruh parameter dalam 1 sesi harus berasal dari zat aktif yang sama (' . html_escape($nama_zat_aktif) . ').');
                 redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
             }
@@ -528,6 +541,67 @@ class Pengujian extends MY_Controller
         $this->data['daftar_template_bidang'] = $daftar_template_bidang;
 
         $this->muat_tampilan('pengujian/proses_sesi');
+    }
+
+    /**
+     * AJAX Pencarian Master Data Parameter Pengujian (Poin 11)
+     */
+    public function ajax_cari_master_parameter()
+    {
+        $this->cek_hak_akses('pengujian_input');
+        $bidang = $this->input->get('bidang', TRUE) ?: 'Mikrobiologi';
+        $q = $this->input->get('q', TRUE);
+        $this->load->model('Model_Metode');
+        $items = $this->Model_Metode->ambil_master_parameter_untuk_picker($bidang, $q, 150);
+        header('Content-Type: application/json');
+        echo json_encode(array('status' => 'success', 'data' => $items));
+        exit;
+    }
+
+    /**
+     * Menambahkan Parameter Pengujian dari Master Data ke Sesi Aktif (Poin 11)
+     *
+     * @param int $session_id
+     */
+    public function tambah_parameter_sesi($session_id = NULL)
+    {
+        $this->cek_hak_akses('pengujian_input');
+        $session_id = (int)$session_id;
+        $sesi = $this->Model_Pengujian->ambil_sesi_by_id($session_id);
+        if (!$sesi || !in_array($sesi['status'], array('Sedang Diuji', 'Ditolak'), TRUE)) {
+            $this->session->set_flashdata('pesan_gagal', 'Sesi pengujian tidak ditemukan atau tidak aktif.');
+            redirect('pengujian/antrean');
+        }
+
+        if ($sesi['penguji_id'] != $this->session->userdata('user_id')) {
+            $this->session->set_flashdata('pesan_gagal', 'Anda tidak memiliki hak akses mengubah sesi penguji lain.');
+            redirect('pengujian/proses_sesi/' . $session_id);
+        }
+
+        $method_id   = (int)$this->input->post('method_id', TRUE);
+        $template_id = (int)$this->input->post('template_id', TRUE);
+
+        if ($method_id <= 0) {
+            $this->session->set_flashdata('pesan_gagal', 'Parameter pengujian belum dipilih.');
+            redirect('pengujian/proses_sesi/' . $session_id);
+        }
+
+        $res_id = $this->Model_Pengujian->tambah_parameter_ke_sesi($session_id, $method_id, $template_id > 0 ? $template_id : NULL);
+        if ($res_id) {
+            $this->load->model('Model_Metode');
+            $metode = $this->Model_Metode->ambil_by_id($method_id);
+            $param_nama = $metode ? $metode['parameter_uji'] : 'Baru';
+            $this->catat_audit('ADD_PARAMETER_TO_SESSION', 'Pengujian', array(
+                'testing_session_id' => $session_id,
+                'method_id'          => $method_id,
+                'test_result_id'     => $res_id
+            ));
+            $this->session->set_flashdata('pesan_sukses', 'Parameter \"' . html_escape($param_nama) . '\" berhasil ditambahkan ke sesi pengujian ini.');
+        } else {
+            $this->session->set_flashdata('pesan_gagal', 'Gagal menambahkan parameter ke sesi pengujian.');
+        }
+
+        redirect('pengujian/proses_sesi/' . $session_id);
     }
 
     /**

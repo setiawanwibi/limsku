@@ -294,9 +294,19 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
             </table>
 
             <!-- Rumus Faktor Perkalian (Fk) Persis Excel -->
+            <?php
+            $fk_tambahan_val = trim((string)($p['faktor_pengali_tambahan'] ?? '1.0'));
+            $fk_final_val = trim((string)($p['faktor_perkalian_final'] ?? ''));
+            $has_custom_tambahan = ($fk_tambahan_val !== '' && $fk_tambahan_val !== '1' && $fk_tambahan_val !== '1.0' && $fk_tambahan_val !== '1.00');
+            ?>
             <div style="font-weight: bold; margin-bottom: 2px;">
                 Faktor Perkalian: <span style="font-family: monospace;">Fk = (V &times; Fu &times; Bb &times; Kb &times; [BM1/BM2] &times; 100%) / (Fb &times; Ab &times; Ke)</span>
                 &nbsp;&nbsp;=&nbsp;&nbsp;<span style="color: #0284c7; font-weight: bold;"><?php echo html_escape($p['faktor_perkalian_fk'] ?? '-'); ?></span>
+                <?php if ($has_custom_tambahan && $fk_final_val !== ''): ?>
+                    <span style="margin-left: 10px; color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 3px; font-size: 7.2pt;">
+                        &times; Pengali Tambahan (<strong><?php echo html_escape($fk_tambahan_val); ?></strong>) = <strong>Fk Final: <?php echo html_escape($fk_final_val); ?></strong>
+                    </span>
+                <?php endif; ?>
             </div>
 
             <?php if ($is_s2): ?>
@@ -448,7 +458,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <tr class="bg-light-gray" style="height: 20px;">
                         <th class="border-all text-center fw-bold">Tahap S1 (Bejana)</th>
                         <th class="border-all text-center fw-bold">Pengukuran (Au / Area)</th>
-                        <th class="border-all text-center fw-bold">% Zat Aktif Terlarut {Dx = Fk &times; Au}</th>
+                        <th class="border-all text-center fw-bold">% Zat Aktif Terlarut {Dx = <?php echo ($has_custom_tambahan && $fk_final_val !== '') ? 'Fk Final' : 'Fk'; ?> &times; Au}</th>
                     </tr>
                 </thead>
                 <tbody>

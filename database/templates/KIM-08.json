@@ -275,18 +275,41 @@
                 "description": "Perhitungan Bobot Bersih = (Wadah+Zat) - (Wadah+Sisa). Respon Puncak (Luas Area / Tinggi Puncak).",
                 "fields": [
                     {
+                        "id": "metode_perhitungan_kadar",
+                        "label": "Metode Perhitungan Kadar Sediaan",
+                        "type": "select",
+                        "options": [
+                            "Tablet / Kapsul BR (Metode 20 Tablet Digerus)",
+                            "Tablet Cemplung (Direct Dissolution / Effervescent)",
+                            "Sirup / Suspensi / Cairan Oral (Volume mL)"
+                        ],
+                        "default": "Tablet / Kapsul BR (Metode 20 Tablet Digerus)",
+                        "keterangan": "Pilih metode perhitungan sesuai bentuk sediaan & preparasi sampel uji."
+                    },
+                    {
+                        "id": "volume_takaran_etiket",
+                        "label": "Volume Takaran Saji Etiket (mL)",
+                        "type": "number",
+                        "step": "any",
+                        "default": "5.0",
+                        "placeholder": "Contoh: 5.0 (sendok takar 5 mL)",
+                        "keterangan": "Hanya untuk metode Sirup / Cairan Oral. Misal 5 mL atau 15 mL."
+                    },
+                    {
                         "id": "bobot_rata_tablet",
                         "label": "Bobot Rata-rata Tablet / Sediaan (Br) [mg]",
                         "type": "number",
                         "step": "any",
-                        "placeholder": "Contoh: 250.5"
+                        "placeholder": "Contoh: 250.5",
+                        "keterangan": "Hanya untuk metode Tablet / Kapsul BR."
                     },
                     {
                         "id": "klaim_etiket",
-                        "label": "Komposisi / Klaim Etiket per Tablet (Ke) [mg]",
+                        "label": "Komposisi / Klaim Etiket (Ke) [mg]",
                         "type": "number",
                         "step": "any",
-                        "placeholder": "Contoh: 50.0"
+                        "placeholder": "Contoh: 50.0",
+                        "keterangan": "Kandungan zat aktif per tablet atau per volume takaran saji etiket."
                     },
                     {
                         "id": "faktor_konversi_bm",

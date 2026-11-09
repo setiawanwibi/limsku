@@ -351,6 +351,68 @@ class Model_Pengujian extends CI_Model
     }
 
     /**
+     * Menambahkan satu parameter pengujian baru dari master data ke sesi yang sedang aktif (Poin 11)
+     *
+     * @param int $session_id
+     * @param int $method_id
+     * @param int|null $template_id
+     * @return int|bool ID test_results yang baru atau FALSE
+     */
+    public function tambah_parameter_ke_sesi($session_id, $method_id, $template_id = NULL)
+    {
+        $session_id = (int)$session_id;
+        $method_id  = (int)$method_id;
+
+        $sesi = $this->db->get_where('testing_sessions', array('id' => $session_id))->row_array();
+        if (!$sesi || !in_array($sesi['status'], array('Sedang Diuji', 'Ditolak'), TRUE)) {
+            return FALSE;
+        }
+
+        // Cek apakah parameter sudah ada di sesi ini
+        $cek = $this->db->get_where('test_results', array(
+            'session_id' => $session_id,
+            'method_id'  => $method_id
+        ))->row_array();
+
+        if ($cek) {
+            return $cek['id'];
+        }
+
+        // Ambil method master
+        $metode = $this->db->get_where('methods', array('id' => $method_id))->row_array();
+        if (!$metode) {
+            return FALSE;
+        }
+
+        $t_id = !empty($template_id) ? (int)$template_id : (!empty($metode['template_id']) ? (int)$metode['template_id'] : NULL);
+
+        $new_test_data = array(
+            'session_id'  => $session_id,
+            'sample_id'   => $sesi['sample_id'],
+            'method_id'   => $method_id,
+            'template_id' => $t_id,
+            'penguji_id'  => $sesi['penguji_id'],
+            'data_hasil'  => '[]',
+            'kesimpulan'  => 'Belum Disimpulkan',
+            'catatan'     => NULL,
+            'status'      => 'Sedang Diuji',
+            'waktu_mulai' => date('Y-m-d H:i:s')
+        );
+
+        if ($this->db->insert('test_results', $new_test_data)) {
+            $insert_id = $this->db->insert_id();
+
+            // Update timestamp sesi
+            $this->db->where('id', $session_id);
+            $this->db->update('testing_sessions', array('updated_at' => date('Y-m-d H:i:s')));
+
+            return $insert_id;
+        }
+
+        return FALSE;
+    }
+
+    /**
      * Mengambil data sesi pengujian berdasarkan ID Sesi
      */
     public function ambil_sesi_by_id($session_id)

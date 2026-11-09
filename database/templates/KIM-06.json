@@ -210,10 +210,27 @@
                 "fields": [
                     {
                         "id": "faktor_perkalian_fk",
-                        "label": "Faktor Perkalian (Fk Tahap S1)",
+                        "label": "Faktor Perkalian (Fk Otomatis)",
                         "type": "number",
                         "step": "any",
-                        "placeholder": "=(V * Fu * Bb * Kb * BMkoreksi * 100) / (Fb * Ab * Ke)"
+                        "placeholder": "=(V * Fu * Bb * Kb * BMkoreksi * 100) / (Fb * Ab * Ke)",
+                        "keterangan": "Dihitung otomatis dari parameter media, baku, pengenceran, dan etiket."
+                    },
+                    {
+                        "id": "faktor_pengali_tambahan",
+                        "label": "Faktor Pengali Tambahan (Opsional Manual)",
+                        "type": "text",
+                        "default": "1.0",
+                        "placeholder": "Contoh: 1.0 atau 2 atau 50/10",
+                        "keterangan": "Opsional: Pengali manual jika ada perkalian/pengenceran tambahan (bisa pecahan misal 50/10). Default: 1.0"
+                    },
+                    {
+                        "id": "faktor_perkalian_final",
+                        "label": "Faktor Perkalian Final (Fk Final)",
+                        "type": "number",
+                        "step": "any",
+                        "placeholder": "= Fk Otomatis * Faktor Pengali Tambahan",
+                        "keterangan": "Faktor perkalian akhir yang digunakan untuk menghitung % zat aktif terlarut (Dx)."
                     },
                     {
                         "id": "tabel_s1",
