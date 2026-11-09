@@ -100,10 +100,6 @@ class Alat extends MY_Controller
 
         $this->data['halaman_aktif']      = 'alat';
         $this->data['judul_halaman']      = 'Tambah Alat Laboratorium';
-        $this->data['breadcrumbs']        = array(
-            array('label' => 'Alat Laboratorium', 'url' => site_url('alat')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
         $this->data['kode_barang_preview'] = $this->Model_Alat->generate_kode_barang();
         $this->data['daftar_ruangan']      = $this->Model_Alat->ambil_daftar_ruangan();
 
@@ -126,10 +122,6 @@ class Alat extends MY_Controller
 
         $this->data['halaman_aktif'] = 'alat';
         $this->data['judul_halaman'] = 'Detail Alat Laboratorium: ' . html_escape($alat['kode_barang']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Alat Laboratorium', 'url' => site_url('alat')),
-            array('label' => 'Detail', 'url' => '#')
-        );
         $this->data['alat']          = $alat;
 
         $this->muat_tampilan('alat/detail');
@@ -211,10 +203,7 @@ class Alat extends MY_Controller
 
         $this->data['halaman_aktif'] = 'alat';
         $this->data['judul_halaman'] = 'Edit Alat Laboratorium';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Alat Laboratorium', 'url' => site_url('alat')),
-            array('label' => 'Edit', 'url' => '#')
-        );
+        
         $this->data['alat']           = $alat;
         $this->data['daftar_ruangan'] = $this->Model_Alat->ambil_daftar_ruangan();
 
@@ -471,11 +460,7 @@ class Alat extends MY_Controller
 
             $this->data['halaman_aktif'] = 'alat';
             $this->data['judul_halaman'] = 'Preview Validasi Import Alat Laboratorium';
-            $this->data['breadcrumbs']   = array(
-                array('label' => 'Alat Laboratorium', 'url' => site_url('alat')),
-                array('label' => 'Import', 'url' => site_url('alat/import')),
-                array('label' => 'Preview', 'url' => '#')
-            );
+            
 
             $this->data['total_read']   = $total_read;
             $this->data['valid_rows']   = $valid_rows;
@@ -487,10 +472,7 @@ class Alat extends MY_Controller
 
         $this->data['halaman_aktif'] = 'alat';
         $this->data['judul_halaman'] = 'Import Alat Laboratorium via Excel';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Alat Laboratorium', 'url' => site_url('alat')),
-            array('label' => 'Import Excel', 'url' => '#')
-        );
+        
 
         $this->muat_tampilan('alat/import');
     }

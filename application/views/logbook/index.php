@@ -6,7 +6,7 @@
     }
     .stat-card-custom {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #edf2f7;
         border-radius: 12px;
         padding: 16px 20px;
         transition: all 0.2s ease;
@@ -29,14 +29,69 @@
     }
     .filter-card {
         background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .filter-input-clean {
+        background-color: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        border-radius: 8px;
+        color: #334155;
+        font-size: 0.82rem;
+        padding: 0.45rem 0.75rem;
+        transition: all 0.2s ease;
+    }
+    .filter-input-clean:focus {
+        background-color: #ffffff;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        color: #0f172a;
+    }
+    .filter-label-clean {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .filter-btn-search {
+        background: #0284c7;
+        border: 1px solid #0284c7;
+        border-radius: 8px;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.82rem;
+        padding: 0.45rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .filter-btn-search:hover {
+        background: #0369a1;
+        border-color: #0369a1;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+    .filter-btn-reset {
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        color: #64748b;
+        padding: 0.45rem 0.75rem;
+        transition: all 0.2s ease;
+    }
+    .filter-btn-reset:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        border-color: #cbd5e1;
     }
     .main-table-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         overflow: hidden;
     }

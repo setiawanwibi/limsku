@@ -93,71 +93,99 @@ body {
 }
 
 #lims-sidebar .sidebar-header {
-    height: 57px;
-    padding: 0.5rem 0.75rem 0.5rem 1rem;
+    height: 60px;
+    padding: 0.75rem 1rem;
     background-color: #ffffff;
-    border-bottom: 1px solid var(--lims-sidebar-border);
+    border-bottom: 1px solid #edf2f7;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 #lims-sidebar .sidebar-header h5 {
-    color: var(--lims-primary);
+    color: #0f172a;
     font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: 0.5px;
+    font-size: 1.05rem;
+    letter-spacing: 0.3px;
     margin-bottom: 0;
-    line-height: 1.1;
+    line-height: 1.15;
     white-space: nowrap;
 }
 
 #lims-sidebar .sidebar-header small {
-    color: var(--lims-secondary);
+    color: #64748b;
     font-size: 0.68rem;
-    font-weight: 600;
+    font-weight: 500;
     display: block;
-    line-height: 1.1;
+    line-height: 1.2;
     white-space: nowrap;
 }
 
 #lims-sidebar ul.components {
-    padding: 0.75rem 0;
+    padding: 0.5rem 0.65rem;
     list-style: none;
     margin: 0;
 }
 
 #lims-sidebar ul li a {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.875rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
-    color: var(--lims-sidebar-text);
+    color: #475569;
     text-decoration: none;
-    transition: all 0.15s ease-in-out;
-    border-left: 3px solid transparent;
-    border-radius: 0 0.375rem 0.375rem 0;
-    margin-right: 0.5rem;
+    transition: all 0.18s ease-in-out;
+    border-left: none;
+    border-radius: 8px;
+    margin-right: 0;
+    margin-bottom: 2px;
+}
+
+#lims-sidebar ul li a i {
+    font-size: 1.05rem;
+    color: #64748b;
+    transition: color 0.18s ease-in-out, transform 0.18s ease-in-out;
 }
 
 #lims-sidebar ul li a:hover {
-    color: var(--lims-primary);
-    background-color: var(--lims-sidebar-hover-bg);
-    border-left-color: var(--lims-secondary);
+    color: #0284c7;
+    background-color: #f0f9ff;
+}
+
+#lims-sidebar ul li a:hover i {
+    color: #0284c7;
+    transform: translateX(2px);
 }
 
 #lims-sidebar ul li.active > a {
-    color: var(--lims-primary);
-    background-color: var(--lims-sidebar-active-bg);
-    border-left-color: var(--lims-primary);
+    color: #0369a1;
+    background-color: #e0f2fe;
     font-weight: 600;
+}
+
+#lims-sidebar ul li.active > a i {
+    color: #0284c7;
 }
 
 #lims-sidebar .nav-header {
     color: #94a3b8;
     font-weight: 700;
-    letter-spacing: 0.06em;
-    font-size: 0.7rem !important;
+    letter-spacing: 0.08em;
+    font-size: 0.65rem !important;
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.35rem !important;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-top: 1px solid #edf2f7;
+}
+
+#lims-sidebar ul.components > li.nav-header:first-child {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0.25rem !important;
 }
 
 /* Sidebar Notification Badges - Soft Pastel Blue */
@@ -220,15 +248,135 @@ body {
     top: 0;
     left: 260px;
     right: 0;
-    height: 57px;
+    height: 60px;
     z-index: 1020;
     background-color: #ffffff;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid var(--lims-card-border);
-    padding: 0.75rem 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid #edf2f7;
+    padding: 0.5rem 1.5rem;
     display: flex;
     align-items: center;
     transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tombol Portal Quick Switcher di Topbar */
+.topbar-portal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #0284c7;
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.topbar-portal-btn:hover {
+    color: #0369a1;
+    background-color: #e0f2fe;
+    border-color: #7dd3fc;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
+}
+
+.topbar-portal-btn i {
+    font-size: 0.9rem;
+    color: #0284c7;
+}
+
+/* User Profile Trigger Button di Topbar */
+.topbar-user-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.topbar-user-btn:hover,
+.topbar-user-btn:focus,
+.topbar-user-btn[aria-expanded="true"] {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.topbar-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+}
+
+.topbar-user-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.topbar-role-badge {
+    display: inline-block;
+    padding: 0.12rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #475569;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    line-height: 1.2;
+}
+
+.topbar-user-chevron {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+}
+
+.topbar-user-btn[aria-expanded="true"] .topbar-user-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu Styling */
+.topbar-dropdown-menu {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    padding: 0.5rem;
+    min-width: 220px;
+    margin-top: 0.5rem !important;
+}
+
+.topbar-dropdown-menu .dropdown-item {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #334155;
+    transition: all 0.15s ease;
+}
+
+.topbar-dropdown-menu .dropdown-item:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.topbar-dropdown-menu .dropdown-item.text-danger:hover {
+    background-color: #fef2f2;
+    color: #dc2626 !important;
 }
 
 /* Sidebar Toggle Buttons & Collapsed State */

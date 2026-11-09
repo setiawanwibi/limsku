@@ -71,10 +71,6 @@ class Kelas_Terapi extends MY_Controller
 
         $this->data['halaman_aktif'] = 'kelas_terapi';
         $this->data['judul_halaman'] = 'Tambah Kelas Terapi';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Kelas Terapi', 'url' => site_url('kelas-terapi')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
 
         $this->muat_tampilan('kelas_terapi/tambah');
     }

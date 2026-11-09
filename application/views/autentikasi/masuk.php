@@ -45,25 +45,40 @@
         .login-hero-pane {
             flex: 1.15;
             position: relative;
-            background: linear-gradient(135deg, rgba(8, 38, 57, 0.88) 0%, rgba(13, 59, 74, 0.82) 100%), 
-                        url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat;
-            color: #ffffff;
-            padding: 3.5rem 4rem;
+            background: linear-gradient(145deg, #071e33 0%, #0c334d 50%, #0a445c 100%);
+            padding: 3rem;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
         }
 
-        /* Subtle grid pattern overlay */
+        /* Ambient Glowing Accents for High-End Institutional Look */
         .login-hero-pane::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at 20% 30%, rgba(20, 184, 166, 0.15), transparent 45%),
-                        radial-gradient(circle at 80% 80%, rgba(14, 116, 144, 0.2), transparent 50%);
+            top: -20%;
+            left: -10%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, transparent 70%);
+            border-radius: 50%;
             pointer-events: none;
         }
+
+        .login-hero-pane::after {
+            content: '';
+            position: absolute;
+            bottom: -15%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(2, 132, 199, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Clean overlay removed */
 
         .hero-top, .hero-center, .hero-bottom {
             position: relative;
@@ -71,22 +86,36 @@
         }
 
         .hero-brand {
+            position: relative;
+            z-index: 3;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.85rem;
+            justify-content: center;
+            text-align: center;
+            gap: 1.25rem;
+            padding: 2.75rem 2.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            max-width: 420px;
+            width: 100%;
         }
 
         .hero-logo-box {
-            width: 48px;
-            height: 48px;
+            width: 80px;
+            height: 80px;
             background: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 5px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .hero-logo-box img {
@@ -96,16 +125,19 @@
         }
 
         .hero-brand-text h4 {
-            margin: 0;
-            font-weight: 700;
-            font-size: 1.15rem;
-            letter-spacing: 0.5px;
+            margin: 0 0 6px;
+            font-weight: 800;
+            font-size: 1.55rem;
+            letter-spacing: 0.8px;
             color: #ffffff;
         }
 
         .hero-brand-text span {
-            font-size: 0.78rem;
+            font-size: 0.85rem;
             color: #94a3b8;
+            font-weight: 500;
+            display: block;
+            line-height: 1.4;
         }
 
         .badge-system {
@@ -405,58 +437,18 @@
 <div class="login-container-split">
     <!-- Left Hero Section -->
     <div class="login-hero-pane">
-        <!-- Top: Logo & App Title -->
-        <div class="hero-top">
-            <div class="hero-brand">
-                <div class="hero-logo-box">
-                    <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-logo">
-                </div>
-                <div class="hero-brand-text">
-                    <h4><?php echo html_escape($nama_aplikasi); ?></h4>
-                    <span><?php echo html_escape($instansi); ?></span>
-                </div>
+        <!-- Center Floating Card: Logo & App Title -->
+        <div class="hero-brand">
+            <div class="hero-logo-box">
+                <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-logo">
             </div>
-        </div>
-
-        <!-- Center: Hero Headline & Description -->
-        <div class="hero-center">
-            <div class="badge-system">
+            <div class="hero-brand-text">
+                <h4><?php echo html_escape($nama_aplikasi); ?></h4>
+                <span><?php echo html_escape($instansi); ?></span>
+            </div>
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mt-1 rounded-pill" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.72rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px;">
                 <i class="bi bi-shield-check"></i>
-                SISTEM TERINTEGRASI &amp; TERLINDUNGI
-            </div>
-            
-            <h1 class="hero-title">
-                Kendali mutu laboratorium, dari sampel hingga laporan final.
-            </h1>
-
-            <p class="hero-desc">
-                Satu ruang kerja untuk penerimaan sampel, pengujian, verifikasi, persetujuan, dan akses laporan BBPOM yang dapat ditelusuri.
-            </p>
-
-            <!-- 3 Workflow Steps -->
-            <div class="hero-cards-grid">
-                <div class="hero-step-card">
-                    <div class="hero-step-number">01</div>
-                    <div class="hero-step-title">Penerimaan</div>
-                    <div class="hero-step-subtitle">Registrasi &amp; distribusi</div>
-                </div>
-                <div class="hero-step-card">
-                    <div class="hero-step-number">02</div>
-                    <div class="hero-step-title">Pengujian</div>
-                    <div class="hero-step-subtitle">Metode &amp; hasil uji</div>
-                </div>
-                <div class="hero-step-card">
-                    <div class="hero-step-number">03</div>
-                    <div class="hero-step-title">Laporan</div>
-                    <div class="hero-step-subtitle">Verifikasi &amp; approval</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom: Copyright -->
-        <div class="hero-bottom">
-            <div class="hero-footer-text">
-                &copy; <?php echo date('Y'); ?> Balai Besar POM
+                <span>SISTEM INFORMASI LABORATORIUM</span>
             </div>
         </div>
     </div>

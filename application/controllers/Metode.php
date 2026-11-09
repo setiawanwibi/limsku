@@ -88,10 +88,6 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif']       = 'metode';
         $this->data['judul_halaman']       = 'Tambah Metode Monografi';
-        $this->data['breadcrumbs']         = array(
-            array('label' => 'Master Metode', 'url' => site_url('metode')),
-            array('label' => 'Tambah', 'url' => '#')
-        );
         $this->data['daftar_kelas_terapi'] = $this->Model_Kelas_Terapi->ambil_aktif();
         $this->data['daftar_lcp']          = $this->Model_Template->ambil_semua();
 
@@ -224,10 +220,6 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif']  = 'metode';
         $this->data['judul_halaman']  = 'Analisis & Auto-Mapping LCP Monografi';
-        $this->data['breadcrumbs']    = array(
-            array('label' => 'Master Metode', 'url' => site_url('metode')),
-            array('label' => 'Auto-Mapping LCP', 'url' => '#')
-        );
         $this->data['stats']          = $stats;
         $this->data['daftar_lcp']      = $daftar_lcp;
 
@@ -543,11 +535,6 @@ class Metode extends MY_Controller
 
             $this->data['halaman_aktif']  = 'metode';
             $this->data['judul_halaman']  = 'Preview & Validasi Import Metode Monografi';
-            $this->data['breadcrumbs']    = array(
-                array('label' => 'Master Metode', 'url' => site_url('metode')),
-                array('label' => 'Import', 'url' => site_url('metode/import')),
-                array('label' => 'Preview', 'url' => '#')
-            );
             $this->data['total_read']     = $total_read;
             $this->data['valid_rows']     = $valid_rows;
             $this->data['duplicate_rows'] = $duplicate_rows;
@@ -560,10 +547,6 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif'] = 'metode';
         $this->data['judul_halaman'] = 'Import Metode Monografi via Excel';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Metode', 'url' => site_url('metode')),
-            array('label' => 'Import Excel', 'url' => '#')
-        );
 
         $this->muat_tampilan('metode/import');
     }

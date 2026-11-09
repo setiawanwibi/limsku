@@ -293,12 +293,11 @@
 
     .banner-tolak-mt {
         background: #fff8f8;
-        border: 1.5px solid #f5c2c7;
-        border-left: 4px solid #dc3545;
+        border: 1px solid #fecaca;
         border-radius: 8px;
-        padding: 14px 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.06);
+        padding: 10px 14px;
+        margin-top: 12px;
+        box-shadow: 0 1px 3px rgba(220, 38, 38, 0.04);
     }
 
     .queue-empty {
@@ -333,7 +332,7 @@
 
     .verifikasi-sample-top {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         gap: 15px;
     }
@@ -367,7 +366,7 @@
     }
 
     .sample-name {
-        margin: 0 0 6px;
+        margin: 0 0 4px;
         color: #294257;
         font-size: 1.02rem;
         font-weight: 700;
@@ -386,27 +385,28 @@
     }
 
     .btn-lampiran {
-        min-height: 34px;
-        padding: 7px 12px;
+        min-height: 32px;
+        padding: 6px 12px;
         border: 1px solid #d9e3e7;
-        border-radius: 7px;
+        border-radius: 20px;
         background: #fff;
         color: #617684;
-        font-size: .68rem;
-        font-weight: 700;
+        font-size: .72rem;
+        font-weight: 600;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        gap: 6px;
         white-space: nowrap;
-        transition: .18s ease;
+        transition: all .18s ease;
+        flex-shrink: 0;
     }
 
     .btn-lampiran:hover {
-        border-color: #bddbd9;
-        background: #f4faf9;
-        color: #168f8b;
+        border-color: #0284c7;
+        background: #f0f9ff;
+        color: #0284c7;
     }
 
     /* =========================================================
@@ -1179,86 +1179,39 @@
                 <!-- Sample Header -->
                 <div class="verifikasi-sample-card">
 
-                    <div class="verifikasi-sample-top">
-
-                        <div>
-
-                            <div class="sample-code-row">
-
-                                <span class="sample-code">
-                                    <?php
-                                        echo html_escape(
-                                            $selected_item['kode_sampel_manual']
-                                            ?: 'SMP-' . $selected_item['sample_id']
-                                        );
-                                    ?>
-                                </span>
-
-                                <?php if ($selected_item['status'] === 'Ditolak MT'): ?>
-                                    <span class="status-ditolak-mt">
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                        DIKEMBALIKAN OLEH MT
-                                    </span>
-                                <?php else: ?>
-                                    <span class="status-menunggu">
-                                        <i class="bi bi-clock-history me-1"></i>
-                                        MENUNGGU VERIFIKASI
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-
-                            <?php if ($selected_item['status'] === 'Ditolak MT' && !empty($selected_item['alasan_penolakan'])): ?>
-                                <div class="banner-tolak-mt mt-2">
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i class="bi bi-exclamation-octagon-fill text-danger fs-6"></i>
-                                        <strong class="text-danger" style="font-size: 0.78rem;">Catatan Penolakan oleh Manajer Teknis (MT):</strong>
-                                    </div>
-                                    <div class="text-dark bg-white p-2 rounded border border-danger-subtle font-monospace" style="font-size: 0.74rem; line-height: 1.5;">
-                                        <?php echo nl2br(html_escape($selected_item['alasan_penolakan'])); ?>
-                                    </div>
-                                    <small class="text-muted d-block mt-1" style="font-size: 0.68rem;">
-                                        <i class="bi bi-info-circle me-1"></i> Silakan periksa kembali data pengujian / LCP di bawah. Anda dapat mengembalikannya ke Penguji dengan memilih keputusan <strong>"Tolak &amp; Kembalikan"</strong> di sebelah kanan.
-                                    </small>
-                                </div>
-                            <?php endif; ?>
-
-
-                            <h4 class="sample-name">
-                                <?php echo html_escape($selected_item['nama_sampel']); ?>
-                            </h4>
-
-
-                            <p class="sample-meta">
-
-                                Penguji:
-                                <strong>
-                                    <?php echo html_escape($selected_item['nama_penguji'] ?: 'Analis'); ?>
-                                </strong>
-
-                                <span class="mx-1">·</span>
-
-                                Selesai:
+                    <!-- Baris Atas: Kode Sampel & Tombol Aksi Sejajar (Tombol Mentok Kanan) -->
+                    <div class="d-flex align-items-center justify-content-between gap-3 mb-2 w-100">
+                        <div class="sample-code-row mb-0 flex-grow-1" style="min-width: 0;">
+                            <span class="sample-code">
                                 <?php
                                     echo html_escape(
-                                        $selected_item['waktu_selesai']
-                                            ? date('d M Y, H.i', strtotime($selected_item['waktu_selesai']))
-                                            : '-'
+                                        $selected_item['kode_sampel_manual']
+                                        ?: 'SMP-' . $selected_item['sample_id']
                                     );
                                 ?>
+                            </span>
 
-                            </p>
-
+                            <?php if ($selected_item['status'] === 'Ditolak MT'): ?>
+                                <span class="status-ditolak-mt">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    DIKEMBALIKAN OLEH MT
+                                </span>
+                            <?php else: ?>
+                                <span class="status-menunggu">
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    MENUNGGU VERIFIKASI
+                                </span>
+                            <?php endif; ?>
                         </div>
 
-
-                        <div class="d-flex align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center flex-nowrap gap-2 flex-shrink-0 ms-auto">
                             <a
                                 href="<?php echo site_url('pengujian/detail_sesi/' . $selected_item['id']); ?>"
                                 class="btn-lampiran"
                                 title="Lihat detail lengkap seluruh parameter, instrumen alat, dan reagen"
                             >
                                 <i class="bi bi-folder2-open text-primary"></i>
-                                Detail Pengujian
+                                <span>Detail Pengujian</span>
                             </a>
 
                             <?php if (isset($selected_item['jenis_pengujian']) && $selected_item['jenis_pengujian'] === 'Kimia'): ?>
@@ -1269,7 +1222,7 @@
                                     title="Tinjau & Simpan Catatan Pengujian (CP) Kimia BBPOM"
                                 >
                                     <i class="bi bi-journal-check text-info"></i>
-                                    Catatan Pengujian (CP)
+                                    <span>Catatan Pengujian (CP)</span>
                                 </a>
                             <?php else: ?>
                                 <a
@@ -1279,12 +1232,51 @@
                                     title="Tinjau & Unduh Catatan Pengujian (CP) Mikrobiologi PDF"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
-                                    Unduh CP Mikro
+                                    <span>Unduh CP Mikro</span>
                                 </a>
                             <?php endif; ?>
                         </div>
-
                     </div>
+
+                    <!-- Baris Bawah: Nama Sampel Full Width & Meta Penguji -->
+                    <div class="mb-1">
+                        <h4 class="sample-name mb-1" style="line-height: 1.45;">
+                            <?php echo html_escape($selected_item['nama_sampel']); ?>
+                        </h4>
+
+                        <p class="sample-meta">
+                            Penguji:
+                            <strong>
+                                <?php echo html_escape($selected_item['nama_penguji'] ?: 'Analis'); ?>
+                            </strong>
+                            <span class="mx-1">·</span>
+                            Selesai:
+                            <?php
+                                echo html_escape(
+                                    $selected_item['waktu_selesai']
+                                        ? date('d M Y, H.i', strtotime($selected_item['waktu_selesai']))
+                                        : '-'
+                                );
+                            ?>
+                        </p>
+                    </div>
+
+                    <?php if ($selected_item['status'] === 'Ditolak MT' && !empty($selected_item['alasan_penolakan'])): ?>
+                        <div class="banner-tolak-mt">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div class="rounded-circle bg-danger-subtle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                    <i class="bi bi-exclamation-circle text-danger" style="font-size: 0.80rem;"></i>
+                                </div>
+                                <strong class="text-danger" style="font-size: 0.80rem;">Catatan Penolakan oleh Manajer Teknis (MT):</strong>
+                            </div>
+                            <div class="text-dark bg-white p-2 px-3 rounded border border-danger-subtle" style="font-size: 0.78rem; line-height: 1.5;">
+                                <?php echo nl2br(html_escape($selected_item['alasan_penolakan'])); ?>
+                            </div>
+                            <small class="text-muted d-block mt-2" style="font-size: 0.70rem; line-height: 1.4;">
+                                <i class="bi bi-info-circle me-1"></i> Periksa kembali data pengujian / LCP di bawah. Anda dapat mengembalikannya ke Penguji dengan memilih keputusan <strong>"Tolak &amp; Kembalikan"</strong> di panel verifikasi sebelah kanan.
+                            </small>
+                        </div>
+                    <?php endif; ?>
 
                 </div>
 

@@ -2,19 +2,25 @@
 
 <style>
     /* =========================================================
-        EKSEKUTIF LABORATORIUM (PREMIUM DESIGN)
-       Standar Visual ISO 17025 BBPOM Bandar Lampung
+        EKSEKUTIF LABORATORIUM (MODERN & CLEAN DESIGN)
+        Standar Visual LIMSKU BBPOM Bandar Lampung
        ========================================================= */
 
     .laporan-page {
         width: 100%;
-        color: #243746;
-        font-size: 0.90rem;
+        color: #1e293b;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 0.88rem;
     }
 
     /* HEADER UTAMA */
     .laporan-header {
-        margin-bottom: 24px;
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
+        padding: 18px 22px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -24,81 +30,103 @@
 
     .laporan-title {
         margin: 0 0 4px;
-        color: #162d3d;
-        font-size: 1.25rem;
-        font-weight: 800;
-        letter-spacing: -0.3px;
+        color: #0f172a;
+        font-size: 1.18rem;
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 9px;
+        gap: 8px;
     }
 
     .laporan-title i {
-        color: #159b98;
+        color: #0284c7;
+        font-size: 1.25rem;
     }
 
     .laporan-desc {
         margin: 0;
-        color: #687d8d;
+        color: #64748b;
         font-size: 0.80rem;
     }
 
     /* ACTION BUTTONS */
-    .laporan-btn-export {
-        min-height: 38px;
-        padding: 0 16px;
-        border-radius: 8px;
+    .btn-export-excel {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534 !important;
+        font-weight: 600;
+        font-size: 0.80rem;
+        border-radius: 999px;
+        padding: 0.45rem 1.1rem;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 7px;
-        text-decoration: none;
-        font-size: 0.78rem;
-        font-weight: 700;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        gap: 0.4rem;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
     }
 
-    .btn-export-excel {
-        background: #0e703c;
-        border: 1px solid #0e703c;
-        color: #fff;
-    }
     .btn-export-excel:hover {
-        background: #09532c;
-        border-color: #09532c;
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(14, 112, 60, 0.25);
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #14532d !important;
     }
 
     .btn-export-pdf {
-        background: #c93b16;
-        border: 1px solid #c93b16;
-        color: #fff;
-    }
-    .btn-export-pdf:hover {
-        background: #a32c0d;
-        border-color: #a32c0d;
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(201, 59, 22, 0.25);
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b !important;
+        font-weight: 600;
+        font-size: 0.80rem;
+        border-radius: 999px;
+        padding: 0.45rem 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
     }
 
-    /* KPI METRIC CARDS (PREMIUM GLASS-LIKE SHADOWS) */
+    .btn-export-pdf:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #7f1d1d !important;
+    }
+
+    .btn-berkas-lhu {
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569 !important;
+        font-weight: 600;
+        font-size: 0.80rem;
+        border-radius: 999px;
+        padding: 0.45rem 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+    }
+
+    .btn-berkas-lhu:hover {
+        background: #f1f5f9;
+        color: #0f172a !important;
+        border-color: #cbd5e1;
+    }
+
+    /* KPI METRIC CARDS */
     .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 16px;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
     }
 
     .kpi-card {
         background: #ffffff;
-        border: 1px solid #e2eaf0;
-        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
         padding: 18px 20px;
-        box-shadow: 0 3px 12px rgba(24, 43, 60, 0.04);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         position: relative;
         overflow: hidden;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -106,7 +134,7 @@
 
     .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(24, 43, 60, 0.08);
+        box-shadow: 0 6px 14px -3px rgba(0, 0, 0, 0.06);
     }
 
     .kpi-card::before {
@@ -115,36 +143,36 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: #159b98;
+        height: 3px;
+        background: #0284c7;
     }
 
-    .kpi-card.kpi-warning::before { background: #e67e22; }
-    .kpi-card.kpi-success::before { background: #27ae60; }
-    .kpi-card.kpi-danger::before { background: #e74c3c; }
-    .kpi-card.kpi-info::before { background: #2980b9; }
+    .kpi-card.kpi-warning::before { background: #f59e0b; }
+    .kpi-card.kpi-success::before { background: #10b981; }
+    .kpi-card.kpi-danger::before { background: #ef4444; }
+    .kpi-card.kpi-info::before { background: #3b82f6; }
 
     .kpi-label {
-        font-size: 0.71rem;
+        font-size: 0.70rem;
         font-weight: 700;
         text-transform: uppercase;
-        color: #7b8e9d;
+        color: #64748b;
         letter-spacing: 0.6px;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         display: block;
     }
 
     .kpi-value {
-        font-size: 1.7rem;
-        font-weight: 800;
-        color: #172e3f;
-        line-height: 1;
-        margin-bottom: 8px;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.1;
+        margin-bottom: 6px;
     }
 
     .kpi-sub {
         font-size: 0.72rem;
-        color: #8598a6;
+        color: #94a3b8;
     }
 
     /* CHARTS & ANALYTICS ROW */
@@ -152,7 +180,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 18px;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
     }
 
     @media (max-width: 992px) {
@@ -163,10 +191,10 @@
 
     .chart-card {
         background: #ffffff;
-        border: 1px solid #e2eaf0;
-        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
         padding: 20px;
-        box-shadow: 0 3px 12px rgba(24, 43, 60, 0.04);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
     }
 
     .chart-header {
@@ -175,13 +203,13 @@
         justify-content: space-between;
         margin-bottom: 16px;
         padding-bottom: 12px;
-        border-bottom: 1px solid #edf3f7;
+        border-bottom: 1px solid #edf2f7;
     }
 
     .chart-title {
         font-size: 0.88rem;
         font-weight: 700;
-        color: #1f3749;
+        color: #1e293b;
         margin: 0;
         display: flex;
         align-items: center;
@@ -191,25 +219,27 @@
     /* FILTER PANEL */
     .filter-panel {
         background: #ffffff;
-        border: 1px solid #e2eaf0;
-        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
         padding: 18px 20px;
-        margin-bottom: 24px;
-        box-shadow: 0 3px 12px rgba(24, 43, 60, 0.03);
+        margin-bottom: 22px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
     }
 
     .filter-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        gap: 14px;
+        gap: 12px;
         align-items: flex-end;
     }
 
     .filter-label {
-        font-size: 0.73rem;
+        font-size: 0.70rem;
         font-weight: 700;
-        color: #4b6272;
-        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 4px;
         display: block;
     }
 
@@ -217,35 +247,77 @@
         width: 100%;
         height: 38px;
         padding: 6px 12px;
-        border: 1px solid #d2dfe7;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 0.77rem;
-        color: #243746;
-        background-color: #fcfdfe;
+        font-size: 0.80rem;
+        color: #334155;
+        background-color: #f8fafc;
         transition: all 0.2s ease;
     }
 
     .filter-input:focus {
-        border-color: #159b98;
+        border-color: #38bdf8;
         outline: none;
-        box-shadow: 0 0 0 3px rgba(21, 155, 152, 0.12);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
         background-color: #ffffff;
+        color: #0f172a;
+    }
+
+    .btn-filter-apply {
+        background: #0284c7;
+        border: 1px solid #0284c7;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.82rem;
+        border-radius: 8px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-filter-apply:hover {
+        background: #0369a1;
+        border-color: #0369a1;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+    }
+
+    .btn-filter-reset {
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #64748b;
+        border-radius: 8px;
+        height: 38px;
+        width: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .btn-filter-reset:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        border-color: #cbd5e1;
     }
 
     /* DATA TABLES & CARDS */
     .table-card {
         background: #ffffff;
-        border: 1px solid #e0e8ee;
-        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
         overflow: hidden;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 16px rgba(24, 43, 60, 0.04);
+        margin-bottom: 22px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
 
     .table-card-header {
         padding: 16px 22px;
-        background: #fafcff;
-        border-bottom: 1px solid #eaf0f5;
+        background: #ffffff;
+        border-bottom: 1px solid #edf2f7;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -254,9 +326,9 @@
     }
 
     .table-card-title {
-        font-size: 0.88rem;
-        font-weight: 800;
-        color: #183346;
+        font-size: 0.90rem;
+        font-weight: 700;
+        color: #0f172a;
         margin: 0;
         display: flex;
         align-items: center;
@@ -268,7 +340,7 @@
         overflow-x: auto;
     }
 
-    /* STYLING TABEL MATRIKS PREMIUM */
+    /* STYLING TABEL MATRIKS CLEAN */
     .table-limsku-matrix {
         width: 100% !important;
         margin: 0 !important;
@@ -277,28 +349,28 @@
     }
 
     .table-limsku-matrix thead th {
-        background: #f6f9fc;
-        padding: 14px 12px;
-        font-size: 0.70rem;
+        background: #f8fafc;
+        padding: 12px 14px;
+        font-size: 0.72rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: #556c7d;
-        border-bottom: 2px solid #e1e9f0;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
         white-space: nowrap;
         vertical-align: middle;
     }
 
     .table-limsku-matrix tbody td {
-        padding: 13px 12px;
-        font-size: 0.76rem;
-        color: #405767;
-        border-bottom: 1px solid #edf3f7;
+        padding: 12px 14px;
+        font-size: 0.82rem;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
     }
 
     .table-limsku-matrix tbody tr:hover td {
-        background: #f8fbfe;
+        background: #f8fafc;
     }
 
     .table-limsku-matrix tbody tr:last-child td {
@@ -310,81 +382,85 @@
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        padding: 4px 9px;
+        padding: 3px 8px;
         border-radius: 6px;
-        font-size: 0.66rem;
-        font-weight: 700;
+        font-size: 0.70rem;
+        font-weight: 600;
         white-space: nowrap;
     }
 
-    .badge-menunggu-pengujian { background: #f1f5f8; color: #526b7c; border: 1px solid #dbe4eb; }
-    .badge-sedang-diuji { background: #eaf5fc; color: #1c729c; border: 1px solid #c7e3f6; }
-    .badge-menunggu-verifikasi { background: #fef7e9; color: #946914; border: 1px solid #f2e0b6; }
-    .badge-menunggu-approval { background: #f5f0fd; color: #6944a4; border: 1px solid #dfd1f7; }
-    .badge-approved-final { background: #e9f8ed; color: #1c813f; border: 1px solid #c2eccd; }
-    .badge-ditolak { background: #fdf1f1; color: #b73838; border: 1px solid #f3cfcf; }
+    .badge-menunggu-pengujian { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .badge-sedang-diuji { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-menunggu-verifikasi { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-menunggu-approval { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge-approved-final { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-ditolak { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     /* LEAD TIME PILL */
     .lead-time-pill {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        padding: 3px 8px;
+        padding: 2px 7px;
         border-radius: 6px;
-        font-size: 0.69rem;
-        font-weight: 700;
+        font-size: 0.72rem;
+        font-weight: 600;
+        font-family: 'JetBrains Mono', Consolas, monospace;
         white-space: nowrap;
     }
-    .lead-time-ontime { background: #e9f8ed; color: #1c813f; border: 1px solid #c2eccd; }
-    .lead-time-late { background: #fdf1f1; color: #b73838; border: 1px solid #f3cfcf; }
+    .lead-time-ontime { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .lead-time-late { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     /* BADGE KESIMPULAN MUTU */
     .badge-ms {
-        background: #e9f8ed;
-        color: #1b7a3d;
-        border: 1px solid #b7e8c5;
-        font-weight: 800;
-        font-size: 0.67rem;
-        padding: 2px 7px;
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+        font-weight: 700;
+        font-size: 0.70rem;
+        padding: 2px 6px;
         border-radius: 5px;
     }
     .badge-tms {
-        background: #fdf1f1;
-        color: #b72b2b;
-        border: 1px solid #f5c4c4;
-        font-weight: 800;
-        font-size: 0.67rem;
-        padding: 2px 7px;
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        font-weight: 700;
+        font-size: 0.70rem;
+        padding: 2px 6px;
         border-radius: 5px;
     }
 
     /* DATATABLES CUSTOM CONTROLS OVERRIDE */
     #tabel-monitoring_wrapper {
-        padding: 12px 18px 16px;
+        padding: 14px 18px;
     }
 
     #tabel-monitoring_wrapper .dataTables_filter input {
-        border: 1px solid #d2dfe7;
-        border-radius: 7px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background-color: #f8fafc;
         padding: 5px 10px;
-        font-size: 0.77rem;
+        font-size: 0.80rem;
         margin-left: 8px;
     }
     #tabel-monitoring_wrapper .dataTables_filter input:focus {
-        border-color: #159b98;
+        border-color: #38bdf8;
         outline: none;
+        background-color: #ffffff;
     }
 
     #tabel-monitoring_wrapper .dataTables_length select {
-        border: 1px solid #d2dfe7;
-        border-radius: 7px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background-color: #f8fafc;
         padding: 4px 8px;
-        font-size: 0.77rem;
+        font-size: 0.80rem;
     }
 
     #tabel-monitoring_wrapper .dataTables_info {
-        color: #728695;
-        font-size: 0.73rem;
+        color: #64748b;
+        font-size: 0.76rem;
         padding-top: 12px;
     }
 
@@ -403,7 +479,7 @@
             flex-wrap: wrap;
             gap: 8px !important;
         }
-        .laporan-btn-export, .laporan-header .btn {
+        .btn-export-excel, .btn-export-pdf, .btn-berkas-lhu {
             flex: 1 1 auto;
             justify-content: center;
         }
@@ -411,7 +487,7 @@
             grid-template-columns: 1fr;
             gap: 12px;
         }
-        .chart-grid {
+        .analytics-row {
             grid-template-columns: 1fr;
         }
         .filter-panel {
@@ -432,14 +508,14 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             <?php $query_string = http_build_query($filter); ?>
-            <a href="<?php echo site_url('laporan/export_excel?' . $query_string); ?>" class="laporan-btn-export btn-export-excel" title="Unduh rekapitulasi lengkap spreadsheet CSV / Excel">
-                <i class="bi bi-file-earmark-excel-fill fs-6"></i> Ekspor Excel
+            <a href="<?php echo site_url('laporan/export_excel?' . $query_string); ?>" class="btn-export-excel" title="Unduh rekapitulasi lengkap spreadsheet CSV / Excel">
+                <i class="bi bi-file-earmark-excel"></i> Ekspor Excel
             </a>
-            <a href="<?php echo site_url('laporan/export_pdf?' . $query_string); ?>" target="_blank" class="laporan-btn-export btn-export-pdf" title="Cetak laporan rekapitulasi resmi A4">
-                <i class="bi bi-file-earmark-pdf-fill fs-6"></i> Cetak Rekap PDF
+            <a href="<?php echo site_url('laporan/export_pdf?' . $query_string); ?>" target="_blank" class="btn-export-pdf" title="Cetak laporan rekapitulasi resmi A4">
+                <i class="bi bi-file-earmark-pdf"></i> Cetak Rekap PDF
             </a>
-            <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn btn-outline-secondary btn-sm" style="height: 38px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center;" title="Buka Workspace Berkas &amp; Cetak LHU Per Sampel">
-                <i class="bi bi-folder2-open me-1"></i> Berkas LHU
+            <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn-berkas-lhu" title="Buka Workspace Berkas &amp; Cetak LHU Per Sampel">
+                <i class="bi bi-folder2-open"></i> Berkas LHU
             </a>
         </div>
     </div>
@@ -561,10 +637,10 @@
                     <input type="text" name="kata_kunci" class="filter-input" placeholder="No SIPT / Bets / Nama..." value="<?php echo html_escape($filter['kata_kunci']); ?>">
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1" style="height: 38px; border-radius: 8px; font-weight: 700;">
+                    <button type="submit" class="btn btn-filter-apply flex-grow-1">
                         <i class="bi bi-funnel-fill me-1"></i> Terapkan
                     </button>
-                    <a href="<?php echo site_url('laporan'); ?>" class="btn btn-outline-secondary btn-sm" style="height: 38px; border-radius: 8px; display: inline-flex; align-items: center;" title="Reset Filter">
+                    <a href="<?php echo site_url('laporan'); ?>" class="btn-filter-reset" title="Reset Filter">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>

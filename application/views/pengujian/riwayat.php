@@ -936,25 +936,29 @@
             <?php endif; ?>
         </div>
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center flex-wrap gap-2">
             <?php if (in_array((int)$this->session->userdata('role_id'), array(1, 4, 5), true)): ?>
-                <a href="<?php echo site_url('laporan'); ?>" class="btn btn-outline-info btn-sm">
-                    <i class="bi bi-graph-up-arrow me-1"></i> Monitoring &amp; Rekap
+                <a href="<?php echo site_url('laporan'); ?>" class="btn btn-sm rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 shadow-sm" style="background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-size: 0.78rem; font-weight: 500;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Monitoring &amp; Rekap</span>
                 </a>
             <?php endif; ?>
             <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'pengujian_approve')): ?>
-                <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-shield-check me-1"></i> Antrean Approval MT
+                <a href="<?php echo site_url('pengujian/approval'); ?>" class="btn btn-sm rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 shadow-sm" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; font-size: 0.78rem; font-weight: 500;">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Antrean Approval MT</span>
                 </a>
-                <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-file-earmark-check me-1"></i> Riwayat Approval MT
+                <a href="<?php echo site_url('pengujian/riwayat_approval'); ?>" class="btn btn-sm rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 shadow-sm" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; font-size: 0.78rem; font-weight: 500;">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>Riwayat Approval MT</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($bisa_pengujian_operasional): ?>
                 <a
                     href="<?php echo site_url('pengujian/antrean'); ?>"
-                    class="riwayat-btn-antrean"
+                    class="riwayat-btn-antrean rounded-pill px-3 py-1 shadow-sm"
+                    style="min-height: 32px; font-size: 0.78rem; font-weight: 500;"
                 >
                     <i class="bi bi-list-task me-1"></i>
                     Antrean Pengujian
