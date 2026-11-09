@@ -214,11 +214,20 @@ class Model_Metode extends CI_Model
      */
     public function ambil_daftar_zat_aktif($bidang = 'Kimia')
     {
-        $this->db->select('TRIM(nama_zat_aktif) as nama_zat_aktif, COUNT(*) as total_parameter, GROUP_CONCAT(DISTINCT NULLIF(TRIM(bentuk_sediaan), "") ORDER BY bentuk_sediaan ASC SEPARATOR ", ") as daftar_sediaan');
-        $this->db->group_start();
-        $this->db->where('bidang_pengujian', $bidang);
-        $this->db->or_where('kategori', $bidang);
-        $this->db->group_end();
+        if ($bidang === 'Mikrobiologi') {
+            // Untuk mikrobiologi, tampilkan semua zat aktif aktif (karena sediaan oral non-antibiotik berlaku umum untuk seluruh zat aktif)
+            // Hitung juga jumlah parameter mikro yang sudah terdaftar
+            $this->db->select('TRIM(nama_zat_aktif) as nama_zat_aktif, 
+                               COUNT(*) as total_parameter, 
+                               COUNT(CASE WHEN bidang_pengujian = "Mikrobiologi" OR kategori = "Mikrobiologi" THEN 1 END) as total_param_mikro,
+                               GROUP_CONCAT(DISTINCT NULLIF(TRIM(bentuk_sediaan), "") ORDER BY bentuk_sediaan ASC SEPARATOR ", ") as daftar_sediaan');
+        } else {
+            $this->db->select('TRIM(nama_zat_aktif) as nama_zat_aktif, COUNT(*) as total_parameter, GROUP_CONCAT(DISTINCT NULLIF(TRIM(bentuk_sediaan), "") ORDER BY bentuk_sediaan ASC SEPARATOR ", ") as daftar_sediaan');
+            $this->db->group_start();
+            $this->db->where('bidang_pengujian', $bidang);
+            $this->db->or_where('kategori', $bidang);
+            $this->db->group_end();
+        }
         $this->db->where('status', 'Aktif');
         $this->db->where("nama_zat_aktif IS NOT NULL AND TRIM(nama_zat_aktif) != ''", NULL, FALSE);
         $this->db->group_by('TRIM(nama_zat_aktif)');
@@ -231,11 +240,24 @@ class Model_Metode extends CI_Model
      * 
      * @param string $zat_aktif
      * @param string $bidang
+     * @param string $bentuk_sediaan_hint
      * @return array
      */
-    public function ambil_parameter_by_zat_aktif($zat_aktif, $bidang = 'Kimia')
+    public function ambil_parameter_by_zat_aktif($zat_aktif, $bidang = 'Kimia', $bentuk_sediaan_hint = '')
     {
         $clean_za = trim(preg_replace('/\s+/', ' ', (string)$zat_aktif));
+        if (empty($clean_za)) {
+            return array();
+        }
+
+        // Jika Mikrobiologi, periksa apakah perlu menyematkan 3 parameter standar untuk oral non-antibiotik
+        if ($bidang === 'Mikrobiologi') {
+            $eval = self::evaluasi_rekomendasi_mikro($clean_za, $bentuk_sediaan_hint);
+            if ($eval['kategori'] === 'oral_non_antibiotik') {
+                $this->pastikan_parameter_mikro_standar_oral($clean_za, $bentuk_sediaan_hint);
+            }
+        }
+
         $this->db->select('m.*, tc.nama_kelas_terapi, ft.kode_template, ft.nama_template, ft.kategori as kategori_template, ft.skema_form');
         $this->db->from($this->tabel . ' m');
         $this->db->join('therapeutic_classes tc', 'tc.id = m.kelas_terapi_id', 'left');
@@ -248,6 +270,323 @@ class Model_Metode extends CI_Model
         $this->db->where('m.status', 'Aktif');
         $this->db->order_by('m.bentuk_sediaan', 'ASC');
         $this->db->order_by('m.parameter_uji', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Evaluasi Cerdas Rekomendasi Pengujian Mikrobiologi:
+     * - Sediaan oral nonsteril non-antibiotik: Wajib/Rekomendasi Paket 3 Parameter (ALT, AKK, E. coli)
+     * - Antibiotik Nistatin: Wajib/Rekomendasi Penetapan Potensi (MIK-03)
+     * - Antibiotik Oral Lainnya: Pemberitahuan informatif (umumnya tidak diuji mikro rutin, kadar di Kimia)
+     * Tetap 100% fleksibel bagi analis.
+     * 
+     * @param string $zat_aktif
+     * @param string $bentuk_sediaan
+     * @param string $nama_sampel
+     * @return array
+     */
+    public static function evaluasi_rekomendasi_mikro($zat_aktif, $bentuk_sediaan = '', $nama_sampel = '')
+    {
+        $za_lower = strtolower(trim((string)$zat_aktif));
+        $bs_lower = strtolower(trim((string)$bentuk_sediaan . ' ' . (string)$nama_sampel));
+
+        // 1. Deteksi apakah Nistatin / Nystatin
+        $is_nystatin = (strpos($za_lower, 'nystatin') !== false || strpos($za_lower, 'nistatin') !== false || strpos($bs_lower, 'nystatin') !== false || strpos($bs_lower, 'nistatin') !== false);
+
+        // 2. Deteksi Golongan Antibiotik
+        $daftar_antibiotik = array(
+            'nystatin', 'nistatin',
+            'amoxicillin', 'amoksisilin', 'ampicillin', 'ampisilin', 'co-amoxiclav', 'clavulanic',
+            'cefadroxil', 'sefadroksil', 'cefixime', 'sefiksim', 'cefotaxime', 'ceftriaxone', 'cefepime', 'cefazolin', 'cephalexin', 'cefaclor', 'cefuroxime', 'cefprozil',
+            'ciprofloxacin', 'siprofloksasin', 'levofloxacin', 'levofloksasin', 'ofloxacin', 'moxifloxacin',
+            'erythromycin', 'eritromisin', 'azithromycin', 'azitromisin', 'clarithromycin', 'klaritromisin', 'spiramycin',
+            'tetracycline', 'tetrasiklin', 'doxycycline', 'doksisiklin', 'oxytetracycline',
+            'chloramphenicol', 'kloramfenikol', 'thiamphenicol', 'tiamfenikol',
+            'clindamycin', 'klindamisin', 'lincomycin', 'linkomisin',
+            'cotrimoxazole', 'kotrimoksazol', 'sulfamethoxazole', 'trimethoprim',
+            'metronidazole', 'metronidazol',
+            'gentamicin', 'gentamisin', 'kanamycin', 'amikacin', 'neomycin', 'tobramycin',
+            'rifampicin', 'rifampisin', 'isoniazid', 'pyrazinamide', 'ethambutol',
+            'vancomycin', 'vankomisin'
+        );
+
+        $is_antibiotik = false;
+        foreach ($daftar_antibiotik as $ab) {
+            if (strpos($za_lower, $ab) !== false || strpos($bs_lower, $ab) !== false) {
+                $is_antibiotik = true;
+                break;
+            }
+        }
+
+        // 3. Deteksi Bentuk Sediaan (Topikal, Rektal, Oral Nonsteril)
+        $is_topikal = (strpos($bs_lower, 'krim') !== false || strpos($bs_lower, 'salep') !== false || strpos($bs_lower, 'gel') !== false || strpos($bs_lower, 'pasta') !== false || strpos($bs_lower, 'topikal') !== false || strpos($bs_lower, 'topical') !== false || strpos($bs_lower, 'ointment') !== false || strpos($bs_lower, 'cream') !== false || strpos($bs_lower, 'losio') !== false || strpos($bs_lower, 'lotion') !== false);
+        $is_rektal = (strpos($bs_lower, 'supositor') !== false || strpos($bs_lower, 'suppos') !== false || strpos($bs_lower, 'ovula') !== false || strpos($bs_lower, 'rektal') !== false || strpos($bs_lower, 'rectal') !== false || strpos($bs_lower, 'enema') !== false);
+
+        $kata_kunci_oral = array(
+            'tablet', 'kaplet', 'kapsul', 'capsule', 'sirup', 'syrup', 'suspensi', 'suspension',
+            'larutan oral', 'oral solution', 'eliksir', 'elixir', 'drop', 'tetes oral', 'oral drop',
+            'emulsi', 'emulsion', 'serbuk oral', 'puyer', 'granul', 'effervescent', 'chewable', 'oral'
+        );
+        $kata_kunci_non_oral_steril = array(
+            'injeksi', 'injection', 'infus', 'infusion', 'tetes mata', 'salep mata', 'eye drop',
+            'eye ointment', 'tetes telinga', 'ear drop', 'topikal', 'topical', 'krim', 'cream',
+            'salep', 'ointment', 'gel', 'suppositoria', 'ovula', 'inhalasi', 'inhalation'
+        );
+
+        $ada_kata_oral = false;
+        foreach ($kata_kunci_oral as $ko) {
+            if (strpos($bs_lower, $ko) !== false) {
+                $ada_kata_oral = true;
+                break;
+            }
+        }
+
+        $ada_kata_steril_atau_topikal = false;
+        foreach ($kata_kunci_non_oral_steril as $ks) {
+            if (strpos($bs_lower, $ks) !== false) {
+                $ada_kata_steril_atau_topikal = true;
+                break;
+            }
+        }
+
+        // Oral nonsteril jika ada kata oral dan bukan topikal/rektal/steril
+        $is_oral_nonsteril = ($ada_kata_oral && !$ada_kata_steril_atau_topikal && !$is_topikal && !$is_rektal);
+
+        // Jika tidak ada indikasi eksplisit sediaan steril/topikal/rektal, asumsikan sediaan umum oral
+        if (!$is_oral_nonsteril && !$ada_kata_steril_atau_topikal && !$is_topikal && !$is_rektal && (empty($bentuk_sediaan) || strpos($bs_lower, 'oral') !== false)) {
+            $is_oral_nonsteril = true;
+        }
+
+        // 4. Klasifikasi dan Susun Respons Rekomendasi
+        if ($is_nystatin) {
+            return array(
+                'kategori'               => 'antibiotik_nystatin',
+                'is_oral_nonsteril'      => $is_oral_nonsteril,
+                'is_antibiotik'          => true,
+                'is_nystatin'            => true,
+                'judul'                  => 'Rekomendasi Farmakope: Penetapan Potensi Nistatin (MIK-03)',
+                'pesan'                  => 'Khusus antibiotik Nistatin, pengujian mikrobiologi yang dipersyaratkan adalah Penetapan Potensi Antibiotika (Metode Lempeng-Silinder 5 Dosis / MIK-03). Uji cemaran mikroba ALT, AKK, dan E. coli tidak dipersyaratkan sesuai standar Farmakope Indonesia.',
+                'parameter_rekomendasi'  => array('potensi', 'penetapan potensi'),
+                'template_rekomendasi'   => array('MIK-03'),
+                'badge_tipe'             => 'primary',
+                'alert_class'            => 'alert-primary',
+                'auto_check_target'      => 'potensi',
+                'btn_label'              => 'Pilih Rekomendasi (Potensi Antibiotika MIK-03)'
+            );
+        } elseif ($is_topikal) {
+            return array(
+                'kategori'               => 'topikal',
+                'is_oral_nonsteril'      => false,
+                'is_antibiotik'          => $is_antibiotik,
+                'is_nystatin'            => false,
+                'judul'                  => 'Rekomendasi Suplemen 1 FI VI (Sediaan Topikal)',
+                'pesan'                  => 'Berdasarkan Suplemen 1 FI VI, seluruh sediaan topikal dipersyaratkan memenuhi uji Angka Lempeng Total (ALT ≤ 10^2 koloni/g), Angka Kapang Khamir (AKK ≤ 10^1 koloni/g), serta bebas dari Pseudomonas aeruginosa dan Staphylococcus aureus (Negatif per gram atau per mL).',
+                'parameter_rekomendasi'  => array('alt', 'lempeng', 'akk', 'kapang', 'khamir', 'pseudomonas', 'pseudo', 'staphylococcus', 'staph', 'aures', 'aeruginosa'),
+                'template_rekomendasi'   => array('MIK-01', 'MIK-02', 'MIK-04'),
+                'badge_tipe'             => 'success',
+                'alert_class'            => 'alert-success border-success-subtle',
+                'auto_check_target'      => 'paket_topikal',
+                'btn_label'              => 'Pilih Paket Rekomendasi Topikal (ALT + AKK + Pseudomonas + Staphylococcus)'
+            );
+        } elseif ($is_rektal) {
+            return array(
+                'kategori'               => 'rektal',
+                'is_oral_nonsteril'      => false,
+                'is_antibiotik'          => $is_antibiotik,
+                'is_nystatin'            => false,
+                'judul'                  => 'Rekomendasi Suplemen 1 FI VI (Sediaan Rektal)',
+                'pesan'                  => 'Berdasarkan Suplemen 1 FI VI, seluruh sediaan rektal dipersyaratkan memenuhi uji Angka Lempeng Total (ALT ≤ 10^3 koloni/g) dan Angka Kapang Khamir (AKK ≤ 10^2 koloni/g).',
+                'parameter_rekomendasi'  => array('alt', 'lempeng', 'akk', 'kapang', 'khamir'),
+                'template_rekomendasi'   => array('MIK-01', 'MIK-02'),
+                'badge_tipe'             => 'info',
+                'alert_class'            => 'alert-info border-info-subtle',
+                'auto_check_target'      => 'paket_rektal',
+                'btn_label'              => 'Pilih Paket Rekomendasi Rektal (ALT + AKK)'
+            );
+        } elseif ($is_antibiotik) {
+            return array(
+                'kategori'               => 'antibiotik_lainnya',
+                'is_oral_nonsteril'      => $is_oral_nonsteril,
+                'is_antibiotik'          => true,
+                'is_nystatin'            => false,
+                'judul'                  => 'Pemberitahuan SOP Mikrobiologi (Sediaan Antibiotik Oral)',
+                'pesan'                  => 'Sediaan antibiotik oral umumnya tidak memerlukan pengujian cemaran mikroba (ALT, AKK, dan E. coli) karena zat aktif memiliki daya hambat bakteri secara alami. Uji penetapan kadar dilakukan di Laboratorium Kimia. Pilihan form di bawah tetap fleksibel jika terdapat instruksi pengujian khusus dari Manajer Teknis.',
+                'parameter_rekomendasi'  => array(),
+                'template_rekomendasi'   => array(),
+                'badge_tipe'             => 'warning',
+                'alert_class'            => 'alert-warning border-warning-subtle',
+                'auto_check_target'      => 'none',
+                'btn_label'              => null
+            );
+        } elseif ($is_oral_nonsteril) {
+            return array(
+                'kategori'               => 'oral_non_antibiotik',
+                'is_oral_nonsteril'      => true,
+                'is_antibiotik'          => false,
+                'is_nystatin'            => false,
+                'judul'                  => 'Rekomendasi Suplemen 1 FI VI (Sediaan Oral Nonsteril)',
+                'pesan'                  => 'Berdasarkan Suplemen 1 FI VI & SOP BBPOM, sediaan oral nonsteril wajib memenuhi batas cemaran mikroba Paket 3 Parameter: Angka Lempeng Total (ALT), Angka Kapang Khamir (AKK), dan Escherichia coli (E. coli).',
+                'parameter_rekomendasi'  => array('alt', 'lempeng', 'akk', 'kapang', 'khamir', 'hitung', 'spesifik', 'ecoli', 'e.coli', 'escherichia'),
+                'template_rekomendasi'   => array('MIK-01', 'MIK-02', 'MIK-04'),
+                'badge_tipe'             => 'success',
+                'alert_class'            => 'alert-success border-success-subtle',
+                'auto_check_target'      => 'paket_3_oral',
+                'btn_label'              => 'Pilih Paket Rekomendasi (ALT + AKK + E. coli)'
+            );
+        } else {
+            return array(
+                'kategori'               => 'lainnya',
+                'is_oral_nonsteril'      => false,
+                'is_antibiotik'          => false,
+                'is_nystatin'            => false,
+                'judul'                  => 'Panduan Pengujian Mikrobiologi',
+                'pesan'                  => 'Pilih parameter pengujian mikrobiologi yang sesuai dengan monografi dan spesifikasi sampel laboratorium.',
+                'parameter_rekomendasi'  => array(),
+                'template_rekomendasi'   => array(),
+                'badge_tipe'             => 'secondary',
+                'alert_class'            => 'alert-light border',
+                'auto_check_target'      => 'none',
+                'btn_label'              => null
+            );
+        }
+    }
+
+    /**
+     * Memastikan 3 parameter mikrobiologi standar untuk sediaan oral nonsteril tersedia di database methods:
+     * 1. Uji Angka Lempeng Total (ALT) -> Template MIK-01
+     * 2. Uji Angka Kapang Khamir (AKK) -> Template MIK-02
+     * 3. Uji Cemaran Mikroba Kualitatif (Escherichia coli) -> Template MIK-04
+     * 
+     * @param string $zat_aktif
+     * @param string $bentuk_sediaan
+     * @return bool
+     */
+    public function pastikan_parameter_mikro_standar_oral($zat_aktif, $bentuk_sediaan = 'Tablet / Sediaan Oral')
+    {
+        $clean_za = trim(preg_replace('/\s+/', ' ', (string)$zat_aktif));
+        if (empty($clean_za)) {
+            return false;
+        }
+
+        // Cek apakah sudah ada parameter mikro untuk zat aktif ini
+        $this->db->where('TRIM(nama_zat_aktif)', $clean_za);
+        $this->db->group_start();
+        $this->db->where('bidang_pengujian', 'Mikrobiologi');
+        $this->db->or_where('kategori', 'Mikrobiologi');
+        $this->db->group_end();
+        $count = $this->db->count_all_results($this->tabel);
+
+        if ($count > 0) {
+            return true; // Sudah ada entri mikro di database
+        }
+
+        // Cari bentuk sediaan dari metode kimia yang sudah ada jika $bentuk_sediaan default
+        if ($bentuk_sediaan === 'Tablet / Sediaan Oral' || empty($bentuk_sediaan)) {
+            $this->db->select('bentuk_sediaan');
+            $this->db->where('TRIM(nama_zat_aktif)', $clean_za);
+            $this->db->where("bentuk_sediaan IS NOT NULL AND TRIM(bentuk_sediaan) != ''", NULL, FALSE);
+            $this->db->limit(1);
+            $row_bs = $this->db->get($this->tabel)->row_array();
+            if (!empty($row_bs['bentuk_sediaan'])) {
+                $bentuk_sediaan = trim($row_bs['bentuk_sediaan']);
+            } else {
+                $bentuk_sediaan = 'Tablet / Sediaan Oral';
+            }
+        }
+
+        $bs_lower = strtolower($bentuk_sediaan);
+        $is_cair = (strpos($bs_lower, 'sirup') !== false || strpos($bs_lower, 'suspensi') !== false || strpos($bs_lower, 'larutan') !== false || strpos($bs_lower, 'drop') !== false || strpos($bs_lower, 'eliksir') !== false || strpos($bs_lower, 'emulsi') !== false);
+
+        $syarat_alt = $is_cair ? '≤ 10^2 koloni/mL' : '≤ 10^3 koloni/g';
+        $syarat_akk = $is_cair ? '≤ 10^1 koloni/mL' : '≤ 10^2 koloni/g';
+
+        $standard_params = array(
+            array(
+                'parameter_uji'  => 'Uji Angka Lempeng Total (ALT)',
+                'metode_analisa' => 'Metode Tuang / Cawan Sebar',
+                'persyaratan'    => $syarat_alt,
+                'pustaka_acuan'  => 'Suplemen 1 FI VI',
+                'template_id'    => 32 // MIK-01
+            ),
+            array(
+                'parameter_uji'  => 'Uji Angka Kapang Khamir (AKK)',
+                'metode_analisa' => 'Metode Tuang / Cawan Sebar',
+                'persyaratan'    => $syarat_akk,
+                'pustaka_acuan'  => 'Suplemen 1 FI VI',
+                'template_id'    => 37 // MIK-02
+            ),
+            array(
+                'parameter_uji'  => 'Uji Cemaran Mikroba Kualitatif (Escherichia coli)',
+                'metode_analisa' => 'Pengayaan & Media Selektif MacConkey',
+                'persyaratan'    => 'Negatif per gram atau per mL',
+                'pustaka_acuan'  => 'Suplemen 1 FI VI',
+                'template_id'    => 19 // MIK-04
+            )
+        );
+
+        $offset = 1;
+        foreach ($standard_params as $sp) {
+            $item = array(
+                'kode_metode'      => $this->generate_kode_metode($offset++),
+                'nama_metode'      => $sp['parameter_uji'] . ' ' . $clean_za,
+                'nama_zat_aktif'   => $clean_za,
+                'jenis_sediaan'    => 'Sediaan Farmasi',
+                'bentuk_sediaan'   => $bentuk_sediaan,
+                'parameter_uji'    => $sp['parameter_uji'],
+                'metode_analisa'   => $sp['metode_analisa'],
+                'persyaratan'      => $sp['persyaratan'],
+                'pustaka_acuan'    => $sp['pustaka_acuan'],
+                'bidang_pengujian' => 'Mikrobiologi',
+                'kategori'         => 'Mikrobiologi',
+                'template_id'      => $sp['template_id'],
+                'status'           => 'Aktif'
+            );
+            $item['composite_hash'] = self::buat_composite_hash($item);
+            $this->db->insert($this->tabel, $item);
+        }
+
+        return true;
+    }
+
+    /**
+     * Mengambil daftar master parameter pengujian untuk modal picker (Poin 11)
+     *
+     * @param string $bidang 'Kimia' / 'Mikrobiologi'
+     * @param string|null $q Kata kunci pencarian
+     * @param int $limit
+     * @return array
+     */
+    public function ambil_master_parameter_untuk_picker($bidang = 'Mikrobiologi', $q = NULL, $limit = 200)
+    {
+        $this->db->select('m.id, m.kode_metode, m.nama_metode, m.nama_zat_aktif, m.bentuk_sediaan, 
+                           m.parameter_uji, m.metode_analisa, m.persyaratan, m.pustaka_acuan, 
+                           m.template_id, ft.kode_template, ft.nama_template, tc.nama_kelas_terapi');
+        $this->db->from($this->tabel . ' m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+        $this->db->join('therapeutic_classes tc', 'tc.id = m.kelas_terapi_id', 'left');
+        $this->db->group_start();
+        $this->db->where('m.bidang_pengujian', $bidang);
+        $this->db->or_where('m.kategori', $bidang);
+        $this->db->group_end();
+        $this->db->where('m.status', 'Aktif');
+
+        if (!empty($q)) {
+            $q = trim($q);
+            $this->db->group_start();
+            $this->db->like('m.nama_zat_aktif', $q);
+            $this->db->or_like('m.parameter_uji', $q);
+            $this->db->or_like('m.metode_analisa', $q);
+            $this->db->or_like('m.bentuk_sediaan', $q);
+            $this->db->or_like('ft.nama_template', $q);
+            $this->db->or_like('ft.kode_template', $q);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('m.parameter_uji', 'ASC');
+        $this->db->order_by('m.nama_zat_aktif', 'ASC');
+        if ($limit > 0) {
+            $this->db->limit($limit);
+        }
         return $this->db->get()->result_array();
     }
 

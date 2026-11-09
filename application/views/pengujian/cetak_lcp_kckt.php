@@ -14,6 +14,20 @@ if (isset($p['parameter_values']) && is_array($p['parameter_values'])) {
     $p = array_merge($p, $p['parameter_values']);
 }
 
+// Deteksi Metode Perhitungan Sediaan (Multi-Formula Penetapan Kadar HPLC)
+$metode_raw = strtolower((string)($p['metode_perhitungan_kadar'] ?? ''));
+if (strpos($metode_raw, 'cemplung') !== false || strpos($metode_raw, 'effervescent') !== false) {
+    $mode_kadar = 'tablet_cemplung';
+} elseif (strpos($metode_raw, 'sirup') !== false || strpos($metode_raw, 'suspensi') !== false || strpos($metode_raw, 'cair') !== false || strpos($metode_raw, 'volume') !== false) {
+    $mode_kadar = 'sirup';
+} else {
+    $mode_kadar = 'tablet_br';
+}
+
+$vol_etiket = !empty($p['volume_takaran_etiket']) && (float)$p['volume_takaran_etiket'] > 0 ? (float)$p['volume_takaran_etiket'] : 5.0;
+$label_kadar_nyata = ($mode_kadar === 'sirup') ? ('Kadar per ' . $vol_etiket . ' mL') : 'Kadar per tablet';
+$unit_kadar_nyata = ($mode_kadar === 'sirup') ? ('mg/' . $vol_etiket . 'mL') : 'mg/tab';
+
 // Data tabel HPLC
 $tabel_hplc = isset($p['tabel_hplc']) && is_array($p['tabel_hplc']) ? $p['tabel_hplc'] : array();
 
@@ -452,10 +466,22 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
     <!-- RUMUS DAN DETAIL PERHITUNGAN -->
     <div class="rumus-box">
         <strong>Rumus Perhitungan:</strong><br>
-        <code>Kadar Rata-rata = (Lu / Lb) &times; (Bb / Bu) &times; (Fu / Fb) &times; (Br / Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</code><br>
-        <span style="font-size: 6.8pt; color: #555;">
-            Lu = Respon Puncak Uji | Lb = Respon Puncak Baku | Bb = Bobot Baku | Bu = Bobot Uji | Fu = Faktor Pengenceran Uji | Fb = Faktor Pengenceran Baku | Br = Bobot Rata-rata Tablet (<strong><?php echo html_escape($p['bobot_rata_tablet'] ?? '-'); ?> mg</strong>) | Ke = Klaim Etiket (<strong><?php echo html_escape($p['klaim_etiket'] ?? '-'); ?> mg</strong>) | Kb = Kadar Baku Terkoreksi (<strong><?php echo html_escape($p['baku_kadar_terkoreksi'] ?? '-'); ?>%</strong>)<?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?> | Faktor Koreksi BM/BR = <strong><?php echo html_escape($p['faktor_konversi_bm']); ?></strong><?php endif; ?>
-        </span>
+        <?php if ($mode_kadar === 'tablet_cemplung'): ?>
+            <code>Kadar Rata-rata = (Lu / Lb) &times; Bb &times; (Fu / Fb) &times; (1 / Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</code><br>
+            <span style="font-size: 6.8pt; color: #555;">
+                Lu = Respon Puncak Uji | Lb = Respon Puncak Baku | Bb = Bobot Baku (mg) | Fu = FP Uji | Fb = FP Baku | Ke = Klaim Etiket (<strong><?php echo html_escape($p['klaim_etiket'] ?? '-'); ?> mg/tablet</strong>) | Kb = Kadar Baku Terkoreksi (<strong><?php echo html_escape($p['baku_kadar_terkoreksi'] ?? '-'); ?>%</strong>)<?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?> | Faktor Koreksi BM/BR = <strong><?php echo html_escape($p['faktor_konversi_bm']); ?></strong><?php endif; ?> [Metode: Tablet Cemplung / Direct Dissolution Utuh]
+            </span>
+        <?php elseif ($mode_kadar === 'sirup'): ?>
+            <code>Kadar Rata-rata = (Lu / Lb) &times; (Bb / Vu) &times; (Fu / Fb) &times; (<?php echo $vol_etiket; ?> / Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</code><br>
+            <span style="font-size: 6.8pt; color: #555;">
+                Lu = Respon Puncak Uji | Lb = Respon Puncak Baku | Bb = Bobot Baku (mg) | Vu = Volume Pipet Sampel Uji (mL) | Fu = FP Uji | Fb = FP Baku | V_etiket = Takaran Saji (<strong><?php echo $vol_etiket; ?> mL</strong>) | Ke = Klaim Etiket (<strong><?php echo html_escape($p['klaim_etiket'] ?? '-'); ?> mg per <?php echo $vol_etiket; ?> mL</strong>) | Kb = Kadar Baku Terkoreksi (<strong><?php echo html_escape($p['baku_kadar_terkoreksi'] ?? '-'); ?>%</strong>)<?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?> | Faktor Koreksi BM/BR = <strong><?php echo html_escape($p['faktor_konversi_bm']); ?></strong><?php endif; ?> [Metode: Sirup / Cairan Oral]
+            </span>
+        <?php else: ?>
+            <code>Kadar Rata-rata = (Lu / Lb) &times; (Bb / Bu) &times; (Fu / Fb) &times; (Br / Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</code><br>
+            <span style="font-size: 6.8pt; color: #555;">
+                Lu = Respon Puncak Uji | Lb = Respon Puncak Baku | Bb = Bobot Baku | Bu = Bobot Uji | Fu = Faktor Pengenceran Uji | Fb = Faktor Pengenceran Baku | Br = Bobot Rata-rata Tablet (<strong><?php echo html_escape($p['bobot_rata_tablet'] ?? '-'); ?> mg</strong>) | Ke = Klaim Etiket (<strong><?php echo html_escape($p['klaim_etiket'] ?? '-'); ?> mg</strong>) | Kb = Kadar Baku Terkoreksi (<strong><?php echo html_escape($p['baku_kadar_terkoreksi'] ?? '-'); ?>%</strong>)<?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?> | Faktor Koreksi BM/BR = <strong><?php echo html_escape($p['faktor_konversi_bm']); ?></strong><?php endif; ?> [Metode: Tablet/Kapsul BR - 20 Tablet Digerus]
+            </span>
+        <?php endif; ?>
     </div>
 
     <!-- HASIL PERHITUNGAN -->
@@ -472,9 +498,9 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
             <td>2) Replikasi 2</td>
             <td>:</td>
             <td style="font-weight: bold; font-size: 8pt;"><?php echo html_escape($p['kadar_replikasi_2'] ?? '-'); ?> %</td>
-            <td>Kadar Rata-rata (mg/tab)</td>
+            <td><?php echo html_escape($label_kadar_nyata); ?></td>
             <td>:</td>
-            <td style="font-weight: bold; font-size: 8.5pt; color: #004b87;"><?php echo html_escape($p['kadar_rata_mg'] ?? '-'); ?> mg/tablet</td>
+            <td style="font-weight: bold; font-size: 8.5pt; color: #004b87;"><?php echo html_escape(!empty($p['kadar_rata_mg']) ? $p['kadar_rata_mg'] . ' ' . $unit_kadar_nyata : '-'); ?></td>
         </tr>
         <tr>
             <td>Hasil Uji (Identifikasi)</td>

@@ -14,6 +14,20 @@ if (isset($p['parameter_values']) && is_array($p['parameter_values'])) {
     $p = array_merge($p, $p['parameter_values']);
 }
 
+// Deteksi Metode Perhitungan Sediaan (Multi-Formula Penetapan Kadar)
+$metode_raw = strtolower((string)($p['metode_perhitungan_kadar'] ?? ''));
+if (strpos($metode_raw, 'cemplung') !== false || strpos($metode_raw, 'effervescent') !== false) {
+    $mode_kadar = 'tablet_cemplung';
+} elseif (strpos($metode_raw, 'sirup') !== false || strpos($metode_raw, 'suspensi') !== false || strpos($metode_raw, 'cair') !== false || strpos($metode_raw, 'volume') !== false) {
+    $mode_kadar = 'sirup';
+} else {
+    $mode_kadar = 'tablet_br';
+}
+
+$vol_etiket = !empty($p['volume_takaran_etiket']) && (float)$p['volume_takaran_etiket'] > 0 ? (float)$p['volume_takaran_etiket'] : 5.0;
+$label_kadar_nyata = ($mode_kadar === 'sirup') ? ('Kadar per ' . $vol_etiket . ' mL') : 'Kadar per tablet';
+$unit_kadar_nyata = ($mode_kadar === 'sirup') ? ('mg/' . $vol_etiket . 'mL') : 'mg/tab';
+
 // Data tabel preparasi & pengukuran
 $tabel_prep = isset($p['tabel_preparasi']) && is_array($p['tabel_preparasi']) ? $p['tabel_preparasi'] : array();
 $baku_row = $tabel_prep[0] ?? array();
@@ -341,7 +355,16 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
 
             <!-- Rumus Perhitungan & Sub-Perhitungan Uji 1 & Uji 2 Persis Excel -->
             <div style="font-weight: bold; margin-bottom: 2px;">
-                Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Bu &times; Fu/Fb &times; Br/Ke &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
+                <?php if ($mode_kadar === 'tablet_cemplung'): ?>
+                    Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb &times; Fu/Fb &times; (1/Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
+                    <span style="font-size: 6.3pt; font-weight: normal; color: #555;">[Tablet Cemplung / Direct Dissolution Utuh]</span>
+                <?php elseif ($mode_kadar === 'sirup'): ?>
+                    Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Vu &times; Fu/Fb &times; (<?php echo $vol_etiket; ?>/Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
+                    <span style="font-size: 6.3pt; font-weight: normal; color: #555;">[Sirup / Cairan Oral - Takaran: <?php echo $vol_etiket; ?> mL]</span>
+                <?php else: ?>
+                    Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Bu &times; Fu/Fb &times; Br/Ke &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
+                    <span style="font-size: 6.3pt; font-weight: normal; color: #555;">[Tablet/Kapsul BR - 20 Tablet Digerus]</span>
+                <?php endif; ?>
             </div>
 
             <table class="lcp-table border-all" style="margin-bottom: 4px;">
@@ -354,9 +377,19 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td class="border-all text-center fw-bold">1)</td>
                     <td class="border-all" style="padding: 2px 4px;">
                         <span class="fraction"><span><?php echo html_escape($uji1_row['serapan'] ?? 'Au1'); ?></span><span class="bottom"><?php echo html_escape($baku_row['serapan'] ?? 'Ab'); ?></span></span> &times;
-                        <span class="fraction"><span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span><span class="bottom"><?php echo html_escape($uji1_row['bobot_zat'] ?? 'Bu1'); ?></span></span> &times;
-                        <span class="fraction"><span><?php echo html_escape($uji1_row['faktor_pengenceran'] ?? 'Fu1'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
-                        <span class="fraction"><span><?php echo html_escape($p['bobot_rata_rata_tablet'] ?? 'Br'); ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php if ($mode_kadar === 'tablet_cemplung'): ?>
+                            <span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($uji1_row['faktor_pengenceran'] ?? 'Fu1'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
+                            <span class="fraction"><span>1</span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php elseif ($mode_kadar === 'sirup'): ?>
+                            <span class="fraction"><span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span><span class="bottom"><?php echo html_escape($uji1_row['bobot_zat'] ?? 'Vu1'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($uji1_row['faktor_pengenceran'] ?? 'Fu1'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo $vol_etiket; ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php else: ?>
+                            <span class="fraction"><span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span><span class="bottom"><?php echo html_escape($uji1_row['bobot_zat'] ?? 'Bu1'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($uji1_row['faktor_pengenceran'] ?? 'Fu1'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($p['bobot_rata_rata_tablet'] ?? 'Br'); ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php endif; ?>
                         <span><?php echo html_escape($p['kadar_baku_persen'] ?? 'Kb'); ?>%</span>
                         <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>
                             &times; <span>(<?php echo html_escape($p['faktor_konversi_bm']); ?>)</span>
@@ -370,9 +403,19 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td class="border-all text-center fw-bold">2)</td>
                     <td class="border-all" style="padding: 2px 4px;">
                         <span class="fraction"><span><?php echo html_escape($uji2_row['serapan'] ?? 'Au2'); ?></span><span class="bottom"><?php echo html_escape($baku_row['serapan'] ?? 'Ab'); ?></span></span> &times;
-                        <span class="fraction"><span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span><span class="bottom"><?php echo html_escape($uji2_row['bobot_zat'] ?? 'Bu2'); ?></span></span> &times;
-                        <span class="fraction"><span><?php echo html_escape($uji2_row['faktor_pengenceran'] ?? 'Fu2'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
-                        <span class="fraction"><span><?php echo html_escape($p['bobot_rata_rata_tablet'] ?? 'Br'); ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php if ($mode_kadar === 'tablet_cemplung'): ?>
+                            <span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($uji2_row['faktor_pengenceran'] ?? 'Fu2'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
+                            <span class="fraction"><span>1</span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php elseif ($mode_kadar === 'sirup'): ?>
+                            <span class="fraction"><span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span><span class="bottom"><?php echo html_escape($uji2_row['bobot_zat'] ?? 'Vu2'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($uji2_row['faktor_pengenceran'] ?? 'Fu2'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo $vol_etiket; ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php else: ?>
+                            <span class="fraction"><span><?php echo html_escape($baku_row['bobot_zat'] ?? 'Bb'); ?></span><span class="bottom"><?php echo html_escape($uji2_row['bobot_zat'] ?? 'Bu2'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($uji2_row['faktor_pengenceran'] ?? 'Fu2'); ?></span><span class="bottom"><?php echo html_escape($baku_row['faktor_pengenceran'] ?? 'Fb'); ?></span></span> &times;
+                            <span class="fraction"><span><?php echo html_escape($p['bobot_rata_rata_tablet'] ?? 'Br'); ?></span><span class="bottom"><?php echo html_escape($p['klaim_etiket'] ?? 'Ke'); ?></span></span> &times;
+                        <?php endif; ?>
                         <span><?php echo html_escape($p['kadar_baku_persen'] ?? 'Kb'); ?>%</span>
                         <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>
                             &times; <span>(<?php echo html_escape($p['faktor_konversi_bm']); ?>)</span>
@@ -397,8 +440,8 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td class="border-l border-t" style="padding-left: 4px;">Kadar Rata-rata</td>
                     <td class="border-t">:</td>
                     <td class="border-r border-t fw-bold" style="color: #0284c7;"><?php echo html_escape($p['kadar_rata_rata_persen'] ?? '-'); ?> %</td>
-                    <td class="border-l border-t" style="padding-left: 4px;">Kadar per tablet</td>
-                    <td class="border-r border-t fw-bold"><?php echo html_escape(!empty($p['kadar_rata_rata_mg']) ? $p['kadar_rata_rata_mg'] . ' mg/tab' : '-'); ?></td>
+                    <td class="border-l border-t" style="padding-left: 4px;"><?php echo html_escape($label_kadar_nyata); ?></td>
+                    <td class="border-r border-t fw-bold"><?php echo html_escape(!empty($p['kadar_rata_rata_mg']) ? $p['kadar_rata_rata_mg'] . ' ' . $unit_kadar_nyata : '-'); ?></td>
                 </tr>
                 <tr>
                     <td class="border-l" style="padding-left: 4px;">Hasil Uji (Identifikasi)</td>

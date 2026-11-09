@@ -617,6 +617,38 @@
                 </div>
             <?php endif; ?>
 
+            <?php if ($jenis_pengujian === 'Mikrobiologi' && !empty($rekomendasi_mikro)): ?>
+                <div class="alert <?php echo $rekomendasi_mikro['alert_class']; ?> d-flex align-items-start gap-3 p-3 mb-3 rounded-3 shadow-sm border">
+                    <div class="fs-3 flex-shrink-0">
+                        <?php if ($rekomendasi_mikro['kategori'] === 'oral_non_antibiotik'): ?>
+                            <i class="bi bi-shield-check text-success"></i>
+                        <?php elseif ($rekomendasi_mikro['kategori'] === 'antibiotik_nystatin'): ?>
+                            <i class="bi bi-capsule text-primary"></i>
+                        <?php elseif ($rekomendasi_mikro['kategori'] === 'antibiotik_lainnya'): ?>
+                            <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                        <?php else: ?>
+                            <i class="bi bi-info-circle-fill text-secondary"></i>
+                        <?php endif; ?>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                            <h6 class="fw-bold mb-0 text-dark"><?php echo html_escape($rekomendasi_mikro['judul']); ?></h6>
+                            <span class="badge bg-white text-dark border px-2 py-1 rounded-pill small">
+                                <i class="bi bi-sliders me-1 text-primary"></i> Mode Fleksibel
+                            </span>
+                        </div>
+                        <p class="mb-2 text-muted small" style="line-height: 1.5;">
+                            <?php echo html_escape($rekomendasi_mikro['pesan']); ?>
+                        </p>
+                        <?php if (!empty($rekomendasi_mikro['btn_label'])): ?>
+                            <button type="button" class="btn btn-sm btn-<?php echo $rekomendasi_mikro['badge_tipe']; ?> fw-semibold shadow-sm" id="btn-apply-rekomendasi">
+                                <i class="bi bi-magic me-1"></i> <?php echo html_escape($rekomendasi_mikro['btn_label']); ?>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="step-card">
                 <div class="step-header">
                     <div class="step-title-wrap">
@@ -631,6 +663,9 @@
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahParameterMaster" title="Pilih dan tambahkan parameter lain dari master data laboratorium">
+                            <i class="bi bi-plus-circle me-1"></i> + Tambah Parameter dari Master
+                        </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-semibold" id="btn-select-all">
                             <i class="bi bi-check-all me-1"></i> Pilih Semua
                         </button>
@@ -659,15 +694,62 @@
                                     <?php 
                                         $is_mapped = !empty($p['template_id']);
                                         $is_checked = !empty($sesi_method_ids) && in_array((int)$p['id'], $sesi_method_ids);
+
+                                        // Evaluasi apakah baris ini adalah parameter rekomendasi Farmakope
+                                        $is_rekomendasi = false;
+                                        $rekomendasi_label = '';
+                                        if ($jenis_pengujian === 'Mikrobiologi' && !empty($rekomendasi_mikro)) {
+                                            $pu_lower = strtolower($p['parameter_uji']);
+                                            if ($rekomendasi_mikro['kategori'] === 'oral_non_antibiotik') {
+                                                if (strpos($pu_lower, 'lempeng') !== false || strpos($pu_lower, 'alt') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Oral (ALT)';
+                                                } elseif (strpos($pu_lower, 'kapang') !== false || strpos($pu_lower, 'khamir') !== false || strpos($pu_lower, 'akk') !== false || (strpos($pu_lower, 'hitung') !== false && !empty($p['template_id']) && $p['template_id'] == 37)) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Oral (AKK)';
+                                                } elseif (strpos($pu_lower, 'spesifik') !== false || strpos($pu_lower, 'coli') !== false || strpos($pu_lower, 'ecoli') !== false || strpos($pu_lower, 'escherichia') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Oral (E. coli)';
+                                                }
+                                            } elseif ($rekomendasi_mikro['kategori'] === 'topikal') {
+                                                if (strpos($pu_lower, 'lempeng') !== false || strpos($pu_lower, 'alt') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Topikal (ALT)';
+                                                } elseif (strpos($pu_lower, 'kapang') !== false || strpos($pu_lower, 'khamir') !== false || strpos($pu_lower, 'akk') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Topikal (AKK)';
+                                                } elseif (strpos($pu_lower, 'pseudo') !== false || strpos($pu_lower, 'aeruginosa') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Topikal (Pseudomonas)';
+                                                } elseif (strpos($pu_lower, 'staph') !== false || strpos($pu_lower, 'aures') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Topikal (Staphylococcus)';
+                                                }
+                                            } elseif ($rekomendasi_mikro['kategori'] === 'rektal') {
+                                                if (strpos($pu_lower, 'lempeng') !== false || strpos($pu_lower, 'alt') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Rektal (ALT)';
+                                                } elseif (strpos($pu_lower, 'kapang') !== false || strpos($pu_lower, 'khamir') !== false || strpos($pu_lower, 'akk') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Rektal (AKK)';
+                                                }
+                                            } elseif ($rekomendasi_mikro['kategori'] === 'antibiotik_nystatin') {
+                                                if (strpos($pu_lower, 'potensi') !== false) {
+                                                    $is_rekomendasi = true;
+                                                    $rekomendasi_label = 'Standar Nistatin (Potensi)';
+                                                }
+                                            }
+                                        }
                                     ?>
                                     <tr id="row_param_<?php echo $p['id']; ?>" class="<?php echo $is_checked ? 'table-active' : ''; ?>">
                                         <td class="text-center">
-                                            <input class="form-check-input custom-param-checkbox form-check-parameter" 
-                                                   type="checkbox" 
-                                                   name="method_ids[]" 
-                                                   value="<?php echo $p['id']; ?>" 
-                                                   id="chk_metode_<?php echo $p['id']; ?>"
-                                                   <?php echo $is_checked ? 'checked' : ''; ?>>
+                                             <input class="form-check-input custom-param-checkbox form-check-parameter" 
+                                                    type="checkbox" 
+                                                    name="method_ids[]" 
+                                                    value="<?php echo $p['id']; ?>" 
+                                                    id="chk_metode_<?php echo $p['id']; ?>"
+                                                    data-is-rekomendasi="<?php echo $is_rekomendasi ? '1' : '0'; ?>"
+                                                    <?php echo $is_checked ? 'checked' : ''; ?>>
                                         </td>
                                         <td>
                                             <label for="chk_metode_<?php echo $p['id']; ?>" class="d-block cursor-pointer mb-0">
@@ -675,6 +757,11 @@
                                                     <strong class="text-dark" style="font-size: 0.88rem;">
                                                         <?php echo html_escape($p['parameter_uji']); ?>
                                                     </strong>
+                                                    <?php if ($is_rekomendasi): ?>
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.72rem;">
+                                                            <i class="bi bi-star-fill text-warning me-1"></i><?php echo html_escape($rekomendasi_label); ?>
+                                                        </span>
+                                                    <?php endif; ?>
                                                     <?php if (!empty($p['bentuk_sediaan'])): ?>
                                                         <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill" style="font-size: 0.72rem;">
                                                             <i class="bi bi-capsule me-1"></i><?php echo html_escape($p['bentuk_sediaan']); ?><?php echo !empty($p['jenis_sediaan']) ? ' (' . html_escape($p['jenis_sediaan']) . ')' : ''; ?>
@@ -815,6 +902,99 @@
                     </button>
                 </div>
             </div>
+
+<!-- Modal Tambah Parameter dari Master Data (Poin 11) -->
+<div class="modal fade" id="modalTambahParameterMaster" tabindex="-1" aria-labelledby="modalTambahParameterMasterLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light py-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary-subtle text-primary p-2 rounded-2 d-inline-flex">
+                        <i class="bi bi-collection-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0" id="modalTambahParameterMasterLabel">Master Data Parameter Pengujian (<?php echo html_escape($jenis_pengujian); ?>)</h6>
+                        <small class="text-muted">Pilih parameter pengujian untuk ditambahkan ke daftar pengerjaan sesi ini</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0" id="inputCariMasterModal" placeholder="Ketik nama parameter, metode analisa, atau zat aktif..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="max-height: 420px;">
+                    <table class="table table-hover align-middle mb-0" id="tabelMasterModal">
+                        <thead class="table-light sticky-top">
+                            <tr style="font-size: 0.78rem;">
+                                <th width="35%">PARAMETER &amp; ZAT AKTIF</th>
+                                <th width="25%">METODE &amp; PERSYARATAN</th>
+                                <th width="25%">FORM LCP DEFAULT</th>
+                                <th width="15%" class="text-center">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMasterModal" style="font-size: 0.82rem;">
+                            <?php if (!empty($daftar_master_bidang)): ?>
+                                <?php foreach ($daftar_master_bidang as $mb): ?>
+                                    <tr class="master-modal-item" 
+                                        data-search="<?php echo html_escape(strtolower($mb['parameter_uji'] . ' ' . $mb['nama_zat_aktif'] . ' ' . $mb['metode_analisa'] . ' ' . $mb['persyaratan'])); ?>">
+                                        <td>
+                                            <div class="fw-bold text-dark mb-1"><?php echo html_escape($mb['parameter_uji']); ?></div>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-capsule me-1"></i><?php echo html_escape($mb['nama_zat_aktif']); ?> 
+                                                <?php if (!empty($mb['bentuk_sediaan'])): ?>
+                                                    <span class="badge bg-light text-secondary border ms-1"><?php echo html_escape($mb['bentuk_sediaan']); ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="text-secondary small fw-semibold"><?php echo html_escape($mb['metode_analisa'] ?: '-'); ?></div>
+                                            <div class="text-muted small font-monospace mt-1"><?php echo html_escape($mb['persyaratan'] ?: '-'); ?></div>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($mb['kode_template'])): ?>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                                    [<?php echo html_escape($mb['kode_template']); ?>] <?php echo html_escape($mb['nama_template']); ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-muted small">Pilih di tabel</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-primary py-1 px-3 rounded-pill fw-semibold btn-pilih-dari-modal"
+                                                    data-id="<?php echo $mb['id']; ?>"
+                                                    data-param="<?php echo html_escape($mb['parameter_uji']); ?>"
+                                                    data-za="<?php echo html_escape($mb['nama_zat_aktif']); ?>"
+                                                    data-sediaan="<?php echo html_escape($mb['bentuk_sediaan'] ?: ''); ?>"
+                                                    data-metode="<?php echo html_escape($mb['metode_analisa'] ?: '-'); ?>"
+                                                    data-syarat="<?php echo html_escape($mb['persyaratan'] ?: '-'); ?>"
+                                                    data-pustaka="<?php echo html_escape(!empty($mb['pustaka_acuan']) ? $mb['pustaka_acuan'] : 'Suplemen 1 FI VI'); ?>"
+                                                    data-tpl-id="<?php echo !empty($mb['template_id']) ? $mb['template_id'] : ''; ?>">
+                                                <i class="bi bi-plus-lg me-1"></i> Tambah
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada master data untuk bidang ini.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
         </form>
 
     <?php else: ?>
@@ -1139,6 +1319,153 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Tombol Terapkan Rekomendasi Pintar (ALT + AKK + E. coli atau Potensi Nistatin)
+    const btnApplyRekomendasi = document.getElementById('btn-apply-rekomendasi');
+    if (btnApplyRekomendasi) {
+        btnApplyRekomendasi.addEventListener('click', function() {
+            checkboxes.forEach(function(cb) {
+                const isRekomendasi = (cb.getAttribute('data-is-rekomendasi') === '1');
+                cb.checked = isRekomendasi;
+                updateRowHighlight(cb);
+            });
+            updateCounter();
+        });
+    }
+
+    // Smart Initial Auto-Check (Khusus saat awal buka sesi baru, belum ada yang tercentang sebelumnya)
+    <?php if (empty($sesi_method_ids) && !empty($rekomendasi_mikro) && in_array($rekomendasi_mikro['kategori'], array('oral_non_antibiotik', 'antibiotik_nystatin', 'topikal', 'rektal'))): ?>
+    let hasExplicitChecked = false;
+    checkboxes.forEach(function(cb) {
+        if (cb.checked) hasExplicitChecked = true;
+    });
+    if (!hasExplicitChecked) {
+        checkboxes.forEach(function(cb) {
+            if (cb.getAttribute('data-is-rekomendasi') === '1') {
+                cb.checked = true;
+                updateRowHighlight(cb);
+            }
+        });
+    }
+    <?php endif; ?>
+
+    // Live Search di Modal Master
+    const inputCariModal = document.getElementById("inputCariMasterModal");
+    const modalItems = document.querySelectorAll(".master-modal-item");
+    if (inputCariModal) {
+        inputCariModal.addEventListener("input", function() {
+            const q = this.value.toLowerCase().trim();
+            modalItems.forEach(function(item) {
+                const searchStr = item.getAttribute("data-search") || "";
+                if (!q || searchStr.indexOf(q) !== -1) {
+                    item.style.display = "";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        });
+    }
+
+    // Handler Klik Tambah dari Modal
+    document.querySelectorAll(".btn-pilih-dari-modal").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const mId = this.getAttribute("data-id");
+            const mParam = this.getAttribute("data-param");
+            const mZa = this.getAttribute("data-za");
+            const mSediaan = this.getAttribute("data-sediaan");
+            const mMetode = this.getAttribute("data-metode");
+            const mSyarat = this.getAttribute("data-syarat");
+            const mPustaka = this.getAttribute("data-pustaka");
+            const mTplId = this.getAttribute("data-tpl-id");
+
+            // Cek apakah sudah ada di tabel utama
+            const existingRow = document.getElementById("row_param_" + mId);
+            if (existingRow) {
+                const cb = existingRow.querySelector(".form-check-parameter");
+                if (cb) {
+                    cb.checked = true;
+                    updateRowHighlight(cb);
+                }
+                existingRow.scrollIntoView({ behavior: "smooth", block: "center" });
+                existingRow.classList.add("table-warning");
+                setTimeout(function() { existingRow.classList.remove("table-warning"); }, 2000);
+            } else {
+                // Buat baris baru di tabel parameter
+                const tbody = document.querySelector(".parameter-table tbody");
+                if (tbody) {
+                    const tr = document.createElement("tr");
+                    tr.id = "row_param_" + mId;
+                    tr.className = "row-checked table-active";
+
+                    let tplOptions = "<option value=\"\">-- Pilih Form LCP --</option>";
+                    <?php if (!empty($daftar_template_bidang)): ?>
+                        <?php foreach ($daftar_template_bidang as $tpl_b): ?>
+                            tplOptions += `<option value="<?php echo $tpl_b['id']; ?>" ${mTplId == "<?php echo $tpl_b['id']; ?>" ? "selected" : ""}>[<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?></option>`;
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    tr.innerHTML = `
+                        <td class="text-center">
+                            <input class="form-check-input custom-param-checkbox form-check-parameter" 
+                                   type="checkbox" 
+                                   name="method_ids[]" 
+                                   value="${mId}" 
+                                   id="chk_metode_${mId}" 
+                                   data-is-rekomendasi="0" 
+                                   checked>
+                        </td>
+                        <td>
+                            <label for="chk_metode_${mId}" class="d-block cursor-pointer mb-0">
+                                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                                    <strong class="text-dark" style="font-size: 0.88rem;">${mParam}</strong>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">
+                                        <i class="bi bi-plus-circle me-1"></i>Tambahan Master
+                                    </span>
+                                    ${mSediaan ? `<span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill" style="font-size: 0.72rem;">${mSediaan}</span>` : ""}
+                                </div>
+                                <div class="text-muted small font-monospace">${mZa}</div>
+                            </label>
+                        </td>
+                        <td><span class="text-secondary small fw-semibold">${mMetode}</span></td>
+                        <td><span class="persyaratan-badge">${mSyarat}</span></td>
+                        <td><span class="text-muted small font-monospace">${mPustaka}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <select class="form-select select-template-lcp select-custom-template" 
+                                        name="custom_template_ids[${mId}]" 
+                                        id="sel_lcp_${mId}">
+                                    ${tplOptions}
+                                </select>
+                                <span class="badge-status-lcp">
+                                    <span class="badge-lcp-custom"><i class="bi bi-pencil-fill"></i> Tambahan</span>
+                                </span>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    // Re-bind listeners for new checkbox & select
+                    const newCb = tr.querySelector(".form-check-parameter");
+                    if (newCb) {
+                        newCb.addEventListener("change", updateCounter);
+                        checkboxes.push(newCb);
+                    }
+                    const newSel = tr.querySelector(".select-custom-template");
+                    if (newSel) {
+                        newSel.addEventListener("change", updateCounter);
+                    }
+                }
+            }
+
+            updateCounter();
+
+            // Tutup modal
+            const modalEl = document.getElementById("modalTambahParameterMaster");
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+    });
     // Inisialisasi awal
     updateCounter();
 });

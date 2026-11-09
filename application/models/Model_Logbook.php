@@ -204,6 +204,104 @@ class Model_Logbook extends CI_Model
     }
 
     /**
+     * Mengambil daftar alat laboratorium beserta agregasi statistik penggunaan logbook-nya.
+     * Mendukung filter: 'terpakai' (default), 'belum_terpakai', dan 'semua'.
+     *
+     * @param array $filter
+     * @return array
+     */
+    public function ambil_alat_dengan_stat($filter = array())
+    {
+        $status_penggunaan = !empty($filter['status_penggunaan']) ? $filter['status_penggunaan'] : 'terpakai';
+        $ruangan           = !empty($filter['ruangan']) ? trim($filter['ruangan']) : NULL;
+        $q                 = !empty($filter['q']) ? trim($filter['q']) : NULL;
+
+        $this->db->select('
+            i.id, i.kode_barang, i.nama_barang, i.merk_tipe, i.nomor_seri, i.nama_ruangan, i.kondisi_adm, i.status,
+            COUNT(il.id) as total_pemakaian,
+            COUNT(DISTINCT il.sample_id) as total_sampel,
+            MAX(il.tanggal_penggunaan) as terakhir_digunakan,
+            MAX(il.waktu_penggunaan) as waktu_terakhir,
+            (
+                SELECT u.nama_lengkap 
+                FROM instrument_logbooks il_sub 
+                LEFT JOIN users u ON u.id = il_sub.user_id 
+                WHERE il_sub.instrument_id = i.id 
+                ORDER BY il_sub.waktu_penggunaan DESC, il_sub.id DESC 
+                LIMIT 1
+            ) as penguji_terakhir,
+            (
+                SELECT s.nama_sampel 
+                FROM instrument_logbooks il_sub 
+                LEFT JOIN samples s ON s.id = il_sub.sample_id 
+                WHERE il_sub.instrument_id = i.id 
+                ORDER BY il_sub.waktu_penggunaan DESC, il_sub.id DESC 
+                LIMIT 1
+            ) as sampel_terakhir,
+            (
+                SELECT s.kode_sampel_manual 
+                FROM instrument_logbooks il_sub 
+                LEFT JOIN samples s ON s.id = il_sub.sample_id 
+                WHERE il_sub.instrument_id = i.id 
+                ORDER BY il_sub.waktu_penggunaan DESC, il_sub.id DESC 
+                LIMIT 1
+            ) as kode_sampel_terakhir
+        ', FALSE);
+
+        $this->db->from('instruments i');
+        $this->db->join($this->tabel . ' il', 'il.instrument_id = i.id', 'left');
+        $this->db->where('i.status', 'Aktif');
+
+        if (!empty($ruangan)) {
+            $this->db->where('i.nama_ruangan', $ruangan);
+        }
+
+        if (!empty($q)) {
+            $this->db->group_start();
+            $this->db->like('i.nama_barang', $q);
+            $this->db->or_like('i.kode_barang', $q);
+            $this->db->or_like('i.nomor_seri', $q);
+            $this->db->or_like('i.merk_tipe', $q);
+            $this->db->or_like('i.nama_ruangan', $q);
+            $this->db->group_end();
+        }
+
+        $this->db->group_by('i.id');
+
+        if ($status_penggunaan === 'terpakai') {
+            $this->db->having('total_pemakaian >', 0);
+            $this->db->order_by('total_pemakaian', 'DESC');
+            $this->db->order_by('terakhir_digunakan', 'DESC');
+        } elseif ($status_penggunaan === 'belum_terpakai') {
+            $this->db->having('total_pemakaian =', 0);
+            $this->db->order_by('i.nama_barang', 'ASC');
+        } else {
+            // 'semua'
+            $this->db->order_by('total_pemakaian', 'DESC');
+            $this->db->order_by('terakhir_digunakan', 'DESC');
+            $this->db->order_by('i.nama_barang', 'ASC');
+        }
+
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Mengambil daftar unik ruangan laboratorium tempat instrumen berada
+     *
+     * @return array
+     */
+    public function ambil_daftar_ruangan()
+    {
+        $this->db->distinct();
+        $this->db->select('TRIM(nama_ruangan) as nama_ruangan');
+        $this->db->where("nama_ruangan IS NOT NULL AND TRIM(nama_ruangan) != ''", NULL, FALSE);
+        $this->db->where('status', 'Aktif');
+        $this->db->order_by('TRIM(nama_ruangan)', 'ASC');
+        $rows = $this->db->get('instruments')->result_array();
+        return !empty($rows) ? array_column($rows, 'nama_ruangan') : array();
+    }
+
+    /**
      * Mengambil ringkasan statistik penggunaan alat untuk dashboard/kartu metrik logbook
      *
      * @return array
@@ -231,13 +329,15 @@ class Model_Logbook extends CI_Model
         // 5. Total master alat aktif
         $this->db->where('status', 'Aktif');
         $total_master_alat = $this->db->count_all_results('instruments');
+        $total_alat_belum = max(0, $total_master_alat - $total_alat_terpakai);
 
         return array(
-            'total_log'            => (int)$total_log,
-            'total_alat_terpakai'  => $total_alat_terpakai,
-            'total_sampel'         => $total_sampel,
-            'penggunaan_bulan_ini' => (int)$penggunaan_bulan_ini,
-            'total_master_alat'    => (int)$total_master_alat
+            'total_log'                 => (int)$total_log,
+            'total_alat_terpakai'       => $total_alat_terpakai,
+            'total_alat_belum_terpakai' => $total_alat_belum,
+            'total_sampel'              => $total_sampel,
+            'penggunaan_bulan_ini'      => (int)$penggunaan_bulan_ini,
+            'total_master_alat'         => (int)$total_master_alat
         );
     }
 

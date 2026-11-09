@@ -643,6 +643,17 @@
                         Ganti Zat Aktif / Parameter
                     </a>
 
+                    <!-- Opsi Tambah Parameter Uji dari Master (Poin 11) -->
+                    <button type="button" 
+                            class="btn btn-sm btn-success py-1 px-3 d-inline-flex align-items-center gap-1 shadow-sm rounded-pill fw-semibold"
+                            style="font-size: 0.72rem;"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalTambahParameterSesi"
+                            title="Tambahkan parameter uji dari master data ke sesi pengerjaan ini">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span>+ Tambah Parameter Uji</span>
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -1035,6 +1046,18 @@
                                                                         }
                                                                     }
 
+                                                                    // Auto-detection metode perhitungan kadar berdasarkan bentuk sediaan jika belum tersimpan
+                                                                    if ($fld_id === 'metode_perhitungan_kadar' && empty($raw_val)) {
+                                                                        $str_sediaan = strtolower(($f['bentuk_sediaan'] ?? '') . ' ' . ($f['jenis_sediaan'] ?? '') . ' ' . ($f['nama_metode'] ?? '') . ' ' . ($sesi['nama_sampel'] ?? ''));
+                                                                        if (strpos($str_sediaan, 'sirup') !== false || strpos($str_sediaan, 'suspensi') !== false || strpos($str_sediaan, 'drops') !== false || strpos($str_sediaan, 'cair') !== false || strpos($str_sediaan, 'larutan') !== false || strpos($str_sediaan, 'eliksir') !== false) {
+                                                                            $raw_val = 'Sirup / Suspensi / Cairan Oral (Volume mL)';
+                                                                        } elseif (strpos($str_sediaan, 'effervescent') !== false || strpos($str_sediaan, 'cemplung') !== false) {
+                                                                            $raw_val = 'Tablet Cemplung (Direct Dissolution / Effervescent)';
+                                                                        } else {
+                                                                            $raw_val = 'Tablet / Kapsul BR (Metode 20 Tablet Digerus)';
+                                                                        }
+                                                                    }
+
                                                                     $val_text = is_array($raw_val) ? json_encode($raw_val, JSON_UNESCAPED_UNICODE) : (string)$raw_val;
 
                                                                     $is_stage_control = in_array($fld_id, array('lakukan_tahap2', 'lakukan_tahap_s2', 'lakukan_tahap_s3'));
@@ -1180,8 +1203,40 @@
                                                                                 </div>
                                                                             </div>
                                                                         </div>
+                                                                    <?php elseif ($fld_id === 'metode_perhitungan_kadar'): ?>
+                                                                        <div class="col-12" data-field-wrapper="metode_perhitungan_kadar">
+                                                                            <div class="p-3 rounded border bg-light-primary border-primary">
+                                                                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                                                                    <div>
+                                                                                        <label for="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>" class="form-label fw-bold mb-0 text-primary">
+                                                                                            <i class="bi bi-calculator-fill me-1"></i> <?php echo html_escape($fld_label); ?>
+                                                                                        </label>
+                                                                                        <div class="small text-muted" style="font-size: 0.78rem;">Pilih rumus perhitungan penetapan kadar sesuai sediaan &amp; preparasi (FI VI &amp; BBPOM SOP).</div>
+                                                                                    </div>
+                                                                                    <div style="min-width: 330px;">
+                                                                                        <select
+                                                                                            class="form-select fw-bold border-primary select-metode-perhitungan-kadar"
+                                                                                            id="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>"
+                                                                                            name="forms[<?php echo $f['id']; ?>][hasil][<?php echo $fld_id; ?>]"
+                                                                                            data-form-id="<?php echo $f['id']; ?>"
+                                                                                            <?php echo $fld_req; ?>
+                                                                                        >
+                                                                                            <?php foreach ($fld['options'] as $opt): ?>
+                                                                                                <option value="<?php echo html_escape($opt); ?>" <?php echo ($raw_val === $opt) ? 'selected' : ''; ?>>
+                                                                                                    <?php echo html_escape($opt); ?>
+                                                                                                </option>
+                                                                                            <?php endforeach; ?>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="badge-rumus-kadar-container p-2 rounded bg-white border small font-monospace text-dark">
+                                                                                    <i class="bi bi-info-circle-fill text-info me-1"></i>
+                                                                                    <span class="text-rumus-kadar">Memuat rumus perhitungan aktif...</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     <?php else: ?>
-                                                                        <div class="col-md-6 <?php echo $cond_class; ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
+                                                                        <div class="col-md-6 <?php echo $cond_class; ?>" data-field-wrapper="<?php echo html_escape($fld_id); ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
                                                                             <label for="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>" class="form-label">
                                                                                 <?php echo html_escape($fld_label); ?>
                                                                                 <?php if ($fld_req): ?><span class="text-danger">*</span><?php endif; ?>
@@ -1219,7 +1274,7 @@
                                                                     </div>
 
                                                                 <?php elseif ($fld_type === 'static_text' || $fld_type === 'display_bound'): ?>
-                                                                    <div class="col-md-6 <?php echo $cond_class; ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
+                                                                    <div class="col-md-6 <?php echo $cond_class; ?>" data-field-wrapper="<?php echo html_escape($fld_id); ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
                                                                         <label class="form-label text-muted small"><?php echo html_escape($fld_label); ?></label>
                                                                         <div class="p-2 bg-light border rounded small text-dark fw-semibold">
                                                                             <?php
@@ -1240,7 +1295,7 @@
                                                                     </div>
 
                                                                 <?php elseif ($fld_type === 'file'): ?>
-                                                                    <div class="col-md-6 <?php echo $cond_class; ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
+                                                                    <div class="col-md-6 <?php echo $cond_class; ?>" data-field-wrapper="<?php echo html_escape($fld_id); ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
                                                                         <label for="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>" class="form-label">
                                                                             <?php echo html_escape($fld_label); ?>
                                                                             <?php if ($fld_req): ?><span class="text-danger">*</span><?php endif; ?>
@@ -1271,7 +1326,7 @@
                                                                     <?php
                                                                         $is_baku_field = in_array($fld_id, array('baku_pembanding', 'baku_nama', 'nama_baku', 'baku_no_kontrol', 'no_kontrol_baku'));
                                                                     ?>
-                                                                    <div class="col-md-6 <?php echo $cond_class; ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
+                                                                    <div class="col-md-6 <?php echo $cond_class; ?>" data-field-wrapper="<?php echo html_escape($fld_id); ?>" <?php echo !empty($cond_style) ? 'style="' . $cond_style . '"' : ''; ?>>
                                                                         <div class="d-flex align-items-center justify-content-between mb-1">
                                                                             <label for="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>" class="form-label mb-0">
                                                                                 <?php echo html_escape($fld_label . $fld_unit); ?>
@@ -1313,20 +1368,22 @@
                                                                             </div>
                                                                         <?php else: ?>
                                                                             <?php
-                                                                                $is_readonly = !empty($fld['readonly']);
+                                                                                $is_fk_final = ($fld_id === 'faktor_perkalian_final');
+                                                                                $is_readonly = !empty($fld['readonly']) || $is_fk_final;
                                                                                 $is_bm_field = ($fld_id === 'faktor_konversi_bm');
+                                                                                $is_fk_tambahan = ($fld_id === 'faktor_pengali_tambahan');
                                                                             ?>
                                                                             <input
                                                                                 type="<?php echo ($fld_type === 'number' ? 'number' : ($fld_type === 'date' ? 'date' : 'text')); ?>"
                                                                                 step="<?php echo ($fld_type === 'number' ? 'any' : ''); ?>"
-                                                                                class="form-control <?php echo $is_bm_field ? 'input-faktor-bm' : ''; ?>"
+                                                                                class="form-control <?php echo $is_bm_field ? 'input-faktor-bm' : ($is_fk_tambahan ? 'input-fk-tambahan' : ''); ?>"
                                                                                 id="f_<?php echo $f['id']; ?>_<?php echo $fld_id; ?>"
                                                                                 name="forms[<?php echo $f['id']; ?>][hasil][<?php echo $fld_id; ?>]"
                                                                                 value="<?php echo html_escape($val_text); ?>"
                                                                                 placeholder="<?php echo html_escape($fld_ph); ?>"
                                                                                 data-form-id="<?php echo $f['id']; ?>"
                                                                                 data-field-id="<?php echo $fld_id; ?>"
-                                                                                <?php echo $is_readonly ? 'readonly style="background-color: #f8fafc; cursor: not-allowed; font-weight: 600; color: #0284c7;"' : ''; ?>
+                                                                                <?php echo $is_fk_final ? 'readonly style="background-color: #f0fdf4; cursor: not-allowed; font-weight: 700; color: #166534;"' : ($is_readonly ? 'readonly style="background-color: #f8fafc; cursor: not-allowed; font-weight: 600; color: #0284c7;"' : ''); ?>
                                                                                 <?php echo $fld_req; ?>
                                                                             >
                                                                             <?php if (!empty($fld['keterangan'])): ?>
@@ -1336,6 +1393,13 @@
                                                                                 <div class="bm-calc-preview mt-1 small" style="display: none;">
                                                                                     <span class="badge bg-light text-dark border">
                                                                                         <i class="bi bi-calculator me-1 text-primary"></i>Hasil Hitung BM: <strong class="bm-eval-val text-primary">1.0000</strong>
+                                                                                    </span>
+                                                                                </div>
+                                                                            <?php endif; ?>
+                                                                            <?php if ($is_fk_tambahan): ?>
+                                                                                <div class="fk-tambahan-preview mt-1 small" style="display: none;">
+                                                                                    <span class="badge bg-light-primary text-primary border border-primary">
+                                                                                        <i class="bi bi-x-circle-fill me-1"></i>Pengali Diterapkan: <strong class="fk-tambahan-eval-val">1.0000</strong>
                                                                                     </span>
                                                                                 </div>
                                                                             <?php endif; ?>
@@ -3096,9 +3160,66 @@
         });
 
         // =========================================================================
+        // Helper Multi-Metode Penetapan Kadar (FI VI & SOP BBPOM)
+        // 1. Tablet / Kapsul BR: (Au/Ab) * (Bb/Bu) * (Fu/Fb) * (Br/Ke) * Kb * 100%
+        // 2. Tablet Cemplung: (Au/Ab) * Bb * (Fu/Fb) * (1/Ke) * Kb * 100%
+        // 3. Sirup / Cairan: (Au/Ab) * (Bb/Vu) * (Fu/Fb) * (Vetiket/Ke) * Kb * 100%
+        // =========================================================================
+        function getMetodeKadar(pane) {
+            var sel = pane ? pane.querySelector('select[name*="[metode_perhitungan_kadar]"]') : document.querySelector('select[name*="[metode_perhitungan_kadar]"]');
+            var val = sel ? sel.value.toLowerCase() : '';
+            if (val.indexOf('cemplung') !== -1 || val.indexOf('effervescent') !== -1) {
+                return 'tablet_cemplung';
+            } else if (val.indexOf('sirup') !== -1 || val.indexOf('suspensi') !== -1 || val.indexOf('cairan') !== -1 || val.indexOf('volume') !== -1) {
+                return 'sirup';
+            }
+            return 'tablet_br';
+        }
+
+        function updateMetodeKadarUI(pane) {
+            if (!pane) return;
+            var mode = getMetodeKadar(pane);
+
+            var wrapVol = pane.querySelector('[data-field-wrapper="volume_takaran_etiket"]');
+            var wrapBr = pane.querySelector('[data-field-wrapper="bobot_rata_rata_tablet"], [data-field-wrapper="bobot_rata_tablet"]');
+            var txtRumus = pane.querySelector('.text-rumus-kadar');
+            var labelKe = pane.querySelector('[data-field-wrapper="klaim_etiket"] label');
+            var labelKadarMg = pane.querySelector('[data-field-wrapper="kadar_rata_rata_mg"] label, [data-field-wrapper="kadar_rata_mg"] label');
+
+            var volInp = pane.querySelector('input[name*="[volume_takaran_etiket]"]');
+            var vEt = (volInp && parseFloat(volInp.value) > 0) ? volInp.value : '5.0';
+
+            if (mode === 'tablet_cemplung') {
+                if (wrapVol) wrapVol.style.display = 'none';
+                if (wrapBr) wrapBr.style.display = 'none';
+                if (txtRumus) {
+                    txtRumus.innerHTML = '<strong>Rumus Aktif (Tablet Cemplung):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; B<sub>b</sub> &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (1 / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100% <span class="badge bg-success ms-2">Hasil: mg/tablet (Direct Dissolution Utuh)</span>';
+                }
+                if (labelKe) labelKe.innerHTML = 'Klaim Etiket per Tablet (Ke) [mg]';
+                if (labelKadarMg) labelKadarMg.innerHTML = 'Kadar Rata-rata per Tablet (mg/tab)';
+            } else if (mode === 'sirup') {
+                if (wrapVol) wrapVol.style.display = '';
+                if (wrapBr) wrapBr.style.display = 'none';
+                if (txtRumus) {
+                    txtRumus.innerHTML = '<strong>Rumus Aktif (Sirup/Cairan):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; (B<sub>b</sub> / V<sub>u</sub>) &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (' + vEt + ' / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100% <span class="badge bg-primary ms-2">Hasil: mg per ' + vEt + ' mL</span>';
+                }
+                if (labelKe) labelKe.innerHTML = 'Klaim Etiket per ' + vEt + ' mL (Ke) [mg]';
+                if (labelKadarMg) labelKadarMg.innerHTML = 'Kadar Rata-rata (mg / ' + vEt + ' mL)';
+            } else { // tablet_br
+                if (wrapVol) wrapVol.style.display = 'none';
+                if (wrapBr) wrapBr.style.display = '';
+                if (txtRumus) {
+                    txtRumus.innerHTML = '<strong>Rumus Aktif (Tablet BR):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; (B<sub>b</sub> / B<sub>u</sub>) &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (Br / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100% <span class="badge bg-secondary ms-2">Hasil: mg/tablet (Metode 20 Tablet Digerus)</span>';
+                }
+                if (labelKe) labelKe.innerHTML = 'Klaim Etiket per Tablet (Ke) [mg]';
+                if (labelKadarMg) labelKadarMg.innerHTML = 'Kadar Rata-rata per Tablet (mg/tab)';
+            }
+        }
+
+        // =========================================================================
         // Auto-Calculator Engine untuk Formulir Spektrofotometri (KIM-05)
+        // Mendukung 3 Metode: Tablet BR, Tablet Cemplung, dan Sirup / Cairan
         // Sesuai Formula Resmi Excel: POM-06.02/CFM.01/SOP.01/F.01A.06
-        // Kadar = (Au / Ab) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb * 100%
         // RPD = |Uji1 - Uji2| / Rata2 * 100%
         // Syarat Horwitz = 0.5 * (2 ^ (1 - 0.5 * LOG10(Kadar/100)))
         // =========================================================================
@@ -3107,6 +3228,10 @@
             var brInput = document.querySelector('input[name*="[bobot_rata_rata_tablet]"]'); // K46
             var keInput = document.querySelector('input[name*="[klaim_etiket]"]'); // K47
             var bmInput = document.querySelector('.form-tab-pane-uji.active input[name*="[faktor_konversi_bm]"]') || document.querySelector('input[name*="[faktor_konversi_bm]"]');
+            var pane = kbInput ? kbInput.closest('.form-tab-pane-uji') : document;
+            var metodeKadar = getMetodeKadar(pane);
+            var volEtiketInput = pane ? pane.querySelector('input[name*="[volume_takaran_etiket]"]') : document.querySelector('input[name*="[volume_takaran_etiket]"]');
+            var Vetiket = (volEtiketInput && parseFloat(volEtiketInput.value) > 0) ? parseFloat(volEtiketInput.value) : 5.0;
 
             var Kb = kbInput ? parseFloat(kbInput.value) || 0 : 0;
             var Br = brInput ? parseFloat(brInput.value) || 0 : 0;
@@ -3144,18 +3269,24 @@
                 var wsb = parseFloat(wadahSisaBaku.value) || 0;
                 Bb = wzb > 0 ? (wzb - wsb) : (parseFloat(bobotZatBakuEl ? bobotZatBakuEl.value : 0) || 0);
                 if (bobotZatBakuEl && Bb > 0) bobotZatBakuEl.value = Bb.toFixed(2);
+            } else if (bobotZatBakuEl) {
+                Bb = parseFloat(bobotZatBakuEl.value) || 0;
             }
             if (wadahZatU1 && wadahSisaU1) {
                 var wzu1 = parseFloat(wadahZatU1.value) || 0;
                 var wsu1 = parseFloat(wadahSisaU1.value) || 0;
                 Bu1 = wzu1 > 0 ? (wzu1 - wsu1) : (parseFloat(bobotZatU1El ? bobotZatU1El.value : 0) || 0);
                 if (bobotZatU1El && Bu1 > 0) bobotZatU1El.value = Bu1.toFixed(2);
+            } else if (bobotZatU1El) {
+                Bu1 = parseFloat(bobotZatU1El.value) || 0;
             }
             if (wadahZatU2 && wadahSisaU2) {
                 var wzu2 = parseFloat(wadahZatU2.value) || 0;
                 var wsu2 = parseFloat(wadahSisaU2.value) || 0;
                 Bu2 = wzu2 > 0 ? (wzu2 - wsu2) : (parseFloat(bobotZatU2El ? bobotZatU2El.value : 0) || 0);
                 if (bobotZatU2El && Bu2 > 0) bobotZatU2El.value = Bu2.toFixed(2);
+            } else if (bobotZatU2El) {
+                Bu2 = parseFloat(bobotZatU2El.value) || 0;
             }
 
             var Ab = abEl ? parseFloat(abEl.value) || 0 : 0;
@@ -3176,15 +3307,27 @@
                 cU2El.value = ((Bu2 * 1000) / Fu2).toFixed(2);
             }
 
-            // 2. Hitung Kadar Uji 1 & 2 (%) dengan Faktor Koreksi BM
+            // 2. Hitung Kadar Uji 1 & 2 (%) berdasarkan METODE PERHITUNGAN
             var kadarU1 = 0, kadarU2 = 0;
             var faktorKb = (Kb > 1) ? (Kb / 100) : Kb;
 
-            if (Ab > 0 && Bu1 > 0 && Ke > 0 && Bb > 0) {
-                kadarU1 = (Au1 / Ab) * (Bb / Bu1) * (Fu1 / Fb) * (Br / Ke) * faktorKb * bmFactor * 100;
-            }
-            if (Ab > 0 && Bu2 > 0 && Ke > 0 && Bb > 0) {
-                kadarU2 = (Au2 / Ab) * (Bb / Bu2) * (Fu2 / Fb) * (Br / Ke) * faktorKb * bmFactor * 100;
+            if (Ab > 0 && Ke > 0 && Bb > 0) {
+                if (metodeKadar === 'tablet_cemplung') {
+                    // Rumus 2: Tablet Cemplung (1 tablet utuh direct dissolution)
+                    // Kadar = (Au / Ab) * Bb * (Fu / Fb) * (1 / Ke) * Kb * FactorBM * 100%
+                    if (Au1 > 0) kadarU1 = (Au1 / Ab) * Bb * (Fu1 / Fb) * (1.0 / Ke) * faktorKb * bmFactor * 100;
+                    if (Au2 > 0) kadarU2 = (Au2 / Ab) * Bb * (Fu2 / Fb) * (1.0 / Ke) * faktorKb * bmFactor * 100;
+                } else if (metodeKadar === 'sirup') {
+                    // Rumus 3: Sirup / Suspensi / Cairan Oral (Pemipetan volume Vu dalam mL)
+                    // Kadar = (Au / Ab) * (Bb / Vu) * (Fu / Fb) * (Vetiket / Ke) * Kb * FactorBM * 100%
+                    if (Bu1 > 0 && Au1 > 0) kadarU1 = (Au1 / Ab) * (Bb / Bu1) * (Fu1 / Fb) * (Vetiket / Ke) * faktorKb * bmFactor * 100;
+                    if (Bu2 > 0 && Au2 > 0) kadarU2 = (Au2 / Ab) * (Bb / Bu2) * (Fu2 / Fb) * (Vetiket / Ke) * faktorKb * bmFactor * 100;
+                } else {
+                    // Rumus 1: Tablet / Kapsul BR (Metode 20 Tablet Digerus / Default)
+                    // Kadar = (Au / Ab) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb * FactorBM * 100%
+                    if (Bu1 > 0 && Au1 > 0 && Br > 0) kadarU1 = (Au1 / Ab) * (Bb / Bu1) * (Fu1 / Fb) * (Br / Ke) * faktorKb * bmFactor * 100;
+                    if (Bu2 > 0 && Au2 > 0 && Br > 0) kadarU2 = (Au2 / Ab) * (Bb / Bu2) * (Fu2 / Fb) * (Br / Ke) * faktorKb * bmFactor * 100;
+                }
             }
 
             var kadarU1Input = document.querySelector('input[name*="[kadar_uji_1]"]');
@@ -3222,9 +3365,24 @@
             }
         }
 
-        // Listener untuk KIM-05 Spektrofotometri
+        // Listener untuk KIM-05 Spektrofotometri & Multi-Metode Kadar
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.matches('input[name*="[tabel_preparasi]"], input[name*="[kadar_baku_persen]"], input[name*="[bobot_rata_rata_tablet]"], input[name*="[klaim_etiket]"], input[name*="[faktor_konversi_bm]"]')) {
+            if (e.target && e.target.matches('input[name*="[tabel_preparasi]"], input[name*="[kadar_baku_persen]"], input[name*="[bobot_rata_rata_tablet]"], input[name*="[klaim_etiket]"], input[name*="[faktor_konversi_bm]"], input[name*="[volume_takaran_etiket]"]')) {
+                hitungSpektrofotometri();
+            }
+        });
+
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.matches('select[name*="[metode_perhitungan_kadar]"]')) {
+                var pane = e.target.closest('.form-tab-pane-uji');
+                if (pane) {
+                    updateMetodeKadarUI(pane);
+                    hitungSpektrofotometri();
+                    hitungHPLC();
+                    evaluasiKesimpulanPane(pane);
+                }
+            }
+        });
                 hitungSpektrofotometri();
             }
         });
@@ -3345,6 +3503,39 @@
             var fkInput = pane.querySelector('input[name*="[faktor_perkalian_fk]"]');
             if (fkInput && Fk > 0) fkInput.value = Fk.toFixed(4);
 
+            // Faktor Pengali Tambahan Opsional (Manual / Pengenceran Bertingkat / Koreksi Khusus)
+            var fTambahanInput = pane.querySelector('input[name*="[faktor_pengali_tambahan]"]');
+            var fTambahanRaw = fTambahanInput ? fTambahanInput.value : '1.0';
+            var fTambahan = evalMathExpression(fTambahanRaw);
+            if (isNaN(fTambahan) || fTambahan <= 0) fTambahan = 1.0;
+
+            // Update badge live preview hasil evaluasi Faktor Pengali Tambahan jika berupa pecahan (misal: 50/10)
+            var fTambahanCol = fTambahanInput ? fTambahanInput.closest('.col-md-6, .col-12') : null;
+            if (fTambahanCol) {
+                var previewEl2 = fTambahanCol.querySelector('.fk-tambahan-preview');
+                if (previewEl2) {
+                    var evalValEl2 = previewEl2.querySelector('.fk-tambahan-eval-val');
+                    var strClean2 = String(fTambahanRaw).trim();
+                    var isCustom = strClean2 !== '' && strClean2 !== '1' && strClean2 !== '1.0' && strClean2 !== '1.00';
+                    if (isCustom) {
+                        if (evalValEl2) evalValEl2.textContent = fTambahan.toFixed(4);
+                        previewEl2.style.display = 'block';
+                    } else {
+                        previewEl2.style.display = 'none';
+                    }
+                }
+            }
+
+            // Hitung Fk Final = Fk Otomatis * Faktor Pengali Tambahan
+            var FkFinal = Fk * fTambahan;
+            var fkFinalInput = pane.querySelector('input[name*="[faktor_perkalian_final]"]');
+            if (fkFinalInput && FkFinal > 0) {
+                fkFinalInput.value = FkFinal.toFixed(4);
+            }
+
+            // Gunakan FkEfektif (FkFinal jika aktif, fallback Fk) untuk seluruh % zat aktif terlarut
+            var FkEfektif = (FkFinal > 0) ? FkFinal : Fk;
+
             // 1. Hitung % Terlarut tiap bejana 1 - 6 (Tahap S1)
             var terlarutValsS1 = [];
             for (var b = 0; b < 6; b++) {
@@ -3353,8 +3544,8 @@
 
                 if (auEl) {
                     var Au = parseFloat(auEl.value) || 0;
-                    if (Au > 0 && Fk > 0) {
-                        var Dx = Fk * Au;
+                    if (Au > 0 && FkEfektif > 0) {
+                        var Dx = FkEfektif * Au;
                         if (dxEl) dxEl.value = Dx.toFixed(2);
                         terlarutValsS1.push(Dx);
                     } else if (dxEl && parseFloat(dxEl.value)) {
@@ -3388,8 +3579,8 @@
 
                     if (auElS2) {
                         var AuS2 = parseFloat(auElS2.value) || 0;
-                        if (AuS2 > 0 && Fk > 0) {
-                            var DxS2 = Fk * AuS2;
+                        if (AuS2 > 0 && FkEfektif > 0) {
+                            var DxS2 = FkEfektif * AuS2;
                             if (dxElS2) dxElS2.value = DxS2.toFixed(2);
                             terlarutValsS2.push(DxS2);
                         } else if (dxElS2 && parseFloat(dxElS2.value)) {
@@ -3425,8 +3616,8 @@
 
                     if (auElS3) {
                         var AuS3 = parseFloat(auElS3.value) || 0;
-                        if (AuS3 > 0 && Fk > 0) {
-                            var DxS3 = Fk * AuS3;
+                        if (AuS3 > 0 && FkEfektif > 0) {
+                            var DxS3 = FkEfektif * AuS3;
                             if (dxElS3) dxElS3.value = DxS3.toFixed(2);
                             terlarutValsS3.push(DxS3);
                         } else if (dxElS3 && parseFloat(dxElS3.value)) {
@@ -3454,14 +3645,14 @@
             evaluasiKesimpulanPane(pane);
         }
 
-        // Listener untuk KIM-06 Disolusi (termasuk tabel S1, S2, S3, kadar baku, susut pengeringan, & rumus BM)
+        // Listener untuk KIM-06 Disolusi (termasuk tabel S1, S2, S3, kadar baku, susut pengeringan, rumus BM, & faktor pengali tambahan)
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.matches('input[name*="[tabel_s1]"], input[name*="[tabel_s2]"], input[name*="[tabel_s3]"], input[name*="[volume_media]"], input[name*="[komposisi_etiket]"], input[name*="[kadar_baku]"], input[name*="[susut_pengeringan]"], input[name*="[bobot_baku_mg]"], input[name*="[faktor_konversi_bm]"], input[name*="[hasil_ukur_baku_ab]"], input[name*="[faktor_pengenceran_baku]"], input[name*="[faktor_pengenceran_uji]"]')) {
+            if (e.target && e.target.matches('input[name*="[tabel_s1]"], input[name*="[tabel_s2]"], input[name*="[tabel_s3]"], input[name*="[volume_media]"], input[name*="[komposisi_etiket]"], input[name*="[kadar_baku]"], input[name*="[susut_pengeringan]"], input[name*="[bobot_baku_mg]"], input[name*="[faktor_konversi_bm]"], input[name*="[faktor_pengali_tambahan]"], input[name*="[hasil_ukur_baku_ab]"], input[name*="[faktor_pengenceran_baku]"], input[name*="[faktor_pengenceran_uji]"]')) {
                 hitungDisolusi();
             }
         });
         document.addEventListener('change', function(e) {
-            if (e.target && e.target.matches('input[name*="[kadar_baku]"], input[name*="[susut_pengeringan]"], input[name*="[faktor_konversi_bm]"], select[name*="[lakukan_tahap_s2]"], select[name*="[lakukan_tahap_s3]"]')) {
+            if (e.target && e.target.matches('input[name*="[kadar_baku]"], input[name*="[susut_pengeringan]"], input[name*="[faktor_konversi_bm]"], input[name*="[faktor_pengali_tambahan]"], select[name*="[lakukan_tahap_s2]"], select[name*="[lakukan_tahap_s3]"]')) {
                 var pane = e.target.closest('.form-tab-pane-uji');
                 if (pane) updateTahapVisibility(pane);
                 hitungDisolusi();
@@ -3517,7 +3708,8 @@
 
         // =========================================================================
         // Auto-Calculator Engine untuk Formulir HPLC / KCKT (KIM-08)
-        // Rumus Resmi: Kadar = (Lu/Lb) * (Bb/Bu) * (Fu/Fb) * (Br/Ke) * Kb * [Faktor BM] * 100%
+        // Mendukung 3 Metode: Tablet BR, Tablet Cemplung, dan Sirup / Cairan
+        // Rumus Resmi: Kadar = (Lu/Lb) * [Faktor Perkalian Sediaan] * Kb * [Faktor BM] * 100%
         // RPD = |K1 - K2| / Kadar * 100%, Horwitz = 0.5 * 2^(1 - 0.5*log10(C))
         // =========================================================================
         function hitungHPLC() {
@@ -3525,6 +3717,10 @@
             var bakuKadarInput = document.querySelector('input[name*="[baku_kadar]"]');
             var bakuSpInput = document.querySelector('input[name*="[baku_sp]"]');
             var bakuTerkoreksiInput = document.querySelector('input[name*="[baku_kadar_terkoreksi]"]');
+            var pane = bakuKadarInput ? bakuKadarInput.closest('.form-tab-pane-uji') : document;
+            var metodeKadar = getMetodeKadar(pane);
+            var volEtiketInput = pane ? pane.querySelector('input[name*="[volume_takaran_etiket]"]') : document.querySelector('input[name*="[volume_takaran_etiket]"]');
+            var Vetiket = (volEtiketInput && parseFloat(volEtiketInput.value) > 0) ? parseFloat(volEtiketInput.value) : 5.0;
 
             var Kb = 0;
             if (bakuKadarInput) {
@@ -3557,8 +3753,8 @@
             // 3. Parameter Tambahan: Br (Bobot rata tablet) & Ke (Klaim etiket)
             var brInput = document.querySelector('input[name*="[bobot_rata_tablet]"]');
             var keInput = document.querySelector('input[name*="[klaim_etiket]"]');
-            var Br = parseFloat(brInput ? brInput.value : 0) || 1;
-            var Ke = parseFloat(keInput ? keInput.value : 0) || 1;
+            var Br = parseFloat(brInput ? brInput.value : 0) || 0;
+            var Ke = parseFloat(keInput ? keInput.value : 0) || 0;
 
             // 4. Ambil Nilai Baku Pembanding (Row 0)
             var bbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][bobot_bersih]"]');
@@ -3569,9 +3765,9 @@
             var Fb = parseFloat(fbBakuEl ? fbBakuEl.value : 1) || 1;
             var Lb = parseFloat(lbBakuEl ? lbBakuEl.value : 0) || 0;
 
-            // 5. Hitung Replikasi 1 (Row 2) & Replikasi 2 (Row 3) dengan aman (Mendukung teks kustom analis)
-            var k1 = hitungKadarSatuSampel(2, Lb, Bb, Fb, Br, Ke, Kb, bmFactor);
-            var k2 = hitungKadarSatuSampel(3, Lb, Bb, Fb, Br, Ke, Kb, bmFactor);
+            // 5. Hitung Replikasi 1 (Row 2) & Replikasi 2 (Row 3) dengan multi-metode
+            var k1 = hitungKadarSatuSampel(2, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket);
+            var k2 = hitungKadarSatuSampel(3, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket);
 
             var k1Input = document.querySelector('input[name*="[kadar_replikasi_1]"]');
             var k2Input = document.querySelector('input[name*="[kadar_replikasi_2]"]');
@@ -3580,10 +3776,10 @@
             if (k2Input && k2 > 0) k2Input.value = k2.toFixed(2);
 
             // 6. Rata-rata Kadar, RPD & Horwitz
-            if (k1 > 0 && k2 > 0) {
-                var rataPersen = (k1 + k2) / 2;
-                var rataMg = (rataPersen / 100) * Ke;
-                var rpd = (Math.abs(k1 - k2) / rataPersen) * 100;
+            if (k1 > 0 || k2 > 0) {
+                var rataPersen = (k1 > 0 && k2 > 0) ? (k1 + k2) / 2 : (k1 || k2);
+                var rataMg = Ke > 0 ? (rataPersen / 100) * Ke : 0;
+                var rpd = (k1 > 0 && k2 > 0 && rataPersen > 0) ? (Math.abs(k1 - k2) / rataPersen) * 100 : 0;
 
                 // Syarat Horwitz: 0.5 * (2 ^ (1 - 0.5 * log10(C)))
                 var C = rataPersen / 100;
@@ -3599,7 +3795,7 @@
 
                 if (rataPersenInput) rataPersenInput.value = rataPersen.toFixed(2);
                 if (rataMgInput) rataMgInput.value = rataMg.toFixed(2);
-                if (rpdInput) rpdInput.value = rpd.toFixed(2);
+                if (rpdInput && rpd > 0) rpdInput.value = rpd.toFixed(2);
                 if (horwitzInput && horwitz > 0) horwitzInput.value = horwitz.toFixed(2);
 
                 var pHplc = bakuKadarInput ? bakuKadarInput.closest('.form-tab-pane-uji') : null;
@@ -3641,9 +3837,11 @@
             }
         }
 
-        function hitungKadarSatuSampel(rowIdx, Lb, Bb, Fb, Br, Ke, Kb, bmFactor) {
+        function hitungKadarSatuSampel(rowIdx, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket) {
             if (Lb <= 0 || Bb <= 0 || Fb <= 0 || Ke <= 0 || Kb <= 0) return 0;
             var fBM = (typeof bmFactor === 'number' && bmFactor > 0) ? bmFactor : 1.0;
+            var mode = metodeKadar || 'tablet_br';
+            var V_et = (typeof Vetiket === 'number' && Vetiket > 0) ? Vetiket : 5.0;
 
             var buEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][bobot_bersih]"]');
             var fuEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][faktor_pengenceran]"]');
@@ -3653,16 +3851,33 @@
             var Fu = parseFloat(fuEl ? fuEl.value : 1) || 1;
             var Lu = parseFloat(luEl ? luEl.value : 0) || 0;
 
-            if (Bu <= 0 || Lu <= 0) return 0;
+            if (Lu <= 0) return 0;
 
-            // Kadar = (Lu / Lb) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb * FactorBM
-            var kadar = (Lu / Lb) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb * fBM;
+            // Pastikan satuan bobot baku dalam mg jika penimbangan dalam gram (< 2.0 g)
+            var Bb_mg = (Bb < 2.0) ? (Bb * 1000) : Bb;
+
+            var kadar = 0;
+            if (mode === 'tablet_cemplung') {
+                // Rumus 2: Tablet Cemplung (1 tablet utuh direct dissolution)
+                // Kadar = (Lu / Lb) * Bb_mg * (Fu / Fb) * (1 / Ke) * (Kb / 100) * FactorBM * 100%
+                kadar = (Lu / Lb) * Bb_mg * (Fu / Fb) * (1.0 / Ke) * (Kb / 100) * fBM * 100;
+            } else if (mode === 'sirup') {
+                // Rumus 3: Sirup / Suspensi / Cairan Oral (Volume Vu dalam mL)
+                if (Bu <= 0) return 0;
+                kadar = (Lu / Lb) * (Bb_mg / Bu) * (Fu / Fb) * (V_et / Ke) * (Kb / 100) * fBM * 100;
+            } else {
+                // Rumus 1: Tablet / Kapsul BR (Metode 20 Tablet Digerus / Default)
+                if (Bu <= 0 || Br <= 0) return 0;
+                var Bu_mg = (Bu < 2.0) ? (Bu * 1000) : Bu;
+                kadar = (Lu / Lb) * (Bb_mg / Bu_mg) * (Fu / Fb) * (Br / Ke) * (Kb / 100) * fBM * 100;
+            }
+
             return isNaN(kadar) ? 0 : kadar;
         }
 
         // Listener HPLC input
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.matches('input[name*="[baku_kadar]"], input[name*="[baku_sp]"], input[name*="[tabel_hplc]"], input[name*="[bobot_rata_tablet]"], input[name*="[klaim_etiket]"], input[name*="[faktor_konversi_bm]"]')) {
+            if (e.target && e.target.matches('input[name*="[baku_kadar]"], input[name*="[baku_sp]"], input[name*="[tabel_hplc]"], input[name*="[bobot_rata_tablet]"], input[name*="[klaim_etiket]"], input[name*="[faktor_konversi_bm]"], input[name*="[volume_takaran_etiket]"]')) {
                 hitungHPLC();
             }
         });
@@ -5055,15 +5270,17 @@
             if (typeof hitungSpektrofotometri === 'function') hitungSpektrofotometri();
         }
 
-        // Inisialisasi awal visibilitas tahap opsional (Tahap 2 Keragaman Bobot & S2/S3 Disolusi)
+        // Inisialisasi awal visibilitas tahap opsional & UI multi-metode kadar
         document.querySelectorAll('.form-tab-pane-uji').forEach(function(pane) {
             updateTahapVisibility(pane);
+            if (typeof updateMetodeKadarUI === 'function') updateMetodeKadarUI(pane);
         });
 
-        // Inisialisasi awal kalkulator disolusi & evaluasi kesimpulan otomatis untuk seluruh form tab pane yang sudah ada isian data
-        if (typeof hitungDisolusi === 'function') {
-            hitungDisolusi();
-        }
+        // Inisialisasi awal kalkulator otomatis & evaluasi kesimpulan
+        if (typeof hitungDisolusi === 'function') hitungDisolusi();
+        if (typeof hitungSpektrofotometri === 'function') hitungSpektrofotometri();
+        if (typeof hitungHPLC === 'function') hitungHPLC();
+
         document.querySelectorAll('.form-tab-pane-uji').forEach(function(pane) {
             evaluasiKesimpulanPane(pane);
         });
@@ -5139,4 +5356,189 @@
     function konfirmasiGantiZatAktif(targetUrl) {
         return confirm('Apakah Anda ingin mengganti pilihan Zat Aktif atau parameter pengujian untuk sesi ini?\n\nSemua data yang telah Anda isi pada parameter yang tetap dipilih akan tersimpan aman dan tidak akan hilang.');
     }
+</script>
+<!-- Modal Tambah Parameter ke Sesi Aktif (Poin 11) -->
+<div class="modal fade" id="modalTambahParameterSesi" tabindex="-1" aria-labelledby="modalTambahParameterSesiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <form action="<?php echo site_url('pengujian/tambah_parameter_sesi/' . $sesi['id']); ?>" method="post" id="formTambahParamSesi">
+                <input type="hidden" name="method_id" id="tambah_param_method_id" value="">
+                <div class="modal-header bg-light py-3 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-success-subtle text-success p-2 rounded-2 d-inline-flex">
+                            <i class="bi bi-plus-circle-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalTambahParameterSesiLabel">Tambah Parameter Pengujian ke Sesi Ini</h6>
+                            <small class="text-muted">Pilih parameter dari master data laboratorium (<?php echo html_escape($sesi['jenis_pengujian']); ?>) untuk ditambahkan</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <!-- Search box -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0" id="searchMasterSesiModal" placeholder="Cari nama parameter uji, zat aktif, atau metode analisa..." autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- Selected Parameter Preview Card -->
+                    <div class="card border-primary-subtle bg-primary-subtle mb-3 d-none" id="cardSelectedParamPreview">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <div class="text-muted small fw-bold text-uppercase" style="font-size: 0.70rem;">Parameter Terpilih:</div>
+                                    <h6 class="fw-bold text-primary mb-1" id="previewParamNama">-</h6>
+                                    <div class="small text-secondary" id="previewParamMeta">-</div>
+                                </div>
+                                <div style="min-width: 220px;">
+                                    <label class="form-label small fw-bold text-dark mb-1">Pilihan Form LCP:</label>
+                                    <select class="form-select form-select-sm" name="template_id" id="selTemplateIdModal">
+                                        <?php if (!empty($daftar_template_bidang)): ?>
+                                            <?php foreach ($daftar_template_bidang as $tpl_b): ?>
+                                                <option value="<?php echo $tpl_b['id']; ?>">[<?php echo html_escape($tpl_b['kode_template']); ?>] <?php echo html_escape($tpl_b['nama_template']); ?></option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Master Table -->
+                    <div class="table-responsive" style="max-height: 380px;">
+                        <table class="table table-hover align-middle mb-0" id="tabelMasterSesiModal">
+                            <thead class="table-light sticky-top">
+                                <tr style="font-size: 0.78rem;">
+                                    <th width="35%">PARAMETER &amp; ZAT AKTIF</th>
+                                    <th width="30%">METODE &amp; PERSYARATAN</th>
+                                    <th width="20%">FORM LCP DEFAULT</th>
+                                    <th width="15%" class="text-center">PILIH</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyMasterSesiModal" style="font-size: 0.82rem;">
+                                <?php if (!empty($daftar_master_bidang)): ?>
+                                    <?php 
+                                        $existing_mids = array();
+                                        if (!empty($forms)) {
+                                            foreach ($forms as $f_item) {
+                                                if (!empty($f_item['method_id'])) $existing_mids[] = (int)$f_item['method_id'];
+                                            }
+                                        }
+                                    ?>
+                                    <?php foreach ($daftar_master_bidang as $mb): ?>
+                                        <?php $is_already_in_session = in_array((int)$mb['id'], $existing_mids); ?>
+                                        <tr class="master-sesi-item <?php echo $is_already_in_session ? 'table-light opacity-75' : ''; ?>" 
+                                            id="row_master_sesi_<?php echo $mb['id']; ?>"
+                                            data-search="<?php echo html_escape(strtolower($mb['parameter_uji'] . ' ' . $mb['nama_zat_aktif'] . ' ' . $mb['metode_analisa'] . ' ' . $mb['persyaratan'])); ?>">
+                                            <td>
+                                                <div class="fw-bold text-dark mb-1"><?php echo html_escape($mb['parameter_uji']); ?></div>
+                                                <div class="text-muted small">
+                                                    <i class="bi bi-capsule me-1"></i><?php echo html_escape($mb['nama_zat_aktif']); ?>
+                                                    <?php if (!empty($mb['bentuk_sediaan'])): ?>
+                                                        <span class="badge bg-light text-secondary border ms-1"><?php echo html_escape($mb['bentuk_sediaan']); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-secondary small fw-semibold"><?php echo html_escape($mb['metode_analisa'] ?: '-'); ?></div>
+                                                <div class="text-muted small font-monospace mt-1"><?php echo html_escape($mb['persyaratan'] ?: '-'); ?></div>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($mb['kode_template'])): ?>
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                                        [<?php echo html_escape($mb['kode_template']); ?>] <?php echo html_escape($mb['nama_template']); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-muted small">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php if ($is_already_in_session): ?>
+                                                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-pill small">
+                                                        <i class="bi bi-check2"></i> Ada di Sesi
+                                                    </span>
+                                                <?php else: ?>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-primary py-1 px-3 rounded-pill fw-semibold btn-select-param-sesi"
+                                                            data-id="<?php echo $mb['id']; ?>"
+                                                            data-param="<?php echo html_escape($mb['parameter_uji']); ?>"
+                                                            data-za="<?php echo html_escape($mb['nama_zat_aktif']); ?>"
+                                                            data-sediaan="<?php echo html_escape($mb['bentuk_sediaan'] ?: ''); ?>"
+                                                            data-metode="<?php echo html_escape($mb['metode_analisa'] ?: '-'); ?>"
+                                                            data-syarat="<?php echo html_escape($mb['persyaratan'] ?: '-'); ?>"
+                                                            data-tpl-id="<?php echo !empty($mb['template_id']) ? $mb['template_id'] : ''; ?>">
+                                                        Pilih
+                                                    </button>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success btn-sm px-4 fw-semibold shadow-sm" id="btnSubmitTambahParamSesi" disabled>
+                        <i class="bi bi-plus-lg me-1"></i> Tambahkan ke Sesi Pengujian
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Live Search & Handler Modal Tambah Parameter Sesi (Poin 11)
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('searchMasterSesiModal');
+    var items = document.querySelectorAll('.master-sesi-item');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            var q = this.value.toLowerCase().trim();
+            items.forEach(function(item) {
+                var s = item.getAttribute('data-search') || '';
+                item.style.display = (!q || s.indexOf(q) !== -1) ? '' : 'none';
+            });
+        });
+    }
+
+    var hiddenInput = document.getElementById('tambah_param_method_id');
+    var cardPreview = document.getElementById('cardSelectedParamPreview');
+    var previewNama = document.getElementById('previewParamNama');
+    var previewMeta = document.getElementById('previewParamMeta');
+    var selTemplate = document.getElementById('selTemplateIdModal');
+    var btnSubmit = document.getElementById('btnSubmitTambahParamSesi');
+
+    document.querySelectorAll('.btn-select-param-sesi').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var mId = this.getAttribute('data-id');
+            var mParam = this.getAttribute('data-param');
+            var mZa = this.getAttribute('data-za');
+            var mSediaan = this.getAttribute('data-sediaan');
+            var mMetode = this.getAttribute('data-metode');
+            var mSyarat = this.getAttribute('data-syarat');
+            var mTplId = this.getAttribute('data-tpl-id');
+
+            if (hiddenInput) hiddenInput.value = mId;
+            if (previewNama) previewNama.textContent = mParam;
+            if (previewMeta) previewMeta.textContent = mZa + (mSediaan ? ' (' + mSediaan + ')' : '') + ' • ' + mMetode + ' • Syarat: ' + mSyarat;
+            if (selTemplate && mTplId) selTemplate.value = mTplId;
+
+            if (cardPreview) cardPreview.classList.remove('d-none');
+            if (btnSubmit) btnSubmit.disabled = false;
+
+            // Highlight baris terpilih
+            document.querySelectorAll('.master-sesi-item').forEach(function(row) {
+                row.classList.remove('table-primary');
+            });
+            var selRow = document.getElementById('row_master_sesi_' + mId);
+            if (selRow) selRow.classList.add('table-primary');
+        });
+    });
+});
 </script>
