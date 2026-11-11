@@ -64,7 +64,8 @@ if (!empty($tabel)) {
 
 $bobot_zat = ($w1 !== null && $w0 !== null) ? ($w1 - $w0) : (isset($p['bobot_zat_bersih']) && is_numeric($p['bobot_zat_bersih']) ? (float)$p['bobot_zat_bersih'] : null);
 $bobot_air = ($w2 !== null && $w0 !== null) ? ($w2 - $w0) : (isset($p['bobot_air_bersih']) && is_numeric($p['bobot_air_bersih']) ? (float)$p['bobot_air_bersih'] : null);
-$bj_val = ($bobot_zat !== null && $bobot_air !== null && $bobot_air > 0) ? ($bobot_zat / $bobot_air) : (isset($p['nilai_bobot_jenis']) && is_numeric($p['nilai_bobot_jenis']) ? (float)$p['nilai_bobot_jenis'] : null);
+// Rumus Bobot Jenis (BJ) = (W2 - W0) / (W1 - W0)
+$bj_val = ($bobot_zat !== null && $bobot_air !== null && $bobot_zat > 0) ? ($bobot_air / $bobot_zat) : (isset($p['nilai_bobot_jenis']) && is_numeric($p['nilai_bobot_jenis']) ? (float)$p['nilai_bobot_jenis'] : null);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -318,11 +319,11 @@ $bj_val = ($bobot_zat !== null && $bobot_air !== null && $bobot_air > 0) ? ($bob
     <div class="rumus-box">
         <strong>PERHITUNGAN :</strong><br>
         <div style="margin-top: 6px; font-family: monospace; font-size: 9.5pt;">
-            BJ = (Bobot Zat) / (Bobot Air)<br>
-            BJ = (W1 - W0) / (W2 - W0)<br>
-            <?php if ($w0 !== null && $w1 !== null && $w2 !== null && $bobot_air > 0): ?>
-                BJ = (<?php echo number_format($w1, 4, '.', ''); ?> - <?php echo number_format($w0, 4, '.', ''); ?>) / (<?php echo number_format($w2, 4, '.', ''); ?> - <?php echo number_format($w0, 4, '.', ''); ?>)<br>
-                BJ = <?php echo number_format($bobot_zat, 4, '.', ''); ?> / <?php echo number_format($bobot_air, 4, '.', ''); ?><br>
+            BJ = (Bobot Air) / (Bobot Zat)<br>
+            BJ = (W2 - W0) / (W1 - W0)<br>
+            <?php if ($w0 !== null && $w1 !== null && $w2 !== null && $bobot_zat > 0): ?>
+                BJ = (<?php echo number_format($w2, 4, '.', ''); ?> - <?php echo number_format($w0, 4, '.', ''); ?>) / (<?php echo number_format($w1, 4, '.', ''); ?> - <?php echo number_format($w0, 4, '.', ''); ?>)<br>
+                BJ = <?php echo number_format($bobot_air, 4, '.', ''); ?> / <?php echo number_format($bobot_zat, 4, '.', ''); ?><br>
                 <strong>BJ = <?php echo number_format($bj_val, 4, '.', ''); ?></strong>
             <?php else: ?>
                 <strong>BJ = <?php echo $bj_val !== null ? number_format($bj_val, 4, '.', '') : '-'; ?></strong>

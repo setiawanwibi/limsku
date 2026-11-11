@@ -16,6 +16,7 @@ if (isset($p['parameter_values']) && is_array($p['parameter_values'])) {
 
 // Data tabel GC-MS
 $tabel_gcms = isset($p['tabel_gcms']) && is_array($p['tabel_gcms']) ? $p['tabel_gcms'] : array();
+$tabel_regresi = isset($p['tabel_regresi_kurva_baku']) && is_array($p['tabel_regresi_kurva_baku']) ? $p['tabel_regresi_kurva_baku'] : array();
 
 // Helper resolve TTD digital
 $resolve_ttd = function($sig) {
@@ -338,6 +339,36 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
         </tr>
     </table>
 
+    <!-- TABEL REGRESI KURVA BAKU DAN PERHITUNGAN -->
+    <?php if (!empty($tabel_regresi)): ?>
+    <div style="margin-top: 10px; margin-bottom: 4px; font-weight: bold; font-size: 8.5pt;">
+        Regresi Kurva Baku dan Perhitungan
+    </div>
+    <table class="table-bordered" style="margin-top: 2px; margin-bottom: 12px; width: 65%;">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 28%; text-align: center; vertical-align: middle;">Kalibrasi</th>
+                <th colspan="3" style="text-align: center;"><?php echo html_escape(!empty($p['ms_nama_senyawa']) ? $p['ms_nama_senyawa'] : (!empty($sampel['nama_sampel']) ? $sampel['nama_sampel'] : 'Etilen Glikol')); ?></th>
+            </tr>
+            <tr>
+                <th style="width: 24%; text-align: center;">Rt</th>
+                <th style="width: 24%; text-align: center;">Area</th>
+                <th style="width: 24%; text-align: center;">Kadar (ug/mL)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($tabel_regresi as $r_reg): ?>
+            <tr>
+                <td style="padding-left: 8px;"><?php echo html_escape($r_reg['kalibrasi'] ?? ''); ?></td>
+                <td class="text-right"><?php echo html_escape($r_reg['waktu_retensi_rt'] ?? ''); ?></td>
+                <td class="text-right"><?php echo html_escape($r_reg['area'] ?? ''); ?></td>
+                <td class="text-right"><?php echo html_escape($r_reg['kadar_ug_ml'] ?? ''); ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php endif; ?>
+
     <!-- TABEL PENIMBANGAN & PENGUKURAN GC-MS -->
     <table class="table-bordered">
         <thead>
@@ -347,21 +378,20 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
                 <th rowspan="2" style="width: 6%;">FP</th>
                 <th rowspan="2" style="width: 7%;">Konsentrasi</th>
                 <th rowspan="2" style="width: 6%;">Rt (menit)</th>
-                <th rowspan="2" style="width: 8%;">Quantifier<br>(A)</th>
-                <th colspan="3" style="width: 18%;">Qualifier Area / Intensitas</th>
-                <th colspan="3" style="width: 14%;">Rasio Ion</th>
+                <th rowspan="2" style="width: 8%;">Area<br>(A)</th>
+                <th rowspan="2" style="width: 8%;">Intensitas<br>(A)</th>
+                <th colspan="2" style="width: 14%;">Qualifier</th>
+                <th colspan="2" style="width: 12%;">Rasio Ion (%)</th>
                 <th rowspan="2" style="width: 8%;">Rasio Area (Uji/Int)</th>
             </tr>
             <tr>
                 <th style="width: 7%;">Wadah+zat</th>
                 <th style="width: 7%;">Wadah+sisa</th>
                 <th style="width: 6%;">Zat</th>
-                <th style="width: 6%;">1 (B)</th>
-                <th style="width: 6%;">2 (C)</th>
-                <th style="width: 6%;">3 (D)</th>
-                <th style="width: 4.6%;">B/A</th>
-                <th style="width: 4.6%;">C/A</th>
-                <th style="width: 4.6%;">D/A</th>
+                <th style="width: 7%;">Qualifier (B)</th>
+                <th style="width: 7%;">Qualifier (C)</th>
+                <th style="width: 6%;">B/A (%)</th>
+                <th style="width: 6%;">C/A (%)</th>
             </tr>
         </thead>
         <tbody>
@@ -389,14 +419,13 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
                     $b_bersih = number_format((float)$r['bobot_bersih'], 4, '.', '');
                 }
 
-                $a = isset($r['area_quantifier']) && is_numeric($r['area_quantifier']) ? (float)$r['area_quantifier'] : 0;
-                $b = isset($r['area_qualifier_1']) && is_numeric($r['area_qualifier_1']) ? (float)$r['area_qualifier_1'] : 0;
-                $c = isset($r['area_qualifier_2']) && is_numeric($r['area_qualifier_2']) ? (float)$r['area_qualifier_2'] : 0;
-                $d = isset($r['area_qualifier_3']) && is_numeric($r['area_qualifier_3']) ? (float)$r['area_qualifier_3'] : 0;
+                $area_a = isset($r['area_quantifier']) && is_numeric($r['area_quantifier']) ? (float)$r['area_quantifier'] : 0;
+                $int_a  = isset($r['area_qualifier_1']) && is_numeric($r['area_qualifier_1']) ? (float)$r['area_qualifier_1'] : 0;
+                $qual_b = isset($r['area_qualifier_2']) && is_numeric($r['area_qualifier_2']) ? (float)$r['area_qualifier_2'] : 0;
+                $qual_c = isset($r['area_qualifier_3']) && is_numeric($r['area_qualifier_3']) ? (float)$r['area_qualifier_3'] : 0;
 
-                $r1 = ($a > 0 && $b > 0) ? number_format($b / $a, 3, '.', '') : (isset($r['rasio_ion_1']) && is_numeric($r['rasio_ion_1']) ? number_format((float)$r['rasio_ion_1'], 3, '.', '') : '-');
-                $r2 = ($a > 0 && $c > 0) ? number_format($c / $a, 3, '.', '') : (isset($r['rasio_ion_2']) && is_numeric($r['rasio_ion_2']) ? number_format((float)$r['rasio_ion_2'], 3, '.', '') : '-');
-                $r3 = ($a > 0 && $d > 0) ? number_format($d / $a, 3, '.', '') : (isset($r['rasio_ion_3']) && is_numeric($r['rasio_ion_3']) ? number_format((float)$r['rasio_ion_3'], 3, '.', '') : '-');
+                $r1 = ($int_a > 0 && $qual_b > 0) ? number_format(($qual_b / $int_a) * 100, 3, '.', '') : (isset($r['rasio_ion_1']) && is_numeric($r['rasio_ion_1']) ? number_format((float)$r['rasio_ion_1'], 3, '.', '') : '-');
+                $r2 = ($int_a > 0 && $qual_c > 0) ? number_format(($qual_c / $int_a) * 100, 3, '.', '') : (isset($r['rasio_ion_2']) && is_numeric($r['rasio_ion_2']) ? number_format((float)$r['rasio_ion_2'], 3, '.', '') : '-');
             ?>
             <tr>
                 <td><strong><?php echo html_escape($kat); ?></strong></td>
@@ -406,13 +435,12 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
                 <td class="text-center"><?php echo html_escape($r['faktor_pengenceran'] ?? '-'); ?></td>
                 <td class="text-center"><?php echo html_escape($r['konsentrasi'] ?? '-'); ?></td>
                 <td class="text-center"><?php echo html_escape($r['waktu_retensi'] ?? '-'); ?></td>
-                <td class="text-right text-bold"><?php echo $a > 0 ? number_format($a, 0, '.', ',') : '-'; ?></td>
-                <td class="text-right"><?php echo $b > 0 ? number_format($b, 0, '.', ',') : '-'; ?></td>
-                <td class="text-right"><?php echo $c > 0 ? number_format($c, 0, '.', ',') : '-'; ?></td>
-                <td class="text-right"><?php echo $d > 0 ? number_format($d, 0, '.', ',') : '-'; ?></td>
+                <td class="text-right text-bold"><?php echo $area_a > 0 ? number_format($area_a, 0, '.', ',') : '-'; ?></td>
+                <td class="text-right"><?php echo $int_a > 0 ? number_format($int_a, 0, '.', ',') : '-'; ?></td>
+                <td class="text-right"><?php echo $qual_b > 0 ? number_format($qual_b, 0, '.', ',') : '-'; ?></td>
+                <td class="text-right"><?php echo $qual_c > 0 ? number_format($qual_c, 0, '.', ',') : '-'; ?></td>
                 <td class="text-center text-bold"><?php echo $r1; ?></td>
                 <td class="text-center text-bold"><?php echo $r2; ?></td>
-                <td class="text-center text-bold"><?php echo $r3; ?></td>
                 <td class="text-center"><?php echo html_escape($r['rasio_area_internal'] ?? '-'); ?></td>
             </tr>
             <?php endforeach; ?>
