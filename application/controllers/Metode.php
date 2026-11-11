@@ -146,10 +146,7 @@ class Metode extends MY_Controller
 
         $this->data['halaman_aktif']       = 'metode';
         $this->data['judul_halaman']       = 'Edit Metode Monografi';
-        $this->data['breadcrumbs']         = array(
-            array('label' => 'Master Metode', 'url' => site_url('metode')),
-            array('label' => 'Edit', 'url' => '#')
-        );
+        
         $this->data['metode']              = $metode;
         $this->data['daftar_kelas_terapi'] = $this->Model_Kelas_Terapi->ambil_aktif();
         $this->data['daftar_lcp']          = $this->Model_Template->ambil_semua();

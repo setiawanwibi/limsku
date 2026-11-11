@@ -590,7 +590,7 @@
                     </label>
                     <?php $val_komoditi = set_value('komoditi', isset($komoditi_pilihan) ? $komoditi_pilihan : 'obat'); ?>
                     <div class="row g-2">
-                        <div class="col-md-3 col-6">
+                        <div class="col-md col-6">
                             <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'obat') ? 'border-primary bg-primary-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
                                 <input type="radio" name="komoditi" value="obat" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'obat') ? 'checked' : ''; ?>>
                                 <div>
@@ -599,30 +599,39 @@
                                 </div>
                             </label>
                         </div>
-                        <div class="col-md-3 col-6">
+                        <div class="col-md col-6">
                             <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'pangan') ? 'border-success bg-success-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
                                 <input type="radio" name="komoditi" value="pangan" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'pangan') ? 'checked' : ''; ?>>
                                 <div>
-                                    <div class="fw-bold text-dark small"><i class="bi bi-cup-hot me-1 text-success"></i> Pangan &amp; Air</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Pangan &amp; Minuman</div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-cup-hot me-1 text-success"></i> Pangan</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kimia / Mikro Pangan</div>
                                 </div>
                             </label>
                         </div>
-                        <div class="col-md-3 col-6">
+                        <div class="col-md col-6">
                             <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'herbal') ? 'border-warning bg-warning-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
                                 <input type="radio" name="komoditi" value="herbal" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'herbal') ? 'checked' : ''; ?>>
                                 <div>
-                                    <div class="fw-bold text-dark small"><i class="bi bi-flower1 me-1 text-warning"></i> Herbal / Jamu</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Obat Tradisional</div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-flower1 me-1 text-warning"></i> Obat Tradisional</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kimia / Mikro Obat Tradisional</div>
                                 </div>
                             </label>
                         </div>
-                        <div class="col-md-3 col-6">
+                        <div class="col-md col-6">
                             <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'kosmetik') ? 'border-danger bg-danger-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
                                 <input type="radio" name="komoditi" value="kosmetik" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'kosmetik') ? 'checked' : ''; ?>>
                                 <div>
                                     <div class="fw-bold text-dark small"><i class="bi bi-brush me-1 text-danger"></i> Kosmetik</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kosmetika</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kimia / Mikro Kosmetik</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md col-6">
+                            <label class="d-flex align-items-center p-2 rounded-3 border <?php echo ($val_komoditi === 'suplemen') ? 'border-info bg-info-subtle bg-opacity-25' : 'border-light-subtle bg-light'; ?> cursor-pointer w-100" style="cursor: pointer;">
+                                <input type="radio" name="komoditi" value="suplemen" class="form-check-input me-2 mt-0" <?php echo ($val_komoditi === 'suplemen') ? 'checked' : ''; ?>>
+                                <div>
+                                    <div class="fw-bold text-dark small"><i class="bi bi-shield-plus me-1 text-info"></i> Suplemen</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Lab Kimia / Mikro Suplemen</div>
                                 </div>
                             </label>
                         </div>

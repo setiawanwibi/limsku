@@ -498,29 +498,7 @@
 
 <div class="laporan-page">
     
-    <!-- PAGE HEADER -->
-    <div class="laporan-header">
-        <div>
-            <h4 class="laporan-title">
-                <i class="bi bi-bar-chart-line-fill"></i> Monitoring &amp; Laporan Eksekutif
-            </h4>
-            <p class="laporan-desc">Evaluasi kinerja pengujian, kepatuhan Turn Around Time (TAT/SLA), dan rekapitulasi pelaporan manajerial.</p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <?php $query_string = http_build_query($filter); ?>
-            <a href="<?php echo site_url('laporan/export_excel?' . $query_string); ?>" class="btn-export-excel" title="Unduh rekapitulasi lengkap spreadsheet CSV / Excel">
-                <i class="bi bi-file-earmark-excel"></i> Ekspor Excel
-            </a>
-            <a href="<?php echo site_url('laporan/export_pdf?' . $query_string); ?>" target="_blank" class="btn-export-pdf" title="Cetak laporan rekapitulasi resmi A4">
-                <i class="bi bi-file-earmark-pdf"></i> Cetak Rekap PDF
-            </a>
-            <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn-berkas-lhu" title="Buka Workspace Berkas &amp; Cetak LHU Per Sampel">
-                <i class="bi bi-folder2-open"></i> Berkas LHU
-            </a>
-        </div>
-    </div>
-
-    <!-- KPI STATISTIC CARDS -->
+    <!-- KPI STATISTIC CARDS (Paling Atas) -->
     <div class="kpi-grid">
         <div class="kpi-card">
             <span class="kpi-label">Volume Sampel Terdata</span>
@@ -557,6 +535,20 @@
         </div>
     </div>
 
+    <!-- ACTION BUTTONS: EKSPOR EXCEL, CETAK REKAP PDF, BERKAS LHU (Di Bawah Card) -->
+    <div class="d-flex align-items-center justify-content-end flex-wrap gap-2 mb-3">
+        <?php $query_string = http_build_query($filter); ?>
+        <a href="<?php echo site_url('laporan/export_excel?' . $query_string); ?>" class="btn-export-excel" title="Unduh rekapitulasi lengkap spreadsheet CSV / Excel">
+            <i class="bi bi-file-earmark-excel"></i> Ekspor Excel
+        </a>
+        <a href="<?php echo site_url('laporan/export_pdf?' . $query_string); ?>" target="_blank" class="btn-export-pdf" title="Cetak laporan rekapitulasi resmi A4">
+            <i class="bi bi-file-earmark-pdf"></i> Cetak Rekap PDF
+        </a>
+        <a href="<?php echo site_url('pengujian/riwayat'); ?>" class="btn-berkas-lhu" title="Buka Workspace Berkas &amp; Cetak LHU Per Sampel">
+            <i class="bi bi-folder2-open"></i> Berkas LHU
+        </a>
+    </div>
+
     <!-- FILTER PANEL INTERAKTIF -->
     <div class="filter-panel">
         <?php if (!empty($is_penyelia_locked)): ?>
@@ -566,10 +558,11 @@
                     <strong>Mode Penyelia Terpadu:</strong> Data monitoring dibatasi khusus pada komoditi wewenang Anda: 
                     <?php 
                         $kom_text = array_map(function($k) {
-                            if ($k === 'obat') return '💊 Laboratorium Obat';
-                            if ($k === 'pangan') return '🍲 Laboratorium Pangan';
-                            if ($k === 'herbal') return '🌿 Laboratorium Herbal';
-                            if ($k === 'kosmetik') return '💄 Laboratorium Kosmetik';
+                            if ($k === 'obat') return 'Laboratorium Obat';
+                            if ($k === 'pangan') return 'Laboratorium Pangan';
+                            if ($k === 'herbal') return 'Laboratorium Obat Tradisional';
+                            if ($k === 'kosmetik') return 'Laboratorium Kosmetik';
+                            if ($k === 'suplemen') return 'Laboratorium Suplemen';
                             return ucfirst($k);
                         }, $komoditi_penyelia ?? array('obat'));
                         echo implode(', ', $kom_text);
@@ -586,10 +579,11 @@
                         <label class="filter-label"><i class="bi bi-grid-fill me-1"></i> Komoditi</label>
                         <select name="komoditi" class="filter-input">
                             <option value="">-- Semua Komoditi --</option>
-                            <option value="obat" <?php echo ($filter['komoditi'] === 'obat') ? 'selected' : ''; ?>>💊 Obat</option>
-                            <option value="pangan" <?php echo ($filter['komoditi'] === 'pangan') ? 'selected' : ''; ?>>🍲 Pangan</option>
-                            <option value="herbal" <?php echo ($filter['komoditi'] === 'herbal') ? 'selected' : ''; ?>>🌿 Herbal</option>
-                            <option value="kosmetik" <?php echo ($filter['komoditi'] === 'kosmetik') ? 'selected' : ''; ?>>💄 Kosmetik</option>
+                            <option value="obat" <?php echo ($filter['komoditi'] === 'obat') ? 'selected' : ''; ?>>Obat</option>
+                            <option value="pangan" <?php echo ($filter['komoditi'] === 'pangan') ? 'selected' : ''; ?>>Pangan</option>
+                            <option value="herbal" <?php echo ($filter['komoditi'] === 'herbal') ? 'selected' : ''; ?>>Obat Tradisional</option>
+                            <option value="kosmetik" <?php echo ($filter['komoditi'] === 'kosmetik') ? 'selected' : ''; ?>>Kosmetik</option>
+                            <option value="suplemen" <?php echo ($filter['komoditi'] === 'suplemen') ? 'selected' : ''; ?>>Suplemen</option>
                         </select>
                     </div>
                 <?php endif; ?>

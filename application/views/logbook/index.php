@@ -188,32 +188,7 @@
 
 <div class="logbook-page">
 
-    <!-- Header Halaman -->
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small">
-                    <i class="bi bi-journal-medical me-1"></i> Buku Log Instrumen Laboratorium
-                </span>
-                <span class="text-muted small">• Terorganisir Berdasarkan Alat</span>
-            </div>
-            <h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-                <span>Logbook Penggunaan Alat Laboratorium</span>
-            </h4>
-            <p class="text-muted small mb-0">
-                Pencatatan riwayat pemakaian instrumen per alat: memuat sampel yang diuji, tanggal penggunaan, dan analis penguji.
-            </p>
-        </div>
-
-        <div class="d-flex gap-2">
-            <a href="<?php echo site_url('logbook/cetak'); ?>" target="_blank" class="btn btn-outline-primary btn-sm px-3 shadow-sm rounded-pill d-inline-flex align-items-center gap-2 fw-semibold">
-                <i class="bi bi-printer-fill"></i>
-                <span>Cetak Rekap Logbook</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- Ringkasan Statistik Kartu -->
+    <!-- Ringkasan Statistik Kartu (Paling Atas) -->
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-lg-3">
             <div class="stat-card-custom d-flex align-items-center gap-3">
@@ -264,36 +239,47 @@
         </div>
     </div>
 
-    <!-- Tab Navigasi Tampilan Logbook Berbasis Alat -->
-    <ul class="nav nav-tabs nav-tabs-custom mb-3">
-        <li class="nav-item">
-            <a class="nav-link <?php echo ($tab_aktif === 'terpakai') ? 'active' : ''; ?>" 
-               href="<?php echo site_url('logbook?tab=terpakai' . (!empty($filter['ruangan']) ? '&ruangan=' . urlencode($filter['ruangan']) : '') . (!empty($filter['q']) ? '&q=' . urlencode($filter['q']) : '')); ?>">
-                <i class="bi bi-fire me-1 text-danger"></i> Alat Pernah Digunakan
-                <span class="badge bg-success-subtle text-success border border-success-subtle badge-tab-count ms-1">
-                    <?php echo $statistik['total_alat_terpakai']; ?>
-                </span>
+    <!-- Bar Navigasi Tab & Tombol Cetak Rekap Logbook -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+        <!-- Tab Navigasi Tampilan Logbook Berbasis Alat -->
+        <ul class="nav nav-tabs nav-tabs-custom border-bottom-0 mb-0">
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($tab_aktif === 'terpakai') ? 'active' : ''; ?>" 
+                   href="<?php echo site_url('logbook?tab=terpakai' . (!empty($filter['ruangan']) ? '&ruangan=' . urlencode($filter['ruangan']) : '') . (!empty($filter['q']) ? '&q=' . urlencode($filter['q']) : '')); ?>">
+                    Alat Pernah Digunakan
+                    <span class="badge bg-success-subtle text-success border border-success-subtle badge-tab-count ms-1">
+                        <?php echo $statistik['total_alat_terpakai']; ?>
+                    </span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($tab_aktif === 'semua') ? 'active' : ''; ?>" 
+                   href="<?php echo site_url('logbook?tab=semua' . (!empty($filter['ruangan']) ? '&ruangan=' . urlencode($filter['ruangan']) : '') . (!empty($filter['q']) ? '&q=' . urlencode($filter['q']) : '')); ?>">
+                    Semua Alat Laboratorium
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle badge-tab-count ms-1">
+                        <?php echo $statistik['total_master_alat']; ?>
+                    </span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($tab_aktif === 'belum_terpakai') ? 'active' : ''; ?>" 
+                   href="<?php echo site_url('logbook?tab=belum_terpakai' . (!empty($filter['ruangan']) ? '&ruangan=' . urlencode($filter['ruangan']) : '') . (!empty($filter['q']) ? '&q=' . urlencode($filter['q']) : '')); ?>">
+                    Belum Pernah Digunakan
+                    <span class="badge bg-secondary-subtle text-secondary border badge-tab-count ms-1">
+                        <?php echo $statistik['total_alat_belum_terpakai']; ?>
+                    </span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Tombol Cetak Rekap Logbook (Di Bawah Card Statistik) -->
+        <div>
+            <a href="<?php echo site_url('logbook/cetak'); ?>" target="_blank" class="btn btn-outline-primary btn-sm px-3 shadow-sm rounded-pill d-inline-flex align-items-center gap-2 fw-semibold">
+                <i class="bi bi-printer-fill"></i>
+                <span>Cetak Rekap Logbook</span>
             </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?php echo ($tab_aktif === 'semua') ? 'active' : ''; ?>" 
-               href="<?php echo site_url('logbook?tab=semua' . (!empty($filter['ruangan']) ? '&ruangan=' . urlencode($filter['ruangan']) : '') . (!empty($filter['q']) ? '&q=' . urlencode($filter['q']) : '')); ?>">
-                <i class="bi bi-collection me-1 text-primary"></i> Semua Alat Laboratorium
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle badge-tab-count ms-1">
-                    <?php echo $statistik['total_master_alat']; ?>
-                </span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?php echo ($tab_aktif === 'belum_terpakai') ? 'active' : ''; ?>" 
-               href="<?php echo site_url('logbook?tab=belum_terpakai' . (!empty($filter['ruangan']) ? '&ruangan=' . urlencode($filter['ruangan']) : '') . (!empty($filter['q']) ? '&q=' . urlencode($filter['q']) : '')); ?>">
-                <i class="bi bi-hourglass-split me-1 text-secondary"></i> Belum Pernah Digunakan
-                <span class="badge bg-secondary-subtle text-secondary border badge-tab-count ms-1">
-                    <?php echo $statistik['total_alat_belum_terpakai']; ?>
-                </span>
-            </a>
-        </li>
-    </ul>
+        </div>
+    </div>
 
     <!-- Filter & Pencarian Cepat -->
     <div class="card filter-card mb-4">

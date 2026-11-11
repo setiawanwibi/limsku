@@ -597,9 +597,11 @@
                                                     <?php elseif ($k === 'pangan'): ?>
                                                         <span class="badge bg-success" style="font-size: 0.65rem;">Pangan</span>
                                                     <?php elseif ($k === 'herbal'): ?>
-                                                        <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Herbal</span>
+                                                        <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Obat Tradisional</span>
                                                     <?php elseif ($k === 'kosmetik'): ?>
                                                         <span class="badge bg-info text-dark" style="font-size: 0.65rem;">Kosmetik</span>
+                                                    <?php elseif ($k === 'suplemen'): ?>
+                                                        <span class="badge bg-secondary" style="font-size: 0.65rem;">Suplemen</span>
                                                     <?php else: ?>
                                                         <span class="badge bg-secondary" style="font-size: 0.65rem;"><?php echo html_escape($k); ?></span>
                                                     <?php endif; ?>

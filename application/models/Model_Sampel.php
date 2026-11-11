@@ -57,7 +57,8 @@ class Model_Sampel extends CI_Model
             SUM(CASE WHEN komoditi = "obat" OR komoditi IS NULL OR komoditi = "" THEN 1 ELSE 0 END) as total_obat,
             SUM(CASE WHEN komoditi = "pangan" THEN 1 ELSE 0 END) as total_pangan,
             SUM(CASE WHEN komoditi = "herbal" THEN 1 ELSE 0 END) as total_herbal,
-            SUM(CASE WHEN komoditi = "kosmetik" THEN 1 ELSE 0 END) as total_kosmetik
+            SUM(CASE WHEN komoditi = "kosmetik" THEN 1 ELSE 0 END) as total_kosmetik,
+            SUM(CASE WHEN komoditi = "suplemen" THEN 1 ELSE 0 END) as total_suplemen
         ');
         $res = $this->db->get($this->tabel)->row_array();
         return array(
@@ -66,6 +67,7 @@ class Model_Sampel extends CI_Model
             'pangan'   => (int)($res['total_pangan'] ?? 0),
             'herbal'   => (int)($res['total_herbal'] ?? 0),
             'kosmetik' => (int)($res['total_kosmetik'] ?? 0),
+            'suplemen' => (int)($res['total_suplemen'] ?? 0),
         );
     }
 

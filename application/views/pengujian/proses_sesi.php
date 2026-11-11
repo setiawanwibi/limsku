@@ -643,17 +643,6 @@
                         Ganti Zat Aktif / Parameter
                     </a>
 
-                    <!-- Opsi Tambah Parameter Uji dari Master (Poin 11) -->
-                    <button type="button" 
-                            class="btn btn-sm btn-success py-1 px-3 d-inline-flex align-items-center gap-1 shadow-sm rounded-pill fw-semibold"
-                            style="font-size: 0.72rem;"
-                            data-bs-toggle="modal" 
-                            data-bs-target="#modalTambahParameterSesi"
-                            title="Tambahkan parameter uji dari master data ke sesi pengerjaan ini">
-                        <i class="bi bi-plus-circle-fill"></i>
-                        <span>+ Tambah Parameter Uji</span>
-                    </button>
-
                 </div>
             </div>
         </div>

@@ -720,23 +720,26 @@
          ===================================================== -->
     <?php
         $k_aktif = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
-        $r_kom   = isset($rekap_komoditi) ? $rekap_komoditi : array('semua' => 0, 'obat' => 0, 'pangan' => 0, 'herbal' => 0, 'kosmetik' => 0);
+        $r_kom   = isset($rekap_komoditi) ? $rekap_komoditi : array('semua' => 0, 'obat' => 0, 'pangan' => 0, 'herbal' => 0, 'kosmetik' => 0, 'suplemen' => 0);
     ?>
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
         <a href="<?php echo site_url('sampel?komoditi=obat'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'obat') ? 'btn-primary shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
-            💊 Sampel Obat <span class="badge <?php echo ($k_aktif === 'obat') ? 'bg-white text-primary' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['obat']; ?></span>
+            Sampel Obat <span class="badge <?php echo ($k_aktif === 'obat') ? 'bg-white text-primary' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['obat'] ?? 0; ?></span>
         </a>
         <a href="<?php echo site_url('sampel?komoditi=pangan'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'pangan') ? 'btn-success shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
-            🍲 Sampel Pangan & Air <span class="badge <?php echo ($k_aktif === 'pangan') ? 'bg-white text-success' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['pangan']; ?></span>
+            Sampel Pangan <span class="badge <?php echo ($k_aktif === 'pangan') ? 'bg-white text-success' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['pangan'] ?? 0; ?></span>
         </a>
         <a href="<?php echo site_url('sampel?komoditi=herbal'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'herbal') ? 'btn-warning text-dark shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
-            🌿 Sampel Herbal / Jamu <span class="badge <?php echo ($k_aktif === 'herbal') ? 'bg-white text-dark' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['herbal']; ?></span>
+            Sampel Obat Tradisional <span class="badge <?php echo ($k_aktif === 'herbal') ? 'bg-white text-dark' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['herbal'] ?? 0; ?></span>
         </a>
         <a href="<?php echo site_url('sampel?komoditi=kosmetik'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'kosmetik') ? 'btn-info text-white shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
-            💄 Sampel Kosmetik <span class="badge <?php echo ($k_aktif === 'kosmetik') ? 'bg-white text-info' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['kosmetik']; ?></span>
+            Sampel Kosmetik <span class="badge <?php echo ($k_aktif === 'kosmetik') ? 'bg-white text-info' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['kosmetik'] ?? 0; ?></span>
+        </a>
+        <a href="<?php echo site_url('sampel?komoditi=suplemen'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 <?php echo ($k_aktif === 'suplemen') ? 'btn-secondary text-white shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
+            Sampel Suplemen <span class="badge <?php echo ($k_aktif === 'suplemen') ? 'bg-white text-secondary' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['suplemen'] ?? 0; ?></span>
         </a>
         <a href="<?php echo site_url('sampel?komoditi=semua'); ?>" class="btn btn-sm rounded-pill fw-semibold px-3 ms-auto <?php echo ($k_aktif === 'semua') ? 'btn-dark shadow-sm' : 'btn-light border text-secondary'; ?>" style="font-size: 0.8rem;">
-            🌟 Semua Sampel <span class="badge <?php echo ($k_aktif === 'semua') ? 'bg-white text-dark' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['semua']; ?></span>
+            Semua Sampel <span class="badge <?php echo ($k_aktif === 'semua') ? 'bg-white text-dark' : 'bg-secondary text-white'; ?> ms-1 rounded-pill"><?php echo $r_kom['semua'] ?? 0; ?></span>
         </a>
     </div>
 

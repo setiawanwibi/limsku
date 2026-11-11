@@ -275,32 +275,6 @@
 
 <div class="baku-page">
 
-    <!-- Header Section -->
-    <div class="baku-header-card d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-            <h4 class="baku-header-title">
-                <i class="bi bi-eyedropper"></i> Master Data Baku Pembanding
-            </h4>
-            <p class="text-muted mb-0 small">
-                Kelola data baku laboratorium kimia, nomor kontrol, lokasi penyimpanan, suhu, serta nilai normalisasi kadar air dan kadar baku (KCKT).
-            </p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'baku_import')): ?>
-                <a href="<?php echo site_url('baku/import'); ?>" class="btn-baku-excel" title="Impor data dari spreadsheet Excel">
-                    <i class="bi bi-file-earmark-excel"></i>
-                    <span>Impor Excel</span>
-                </a>
-            <?php endif; ?>
-            <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'baku_create')): ?>
-                <a href="<?php echo site_url('baku/tambah'); ?>" class="btn-baku-add" title="Tambah data baku baru">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>Tambah Baku</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
-
     <!-- Alert Notifikasi -->
     <?php if ($this->session->flashdata('pesan_sukses')): ?>
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 10px; background: #f0fdf4; color: #166534;">
@@ -353,6 +327,22 @@
                 <?php endif; ?>
             </div>
         </form>
+    </div>
+
+    <!-- Tombol Aksi: Impor Excel & Tambah Baku (Di Bawah Card Search) -->
+    <div class="d-flex align-items-center justify-content-end gap-2 mb-3">
+        <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'baku_import')): ?>
+            <a href="<?php echo site_url('baku/import'); ?>" class="btn-baku-excel" title="Impor data dari spreadsheet Excel">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Impor Excel</span>
+            </a>
+        <?php endif; ?>
+        <?php if ($this->Model_Hak_Akses->memiliki_akses($this->session->userdata('role_id'), 'baku_create')): ?>
+            <a href="<?php echo site_url('baku/tambah'); ?>" class="btn-baku-add" title="Tambah data baku baru">
+                <i class="bi bi-plus-lg"></i>
+                <span>Tambah Baku</span>
+            </a>
+        <?php endif; ?>
     </div>
 
     <!-- Tabel Data Master Baku -->

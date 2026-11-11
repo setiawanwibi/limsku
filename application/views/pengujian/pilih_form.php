@@ -95,7 +95,7 @@
     .step-card-za {
         overflow: visible !important;
         position: relative;
-        z-index: 1050 !important;
+        z-index: 10 !important;
     }
     .step-header {
         display: flex;

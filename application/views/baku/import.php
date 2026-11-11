@@ -173,21 +173,11 @@
 
 <div class="baku-import-page">
 
-    <!-- Header Section -->
-    <div class="import-header-card d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-            <h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2" style="font-size: 1.15rem;">
-                <i class="bi bi-file-earmark-arrow-up text-success"></i> Impor Master Data Baku dari Excel
-            </h4>
-            <p class="text-muted mb-0 small">
-                Unggah file spreadsheet <code>.xlsx</code> Master Baku Pembanding untuk impor massal dengan fitur normalisasi otomatis kolom <strong>Kadar Air (%)</strong> dan <strong>Kadar Baku / KCKT (%)</strong>.
-            </p>
-        </div>
-        <div>
-            <a href="<?php echo site_url('baku'); ?>" class="btn-baku-back">
-                <i class="bi bi-arrow-left"></i> Kembali ke Master Baku
-            </a>
-        </div>
+    <!-- Tombol Kembali -->
+    <div class="mb-3">
+        <a href="<?php echo site_url('baku'); ?>" class="btn-baku-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Master Baku
+        </a>
     </div>
 
     <!-- Petunjuk Format File (Clean Card) -->

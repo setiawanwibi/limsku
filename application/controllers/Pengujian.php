@@ -150,10 +150,7 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif']  = 'pengujian_antrean';
         $this->data['judul_halaman']  = 'Pilih Jenis Pengujian';
-        $this->data['breadcrumbs']    = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian')),
-            array('label' => 'Pilih Jenis Pengujian', 'url' => '#')
-        );
+    
         $this->data['sampel']         = $sampel;
         $this->data['sesi_kimia_ada'] = $sesi_kimia_ada;
         $this->data['sesi_mikro_ada'] = $sesi_mikro_ada;
@@ -702,10 +699,7 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_riwayat';
         $this->data['judul_halaman'] = 'Detail Hasil Pengujian: ' . html_escape($hasil['nama_sampel']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian/riwayat')),
-            array('label' => 'Detail Hasil Uji', 'url' => '#')
-        );
+        
         $this->data['hasil']         = $hasil;
 
         $this->muat_tampilan('pengujian/detail');
@@ -2533,11 +2527,7 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif']     = 'pengujian_riwayat';
         $this->data['judul_halaman']     = 'Revisi Hasil Pengujian: ' . html_escape($sampel['nama_sampel']);
-        $this->data['breadcrumbs']       = array(
-            array('label' => 'Pengujian', 'url' => site_url('pengujian/riwayat')),
-            array('label' => 'Detail', 'url' => site_url('pengujian/detail/' . $test_id)),
-            array('label' => 'Revisi', 'url' => '#')
-        );
+        
         $this->data['sampel']            = $sampel;
         $this->data['hasil']             = $hasil;
         $this->data['daftar_template']   = $this->Model_Template->ambil_aktif();

@@ -22,9 +22,6 @@ class Audit extends MY_Controller
 
         $this->data['halaman_aktif'] = 'audit';
         $this->data['judul_halaman'] = 'Audit Trail Sistem';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Audit Trail', 'url' => site_url('audit'))
-        );
 
         $this->data['daftar_log'] = $this->Model_Audit->ambil_semua(500, 0);
 

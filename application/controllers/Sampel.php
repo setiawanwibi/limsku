@@ -65,7 +65,7 @@ class Sampel extends MY_Controller
         $this->cek_hak_akses('sampel_create');
 
         $komoditi_pilihan = $this->input->get('komoditi', TRUE) ?: 'obat';
-        if (!in_array($komoditi_pilihan, array('obat', 'pangan', 'herbal', 'kosmetik'))) {
+        if (!in_array($komoditi_pilihan, array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'))) {
             $komoditi_pilihan = 'obat';
         }
 
@@ -76,7 +76,7 @@ class Sampel extends MY_Controller
 
             if ($this->form_validation->run() === TRUE) {
                 $komoditi_post = $this->input->post('komoditi', TRUE) ?: 'obat';
-                if (!in_array($komoditi_post, array('obat', 'pangan', 'herbal', 'kosmetik'))) {
+                if (!in_array($komoditi_post, array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'))) {
                     $komoditi_post = 'obat';
                 }
 
@@ -252,7 +252,7 @@ class Sampel extends MY_Controller
                     'updated_by'             => $this->session->userdata('user_id')
                 );
 
-                if (!empty($komoditi_edit) && in_array($komoditi_edit, array('obat', 'pangan', 'herbal', 'kosmetik'))) {
+                if (!empty($komoditi_edit) && in_array($komoditi_edit, array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'))) {
                     $data_update['komoditi'] = $komoditi_edit;
                 }
 
@@ -313,13 +313,13 @@ class Sampel extends MY_Controller
         $this->cek_hak_akses('sampel_import');
 
         $komoditi_pilihan = $this->input->get('komoditi', TRUE) ?: 'obat';
-        if (!in_array($komoditi_pilihan, array('obat', 'pangan', 'herbal', 'kosmetik'))) {
+        if (!in_array($komoditi_pilihan, array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'))) {
             $komoditi_pilihan = 'obat';
         }
 
         if ($this->input->method() === 'post') {
             $komoditi_import = $this->input->post('komoditi', TRUE) ?: 'obat';
-            if (!in_array($komoditi_import, array('obat', 'pangan', 'herbal', 'kosmetik'))) {
+            if (!in_array($komoditi_import, array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'))) {
                 $komoditi_import = 'obat';
             }
 
@@ -489,7 +489,7 @@ class Sampel extends MY_Controller
     {
         $this->cek_hak_akses('sampel_import');
 
-        if (!in_array($komoditi, array('obat', 'pangan', 'herbal', 'kosmetik'))) {
+        if (!in_array($komoditi, array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'))) {
             $komoditi = 'obat';
         }
 
