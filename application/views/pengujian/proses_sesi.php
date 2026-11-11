@@ -2769,68 +2769,24 @@
                 }
             }
 
-            // Langkah 3: Deteksi satuan Kadar dari Hasil Uji (A)
-            // Di Farmakope Indonesia VI, penetapan kadar dilaporkan dalam % etiket (e.g. 98% - 102%)
-            // atau dalam mg/satuan (e.g. 500 mg).
-            var isKadarPersen = false;
-            if (kadarHasilVal > 0) {
-                if (etiketVal > 0) {
-                    if (kadarHasilVal <= 150 && etiketVal > 150) {
-                        isKadarPersen = true;
-                    } else if (kadarHasilVal > 150) {
-                        isKadarPersen = false;
-                    } else {
-                        isKadarPersen = (kadarHasilVal >= 50 && kadarHasilVal <= 150 && etiketVal < 50);
-                    }
-                }
-            }
-
-            // Langkah 4: Hitung Baris Tahap 1 (mg/tab dan Kadar %)
+            // Langkah 3: Perhitungan Baris Tahap 1 (mg/tab dan Kadar %)
+            // Netto (mg) dan mg/tab (kaps) diinput secara manual.
+            // Kadar (%) dihitung otomatis: mg/tab * Kadar dari hasil uji
             var kadarPersenT1 = [];
             for (var i = 0; i < 10; i++) {
-                var nettoEl = pane.querySelector('input[name*="[tabel_tahap1][' + i + '][netto]"]');
                 var kadarMgEl = pane.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_mg]"]');
                 var kadarPersenEl = pane.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_persen]"]');
 
-                if (nettoEl) {
-                    var netto = parseNum(nettoEl.value);
-                    var kMgManual = kadarMgEl && kadarMgEl.value.trim() !== '' ? parseNum(kadarMgEl.value) : 0;
+                if (kadarMgEl) {
+                    var finalMg = kadarMgEl.value.trim() !== '' ? parseNum(kadarMgEl.value) : 0;
                     var kPctManual = kadarPersenEl && kadarPersenEl.value.trim() !== '' ? parseNum(kadarPersenEl.value) : 0;
-
-                    var finalMg = 0;
                     var finalPct = 0;
 
-                    if (netto > 0 && W_bar > 0 && kadarHasilVal > 0) {
-                        // Rumus Standar Farmakope Indonesia VI <911>:
-                        if (isKadarPersen) {
-                            // Kadar hasil uji adalah % (A)
-                            finalPct = (netto / W_bar) * kadarHasilVal;
-                            finalMg = etiketVal > 0 ? (finalPct / 100) * etiketVal : 0;
-                        } else {
-                            // Kadar hasil uji adalah mg/tab
-                            finalMg = (netto / W_bar) * kadarHasilVal;
-                            finalPct = etiketVal > 0 ? (finalMg / etiketVal) * 100 : (netto / W_bar) * 100;
-                        }
-                        if (kadarMgEl && finalMg > 0) kadarMgEl.value = finalMg.toFixed(2);
-                        if (kadarPersenEl && finalPct > 0) kadarPersenEl.value = finalPct.toFixed(2);
-                    } else if (kMgManual > 0 && etiketVal > 0) {
-                        // Pengguna memasukkan mg/tablet secara langsung
-                        finalMg = kMgManual;
-                        finalPct = (kMgManual / etiketVal) * 100;
+                    if (finalMg > 0 && kadarHasilVal > 0) {
+                        finalPct = finalMg * kadarHasilVal;
                         if (kadarPersenEl) kadarPersenEl.value = finalPct.toFixed(2);
                     } else if (kPctManual > 0) {
-                        // Pengguna memasukkan Kadar % secara langsung
                         finalPct = kPctManual;
-                        if (etiketVal > 0) {
-                            finalMg = (kPctManual / 100) * etiketVal;
-                            if (kadarMgEl) kadarMgEl.value = finalMg.toFixed(2);
-                        }
-                    } else if (netto > 0 && W_bar > 0) {
-                        // Fallback rasio bobot murni jika belum ada data kadar hasil uji
-                        finalPct = (netto / W_bar) * 100;
-                        finalMg = etiketVal > 0 ? (netto / W_bar) * etiketVal : 0;
-                        if (kadarMgEl && finalMg > 0) kadarMgEl.value = finalMg.toFixed(2);
-                        if (kadarPersenEl && finalPct > 0) kadarPersenEl.value = finalPct.toFixed(2);
                     }
 
                     if (finalPct > 0) {
@@ -2860,56 +2816,24 @@
             }
 
             // Langkah 6: Baris Tahap 2 (No. 11 - 30) jika diaktifkan
+            // Netto (mg) dan mg/tab (kaps) diinput secara manual.
+            // Kadar (%) dihitung otomatis: mg/tab * Kadar dari hasil uji
             var kadarPersenT2 = [];
             if (isTahap2) {
                 for (var j = 0; j < 20; j++) {
-                    var bruto2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][bruto]"]');
-                    var cangkang2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][cangkang]"]');
-                    var netto2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][netto]"]');
                     var kadarMg2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_mg]"]');
                     var kadarPersen2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_persen]"]');
 
-                    if (netto2El) {
-                        var bruto2 = bruto2El ? parseNum(bruto2El.value) : 0;
-                        var cangkang2 = cangkang2El ? parseNum(cangkang2El.value) : 0;
-                        var netto2 = 0;
-
-                        if (bruto2 > 0) {
-                            netto2 = bruto2 - cangkang2;
-                            netto2El.value = netto2.toFixed(2);
-                        } else if (netto2El.value.trim() !== '') {
-                            netto2 = parseNum(netto2El.value);
-                        }
-
-                        var kMg2Manual = kadarMg2El && kadarMg2El.value.trim() !== '' ? parseNum(kadarMg2El.value) : 0;
+                    if (kadarMg2El) {
+                        var fMg2 = kadarMg2El.value.trim() !== '' ? parseNum(kadarMg2El.value) : 0;
                         var kPct2Manual = kadarPersen2El && kadarPersen2El.value.trim() !== '' ? parseNum(kadarPersen2El.value) : 0;
-                        var fMg2 = 0, fPct2 = 0;
+                        var fPct2 = 0;
 
-                        if (netto2 > 0 && W_bar > 0 && kadarHasilVal > 0) {
-                            if (isKadarPersen) {
-                                fPct2 = (netto2 / W_bar) * kadarHasilVal;
-                                fMg2 = etiketVal > 0 ? (fPct2 / 100) * etiketVal : 0;
-                            } else {
-                                fMg2 = (netto2 / W_bar) * kadarHasilVal;
-                                fPct2 = etiketVal > 0 ? (fMg2 / etiketVal) * 100 : (netto2 / W_bar) * 100;
-                            }
-                            if (kadarMg2El && fMg2 > 0) kadarMg2El.value = fMg2.toFixed(2);
-                            if (kadarPersen2El && fPct2 > 0) kadarPersen2El.value = fPct2.toFixed(2);
-                        } else if (kMg2Manual > 0 && etiketVal > 0) {
-                            fMg2 = kMg2Manual;
-                            fPct2 = (kMg2Manual / etiketVal) * 100;
+                        if (fMg2 > 0 && kadarHasilVal > 0) {
+                            fPct2 = fMg2 * kadarHasilVal;
                             if (kadarPersen2El) kadarPersen2El.value = fPct2.toFixed(2);
                         } else if (kPct2Manual > 0) {
                             fPct2 = kPct2Manual;
-                            if (etiketVal > 0) {
-                                fMg2 = (kPct2Manual / 100) * etiketVal;
-                                if (kadarMg2El) kadarMg2El.value = fMg2.toFixed(2);
-                            }
-                        } else if (netto2 > 0 && W_bar > 0) {
-                            fPct2 = (netto2 / W_bar) * 100;
-                            fMg2 = etiketVal > 0 ? (netto2 / W_bar) * etiketVal : 0;
-                            if (kadarMg2El && fMg2 > 0) kadarMg2El.value = fMg2.toFixed(2);
-                            if (kadarPersen2El && fPct2 > 0) kadarPersen2El.value = fPct2.toFixed(2);
                         }
 
                         if (fPct2 > 0) {
@@ -3883,6 +3807,7 @@
         // Auto-Calculator Engine untuk Formulir GC-MS (KIM-09)
         // Menghitung: Bobot Bersih = Wadah+Zat - Wadah+Sisa
         // Rasio Ion: R1 = B/A, R2 = C/A, R3 = D/A
+        // Input tetap dapat diedit manual dan tidak dikunci
         // =========================================================================
         function hitungGCMS() {
             var gcmsRows = document.querySelectorAll('tr:has(input[name*="[area_quantifier]"])');
@@ -3906,37 +3831,45 @@
             var bBersihInput = tr.querySelector('input[name*="[bobot_bersih]"]');
 
             if (wZatInput && wSisaInput && bBersihInput) {
-                var wZat = parseFloat(wZatInput.value) || 0;
-                var wSisa = parseFloat(wSisaInput.value) || 0;
+                var wZat = parseFloat(wZatInput.value.replace(',', '.')) || 0;
+                var wSisa = parseFloat(wSisaInput.value.replace(',', '.')) || 0;
                 if (wZat > 0 && wSisa > 0 && wZat >= wSisa) {
                     bBersihInput.value = (wZat - wSisa).toFixed(4);
                 }
             }
 
-            // Rasio Ion
-            var aInput = tr.querySelector('input[name*="[area_quantifier]"]');
-            var bInput = tr.querySelector('input[name*="[area_qualifier_1]"]');
-            var cInput = tr.querySelector('input[name*="[area_qualifier_2]"]');
-            var dInput = tr.querySelector('input[name*="[area_qualifier_3]"]');
+            // Rasio Ion Sesuai Rumus Penguji:
+            // Intensitas (A) = area_qualifier_1
+            // Qualifier (B)  = area_qualifier_2
+            // Qualifier (C)  = area_qualifier_3
+            // Rasio 1 (B/A) = Qualifier (B) / Intensitas (A) * 100
+            // Rasio 2 (C/A) = Qualifier (C) / Intensitas (A) * 100
+            var intAInput = tr.querySelector('input[name*="[area_qualifier_1]"]'); // Intensitas (A)
+            var qualBInput = tr.querySelector('input[name*="[area_qualifier_2]"]'); // Qualifier (B)
+            var qualCInput = tr.querySelector('input[name*="[area_qualifier_3]"]'); // Qualifier (C)
 
             var r1Input = tr.querySelector('input[name*="[rasio_ion_1]"]');
             var r2Input = tr.querySelector('input[name*="[rasio_ion_2]"]');
             var r3Input = tr.querySelector('input[name*="[rasio_ion_3]"]');
 
-            var A = parseFloat(aInput ? aInput.value : 0) || 0;
-            var B = parseFloat(bInput ? bInput.value : 0) || 0;
-            var C = parseFloat(cInput ? cInput.value : 0) || 0;
-            var D = parseFloat(dInput ? dInput.value : 0) || 0;
+            var intA = parseFloat(intAInput ? intAInput.value.replace(',', '.') : 0) || 0;
+            var qualB = parseFloat(qualBInput ? qualBInput.value.replace(',', '.') : 0) || 0;
+            var qualC = parseFloat(qualCInput ? qualCInput.value.replace(',', '.') : 0) || 0;
 
-            if (A > 0) {
-                if (r1Input && B > 0) r1Input.value = (B / A).toFixed(3);
-                if (r2Input && C > 0) r2Input.value = (C / A).toFixed(3);
-                if (r3Input && D > 0) r3Input.value = (D / A).toFixed(3);
+            if (intA > 0) {
+                if (r1Input && qualB > 0) r1Input.value = ((qualB / intA) * 100).toFixed(3);
+                if (r2Input && qualC > 0) r2Input.value = ((qualC / intA) * 100).toFixed(3);
             }
         }
 
-        // Listener GC-MS input
+        // Listener GC-MS input & change secara real-time live
         document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('input[name*="[tabel_gcms]"]')) {
+                var tr = e.target.closest('tr');
+                if (tr) hitungBarisGCMS(tr);
+            }
+        });
+        document.addEventListener('change', function(e) {
             if (e.target && e.target.matches('input[name*="[tabel_gcms]"]')) {
                 var tr = e.target.closest('tr');
                 if (tr) hitungBarisGCMS(tr);
@@ -3975,25 +3908,49 @@
         // Bobot Zat = W1 - W0, Bobot Air = W2 - W0, BJ = (W1 - W0) / (W2 - W0)
         // =========================================================================
         function hitungBobotJenis() {
-            var rows = document.querySelectorAll('tr:has(input[name*="[bobot_1]"])');
+            var panes = document.querySelectorAll('.form-tab-pane-uji');
+            panes.forEach(function(pane) {
+                var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+                var namaTpl = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+                var paramTpl = (pane.getAttribute('data-parameter') || '').toLowerCase();
+                if (kodeTpl === 'KIM-12' || namaTpl.indexOf('bobot jenis') !== -1 || paramTpl.indexOf('bobot jenis') !== -1 || pane.querySelector('input[name*="[tabel_penimbangan]"]')) {
+                    hitungBobotJenisPane(pane);
+                }
+            });
+        }
+
+        function hitungBobotJenisPane(pane) {
             var w = [null, null, null]; // W0, W1, W2
 
             for (var i = 0; i < 3; i++) {
-                var b1Input = document.querySelector('input[name*="[tabel_penimbangan][' + i + '][bobot_1]"]');
-                var b2Input = document.querySelector('input[name*="[tabel_penimbangan][' + i + '][bobot_2]"]');
-                var rataInput = document.querySelector('input[name*="[tabel_penimbangan][' + i + '][rata_rata]"]');
+                var b1Input = pane.querySelector('input[name*="[tabel_penimbangan][' + i + '][bobot_1]"]');
+                var b2Input = pane.querySelector('input[name*="[tabel_penimbangan][' + i + '][bobot_2]"]');
+                var rataInput = pane.querySelector('input[name*="[tabel_penimbangan][' + i + '][rata_rata]"]');
 
                 if (b1Input) {
-                    var v1 = parseFloat(b1Input.value);
-                    var v2 = parseFloat(b2Input ? b2Input.value : NaN);
+                    var v1 = parseFloat(b1Input.value.replace(',', '.'));
+                    var v2 = b2Input && b2Input.value.trim() !== '' ? parseFloat(b2Input.value.replace(',', '.')) : NaN;
 
+                    // Hitung rata-rata otomatis jika kedua bobot atau salah satunya diisi
                     if (!isNaN(v1) && !isNaN(v2)) {
                         var mean = (v1 + v2) / 2;
-                        if (rataInput) rataInput.value = mean.toFixed(4);
+                        // Tanpa pembulatan fixed, tampilkan presisi floating number murni
+                        if (rataInput) rataInput.value = mean.toString();
                         w[i] = mean;
                     } else if (!isNaN(v1)) {
-                        if (rataInput) rataInput.value = v1.toFixed(4);
+                        if (rataInput) rataInput.value = v1.toString();
                         w[i] = v1;
+                    } else if (rataInput && rataInput.value.trim() !== '') {
+                        // Jika analis mengedit nilai rata-rata manual secara langsung
+                        var vRataManual = parseFloat(rataInput.value.replace(',', '.'));
+                        if (!isNaN(vRataManual)) {
+                            w[i] = vRataManual;
+                        }
+                    }
+                } else if (rataInput && rataInput.value.trim() !== '') {
+                    var vRataManual2 = parseFloat(rataInput.value.replace(',', '.'));
+                    if (!isNaN(vRataManual2)) {
+                        w[i] = vRataManual2;
                     }
                 }
             }
@@ -4002,35 +3959,50 @@
             var w1 = w[1];
             var w2 = w[2];
 
-            var zatEl = document.querySelector('input[name*="[bobot_zat_bersih]"]');
-            var airEl = document.querySelector('input[name*="[bobot_air_bersih]"]');
-            var bjEl = document.querySelector('input[name*="[nilai_bobot_jenis]"]');
+            var zatEl = pane.querySelector('input[name*="[bobot_zat_bersih]"]');
+            var airEl = pane.querySelector('input[name*="[bobot_air_bersih]"]');
+            var bjEl = pane.querySelector('input[name*="[nilai_bobot_jenis]"]');
 
             if (w0 !== null && w1 !== null) {
                 var bZat = w1 - w0;
-                if (zatEl) zatEl.value = bZat.toFixed(4);
+                if (zatEl) zatEl.value = bZat.toString();
             }
 
             if (w0 !== null && w2 !== null) {
                 var bAir = w2 - w0;
-                if (airEl) airEl.value = bAir.toFixed(4);
+                if (airEl) airEl.value = bAir.toString();
             }
 
             if (w0 !== null && w1 !== null && w2 !== null) {
-                var bZat = w1 - w0;
-                var bAir = w2 - w0;
-                if (bAir > 0 && bjEl) {
-                    bjEl.value = (bZat / bAir).toFixed(4);
-                    var pBj = bjEl.closest('.form-tab-pane-uji');
-                    if (pBj) evaluasiKesimpulanPane(pBj);
+                var bZatFinal = w1 - w0;
+                var bAirFinal = w2 - w0;
+                // Rumus Bobot Jenis (BJ) = (W2 - W0) / (W1 - W0)
+                if (bZatFinal > 0 && bjEl) {
+                    bjEl.value = (bAirFinal / bZatFinal).toString();
+                    evaluasiKesimpulanPane(pane);
                 }
             }
         }
 
-        // Listener Bobot Jenis input
+        // Listener Bobot Jenis input & change secara live real-time
         document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('input[name*="[tabel_penimbangan]"], input[name*="[bobot_zat_bersih]"], input[name*="[bobot_air_bersih]"], input[name*="[nilai_bobot_jenis]"]')) {
+                var pane = e.target.closest('.form-tab-pane-uji');
+                if (pane) {
+                    hitungBobotJenisPane(pane);
+                } else {
+                    hitungBobotJenis();
+                }
+            }
+        });
+        document.addEventListener('change', function(e) {
             if (e.target && e.target.matches('input[name*="[tabel_penimbangan]"]')) {
-                hitungBobotJenis();
+                var pane = e.target.closest('.form-tab-pane-uji');
+                if (pane) {
+                    hitungBobotJenisPane(pane);
+                } else {
+                    hitungBobotJenis();
+                }
             }
         });
 
@@ -5277,6 +5249,8 @@
         if (typeof hitungDisolusi === 'function') hitungDisolusi();
         if (typeof hitungSpektrofotometri === 'function') hitungSpektrofotometri();
         if (typeof hitungHPLC === 'function') hitungHPLC();
+        if (typeof hitungBobotJenis === 'function') hitungBobotJenis();
+        if (typeof hitungGCMS === 'function') hitungGCMS();
 
         document.querySelectorAll('.form-tab-pane-uji').forEach(function(pane) {
             evaluasiKesimpulanPane(pane);
