@@ -1,0 +1,112 @@
+Line 2431: var alasanMS_S1 = 'Kriteria Tahap S1: Seluruh 6 unit terlarut memenuhi batas penerimaan ≥ Q + 5% (' 
+Line 2471: var alasanTMS_S1 = 'Kriteria Tahap S1: Nilai terendah (' + minValS1.toFixed(2) + '%) tidak memenuhi 
+Line 2485: var alasanMS_S2 = 'Kriteria Tahap S2 (12 Unit): Rata-rata 12 unit (' + mean12.toFixed(2) + '%) ≥ Q (
+Line 2514: var alasanTMS_S2 = 'Kriteria Tahap S2: Rata-rata 12 unit (' + mean12.toFixed(2) + '%) < Q (' + Q + '
+Line 2539: var alasanMS_S3 = 'Kriteria Tahap S3 (24 Unit): Rata-rata 24 unit (' + mean24.toFixed(2) + '%) ≥ Q (
+Line 2542: var alasanTMS_S3 = 'Kriteria Tahap S3 (24 Unit): Rata-rata 24 unit (' + mean24.toFixed(2) + '%) atau
+Line 2572: var alasanMS_T2 = 'Kriteria Tahap 2 (30 Satuan Sediaan): Nilai Penerimaan (AV = ' + AV.toFixed(2) + 
+Line 2575: var alasanTMS_T2 = 'Kriteria Tahap 2 (30 Satuan Sediaan): Nilai Penerimaan (AV = ' + AV.toFixed(2) +
+Line 2582: var alasanMS_T1 = 'Kriteria Tahap 1 (10 Satuan Sediaan): Nilai Penerimaan (AV = ' + AV.toFixed(2) + 
+Line 2598: var alasanTMS_T1 = 'Kriteria Tahap 1 (10 Satuan Sediaan): Nilai Penerimaan (AV = ' + AV.toFixed(2) +
+Line 2639: var alasanTMS = 'Kadar rata-rata (' + kadar.toFixed(2) + '%) berada di luar rentang spesifikasi (' +
+Line 2643: var alasanRPD = 'Kadar rata-rata (' + kadar.toFixed(2) + '%) masuk rentang spesifikasi (' + minKadar
+Line 2646: var rpdKet = (rpd !== null && !isNaN(rpd)) ? ' RPD (' + rpd.toFixed(2) + '%) memenuhi syarat.' : '';
+Line 2647: var alasanMS = 'Kadar rata-rata (' + kadar.toFixed(2) + '%) memenuhi rentang spesifikasi (' + minKad
+Line 2671: setKesimpulanOtomatis(formId, 'Memenuhi Syarat (MS)', 'pH rata-rata (' + phVal.toFixed(2) + ') memen
+Line 2673: setKesimpulanOtomatis(formId, 'Tidak Memenuhi Syarat (TMS)', 'pH rata-rata (' + phVal.toFixed(2) + '
+Line 2716: setKesimpulanOtomatis(formId, 'Memenuhi Syarat (MS)', 'Bobot jenis (' + bjVal.toFixed(4) + ') memenu
+Line 2718: setKesimpulanOtomatis(formId, 'Tidak Memenuhi Syarat (TMS)', 'Bobot jenis (' + bjVal.toFixed(4) + ')
+Line 2792: nettoEl.value = netto.toFixed(2);
+Line 2810: bobotRataInput.value = W_bar.toFixed(2);
+Line 2856: if (kadarMgEl && finalMg > 0) kadarMgEl.value = finalMg.toFixed(2);
+Line 2857: if (kadarPersenEl && finalPct > 0) kadarPersenEl.value = finalPct.toFixed(2);
+Line 2862: if (kadarPersenEl) kadarPersenEl.value = finalPct.toFixed(2);
+Line 2868: if (kadarMgEl) kadarMgEl.value = finalMg.toFixed(2);
+Line 2874: if (kadarMgEl && finalMg > 0) kadarMgEl.value = finalMg.toFixed(2);
+Line 2875: if (kadarPersenEl && finalPct > 0) kadarPersenEl.value = finalPct.toFixed(2);
+Line 2899: if (xRerataT1Input) xRerataT1Input.value = meanT1.toFixed(2);
+Line 2900: if (sdT1Input) sdT1Input.value = sdT1.toFixed(2);
+Line 2901: if (rsdT1Input) rsdT1Input.value = rsdT1.toFixed(2);
+Line 2921: netto2El.value = netto2.toFixed(2);
+Line 2938: if (kadarMg2El && fMg2 > 0) kadarMg2El.value = fMg2.toFixed(2);
+Line 2939: if (kadarPersen2El && fPct2 > 0) kadarPersen2El.value = fPct2.toFixed(2);
+Line 2943: if (kadarPersen2El) kadarPersen2El.value = fPct2.toFixed(2);
+Line 2948: if (kadarMg2El) kadarMg2El.value = fMg2.toFixed(2);
+Line 2953: if (kadarMg2El && fMg2 > 0) kadarMg2El.value = fMg2.toFixed(2);
+Line 2954: if (kadarPersen2El && fPct2 > 0) kadarPersen2El.value = fPct2.toFixed(2);
+Line 2979: if (xRerata30Input) xRerata30Input.value = mean30.toFixed(2);
+Line 2980: if (sd30Input) sd30Input.value = sd30.toFixed(2);
+Line 2981: if (rsd30Input) rsd30Input.value = rsd30.toFixed(2);
+Line 3009: if (mInput) mInput.value = M.toFixed(2);
+Line 3010: if (avInput) avInput.value = AV.toFixed(2);
+Line 3084: if (kadarMgEl) kadarMgEl.value = kadarMg.toFixed(2);
+Line 3088: if (kadarPersenEl) kadarPersenEl.value = kadarPersen.toFixed(2);
+Line 3112: if (rerataMgInput) rerataMgInput.value = meanMgT1.toFixed(2);
+Line 3113: if (xRerataInput) xRerataInput.value = meanPersenT1.toFixed(2);
+Line 3114: if (sdInput) sdInput.value = sdT1.toFixed(2);
+Line 3115: if (rsdInput) rsdInput.value = rsdT1.toFixed(2);
+Line 3130: if (kadarMg2El) kadarMg2El.value = km2.toFixed(2);
+Line 3133: if (kadarPersen2El) kadarPersen2El.value = kp2.toFixed(2);
+Line 3155: if (xRerata30Input) xRerata30Input.value = mean30.toFixed(2);
+Line 3156: if (sd30Input) sd30Input.value = sd30.toFixed(2);
+Line 3157: if (rsd30Input) rsd30Input.value = rsd30.toFixed(2);
+Line 3185: if (mInput) mInput.value = M.toFixed(2);
+Line 3186: if (avInput) avInput.value = AV.toFixed(2);
+Line 3480: if (kadarU1Input) kadarU1Input.value = (kadarU1 > 0) ? kadarU1.toFixed(2) : '';
+Line 3481: if (kadarU2Input) kadarU2Input.value = (kadarU2 > 0) ? kadarU2.toFixed(2) : '';
+Line 3487: if (kadarRataPersenInput) kadarRataPersenInput.value = rataPersen.toFixed(2);
+Line 3488: if (kadarRataMgInput) kadarRataMgInput.value = rataMg.toFixed(2);
+Line 3492: if (rpdInput) rpdInput.value = rpd.toFixed(2);
+Line 3497: if (horwitzInput) horwitzInput.value = horw.toFixed(2);
+Line 3625: kbKoreksiInput.value = Kb.toFixed(2);
+Line 3643: if (evalValEl) evalValEl.textContent = bmFactor.toFixed(4);
+Line 3664: if (fkInput && Fk > 0) fkInput.value = Fk.toFixed(4);
+Line 3681: if (evalValEl2) evalValEl2.textContent = fTambahan.toFixed(4);
+Line 3693: fkFinalInput.value = FkFinal.toFixed(4);
+Line 3709: if (dxEl) dxEl.value = Dx.toFixed(2);
+Line 3726: if (rataInputS1) rataInputS1.value = meanS1.toFixed(2);
+Line 3727: if (minInputS1) minInputS1.value = minValS1.toFixed(2);
+Line 3744: if (dxElS2) dxElS2.value = DxS2.toFixed(2);
+Line 3762: if (rataInputS2) rataInputS2.value = mean12.toFixed(2);
+Line 3763: if (minInputS2) minInputS2.value = minVal12.toFixed(2);
+Line 3781: if (dxElS3) dxElS3.value = DxS3.toFixed(2);
+Line 3799: if (rataInputS3) rataInputS3.value = mean24.toFixed(2);
+Line 3800: if (minInputS3) minInputS3.value = minVal24.toFixed(2);
+Line 3855: bZatInput.value = bZat.toFixed(4);
+Line 3976: if (k1Input) k1Input.value = (k1 > 0) ? k1.toFixed(2) : '';
+Line 3977: if (k2Input) k2Input.value = (k2 > 0) ? k2.toFixed(2) : '';
+Line 3996: if (rataPersenInput) rataPersenInput.value = rataPersen.toFixed(2);
+Line 3997: if (rataMgInput) rataMgInput.value = rataMg.toFixed(2);
+Line 3998: if (rpdInput) rpdInput.value = (rpd > 0) ? rpd.toFixed(2) : '0.00';
+Line 3999: if (horwitzInput) horwitzInput.value = (horwitz > 0) ? horwitz.toFixed(2) : '0.00';
+Line 4151: bBersihInput.value = (wZat - wSisa).toFixed(4);
+Line 4171: if (r1Input && B > 0) r1Input.value = (B / A).toFixed(3);
+Line 4172: if (r2Input && C > 0) r2Input.value = (C / A).toFixed(3);
+Line 4173: if (r3Input && D > 0) r3Input.value = (D / A).toFixed(3);
+Line 4198: phRataInput.value = ((p1 + p2) / 2).toFixed(2);
+Line 4231: if (rataInput) rataInput.value = mean.toFixed(4);
+Line 4234: if (rataInput) rataInput.value = v1.toFixed(4);
+Line 4250: if (zatEl) zatEl.value = bZat.toFixed(4);
+Line 4255: if (airEl) airEl.value = bAir.toFixed(4);
+Line 4262: bjEl.value = (bZat / bAir).toFixed(4);
+Line 4397: rsdInp.value = rsd.toFixed(2);
+Line 4427: if (r2Inp) r2Inp.value = r2.toFixed(4);
+Line 4431: if (pr2Inp) pr2Inp.value = pr2.toFixed(2);
+Line 4446: konvCse.value = (potCse / lam).toFixed(2) + ' λ';
+Line 4456: pmaInp.value = pma.toFixed(2);
+Line 4473: if (rataInp) rataInp.value = rata.toFixed(4);
+Line 4474: if (euMlInp && !euMlInp.value) euMlInp.value = '< ' + rata.toFixed(4);
+Line 4475: if (konvEInp && !konvEInp.value) konvEInp.value = rata.toFixed(4);
+Line 4484: var hasilKonv = (eVal / potVal).toFixed(4);
+Line 4506: if (rq === '+') taInp.value = (0.25 * lam).toFixed(4);
+Line 4507: else if (rh === '+') taInp.value = (0.5 * lam).toFixed(4);
+Line 4508: else if (r1 === '+') taInp.value = (1.0 * lam).toFixed(4);
+Line 4509: else if (r2 === '+') taInp.value = (2.0 * lam).toFixed(4);
+Line 4516: if (leInp) leInp.value = eVal.toFixed(4);
+Line 4531: if (rataEInp) rataEInp.value = avgE.toFixed(4);
+Line 4532: if (gmInp) gmInp.value = gm.toFixed(4);
+Line 4535: var minL = (0.5 * lam).toFixed(4);
+Line 4536: var maxL = (2.0 * lam).toFixed(4);
+Line 4537: rentangInp.value = minL + ' ≤ ' + gm.toFixed(4) + ' ≤ ' + maxL;
+Line 4669: var rounded102 = Math.round(nilaiBasis102 * 100) / 100;
+Line 5011: input.value = newVal.toFixed(decCount > 0 ? decCount : 0);

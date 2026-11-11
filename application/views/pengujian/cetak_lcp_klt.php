@@ -337,11 +337,10 @@ $tgl_lap = !empty($p['tanggal_laporan']) ? date('d F Y', strtotime($p['tanggal_l
         <tbody>
             <?php
             $rows = !empty($klt_items) ? $klt_items : array(
-                array('kategori' => 'Baku Pembanding', 'nama_zat' => ''),
-                array('kategori' => 'Zat Uji 1', 'nama_zat' => '1. '),
-                array('kategori' => 'Zat Uji 2', 'nama_zat' => '2. '),
-                array('kategori' => 'Spiked Sample: Zat Uji', 'nama_zat' => 'Zat Uji'),
-                array('kategori' => 'Spiked Sample: Baku', 'nama_zat' => 'Baku Pembanding')
+                array('kategori' => 'Baku Pembanding', 'nama_zat' => 'Baku Pembanding'),
+                array('kategori' => 'Pelarut', 'nama_zat' => 'Pelarut'),
+                array('kategori' => 'Zat Uji', 'nama_zat' => 'Zat Uji'),
+                array('kategori' => 'Spike', 'nama_zat' => 'Spike')
             );
 
             foreach ($rows as $idx => $r):

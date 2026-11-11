@@ -30,6 +30,8 @@ $unit_kadar_nyata = ($mode_kadar === 'sirup') ? ('mg/' . $vol_etiket . 'mL') : '
 
 // Data tabel preparasi & pengukuran
 $tabel_prep = isset($p['tabel_preparasi']) && is_array($p['tabel_preparasi']) ? $p['tabel_preparasi'] : array();
+$param_uji = $metode['parameter_uji'] ?? ($hasil['nama_metode'] ?? ($p['parameter_uji'] ?? ''));
+$is_identifikasi = (stripos($param_uji, 'identifikasi') !== false || stripos($hasil['nama_metode'] ?? '', 'identifikasi') !== false || stripos($p['nama_template'] ?? '', 'identifikasi') !== false);
 $baku_row = $tabel_prep[0] ?? array();
 $uji1_row = $tabel_prep[1] ?? array();
 $uji2_row = $tabel_prep[2] ?? array();
@@ -265,6 +267,23 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td>:</td>
                     <td class="border-r"><?php echo html_escape(!empty($p['susut_pengeringan']) ? $p['susut_pengeringan'] . ' %' : '-'); ?></td>
                 </tr>
+<?php if ($is_identifikasi): ?>
+                <tr>
+                    <td class="border-l" style="padding-left: 4px;">Scanning</td>
+                    <td>:</td>
+                    <td class="border-r" colspan="4"><?php echo html_escape($p['kecepatan_scanning'] ?? 'Sedang'); ?> (λ: <?php echo html_escape($p['rentang_panjang_gelombang'] ?? '200 - 400 nm'); ?>)</td>
+                </tr>
+                <tr>
+                    <td class="border-l" style="padding-left: 4px;">Jenis spektrum / Kuvet</td>
+                    <td>:</td>
+                    <td class="border-r" colspan="4"><?php echo html_escape($p['jenis_spektrum'] ?? 'Normal'); ?> / <?php echo html_escape($p['jenis_kuvet'] ?? 'Kwarsa'); ?> (Tebal: <?php echo html_escape($p['tebal_kuvet'] ?? '1 cm'); ?>)</td>
+                </tr>
+                <tr>
+                    <td class="border-l border-b" style="padding-left: 4px;">Pelarut / Blanko</td>
+                    <td class="border-b">:</td>
+                    <td class="border-r border-b" colspan="4"><?php echo html_escape($p['pelarut'] ?? '-'); ?> / <?php echo html_escape($p['blanko'] ?? '-'); ?></td>
+                </tr>
+<?php else: ?>
                 <tr>
                     <td class="border-l" style="padding-left: 4px;">Scanning</td>
                     <td>:</td>
@@ -287,8 +306,24 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td class="border-r border-b"><?php echo html_escape($p['pelarut'] ?? '-'); ?> / <?php echo html_escape($p['blanko'] ?? '-'); ?></td>
                     <td class="border-l border-b" style="padding-left: 4px;">Faktor Koreksi BM</td>
                     <td class="border-b">:</td>
-                    <td class="border-r border-b fw-bold"><?php echo html_escape(!empty($p['faktor_konversi_bm']) ? $p['faktor_konversi_bm'] : '1.0'); ?></td>
+                    <td class="border-r border-b fw-bold">
+                        <?php
+                            $bm_raw = trim((string)(!empty($p['faktor_konversi_bm']) ? $p['faktor_konversi_bm'] : '1.0'));
+                            $bm_eval = null;
+                            if (strpos($bm_raw, '/') !== false || strpos($bm_raw, '*') !== false) {
+                                $clean_expr = preg_replace('/[^0-9\.\+\-\*\/]/', '', str_replace(',', '.', $bm_raw));
+                                try {
+                                    @eval("\$bm_eval = ($clean_expr);");
+                                } catch (Throwable $e) {}
+                            }
+                            echo html_escape($bm_raw);
+                            if ($bm_eval !== null && is_numeric($bm_eval) && $bm_eval > 0) {
+                                echo ' <span style="color: #0284c7;">( = ' . number_format($bm_eval, 4, '.', '') . ' )</span>';
+                            }
+                        ?>
+                    </td>
                 </tr>
+<?php endif; ?>
             </table>
 
             <!-- Tabel Preparasi & Pengukuran Serapan Persis Excel -->
@@ -320,6 +355,36 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     </tr>
                 </thead>
                 <tbody>
+<?php if ($is_identifikasi): ?>
+                    <?php
+                    $spek_rows = !empty($tabel_preparasi) ? $tabel_preparasi : array(
+                        array('nama_zat' => 'Baku Pembanding'),
+                        array('nama_zat' => 'Pelarut'),
+                        array('nama_zat' => 'Zat Uji'),
+                        array('nama_zat' => 'Spike')
+                    );
+                    $default_labels = array('Baku Pembanding', 'Pelarut', 'Zat Uji', 'Spike');
+                    foreach ($default_labels as $d_idx => $d_lbl) {
+                        if (!isset($spek_rows[$d_idx])) {
+                            $spek_rows[$d_idx] = array('nama_zat' => $d_lbl);
+                        } elseif (empty($spek_rows[$d_idx]['nama_zat'])) {
+                            $spek_rows[$d_idx]['nama_zat'] = $d_lbl;
+                        }
+                    }
+                    ?>
+                    <?php foreach ($spek_rows as $sr): ?>
+                    <tr>
+                        <td class="border-all fw-bold"><?php echo html_escape($sr['nama_zat'] ?? ($sr['kategori'] ?? '-')); ?></td>
+                        <td class="border-all text-right"><?php echo html_escape($sr['wadah_zat'] ?? '-'); ?></td>
+                        <td class="border-all text-right"><?php echo html_escape($sr['wadah_sisa'] ?? '-'); ?></td>
+                        <td class="border-all text-right fw-bold"><?php echo html_escape($sr['bobot_zat'] ?? '-'); ?></td>
+                        <td class="border-all text-center"><?php echo html_escape($sr['faktor_pengenceran'] ?? '-'); ?></td>
+                        <td class="border-all text-right"><?php echo html_escape($sr['konsentrasi'] ?? '-'); ?></td>
+                        <td class="border-all text-center"><?php echo html_escape($sr['lambda_maks'] ?? '-'); ?></td>
+                        <td class="border-all text-right fw-bold"><?php echo html_escape($sr['serapan'] ?? '-'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+<?php else: ?>
                     <tr>
                         <td class="border-all fw-bold"><?php echo html_escape(!empty($baku_row['nama_zat']) ? $baku_row['nama_zat'] : 'Baku Pembanding'); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($baku_row['wadah_zat'] ?? ''); ?></td>
@@ -332,9 +397,20 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     </tr>
                     <tr>
                         <td class="border-all fw-bold"><?php echo html_escape(!empty($uji1_row['nama_zat']) ? $uji1_row['nama_zat'] : 'Zat Uji 1'); ?></td>
-                        <td class="border-all text-right"><?php echo html_escape($uji1_row['wadah_zat'] ?? ''); ?></td>
-                        <td class="border-all text-right"><?php echo html_escape($uji1_row['wadah_sisa'] ?? ''); ?></td>
-                        <td class="border-all text-right fw-bold"><?php echo html_escape($uji1_row['bobot_zat'] ?? ''); ?></td>
+                        <?php if ($mode_kadar === 'tablet_cemplung'): ?>
+                            <td colspan="3" class="border-all text-center" style="font-size: 7.2pt; background-color: #fbfbfb;">
+                                <strong>1 Tablet Utuh</strong> (Direct Dissolution)
+                            </td>
+                        <?php elseif ($mode_kadar === 'sirup'): ?>
+                            <td colspan="2" class="border-all text-center" style="font-size: 7.2pt; background-color: #fbfbfb;">
+                                Volume Pipet (Vu): <strong><?php echo html_escape(!empty($uji1_row['bobot_zat']) ? $uji1_row['bobot_zat'] : (!empty($uji1_row['wadah_zat']) ? $uji1_row['wadah_zat'] : ($vol_etiket ?: '5.0'))); ?> mL</strong>
+                            </td>
+                            <td class="border-all text-right fw-bold"><?php echo html_escape(!empty($uji1_row['bobot_zat']) ? $uji1_row['bobot_zat'] : (!empty($uji1_row['wadah_zat']) ? $uji1_row['wadah_zat'] : ($vol_etiket ?: '5.0'))); ?></td>
+                        <?php else: ?>
+                            <td class="border-all text-right"><?php echo html_escape($uji1_row['wadah_zat'] ?? ''); ?></td>
+                            <td class="border-all text-right"><?php echo html_escape($uji1_row['wadah_sisa'] ?? ''); ?></td>
+                            <td class="border-all text-right fw-bold"><?php echo html_escape($uji1_row['bobot_zat'] ?? ''); ?></td>
+                        <?php endif; ?>
                         <td class="border-all text-center"><?php echo html_escape($uji1_row['faktor_pengenceran'] ?? ''); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($uji1_row['konsentrasi'] ?? ''); ?></td>
                         <td class="border-all text-center"><?php echo html_escape($uji1_row['lambda_maks'] ?? ''); ?></td>
@@ -342,25 +418,65 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     </tr>
                     <tr>
                         <td class="border-all fw-bold"><?php echo html_escape(!empty($uji2_row['nama_zat']) ? $uji2_row['nama_zat'] : 'Zat Uji 2'); ?></td>
-                        <td class="border-all text-right"><?php echo html_escape($uji2_row['wadah_zat'] ?? ''); ?></td>
-                        <td class="border-all text-right"><?php echo html_escape($uji2_row['wadah_sisa'] ?? ''); ?></td>
-                        <td class="border-all text-right fw-bold"><?php echo html_escape($uji2_row['bobot_zat'] ?? ''); ?></td>
+                        <?php if ($mode_kadar === 'tablet_cemplung'): ?>
+                            <td colspan="3" class="border-all text-center" style="font-size: 7.2pt; background-color: #fbfbfb;">
+                                <strong>1 Tablet Utuh</strong> (Direct Dissolution)
+                            </td>
+                        <?php elseif ($mode_kadar === 'sirup'): ?>
+                            <td colspan="2" class="border-all text-center" style="font-size: 7.2pt; background-color: #fbfbfb;">
+                                Volume Pipet (Vu): <strong><?php echo html_escape(!empty($uji2_row['bobot_zat']) ? $uji2_row['bobot_zat'] : (!empty($uji2_row['wadah_zat']) ? $uji2_row['wadah_zat'] : ($vol_etiket ?: '5.0'))); ?> mL</strong>
+                            </td>
+                            <td class="border-all text-right fw-bold"><?php echo html_escape(!empty($uji2_row['bobot_zat']) ? $uji2_row['bobot_zat'] : (!empty($uji2_row['wadah_zat']) ? $uji2_row['wadah_zat'] : ($vol_etiket ?: '5.0'))); ?></td>
+                        <?php else: ?>
+                            <td class="border-all text-right"><?php echo html_escape($uji2_row['wadah_zat'] ?? ''); ?></td>
+                            <td class="border-all text-right"><?php echo html_escape($uji2_row['wadah_sisa'] ?? ''); ?></td>
+                            <td class="border-all text-right fw-bold"><?php echo html_escape($uji2_row['bobot_zat'] ?? ''); ?></td>
+                        <?php endif; ?>
                         <td class="border-all text-center"><?php echo html_escape($uji2_row['faktor_pengenceran'] ?? ''); ?></td>
                         <td class="border-all text-right"><?php echo html_escape($uji2_row['konsentrasi'] ?? ''); ?></td>
                         <td class="border-all text-center"><?php echo html_escape($uji2_row['lambda_maks'] ?? ''); ?></td>
                         <td class="border-all text-right fw-bold"><?php echo html_escape($uji2_row['serapan'] ?? ''); ?></td>
                     </tr>
+<?php endif; ?>
                 </tbody>
             </table>
 
+            <?php if ($is_identifikasi): ?>
+            <!-- HASIL PENGUJIAN IDENTIFIKASI (KUALITATIF - Poin 1 & 3: Tanpa Rumus & Kolom Kadar) -->
+            <table class="lcp-table border-all" style="margin-bottom: 4px;">
+                <colgroup>
+                    <col style="width: 30%;">
+                    <col style="width: 2%;">
+                    <col style="width: 68%;">
+                </colgroup>
+                <tr>
+                    <td class="border-all" style="padding-left: 4px;">Hasil Pengamatan / Uji</td>
+                    <td class="border-all text-center">:</td>
+                    <td class="border-all fw-bold" style="color: #0284c7; padding-left: 4px;">
+                        <?php echo html_escape($p['hasil_uji'] ?? ($p['hasil_identifikasi'] ?? 'Sesuai / Positif')); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border-all" style="padding-left: 4px;">Keterangan Spektrum</td>
+                    <td class="border-all text-center">:</td>
+                    <td class="border-all" style="padding-left: 4px;">
+                        <em>Spektrum serapan UV-Vis larutan uji menunjukkan serapan maksimum pada panjang gelombang yang sama seperti baku pembanding.</em>
+                    </td>
+                </tr>
+            </table>
+            <?php else: ?>
             <!-- Rumus Perhitungan & Sub-Perhitungan Uji 1 & Uji 2 Persis Excel -->
             <div style="font-weight: bold; margin-bottom: 2px;">
                 <?php if ($mode_kadar === 'tablet_cemplung'): ?>
                     Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb &times; Fu/Fb &times; (1/Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
-                    <span style="font-size: 6.3pt; font-weight: normal; color: #555;">[Tablet Cemplung / Direct Dissolution Utuh]</span>
+                    <div style="font-size: 6.8pt; font-weight: 600; color: #166534; margin: 2px 0;">
+                        Keterangan Rumus Tablet Cemplung: Pada penetapan kadar sediaan tablet cemplung / direct dissolution, pengujian menggunakan 1 tablet utuh yang dilarutkan langsung tanpa penggerusan dan tanpa penimbangan serbuk sisa (wadah zat, wadah sisa, dan bobot uji digabung menjadi 1 tablet utuh).
+                    </div>
                 <?php elseif ($mode_kadar === 'sirup'): ?>
                     Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Vu &times; Fu/Fb &times; (<?php echo $vol_etiket; ?>/Ke) &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
-                    <span style="font-size: 6.3pt; font-weight: normal; color: #555;">[Sirup / Cairan Oral - Takaran: <?php echo $vol_etiket; ?> mL]</span>
+                    <div style="font-size: 6.8pt; font-weight: 600; color: #1e40af; margin: 2px 0;">
+                        Keterangan Rumus Sirup: Pada penetapan kadar sediaan sirup / cairan oral, pengujian menggunakan pemipetan volume sampel uji (Vu dalam mL) per takaran saji <?php echo $vol_etiket; ?> mL (wadah zat dan wadah sisa digabung menjadi satu bagian volume uji Vu).
+                    </div>
                 <?php else: ?>
                     Rumus Perhitungan: Kadar = <span style="font-family: monospace;">Au/Ab &times; Bb/Bu &times; Fu/Fb &times; Br/Ke &times; Kb <?php if (!empty($p['faktor_konversi_bm']) && $p['faktor_konversi_bm'] !== '1.0' && $p['faktor_konversi_bm'] !== '1'): ?>&times; (<?php echo html_escape($p['faktor_konversi_bm']); ?>) <?php endif; ?>&times; 100%</span>
                     <span style="font-size: 6.3pt; font-weight: normal; color: #555;">[Tablet/Kapsul BR - 20 Tablet Digerus]</span>
@@ -459,6 +575,7 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                 </tr>
             </table>
 
+            <?php endif; ?>
             <!-- Pustaka, Syarat Mutu & Kesimpulan -->
             <div style="font-size: 6.8pt; margin-bottom: 3px;">
                 <div><strong>Pustaka metode :</strong> <?php echo html_escape(!empty($p['pustaka_metode']) ? $p['pustaka_metode'] : ($metode['pustaka_acuan'] ?? 'Farmakope Indonesia Edisi VI')); ?></div>

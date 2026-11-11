@@ -700,6 +700,12 @@
                     <ul class="nav nav-tabs proses-sesi-tabs" id="formTabs" role="tablist">
 
                         <?php foreach ($hasil_forms as $idx => $f): ?>
+                        <?php
+                            $f_param_name = (!empty($f['parameter_uji']) ? $f['parameter_uji'] : (!empty($f['nama_parameter']) ? $f['nama_parameter'] : ($f['nama_metode'] ?? '')));
+                            $f_tpl_name   = (!empty($f['nama_template']) ? $f['nama_template'] : ($f['kode_template'] ?? ''));
+                            $f_check_text = strtolower($f_param_name . ' ' . $f_tpl_name . ' ' . ($f['nama_metode'] ?? '') . ' ' . ($f['nama_parameter'] ?? '') . ' ' . ($f['metode_analisa'] ?? '') . ' ' . ($f['persyaratan'] ?? '') . ' ' . ($f['kode_template'] ?? '') . ' ' . ($f['kode_metode'] ?? ''));
+                            $is_identifikasi = (strpos($f_check_text, 'identifikasi') !== false);
+                        ?>
 
                             <li class="nav-item" role="presentation">
 
@@ -729,6 +735,12 @@
                 <div class="tab-content" id="formTabsContent">
 
                     <?php foreach ($hasil_forms as $idx => $f): ?>
+                        <?php
+                            $f_param_name = (!empty($f['parameter_uji']) ? $f['parameter_uji'] : (!empty($f['nama_parameter']) ? $f['nama_parameter'] : ($f['nama_metode'] ?? '')));
+                            $f_tpl_name   = (!empty($f['nama_template']) ? $f['nama_template'] : ($f['kode_template'] ?? ''));
+                            $f_check_text = strtolower($f_param_name . ' ' . $f_tpl_name . ' ' . ($f['nama_metode'] ?? '') . ' ' . ($f['nama_parameter'] ?? '') . ' ' . ($f['metode_analisa'] ?? '') . ' ' . ($f['persyaratan'] ?? '') . ' ' . ($f['kode_template'] ?? '') . ' ' . ($f['kode_metode'] ?? ''));
+                            $is_identifikasi = (strpos($f_check_text, 'identifikasi') !== false);
+                        ?>
 
                         <div
                             class="tab-pane fade <?php echo ($idx === 0 ? 'show active' : ''); ?> form-tab-pane-uji"
@@ -738,7 +750,8 @@
                             data-kode-template="<?php echo html_escape($f['kode_template'] ?: ''); ?>"
                             data-nama-template="<?php echo html_escape($f['nama_template'] ?: ''); ?>"
                             data-syarat="<?php echo html_escape($f['persyaratan'] ?: ''); ?>"
-                            data-parameter="<?php echo html_escape($f['parameter_uji'] ?: $f['nama_metode']); ?>"
+                            data-parameter="<?php echo html_escape($f['parameter_uji'] ?: (!empty($f['nama_parameter']) ? $f['nama_parameter'] : $f['nama_metode'])); ?>"
+                            data-is-identifikasi="<?php echo $is_identifikasi ? '1' : '0'; ?>"
                         >
 
                             <div class="uji-form-card">
@@ -978,18 +991,55 @@
                                             <?php foreach ($schema['sections'] as $sec): ?>
                                                 <?php
                                                     $sec_id = $sec['id'] ?? '';
+                                                    $is_kadar_sec = in_array($sec_id, array('perhitungan_kadar_hplc', 'perhitungan_kadar_dan_presisi', 'perhitungan_kadar', 'perhitungan_kadar_spektro'), true);
+
+                                                    // Field kadar yang wajib disembunyikan pada LCP Identifikasi (Poin 1 & 3)
+                                                    $kadar_exclusive_flds = array(
+                                                        'metode_perhitungan_kadar', 'volume_takaran_etiket', 'bobot_rata_tablet',
+                                                        'bobot_rata_rata_tablet', 'klaim_etiket', 'faktor_konversi_bm',
+                                                        'baku_kadar', 'baku_sp', 'baku_kadar_terkoreksi', 'kadar_baku_persen',
+                                                        'internal_kadar', 'internal_sp', 'internal_kadar_terkoreksi',
+                                                        'kadar_uji_1', 'kadar_uji_2', 'kadar_rata_rata_persen', 'kadar_rata_rata_mg',
+                                                        'kadar_replikasi_1', 'kadar_replikasi_2', 'kadar_rata_persen',
+                                                        'kadar_rata_mg', 'rpd_hitung', 'nilai_rpd', 'rpd',
+                                                        'syarat_rpd_horwitz', 'syarat_horwitz', 'ketidakpastian_teks', 'decision_rule',
+                                                        'kadar_hasil_persen', 'kadar_hasil_mg'
+                                                    );
+
+                                                    // Jika Identifikasi dan seluruh field dalam seksi ini adalah field kadar, skip seksi seutuhnya
+                                                    if ($is_identifikasi && !empty($sec['fields']) && is_array($sec['fields'])) {
+                                                        $rem_flds = 0;
+                                                        foreach ($sec['fields'] as $cf) {
+                                                            if (!in_array($cf['id'] ?? '', $kadar_exclusive_flds, true)) {
+                                                                $rem_flds++;
+                                                            }
+                                                        }
+                                                        if ($rem_flds === 0) {
+                                                            continue;
+                                                        }
+                                                    }
+
                                                     $is_stage_sec = in_array($sec_id, array('tahap_2', 'data_tahap_s2', 'data_tahap_s3'));
                                                     $stage_trigger_key = ($sec_id === 'tahap_2') ? 'lakukan_tahap2' : (($sec_id === 'data_tahap_s2') ? 'lakukan_tahap_s2' : 'lakukan_tahap_s3');
                                                     $stage_active = isset($saved_param_values[$stage_trigger_key]) ? ($saved_param_values[$stage_trigger_key] === 'Ya') : (isset($data_hasil[$stage_trigger_key]) ? ($data_hasil[$stage_trigger_key] === 'Ya') : false);
+
+                                                    $sec_title = isset($sec['title']) ? $sec['title'] : 'Bagian Form';
+                                                    $sec_desc  = isset($sec['description']) ? $sec['description'] : '';
+
+                                                    // Poin 1 & 3: Sesuaikan judul & keterangan seksi hasil pengujian Identifikasi
+                                                    if ($is_identifikasi && $is_kadar_sec) {
+                                                        $sec_title = 'Hasil Pengujian & Pustaka Acuan (Identifikasi)';
+                                                        $sec_desc  = 'Catatan hasil pengamatan uji identifikasi kualitatif dan verifikasi kesesuaian terhadap pustaka acuan resmi.';
+                                                    }
                                                 ?>
                                                 <div class="parameter-section mb-4" id="sec_<?php echo $f['id']; ?>_<?php echo html_escape($sec_id); ?>" data-section-id="<?php echo html_escape($sec_id); ?>">
                                                     <div class="parameter-section-title">
                                                         <i class="bi bi-folder2-open me-1"></i>
-                                                        <?php echo html_escape(isset($sec['title']) ? $sec['title'] : 'Bagian Form'); ?>
+                                                        <?php echo html_escape($sec_title); ?>
                                                     </div>
 
-                                                    <?php if (!empty($sec['description'])): ?>
-                                                        <p class="text-muted small mb-3"><?php echo html_escape($sec['description']); ?></p>
+                                                    <?php if (!empty($sec_desc)): ?>
+                                                        <p class="text-muted small mb-3"><?php echo html_escape($sec_desc); ?></p>
                                                     <?php endif; ?>
 
                                                     <?php if (isset($sec['type']) && $sec['type'] === 'reference_guide' && !empty($sec['items'])): ?>
@@ -1023,6 +1073,21 @@
                                                     <?php elseif (!empty($sec['fields']) && is_array($sec['fields'])): ?>
                                                         <div class="row g-3">
                                                             <?php foreach ($sec['fields'] as $fld): ?>
+                                                                <?php
+                                                                    $fld_id = isset($fld['id']) ? $fld['id'] : '';
+                                                                    // Poin 1 & 3: Skip field kadar sediaan, bobot rata-rata, klaim, faktor koreksi BM, kadar baku internal untuk Identifikasi
+                                                                    $kadar_exclusive_flds = array(
+                                                                        'metode_perhitungan_kadar', 'volume_takaran_etiket', 'bobot_rata_tablet',
+                                                                        'bobot_rata_rata_tablet', 'klaim_etiket', 'faktor_konversi_bm',
+                                                                        'baku_kadar', 'baku_sp', 'baku_kadar_terkoreksi',
+                                                                        'internal_kadar', 'internal_sp', 'internal_kadar_terkoreksi',
+                                                                        'kadar_replikasi_1', 'kadar_replikasi_2', 'kadar_rata_persen',
+                                                                        'kadar_rata_mg', 'rpd', 'syarat_horwitz'
+                                                                    );
+                                                                    if ($is_identifikasi && in_array($fld_id, $kadar_exclusive_flds, true)) {
+                                                                        continue;
+                                                                    }
+                                                                ?>
                                                                 <?php
                                                                     $fld_id = isset($fld['id']) ? $fld['id'] : '';
                                                                     if (empty($fld_id)) continue;
@@ -1084,9 +1149,49 @@
                                                                                 </thead>
                                                                                 <tbody>
                                                                                     <?php
-                                                                                        $existing_rows = !empty($raw_val) && is_array($raw_val)
-                                                                                            ? $raw_val
-                                                                                            : (isset($fld['default_rows']) ? $fld['default_rows'] : array(array()));
+                                                                                        // Poin 2: Baris tabel baku untuk Identifikasi (Baku Pembanding, Pelarut, Zat Uji, Spike)
+                                                                                        if ($is_identifikasi && in_array($fld_id, array('tabel_hplc', 'tabel_preparasi', 'klt_items'), true)) {
+                                                                                            $ident_categories = array('Baku Pembanding', 'Pelarut', 'Zat Uji', 'Spike');
+                                                                                            
+                                                                                            // Validasi apakah raw_val sudah memuat 4 kategori Identifikasi lengkap
+                                                                                            $has_ident_format = false;
+                                                                                            if (!empty($raw_val) && is_array($raw_val) && count($raw_val) === 4) {
+                                                                                                $r1_name = strtolower($raw_val[1]['nama_zat'] ?? ($raw_val[1]['kategori'] ?? ''));
+                                                                                                $r3_name = strtolower($raw_val[3]['nama_zat'] ?? ($raw_val[3]['kategori'] ?? ''));
+                                                                                                if (strpos($r1_name, 'pelarut') !== false && strpos($r3_name, 'spike') !== false) {
+                                                                                                    $has_ident_format = true;
+                                                                                                }
+                                                                                            }
+
+                                                                                            if ($has_ident_format) {
+                                                                                                $existing_rows = $raw_val;
+                                                                                            } else {
+                                                                                                $existing_rows = array();
+                                                                                                foreach ($ident_categories as $c_idx => $c_cat) {
+                                                                                                    $row_data = array('kategori' => $c_cat, 'nama_zat' => $c_cat);
+                                                                                                    if (!empty($raw_val) && is_array($raw_val)) {
+                                                                                                        if ($c_cat === 'Baku Pembanding' && isset($raw_val[0])) {
+                                                                                                            $row_data = array_merge($raw_val[0], $row_data);
+                                                                                                        } elseif ($c_cat === 'Zat Uji') {
+                                                                                                            foreach ($raw_val as $old_r) {
+                                                                                                                $old_name = strtolower($old_r['nama_zat'] ?? ($old_r['kategori'] ?? ''));
+                                                                                                                if (strpos($old_name, 'uji') !== false) {
+                                                                                                                    $row_data = array_merge($old_r, $row_data);
+                                                                                                                    $row_data['nama_zat'] = 'Zat Uji';
+                                                                                                                    $row_data['kategori'] = 'Zat Uji';
+                                                                                                                    break;
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                    $existing_rows[] = $row_data;
+                                                                                                }
+                                                                                            }
+                                                                                        } else {
+                                                                                            $existing_rows = !empty($raw_val) && is_array($raw_val)
+                                                                                                ? $raw_val
+                                                                                                : (isset($fld['default_rows']) ? $fld['default_rows'] : array(array()));
+                                                                                        }
                                                                                     ?>
                                                                                     <?php foreach ($existing_rows as $r_idx => $row_data): ?>
                                                                                         <tr>
@@ -1098,7 +1203,7 @@
                                                                                                     $c_type = isset($col['type']) && $col['type'] === 'date' ? 'date' : 'text';
                                                                                                 ?>
                                                                                                 <td>
-                                                                                                    <?php if ($c_readonly): ?>
+                                                                                                    <?php if ($c_readonly && !$is_identifikasi): ?>
                                                                                                         <div class="px-2 py-1 bg-light border rounded text-dark fw-semibold small" style="white-space: normal; word-break: break-word; line-height: 1.35; min-width: 130px;">
                                                                                                             <?php echo html_escape((string)$c_val); ?>
                                                                                                         </div>
@@ -1109,10 +1214,11 @@
                                                                                                         >
                                                                                                     <?php else: ?>
                                                                                                         <input
-                                                                                                            type="<?php echo $c_type; ?>"
+                                                                                                            type="<?php echo $is_identifikasi ? 'text' : $c_type; ?>"
                                                                                                             class="form-control form-control-sm"
                                                                                                             name="forms[<?php echo $f['id']; ?>][hasil][<?php echo $fld_id; ?>][<?php echo $r_idx; ?>][<?php echo $c_id; ?>]"
                                                                                                             value="<?php echo html_escape((string)$c_val); ?>"
+                                                                                                            placeholder="<?php echo $is_identifikasi ? 'Input teks/angka...' : ''; ?>"
                                                                                                         >
                                                                                                     <?php endif; ?>
                                                                                                 </td>
@@ -2229,6 +2335,13 @@
             var syaratStr = (pane.getAttribute('data-syarat') || '').replace(/,/g, '.');
             var paramStr = (pane.getAttribute('data-parameter') || '').toLowerCase();
 
+            // 0. FORM IDENTIFIKASI (Kualitatif: Positif/Negatif)
+            var isIdent = (pane.getAttribute('data-is-identifikasi') === '1') || paramStr.indexOf('identifikasi') !== -1 || namaTpl.indexOf('identifikasi') !== -1;
+            if (isIdent) {
+                evaluasiIdentifikasi(pane, formId);
+                return;
+            }
+
             // 1. FORM DISOLUSI (KIM-06 atau nama / parameter mengandung disolusi)
             if (kodeTpl === 'KIM-06' || namaTpl.indexOf('disolusi') !== -1 || paramStr.indexOf('disolusi') !== -1) {
                 evaluasiDisolusi(pane, formId, syaratStr);
@@ -2348,6 +2461,21 @@
          * Jika S2 TMS: Otomatis tampilkan tabel Tahap S3 (Bejana 13-24)
          * Tahap S3 (24 unit total): Rata-rata 24 unit >= Q, tidak lebih dari 2 unit < Q - 15%, dan tidak ada unit < Q - 25%
          */
+        /**
+         * Evaluasi kesimpulan untuk Formulir Identifikasi (Kualitatif: Positif/Negatif)
+         */
+        function evaluasiIdentifikasi(pane, formId) {
+            var valUji = pane.querySelector('select[name*="[hasil_identifikasi]"], input[name*="[hasil_identifikasi]"], select[name*="[hasil_uji]"], input[name*="[hasil_uji]"]');
+            if (!valUji) return;
+            var val = (valUji.value || '').trim().toLowerCase();
+            if (!val) return;
+            if (val === 'positif' || val === 'sesuai' || val === 'memenuhi syarat' || val === 'ms' || val.indexOf('positif') !== -1 || val.indexOf('sesuai') !== -1) {
+                setKesimpulanOtomatis(formId, 'Memenuhi Syarat (MS)', 'Hasil pengujian identifikasi kualitatif: ' + (valUji.value || 'Positif') + ' (Memenuhi Syarat).');
+            } else if (val === 'negatif' || val === 'tidak sesuai' || val === 'tidak memenuhi syarat' || val === 'tms' || val.indexOf('negatif') !== -1 || val.indexOf('tidak') !== -1) {
+                setKesimpulanOtomatis(formId, 'Tidak Memenuhi Syarat (TMS)', 'Hasil pengujian identifikasi kualitatif: ' + (valUji.value || 'Negatif') + ' (Tidak Memenuhi Syarat).');
+            }
+        }
+
         function evaluasiDisolusi(pane, formId, syaratStr) {
             // Ambil toleransi Q dari input atau teks syarat monografi
             var qInput = pane.querySelector('input[name*="[toleransi_q]"]');
@@ -3177,6 +3305,15 @@
         }
 
         function updateMetodeKadarUI(pane) {
+        if (!pane) return;
+        var pName = (pane.getAttribute('data-parameter') || '').toLowerCase();
+        var tName = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+        var isIdent = (pane.getAttribute('data-is-identifikasi') === '1') || pName.indexOf('identifikasi') !== -1 || tName.indexOf('identifikasi') !== -1;
+        if (isIdent) {
+            var mw = pane.querySelector('[data-field-wrapper="metode_perhitungan_kadar"]');
+            if (mw) mw.style.display = 'none';
+            return;
+        }
             if (!pane) return;
             var mode = getMetodeKadar(pane);
 
@@ -3189,30 +3326,68 @@
             var volInp = pane.querySelector('input[name*="[volume_takaran_etiket]"]');
             var vEt = (volInp && parseFloat(volInp.value) > 0) ? volInp.value : '5.0';
 
+            var tableRows = pane.querySelectorAll('table tbody tr');
+
             if (mode === 'tablet_cemplung') {
                 if (wrapVol) wrapVol.style.display = 'none';
                 if (wrapBr) wrapBr.style.display = 'none';
                 if (txtRumus) {
-                    txtRumus.innerHTML = '<strong>Rumus Aktif (Tablet Cemplung):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; B<sub>b</sub> &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (1 / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100% <span class="badge bg-success ms-2">Hasil: mg/tablet (Direct Dissolution Utuh)</span>';
+                    txtRumus.innerHTML = '<strong>Rumus Aktif (Tablet Cemplung):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; B<sub>b</sub> &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (1 / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100%<div class="mt-1 text-success fw-bold" style="font-size: 0.78rem;"><i class="bi bi-info-circle-fill me-1"></i>Keterangan Rumus Tablet Cemplung: Pada penetapan kadar tablet cemplung / effervescent / direct dissolution, pengujian menggunakan 1 tablet utuh yang dilarutkan langsung secara utuh tanpa penggerusan dan penimbangan serbuk sisa (bagian zat uji: wadah zat, wadah sisa, dan bobot uji digabung menjadi 1 tablet utuh).</div>';
                 }
                 if (labelKe) labelKe.innerHTML = 'Klaim Etiket per Tablet (Ke) [mg]';
                 if (labelKadarMg) labelKadarMg.innerHTML = 'Kadar Rata-rata per Tablet (mg/tab)';
+
+                tableRows.forEach(function(tr) {
+                    var kat = (tr.querySelector('input[name*="[kategori]"], td:first-child input, td:first-child')?.value || tr.querySelector('td:first-child')?.textContent || '').toLowerCase();
+                    if (kat.indexOf('uji') !== -1 || kat.indexOf('sampel') !== -1) {
+                        var wZat = tr.querySelector('input[name*="[wadah_zat]"]');
+                        var wSisa = tr.querySelector('input[name*="[wadah_sisa]"]');
+                        var bBersih = tr.querySelector('input[name*="[bobot_bersih]"], input[name*="[bobot_zat]"]');
+                        if (wZat) wZat.placeholder = "1 Tab Utuh";
+                        if (wSisa) wSisa.placeholder = "(Digabung)";
+                        if (bBersih) {
+                            bBersih.placeholder = "1 Tab";
+                            if (!bBersih.value || bBersih.value === '0') bBersih.value = "1";
+                        }
+                    }
+                });
             } else if (mode === 'sirup') {
                 if (wrapVol) wrapVol.style.display = '';
                 if (wrapBr) wrapBr.style.display = 'none';
                 if (txtRumus) {
-                    txtRumus.innerHTML = '<strong>Rumus Aktif (Sirup/Cairan):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; (B<sub>b</sub> / V<sub>u</sub>) &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (' + vEt + ' / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100% <span class="badge bg-primary ms-2">Hasil: mg per ' + vEt + ' mL</span>';
+                    txtRumus.innerHTML = '<strong>Rumus Aktif (Sirup/Cairan):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; (B<sub>b</sub> / V<sub>u</sub>) &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (' + vEt + ' / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100%<div class="mt-1 text-primary fw-bold" style="font-size: 0.78rem;"><i class="bi bi-info-circle-fill me-1"></i>Keterangan Rumus Sirup: Pada penetapan kadar sirup / suspensi / cairan oral, pengujian menggunakan pemipetan volume sampel uji (Vu dalam mL) per takaran saji ' + vEt + ' mL (bagian wadah zat dan wadah sisa digabung menjadi satu bagian volume uji Vu).</div>';
                 }
                 if (labelKe) labelKe.innerHTML = 'Klaim Etiket per ' + vEt + ' mL (Ke) [mg]';
                 if (labelKadarMg) labelKadarMg.innerHTML = 'Kadar Rata-rata (mg / ' + vEt + ' mL)';
+
+                tableRows.forEach(function(tr) {
+                    var kat = (tr.querySelector('input[name*="[kategori]"], td:first-child input, td:first-child')?.value || tr.querySelector('td:first-child')?.textContent || '').toLowerCase();
+                    if (kat.indexOf('uji') !== -1 || kat.indexOf('sampel') !== -1) {
+                        var wZat = tr.querySelector('input[name*="[wadah_zat]"]');
+                        var wSisa = tr.querySelector('input[name*="[wadah_sisa]"]');
+                        var bBersih = tr.querySelector('input[name*="[bobot_bersih]"], input[name*="[bobot_zat]"]');
+                        if (wZat) wZat.placeholder = "Vol. Pipet Vu (mL)";
+                        if (wSisa) wSisa.placeholder = "(Digabung)";
+                        if (bBersih) bBersih.placeholder = "Vu (mL)";
+                    }
+                });
             } else { // tablet_br
                 if (wrapVol) wrapVol.style.display = 'none';
                 if (wrapBr) wrapBr.style.display = '';
                 if (txtRumus) {
-                    txtRumus.innerHTML = '<strong>Rumus Aktif (Tablet BR):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; (B<sub>b</sub> / B<sub>u</sub>) &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (Br / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100% <span class="badge bg-secondary ms-2">Hasil: mg/tablet (Metode 20 Tablet Digerus)</span>';
+                    txtRumus.innerHTML = '<strong>Rumus Aktif (Tablet BR):</strong> Kadar (%) = (A<sub>u</sub> / A<sub>b</sub>) &times; (B<sub>b</sub> / B<sub>u</sub>) &times; (F<sub>u</sub> / F<sub>b</sub>) &times; (Br / Ke) &times; K<sub>b</sub> &times; [f<sub>BM</sub>] &times; 100%<div class="mt-1 text-secondary fw-bold" style="font-size: 0.78rem;"><i class="bi bi-info-circle-fill me-1"></i>Metode 20 Tablet Digerus: Penimbangan serbuk uji (Wadah+Zat - Wadah+Sisa) dikalikan Bobot Rata-rata 20 Tablet (Br).</div>';
                 }
                 if (labelKe) labelKe.innerHTML = 'Klaim Etiket per Tablet (Ke) [mg]';
                 if (labelKadarMg) labelKadarMg.innerHTML = 'Kadar Rata-rata per Tablet (mg/tab)';
+
+                tableRows.forEach(function(tr) {
+                    var wZat = tr.querySelector('input[name*="[wadah_zat]"]');
+                    var wSisa = tr.querySelector('input[name*="[wadah_sisa]"]');
+                    var bBersih = tr.querySelector('input[name*="[bobot_bersih]"], input[name*="[bobot_zat]"]');
+                    if (wZat) wZat.placeholder = "";
+                    if (wSisa) wSisa.placeholder = "";
+                    if (bBersih) bBersih.placeholder = "";
+                });
             }
         }
 
@@ -3224,69 +3399,128 @@
         // Syarat Horwitz = 0.5 * (2 ^ (1 - 0.5 * LOG10(Kadar/100)))
         // =========================================================================
         function hitungSpektrofotometri() {
-            var kbInput = document.querySelector('input[name*="[kadar_baku_persen]"]'); // M25
-            var brInput = document.querySelector('input[name*="[bobot_rata_rata_tablet]"]'); // K46
-            var keInput = document.querySelector('input[name*="[klaim_etiket]"]'); // K47
-            var bmInput = document.querySelector('.form-tab-pane-uji.active input[name*="[faktor_konversi_bm]"]') || document.querySelector('input[name*="[faktor_konversi_bm]"]');
-            var pane = kbInput ? kbInput.closest('.form-tab-pane-uji') : document;
+            var panes = document.querySelectorAll('.form-tab-pane-uji');
+            panes.forEach(function(pane) {
+                var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+                var namaTpl = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+                var paramTpl = (pane.getAttribute('data-parameter') || '').toLowerCase();
+                if (kodeTpl === 'KIM-05' || namaTpl.indexOf('spektro') !== -1 || paramTpl.indexOf('spektro') !== -1 || pane.querySelector('input[name*="[tabel_preparasi]"]')) {
+                    hitungSpektrofotometriPane(pane);
+                }
+            });
+        }
+
+        function hitungSpektrofotometriPane(pane) {
+            if (!pane) return;
+            var pName = (pane.getAttribute('data-parameter') || '').toLowerCase();
+            var tName = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+            var isIdent = (pane.getAttribute('data-is-identifikasi') === '1') || pName.indexOf('identifikasi') !== -1 || tName.indexOf('identifikasi') !== -1;
+            if (isIdent) {
+                return; // Skip hitung kadar untuk LCP Identifikasi
+            }
+            var kbInput = pane.querySelector('input[name*="[kadar_baku_persen]"]'); // M25
+            var brInput = pane.querySelector('input[name*="[bobot_rata_rata_tablet]"], input[name*="[bobot_rata_tablet]"]'); // K46
+            var keInput = pane.querySelector('input[name*="[klaim_etiket]"]'); // K47
+            var bmInput = pane.querySelector('input[name*="[faktor_konversi_bm]"]');
             var metodeKadar = getMetodeKadar(pane);
-            var volEtiketInput = pane ? pane.querySelector('input[name*="[volume_takaran_etiket]"]') : document.querySelector('input[name*="[volume_takaran_etiket]"]');
+            var volEtiketInput = pane.querySelector('input[name*="[volume_takaran_etiket]"]');
             var Vetiket = (volEtiketInput && parseFloat(volEtiketInput.value) > 0) ? parseFloat(volEtiketInput.value) : 5.0;
 
             var Kb = kbInput ? parseFloat(kbInput.value) || 0 : 0;
             var Br = brInput ? parseFloat(brInput.value) || 0 : 0;
             var Ke = keInput ? parseFloat(keInput.value) || 0 : 0;
             var bmFactor = evalMathExpression(bmInput ? bmInput.value : 1.0);
+            updateBMPreviewInContainer(pane);
 
             // Baris 0: Baku | Baris 1: Uji 1 | Baris 2: Uji 2
-            var wadahZatBaku = document.querySelector('input[name*="[tabel_preparasi][0][wadah_zat]"]');
-            var wadahSisaBaku = document.querySelector('input[name*="[tabel_preparasi][0][wadah_sisa]"]');
-            var bobotZatBakuEl = document.querySelector('input[name*="[tabel_preparasi][0][bobot_zat]"]');
-            var fbEl = document.querySelector('input[name*="[tabel_preparasi][0][faktor_pengenceran]"]');
-            var cBakuEl = document.querySelector('input[name*="[tabel_preparasi][0][konsentrasi]"]');
-            var abEl = document.querySelector('input[name*="[tabel_preparasi][0][serapan]"]');
+            var wadahZatBaku = pane.querySelector('input[name*="[tabel_preparasi][0][wadah_zat]"]');
+            var wadahSisaBaku = pane.querySelector('input[name*="[tabel_preparasi][0][wadah_sisa]"]');
+            var bobotZatBakuEl = pane.querySelector('input[name*="[tabel_preparasi][0][bobot_zat]"]');
+            var fbEl = pane.querySelector('input[name*="[tabel_preparasi][0][faktor_pengenceran]"]');
+            var cBakuEl = pane.querySelector('input[name*="[tabel_preparasi][0][konsentrasi]"]');
+            var abEl = pane.querySelector('input[name*="[tabel_preparasi][0][serapan]"]');
 
-            var wadahZatU1 = document.querySelector('input[name*="[tabel_preparasi][1][wadah_zat]"]');
-            var wadahSisaU1 = document.querySelector('input[name*="[tabel_preparasi][1][wadah_sisa]"]');
-            var bobotZatU1El = document.querySelector('input[name*="[tabel_preparasi][1][bobot_zat]"]');
-            var fu1El = document.querySelector('input[name*="[tabel_preparasi][1][faktor_pengenceran]"]');
-            var cU1El = document.querySelector('input[name*="[tabel_preparasi][1][konsentrasi]"]');
-            var au1El = document.querySelector('input[name*="[tabel_preparasi][1][serapan]"]');
+            var wadahZatU1 = pane.querySelector('input[name*="[tabel_preparasi][1][wadah_zat]"]');
+            var wadahSisaU1 = pane.querySelector('input[name*="[tabel_preparasi][1][wadah_sisa]"]');
+            var bobotZatU1El = pane.querySelector('input[name*="[tabel_preparasi][1][bobot_zat]"]');
+            var fu1El = pane.querySelector('input[name*="[tabel_preparasi][1][faktor_pengenceran]"]');
+            var cU1El = pane.querySelector('input[name*="[tabel_preparasi][1][konsentrasi]"]');
+            var au1El = pane.querySelector('input[name*="[tabel_preparasi][1][serapan]"]');
 
-            var wadahZatU2 = document.querySelector('input[name*="[tabel_preparasi][2][wadah_zat]"]');
-            var wadahSisaU2 = document.querySelector('input[name*="[tabel_preparasi][2][wadah_sisa]"]');
-            var bobotZatU2El = document.querySelector('input[name*="[tabel_preparasi][2][bobot_zat]"]');
-            var fu2El = document.querySelector('input[name*="[tabel_preparasi][2][faktor_pengenceran]"]');
-            var cU2El = document.querySelector('input[name*="[tabel_preparasi][2][konsentrasi]"]');
-            var au2El = document.querySelector('input[name*="[tabel_preparasi][2][serapan]"]');
+            var wadahZatU2 = pane.querySelector('input[name*="[tabel_preparasi][2][wadah_zat]"]');
+            var wadahSisaU2 = pane.querySelector('input[name*="[tabel_preparasi][2][wadah_sisa]"]');
+            var bobotZatU2El = pane.querySelector('input[name*="[tabel_preparasi][2][bobot_zat]"]');
+            var fu2El = pane.querySelector('input[name*="[tabel_preparasi][2][faktor_pengenceran]"]');
+            var cU2El = pane.querySelector('input[name*="[tabel_preparasi][2][konsentrasi]"]');
+            var au2El = pane.querySelector('input[name*="[tabel_preparasi][2][serapan]"]');
 
             if (!kbInput && !abEl) return;
 
-            // 1. Hitung bobot zat = wadah+zat - wadah+sisa
+            // 1. Hitung bobot zat = wadah+zat - wadah+sisa (presisi penuh tanpa pembulatan paksa)
             var Bb = 0, Bu1 = 0, Bu2 = 0;
             if (wadahZatBaku && wadahSisaBaku) {
                 var wzb = parseFloat(wadahZatBaku.value) || 0;
                 var wsb = parseFloat(wadahSisaBaku.value) || 0;
-                Bb = wzb > 0 ? (wzb - wsb) : (parseFloat(bobotZatBakuEl ? bobotZatBakuEl.value : 0) || 0);
-                if (bobotZatBakuEl && Bb > 0) bobotZatBakuEl.value = Bb.toFixed(2);
+                if (wzb > 0 && wsb > 0 && wzb >= wsb) {
+                    Bb = wzb - wsb;
+                    if (bobotZatBakuEl && !bobotZatBakuEl.dataset.manualEdited) {
+                        bobotZatBakuEl.value = parseFloat(Bb.toPrecision(12)).toString();
+                    }
+                } else if (bobotZatBakuEl) {
+                    Bb = parseFloat(bobotZatBakuEl.value) || 0;
+                }
             } else if (bobotZatBakuEl) {
                 Bb = parseFloat(bobotZatBakuEl.value) || 0;
             }
-            if (wadahZatU1 && wadahSisaU1) {
-                var wzu1 = parseFloat(wadahZatU1.value) || 0;
-                var wsu1 = parseFloat(wadahSisaU1.value) || 0;
-                Bu1 = wzu1 > 0 ? (wzu1 - wsu1) : (parseFloat(bobotZatU1El ? bobotZatU1El.value : 0) || 0);
-                if (bobotZatU1El && Bu1 > 0) bobotZatU1El.value = Bu1.toFixed(2);
-            } else if (bobotZatU1El) {
-                Bu1 = parseFloat(bobotZatU1El.value) || 0;
-            }
-            if (wadahZatU2 && wadahSisaU2) {
-                var wzu2 = parseFloat(wadahZatU2.value) || 0;
-                var wsu2 = parseFloat(wadahSisaU2.value) || 0;
-                Bu2 = wzu2 > 0 ? (wzu2 - wsu2) : (parseFloat(bobotZatU2El ? bobotZatU2El.value : 0) || 0);
-                if (bobotZatU2El && Bu2 > 0) bobotZatU2El.value = Bu2.toFixed(2);
-            } else if (bobotZatU2El) {
-                Bu2 = parseFloat(bobotZatU2El.value) || 0;
+
+            if (metodeKadar === 'tablet_cemplung') {
+                Bu1 = 1.0;
+                Bu2 = 1.0;
+                if (bobotZatU1El && (!bobotZatU1El.value || bobotZatU1El.value === '0')) bobotZatU1El.value = "1";
+                if (bobotZatU2El && (!bobotZatU2El.value || bobotZatU2El.value === '0')) bobotZatU2El.value = "1";
+            } else if (metodeKadar === 'sirup') {
+                if (wadahZatU1 && parseFloat(wadahZatU1.value) > 0) {
+                    Bu1 = parseFloat(wadahZatU1.value);
+                    if (bobotZatU1El && !bobotZatU1El.dataset.manualEdited) bobotZatU1El.value = wadahZatU1.value;
+                } else if (bobotZatU1El) {
+                    Bu1 = parseFloat(bobotZatU1El.value) || 0;
+                }
+                if (wadahZatU2 && parseFloat(wadahZatU2.value) > 0) {
+                    Bu2 = parseFloat(wadahZatU2.value);
+                    if (bobotZatU2El && !bobotZatU2El.dataset.manualEdited) bobotZatU2El.value = wadahZatU2.value;
+                } else if (bobotZatU2El) {
+                    Bu2 = parseFloat(bobotZatU2El.value) || 0;
+                }
+            } else {
+                if (wadahZatU1 && wadahSisaU1) {
+                    var wzu1 = parseFloat(wadahZatU1.value) || 0;
+                    var wsu1 = parseFloat(wadahSisaU1.value) || 0;
+                    if (wzu1 > 0 && wsu1 > 0 && wzu1 >= wsu1) {
+                        Bu1 = wzu1 - wsu1;
+                        if (bobotZatU1El && !bobotZatU1El.dataset.manualEdited) {
+                            bobotZatU1El.value = parseFloat(Bu1.toPrecision(12)).toString();
+                        }
+                    } else if (bobotZatU1El) {
+                        Bu1 = parseFloat(bobotZatU1El.value) || 0;
+                    }
+                } else if (bobotZatU1El) {
+                    Bu1 = parseFloat(bobotZatU1El.value) || 0;
+                }
+
+                if (wadahZatU2 && wadahSisaU2) {
+                    var wzu2 = parseFloat(wadahZatU2.value) || 0;
+                    var wsu2 = parseFloat(wadahSisaU2.value) || 0;
+                    if (wzu2 > 0 && wsu2 > 0 && wzu2 >= wsu2) {
+                        Bu2 = wzu2 - wsu2;
+                        if (bobotZatU2El && !bobotZatU2El.dataset.manualEdited) {
+                            bobotZatU2El.value = parseFloat(Bu2.toPrecision(12)).toString();
+                        }
+                    } else if (bobotZatU2El) {
+                        Bu2 = parseFloat(bobotZatU2El.value) || 0;
+                    }
+                } else if (bobotZatU2El) {
+                    Bu2 = parseFloat(bobotZatU2El.value) || 0;
+                }
             }
 
             var Ab = abEl ? parseFloat(abEl.value) || 0 : 0;
@@ -3296,72 +3530,68 @@
             var Au2 = au2El ? parseFloat(au2El.value) || 0 : 0;
             var Fu2 = fu2El ? parseFloat(fu2El.value) || 1 : 1;
 
-            // 1b. Hitung otomatis Konsentrasi (mcg/mL = mg * 1000 / FP)
-            if (cBakuEl && Bb > 0 && Fb > 0) {
-                cBakuEl.value = ((Bb * 1000) / Fb).toFixed(2);
+            // 1b. Hitung otomatis Konsentrasi (mcg/mL = mg * 1000 / FP) HANYA jika belum dimodifikasi manual
+            if (cBakuEl && Bb > 0 && Fb > 0 && !cBakuEl.dataset.manualEdited && cBakuEl.value === '') {
+                cBakuEl.value = parseFloat(((Bb * 1000) / Fb).toPrecision(8)).toString();
             }
-            if (cU1El && Bu1 > 0 && Fu1 > 0) {
-                cU1El.value = ((Bu1 * 1000) / Fu1).toFixed(2);
+            if (cU1El && Bu1 > 0 && Fu1 > 0 && !cU1El.dataset.manualEdited && cU1El.value === '') {
+                cU1El.value = parseFloat(((Bu1 * 1000) / Fu1).toPrecision(8)).toString();
             }
-            if (cU2El && Bu2 > 0 && Fu2 > 0) {
-                cU2El.value = ((Bu2 * 1000) / Fu2).toFixed(2);
+            if (cU2El && Bu2 > 0 && Fu2 > 0 && !cU2El.dataset.manualEdited && cU2El.value === '') {
+                cU2El.value = parseFloat(((Bu2 * 1000) / Fu2).toPrecision(8)).toString();
             }
 
             // 2. Hitung Kadar Uji 1 & 2 (%) berdasarkan METODE PERHITUNGAN
             var kadarU1 = 0, kadarU2 = 0;
-            var faktorKb = (Kb > 1) ? (Kb / 100) : Kb;
+            var faktorKb = (Kb > 1) ? (Kb / 100) : (Kb > 0 ? Kb : 1.0);
 
             if (Ab > 0 && Ke > 0 && Bb > 0) {
                 if (metodeKadar === 'tablet_cemplung') {
-                    // Rumus 2: Tablet Cemplung (1 tablet utuh direct dissolution)
-                    // Kadar = (Au / Ab) * Bb * (Fu / Fb) * (1 / Ke) * Kb * FactorBM * 100%
                     if (Au1 > 0) kadarU1 = (Au1 / Ab) * Bb * (Fu1 / Fb) * (1.0 / Ke) * faktorKb * bmFactor * 100;
                     if (Au2 > 0) kadarU2 = (Au2 / Ab) * Bb * (Fu2 / Fb) * (1.0 / Ke) * faktorKb * bmFactor * 100;
                 } else if (metodeKadar === 'sirup') {
-                    // Rumus 3: Sirup / Suspensi / Cairan Oral (Pemipetan volume Vu dalam mL)
-                    // Kadar = (Au / Ab) * (Bb / Vu) * (Fu / Fb) * (Vetiket / Ke) * Kb * FactorBM * 100%
                     if (Bu1 > 0 && Au1 > 0) kadarU1 = (Au1 / Ab) * (Bb / Bu1) * (Fu1 / Fb) * (Vetiket / Ke) * faktorKb * bmFactor * 100;
                     if (Bu2 > 0 && Au2 > 0) kadarU2 = (Au2 / Ab) * (Bb / Bu2) * (Fu2 / Fb) * (Vetiket / Ke) * faktorKb * bmFactor * 100;
                 } else {
-                    // Rumus 1: Tablet / Kapsul BR (Metode 20 Tablet Digerus / Default)
-                    // Kadar = (Au / Ab) * (Bb / Bu) * (Fu / Fb) * (Br / Ke) * Kb * FactorBM * 100%
                     if (Bu1 > 0 && Au1 > 0 && Br > 0) kadarU1 = (Au1 / Ab) * (Bb / Bu1) * (Fu1 / Fb) * (Br / Ke) * faktorKb * bmFactor * 100;
                     if (Bu2 > 0 && Au2 > 0 && Br > 0) kadarU2 = (Au2 / Ab) * (Bb / Bu2) * (Fu2 / Fb) * (Br / Ke) * faktorKb * bmFactor * 100;
                 }
             }
 
-            var kadarU1Input = document.querySelector('input[name*="[kadar_uji_1]"]');
-            var kadarU2Input = document.querySelector('input[name*="[kadar_uji_2]"]');
-            var kadarRataPersenInput = document.querySelector('input[name*="[kadar_rata_rata_persen]"]');
-            var kadarRataMgInput = document.querySelector('input[name*="[kadar_rata_rata_mg]"]');
-            var rpdInput = document.querySelector('input[name*="[rpd_hitung]"]');
-            var horwitzInput = document.querySelector('input[name*="[syarat_rpd_horwitz]"]');
+            var kadarU1Input = pane.querySelector('input[name*="[kadar_uji_1]"]');
+            var kadarU2Input = pane.querySelector('input[name*="[kadar_uji_2]"]');
+            var kadarRataPersenInput = pane.querySelector('input[name*="[kadar_rata_rata_persen]"]');
+            var kadarRataMgInput = pane.querySelector('input[name*="[kadar_rata_rata_mg]"]');
+            var rpdInput = pane.querySelector('input[name*="[rpd_hitung]"], input[name*="[nilai_rpd]"]');
+            var horwitzInput = pane.querySelector('input[name*="[syarat_rpd_horwitz]"], input[name*="[syarat_horwitz]"]');
 
-            if (kadarU1Input && kadarU1 > 0) kadarU1Input.value = kadarU1.toFixed(2);
-            if (kadarU2Input && kadarU2 > 0) kadarU2Input.value = kadarU2.toFixed(2);
+            if (kadarU1Input) kadarU1Input.value = (kadarU1 > 0) ? parseFloat(kadarU1.toPrecision(12)).toString() : '';
+            if (kadarU2Input) kadarU2Input.value = (kadarU2 > 0) ? parseFloat(kadarU2.toPrecision(12)).toString() : '';
 
             if (kadarU1 > 0 || kadarU2 > 0) {
                 var rataPersen = (kadarU1 > 0 && kadarU2 > 0) ? (kadarU1 + kadarU2) / 2 : (kadarU1 || kadarU2);
                 var rataMg = Ke > 0 ? (rataPersen * Ke) / 100 : 0;
 
-                if (kadarRataPersenInput) kadarRataPersenInput.value = rataPersen.toFixed(2);
-                if (kadarRataMgInput) kadarRataMgInput.value = rataMg.toFixed(2);
+                if (kadarRataPersenInput) kadarRataPersenInput.value = parseFloat(rataPersen.toPrecision(12)).toString();
+                if (kadarRataMgInput) kadarRataMgInput.value = (rataMg > 0) ? parseFloat(rataMg.toPrecision(12)).toString() : '';
 
-                // RPD = |Uji1 - Uji2| / Rata2 * 100
                 if (kadarU1 > 0 && kadarU2 > 0 && rataPersen > 0) {
                     var rpd = (Math.abs(kadarU1 - kadarU2) / rataPersen) * 100;
-                    if (rpdInput) rpdInput.value = rpd.toFixed(2);
+                    if (rpdInput) rpdInput.value = parseFloat(rpd.toPrecision(12)).toString();
 
-                    // 1/2 CV Horwitz: 0.5 * 2 ^ (1 - 0.5 * LOG10(kadar_fraksi))
                     var C_fraksi = rataPersen / 100;
                     if (C_fraksi > 0) {
                         var horw = 0.5 * Math.pow(2, (1 - 0.5 * (Math.log10(C_fraksi))));
-                        if (horwitzInput) horwitzInput.value = horw.toFixed(2);
+                        if (horwitzInput) horwitzInput.value = parseFloat(horw.toPrecision(12)).toString();
                     }
                 }
 
-                var pSpektro = kbInput ? kbInput.closest('.form-tab-pane-uji') : null;
-                if (pSpektro) evaluasiKesimpulanPane(pSpektro);
+                evaluasiKesimpulanPane(pane);
+            } else {
+                if (kadarRataPersenInput && !kadarRataPersenInput.dataset.manualEdited) kadarRataPersenInput.value = '';
+                if (kadarRataMgInput && !kadarRataMgInput.dataset.manualEdited) kadarRataMgInput.value = '';
+                if (rpdInput && !rpdInput.dataset.manualEdited) rpdInput.value = '';
+                if (horwitzInput && !horwitzInput.dataset.manualEdited) horwitzInput.value = '';
             }
         }
 
@@ -3385,7 +3615,6 @@
         });
 
         // =========================================================================
-        // =========================================================================
         // Evaluator Ekspresi Matematika Aman untuk Faktor Koreksi BM (BM1 / BM2)
         // Menerima angka biasa (1.0, 0.896, 0,896) atau rumus pembagian (425.9/41, (314.4/350.87))
         // =========================================================================
@@ -3394,16 +3623,13 @@
             var str = String(expr).trim();
             if (str === '') return 1.0;
 
-            // Normalisasi koma desimal ke titik (e.g. 0,896 -> 0.896)
             str = str.replace(/,/g, '.');
 
-            // Jika murni angka biasa
             if (!isNaN(str) && !isNaN(parseFloat(str))) {
                 var num = parseFloat(str);
                 return num > 0 ? num : 1.0;
             }
 
-            // Validasi karakter yang diizinkan (angka, titik, kurung, spasi, +, -, *, /)
             if (!/^[0-9\.\s\(\)\+\-\*\/]+$/.test(str)) {
                 return 1.0;
             }
@@ -3413,13 +3639,43 @@
                 if (typeof res === 'number' && !isNaN(res) && isFinite(res) && res > 0) {
                     return res;
                 }
-            } catch (e) {
-                // Abaikan kesalahan sintaks jika rumus belum selesai diketik
-            }
+            } catch (e) {}
             return 1.0;
         }
 
-        // =========================================================================
+        // Helper update badge live preview hasil hitung BM di formulir
+        function updateBMPreviewInContainer(container) {
+            if (!container) container = document;
+            var bmInputs = container.querySelectorAll('.input-faktor-bm, input[name*="[faktor_konversi_bm]"]');
+            bmInputs.forEach(function(bmInput) {
+                var bmCol = bmInput.closest('.col-md-6') || bmInput.closest('.col-12') || bmInput.parentElement;
+                if (!bmCol) return;
+                var previewEl = bmCol.querySelector('.bm-calc-preview');
+                if (!previewEl) return;
+                var evalValEl = previewEl.querySelector('.bm-eval-val');
+                var bmRaw = String(bmInput.value || '').trim();
+                var bmFactor = evalMathExpression(bmRaw);
+                var hasFormula = bmRaw !== '' && (bmRaw.indexOf('/') !== -1 || bmRaw.indexOf('*') !== -1 || bmRaw.indexOf('(') !== -1 || isNaN(bmRaw.replace(/,/g, '.')));
+                if (hasFormula || (bmRaw !== '' && parseFloat(bmRaw) !== 1.0)) {
+                    if (evalValEl) evalValEl.textContent = parseFloat(bmFactor.toPrecision(8)).toString();
+                    previewEl.style.display = 'block';
+                } else {
+                    previewEl.style.display = 'none';
+                }
+            });
+        }
+
+        // Listener universal input faktor koreksi BM
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('.input-faktor-bm, input[name*="[faktor_konversi_bm]"]')) {
+                var pane = e.target.closest('.form-tab-pane-uji') || document;
+                updateBMPreviewInContainer(pane);
+                hitungHPLC();
+                hitungSpektrofotometri();
+                hitungDisolusi();
+            }
+        });
+
         // Auto-Calculator Engine untuk Formulir Disolusi (KIM-06)
         // Sesuai Formula Resmi Excel: POM-06.02/CFM.01/SOP.01/F.01A.08
         // Fk = (V * Fu * Bb * Kb * [BM1/BM2] * 100%) / (Fb * Ab * Ke)
@@ -3710,139 +3966,219 @@
         // RPD = |K1 - K2| / Kadar * 100%, Horwitz = 0.5 * 2^(1 - 0.5*log10(C))
         // =========================================================================
         function hitungHPLC() {
-            // 1. Koreksi Kadar Kemurnian Baku
-            var bakuKadarInput = document.querySelector('input[name*="[baku_kadar]"]');
-            var bakuSpInput = document.querySelector('input[name*="[baku_sp]"]');
-            var bakuTerkoreksiInput = document.querySelector('input[name*="[baku_kadar_terkoreksi]"]');
-            var pane = bakuKadarInput ? bakuKadarInput.closest('.form-tab-pane-uji') : document;
+            var panes = document.querySelectorAll('.form-tab-pane-uji');
+            panes.forEach(function(pane) {
+                var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+                var namaTpl = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+                var paramTpl = (pane.getAttribute('data-parameter') || '').toLowerCase();
+                if (kodeTpl === 'KIM-08' || namaTpl.indexOf('kckt') !== -1 || namaTpl.indexOf('hplc') !== -1 || paramTpl.indexOf('kadar') !== -1 || pane.querySelector('table input[name*="[respon_puncak]"]')) {
+                    hitungHPLCPane(pane);
+                }
+            });
+        }
+
+        function hitungHPLCPane(pane) {
+        if (!pane) return;
+        var pName = (pane.getAttribute('data-parameter') || '').toLowerCase();
+        var tName = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+        if (pName.indexOf('identifikasi') !== -1 || tName.indexOf('identifikasi') !== -1) {
+            return; // Skip hitung kadar untuk LCP Identifikasi
+        }
+            if (!pane) return;
+
+            // 1. Tipe Metode Kadar (Tablet BR / Tablet Cemplung / Sirup)
             var metodeKadar = getMetodeKadar(pane);
-            var volEtiketInput = pane ? pane.querySelector('input[name*="[volume_takaran_etiket]"]') : document.querySelector('input[name*="[volume_takaran_etiket]"]');
+            var volEtiketInput = pane.querySelector('input[name*="[volume_takaran_etiket]"]');
             var Vetiket = (volEtiketInput && parseFloat(volEtiketInput.value) > 0) ? parseFloat(volEtiketInput.value) : 5.0;
 
-            var Kb = 0;
-            if (bakuKadarInput) {
+            // 2. Koreksi Kadar Kemurnian Baku
+            var bakuKadarInput = pane.querySelector('input[name*="[baku_kadar]"]');
+            var bakuSpInput = pane.querySelector('input[name*="[baku_sp]"]');
+            var bakuTerkoreksiInput = pane.querySelector('input[name*="[baku_kadar_terkoreksi]"]');
+
+            var Kb = 100.0;
+            if (bakuKadarInput && parseFloat(bakuKadarInput.value) > 0) {
                 var rawKadar = parseFloat(bakuKadarInput.value) || 0;
                 var sp = parseFloat(bakuSpInput ? bakuSpInput.value : 0) || 0;
                 Kb = (100 - sp) * (rawKadar / 100);
-                if (bakuTerkoreksiInput && rawKadar > 0) {
-                    bakuTerkoreksiInput.value = Kb.toFixed(2);
+                if (bakuTerkoreksiInput) {
+                    bakuTerkoreksiInput.value = parseFloat(Kb.toPrecision(8)).toString();
                 }
+            } else if (bakuTerkoreksiInput && parseFloat(bakuTerkoreksiInput.value) > 0) {
+                Kb = parseFloat(bakuTerkoreksiInput.value);
             }
 
-            // 1b. Faktor Koreksi BM / BR (BM1 / BM2)
-            var bmInput = document.querySelector('.form-tab-pane-uji.active input[name*="[faktor_konversi_bm]"]') || document.querySelector('input[name*="[faktor_konversi_bm]"]');
+            // 3. Faktor Koreksi BM / BR (BM1 / BM2)
+            var bmInput = pane.querySelector('input[name*="[faktor_konversi_bm]"]');
             var bmFactor = evalMathExpression(bmInput ? bmInput.value : 1.0);
+            updateBMPreviewInContainer(pane);
 
-            // 2. Bobot Bersih & Konsentrasi Tiap Baris Tabel HPLC
-            var hplcRows = document.querySelectorAll('tr:has(input[name*="[bobot_bersih]"])');
-            if (!hplcRows || hplcRows.length === 0) {
-                var allBb = document.querySelectorAll('input[name*="[bobot_bersih]"]');
-                allBb.forEach(function(bEl) {
-                    var tr = bEl.closest('tr');
-                    if (tr) hitungBarisHPLC(tr);
-                });
-            } else {
-                hplcRows.forEach(function(row) {
-                    hitungBarisHPLC(row);
-                });
+            // 4. Hitung Bobot Bersih Tiap Baris Tabel HPLC (Scoped khusus ke tabel HPLC, bukan tabel gradient)
+            var hplcInput = pane.querySelector('input[name*="[tabel_hplc]"], input[name*="[respon_puncak]"]');
+            var hplcTable = hplcInput ? hplcInput.closest('table') : null;
+            var rows = hplcTable ? Array.from(hplcTable.querySelectorAll('tbody tr')) : [];
+            if (rows.length === 0) {
+                rows = Array.from(pane.querySelectorAll('tr:has(input[name*="[respon_puncak]"]), tr:has(input[name*="[bobot_bersih]"])'));
             }
 
-            // 3. Parameter Tambahan: Br (Bobot rata tablet) & Ke (Klaim etiket)
-            var brInput = document.querySelector('input[name*="[bobot_rata_tablet]"]');
-            var keInput = document.querySelector('input[name*="[klaim_etiket]"]');
+            rows.forEach(function(tr) {
+                hitungBarisHPLC(tr, metodeKadar);
+            });
+
+            // 5. Parameter Tambahan: Br (Bobot rata tablet) & Ke (Klaim etiket)
+            var brInput = pane.querySelector('input[name*="[bobot_rata_tablet]"], input[name*="[bobot_rata_rata_tablet]"]');
+            var keInput = pane.querySelector('input[name*="[klaim_etiket]"]');
             var Br = parseFloat(brInput ? brInput.value : 0) || 0;
             var Ke = parseFloat(keInput ? keInput.value : 0) || 0;
 
-            // 4. Ambil Nilai Baku Pembanding (Row 0)
-            var bbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][bobot_bersih]"]');
-            var fbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][faktor_pengenceran]"]');
-            var lbBakuEl = document.querySelector('input[name*="[tabel_hplc][0][respon_puncak]"]');
+            // 6. Ambil Data Baku Pembanding & Zat Uji Replikasi 1 & 2 secara dinamis dari tabel HPLC
+            var bakuRow = null;
+            var uji1Row = null;
+            var uji2Row = null;
 
-            var Bb = parseFloat(bbBakuEl ? bbBakuEl.value : 0) || 0;
-            var Fb = parseFloat(fbBakuEl ? fbBakuEl.value : 1) || 1;
-            var Lb = parseFloat(lbBakuEl ? lbBakuEl.value : 0) || 0;
+            rows.forEach(function(tr) {
+                var katInput = tr.querySelector('input[name*="[kategori]"], td:first-child input, td:first-child');
+                var katText = (katInput ? (katInput.value || katInput.textContent || '') : '').toLowerCase();
+                if (katText.indexOf('baku pembanding') !== -1 || (katText.indexOf('baku') !== -1 && katText.indexOf('internal') === -1)) {
+                    if (!bakuRow) bakuRow = tr;
+                } else if (katText.indexOf('uji 1') !== -1 || katText.indexOf('replikasi 1') !== -1) {
+                    uji1Row = tr;
+                } else if (katText.indexOf('uji 2') !== -1 || katText.indexOf('replikasi 2') !== -1) {
+                    uji2Row = tr;
+                }
+            });
 
-            // 5. Hitung Replikasi 1 (Row 2) & Replikasi 2 (Row 3) dengan multi-metode
-            var k1 = hitungKadarSatuSampel(2, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket);
-            var k2 = hitungKadarSatuSampel(3, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket);
+            // Fallback berdasarkan index tabel HPLC jika teks kategori belum/tidak cocok
+            if (!bakuRow && rows.length > 0) bakuRow = rows[0];
+            if (!uji1Row) {
+                if (rows.length >= 4) uji1Row = rows[2];
+                else if (rows.length >= 2) uji1Row = rows[1];
+            }
+            if (!uji2Row) {
+                if (rows.length >= 4) uji2Row = rows[3];
+                else if (rows.length >= 3) uji2Row = rows[2];
+            }
 
-            var k1Input = document.querySelector('input[name*="[kadar_replikasi_1]"]');
-            var k2Input = document.querySelector('input[name*="[kadar_replikasi_2]"]');
+            var Bb = 0, Fb = 1, Lb = 0;
+            if (bakuRow) {
+                var bbEl = bakuRow.querySelector('input[name*="[bobot_bersih]"]');
+                var fbEl = bakuRow.querySelector('input[name*="[faktor_pengenceran]"]');
+                var lbEl = bakuRow.querySelector('input[name*="[respon_puncak]"]');
+                Bb = parseFloat(bbEl ? bbEl.value : 0) || 0;
+                Fb = parseFloat(fbEl ? fbEl.value : 1) || 1;
+                Lb = parseFloat(lbEl ? lbEl.value : 0) || 0;
+            }
 
-            if (k1Input && k1 > 0) k1Input.value = k1.toFixed(2);
-            if (k2Input && k2 > 0) k2Input.value = k2.toFixed(2);
+            // 7. Hitung Kadar Uji 1 dan Uji 2 (Presisi unrounded sebenar-benarnya)
+            var k1 = hitungKadarSatuBaris(uji1Row, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket);
+            var k2 = hitungKadarSatuBaris(uji2Row, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket);
 
-            // 6. Rata-rata Kadar, RPD & Horwitz
+            var k1Input = pane.querySelector('input[name*="[kadar_replikasi_1]"], input[name*="[kadar_uji_1]"]');
+            var k2Input = pane.querySelector('input[name*="[kadar_replikasi_2]"], input[name*="[kadar_uji_2]"]');
+
+            if (k1Input) k1Input.value = (k1 > 0) ? parseFloat(k1.toPrecision(12)).toString() : '';
+            if (k2Input) k2Input.value = (k2 > 0) ? parseFloat(k2.toPrecision(12)).toString() : '';
+
+            // 8. Rata-rata Kadar, RPD & Horwitz (Presisi unrounded sebenar-benarnya)
+            var rataPersenInput = pane.querySelector('input[name*="[kadar_rata_persen]"], input[name*="[kadar_rata_rata_persen]"]');
+            var rataMgInput = pane.querySelector('input[name*="[kadar_rata_mg]"], input[name*="[kadar_rata_rata_mg]"]');
+            var rpdInput = pane.querySelector('input[name*="[nilai_rpd]"], input[name*="[rpd_hitung]"]');
+            var horwitzInput = pane.querySelector('input[name*="[syarat_horwitz]"], input[name*="[syarat_rpd_horwitz]"]');
+
             if (k1 > 0 || k2 > 0) {
                 var rataPersen = (k1 > 0 && k2 > 0) ? (k1 + k2) / 2 : (k1 || k2);
                 var rataMg = Ke > 0 ? (rataPersen / 100) * Ke : 0;
                 var rpd = (k1 > 0 && k2 > 0 && rataPersen > 0) ? (Math.abs(k1 - k2) / rataPersen) * 100 : 0;
 
-                // Syarat Horwitz: 0.5 * (2 ^ (1 - 0.5 * log10(C)))
                 var C = rataPersen / 100;
                 var horwitz = 0;
                 if (C > 0) {
                     horwitz = 0.5 * Math.pow(2, (1 - (0.5 * (Math.log(C) / Math.LN10))));
                 }
 
-                var rataPersenInput = document.querySelector('input[name*="[kadar_rata_persen]"]');
-                var rataMgInput = document.querySelector('input[name*="[kadar_rata_mg]"]');
-                var rpdInput = document.querySelector('input[name*="[nilai_rpd]"]');
-                var horwitzInput = document.querySelector('input[name*="[syarat_horwitz]"]');
+                if (rataPersenInput) rataPersenInput.value = parseFloat(rataPersen.toPrecision(12)).toString();
+                if (rataMgInput) rataMgInput.value = (rataMg > 0) ? parseFloat(rataMg.toPrecision(12)).toString() : '';
+                if (rpdInput) rpdInput.value = (rpd > 0) ? parseFloat(rpd.toPrecision(12)).toString() : '0';
+                if (horwitzInput) horwitzInput.value = (horwitz > 0) ? parseFloat(horwitz.toPrecision(12)).toString() : '0';
 
-                if (rataPersenInput) rataPersenInput.value = rataPersen.toFixed(2);
-                if (rataMgInput) rataMgInput.value = rataMg.toFixed(2);
-                if (rpdInput && rpd > 0) rpdInput.value = rpd.toFixed(2);
-                if (horwitzInput && horwitz > 0) horwitzInput.value = horwitz.toFixed(2);
-
-                var pHplc = bakuKadarInput ? bakuKadarInput.closest('.form-tab-pane-uji') : null;
-                if (pHplc) evaluasiKesimpulanPane(pHplc);
+                evaluasiKesimpulanPane(pane);
+            } else {
+                if (rataPersenInput && !rataPersenInput.dataset.manualEdited) rataPersenInput.value = '';
+                if (rataMgInput && !rataMgInput.dataset.manualEdited) rataMgInput.value = '';
+                if (rpdInput && !rpdInput.dataset.manualEdited) rpdInput.value = '';
+                if (horwitzInput && !horwitzInput.dataset.manualEdited) horwitzInput.value = '';
             }
         }
 
-        function hitungBarisHPLC(tr) {
+        function hitungBarisHPLC(tr, metodeKadar) {
+            if (!tr) return;
             var wZatInput = tr.querySelector('input[name*="[wadah_zat]"]');
             var wSisaInput = tr.querySelector('input[name*="[wadah_sisa]"]');
             var bBersihInput = tr.querySelector('input[name*="[bobot_bersih]"]');
             var fpInput = tr.querySelector('input[name*="[faktor_pengenceran]"]');
             var cInput = tr.querySelector('input[name*="[konsentrasi]"]');
 
-            var bBersih = 0;
-            if (wZatInput && wSisaInput && bBersihInput) {
-                var wZat = parseFloat(wZatInput.value) || 0;
-                var wSisa = parseFloat(wSisaInput.value) || 0;
-                if (wZat > 0 && wSisa > 0 && wZat >= wSisa) {
-                    bBersih = wZat - wSisa;
-                    bBersihInput.value = bBersih.toFixed(4);
-                } else if (parseFloat(bBersihInput.value) > 0) {
-                    bBersih = parseFloat(bBersihInput.value) || 0;
+            var katInput = tr.querySelector('input[name*="[kategori]"], td:first-child input, td:first-child');
+            var katText = (katInput ? (katInput.value || katInput.textContent || '') : '').toLowerCase();
+            var isUjiRow = (katText.indexOf('uji') !== -1 || katText.indexOf('sampel') !== -1);
+
+            var mode = metodeKadar || 'tablet_br';
+
+            // Penanganan khusus untuk Tablet Cemplung dan Sirup pada baris Zat Uji:
+            if (isUjiRow && mode === 'tablet_cemplung') {
+                if (wZatInput) wZatInput.placeholder = "1 Tab Utuh";
+                if (wSisaInput) wSisaInput.placeholder = "(Digabung)";
+                if (bBersihInput && (!bBersihInput.value || bBersihInput.value === '0')) {
+                    bBersihInput.value = "1";
                 }
-            } else if (bBersihInput) {
-                bBersih = parseFloat(bBersihInput.value) || 0;
+            } else if (isUjiRow && mode === 'sirup') {
+                if (wSisaInput) wSisaInput.placeholder = "(Digabung)";
+                if (wZatInput && parseFloat(wZatInput.value) > 0) {
+                    if (bBersihInput && !bBersihInput.dataset.manualEdited) {
+                        bBersihInput.value = wZatInput.value;
+                    }
+                }
+            } else {
+                // Mode standar / Baku Pembanding: Wadah + Zat - Wadah + Sisa (presisi sebenarnya tanpa pembulatan paksa)
+                if (wZatInput && bBersihInput) {
+                    var wZatStr = (wZatInput.value || '').trim();
+                    var wSisaStr = wSisaInput ? (wSisaInput.value || '').trim() : '';
+                    if (wZatStr !== '') {
+                        var wZat = parseFloat(wZatStr) || 0;
+                        var wSisa = (wSisaStr !== '') ? (parseFloat(wSisaStr) || 0) : 0;
+                        if (wZat >= wSisa) {
+                            var diff = wZat - wSisa;
+                            var cleanVal = parseFloat(diff.toPrecision(12)).toString();
+                            if (!bBersihInput.dataset.manualEdited || bBersihInput.value === '') {
+                                bBersihInput.value = cleanVal;
+                            }
+                        }
+                    }
+                }
             }
 
-            // Hitung dan tampilkan nilai konsentrasi secara otomatis
+            var bBersih = parseFloat(bBersihInput ? bBersihInput.value : 0) || 0;
+
+            // Hitung dan tampilkan nilai konsentrasi secara otomatis HANYA jika belum diubah manual oleh pengguna
             if (cInput && fpInput && bBersih > 0) {
                 var fpVal = parseFloat(fpInput.value) || 0;
-                if (fpVal > 0) {
-                    // Jika penimbangan dalam gram (< 2.0 g), ubah ke mg
+                if (fpVal > 0 && !cInput.dataset.manualEdited) {
                     var bMg = (bBersih < 2.0) ? (bBersih * 1000) : bBersih;
                     var cVal = bMg / fpVal; // mg/mL
-                    var cFormatted = (cVal >= 0.0001) ? cVal.toFixed(4) : cVal.toPrecision(4);
-                    cInput.value = parseFloat(cFormatted).toString();
+                    cInput.value = parseFloat(cVal.toPrecision(12)).toString();
                 }
             }
         }
 
-        function hitungKadarSatuSampel(rowIdx, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket) {
-            if (Lb <= 0 || Bb <= 0 || Fb <= 0 || Ke <= 0 || Kb <= 0) return 0;
+        function hitungKadarSatuBaris(tr, Lb, Bb, Fb, Br, Ke, Kb, bmFactor, metodeKadar, Vetiket) {
+            if (!tr || Lb <= 0 || Bb <= 0 || Fb <= 0 || Ke <= 0 || Kb <= 0) return 0;
             var fBM = (typeof bmFactor === 'number' && bmFactor > 0) ? bmFactor : 1.0;
             var mode = metodeKadar || 'tablet_br';
             var V_et = (typeof Vetiket === 'number' && Vetiket > 0) ? Vetiket : 5.0;
 
-            var buEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][bobot_bersih]"]');
-            var fuEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][faktor_pengenceran]"]');
-            var luEl = document.querySelector('input[name*="[tabel_hplc][' + rowIdx + '][respon_puncak]"]');
+            var buEl = tr.querySelector('input[name*="[bobot_bersih]"]');
+            var fuEl = tr.querySelector('input[name*="[faktor_pengenceran]"]');
+            var luEl = tr.querySelector('input[name*="[respon_puncak]"], input[name*="[serapan]"]');
 
             var Bu = parseFloat(buEl ? buEl.value : 0) || 0;
             var Fu = parseFloat(fuEl ? fuEl.value : 1) || 1;
@@ -3872,14 +4208,90 @@
             return isNaN(kadar) ? 0 : kadar;
         }
 
-        // Listener HPLC input
+        // Listener reaktif HPLC & Penetapan Kadar: Real-time Live calculation tanpa perlu refresh!
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.matches('input[name*="[baku_kadar]"], input[name*="[baku_sp]"], input[name*="[tabel_hplc]"], input[name*="[bobot_rata_tablet]"], input[name*="[klaim_etiket]"], input[name*="[faktor_konversi_bm]"], input[name*="[volume_takaran_etiket]"]')) {
+            if (!e.target || !e.target.name) return;
+            var targetName = e.target.name;
+
+            // Jika pengguna mengetik wadah_zat atau wadah_sisa, reset manualEdited pada bobot_bersih dan konsentrasi baris tsb
+            if (targetName.indexOf('[wadah_zat]') !== -1 || targetName.indexOf('[wadah_sisa]') !== -1) {
+                var tr = e.target.closest('tr');
+                if (tr) {
+                    var bbEl = tr.querySelector('input[name*="[bobot_bersih]"], input[name*="[bobot_zat]"]');
+                    var cEl = tr.querySelector('input[name*="[konsentrasi]"]');
+                    if (bbEl) delete bbEl.dataset.manualEdited;
+                    if (cEl) delete cEl.dataset.manualEdited;
+                }
                 hitungHPLC();
+                hitungSpektrofotometri();
+                return;
+            }
+
+            // Jika pengguna mengedit bobot_bersih secara manual
+            if (targetName.indexOf('[bobot_bersih]') !== -1 || targetName.indexOf('[bobot_zat]') !== -1) {
+                e.target.dataset.manualEdited = "true";
+                var tr = e.target.closest('tr');
+                if (tr) {
+                    var cEl = tr.querySelector('input[name*="[konsentrasi]"]');
+                    if (cEl) delete cEl.dataset.manualEdited;
+                }
+                hitungHPLC();
+                hitungSpektrofotometri();
+                return;
+            }
+
+            // Jika pengguna mengedit konsentrasi secara manual
+            if (targetName.indexOf('[konsentrasi]') !== -1) {
+                e.target.dataset.manualEdited = "true";
+                return;
+            }
+
+            // Jika pengguna mengedit faktor pengenceran
+            if (targetName.indexOf('[faktor_pengenceran]') !== -1) {
+                var tr = e.target.closest('tr');
+                if (tr) {
+                    var cEl = tr.querySelector('input[name*="[konsentrasi]"]');
+                    if (cEl) delete cEl.dataset.manualEdited;
+                }
+                hitungHPLC();
+                hitungSpektrofotometri();
+                return;
+            }
+
+            // Semua field terkait penetapan kadar (baku, respon puncak, serapan, tablet BR, klaim etiket, BM, volume)
+            if (targetName.indexOf('[respon_puncak]') !== -1 ||
+                targetName.indexOf('[serapan]') !== -1 ||
+                targetName.indexOf('[baku_kadar]') !== -1 ||
+                targetName.indexOf('[baku_sp]') !== -1 ||
+                targetName.indexOf('[kadar_baku_persen]') !== -1 ||
+                targetName.indexOf('[bobot_rata_tablet]') !== -1 ||
+                targetName.indexOf('[bobot_rata_rata_tablet]') !== -1 ||
+                targetName.indexOf('[klaim_etiket]') !== -1 ||
+                targetName.indexOf('[faktor_konversi_bm]') !== -1 ||
+                targetName.indexOf('[volume_takaran_etiket]') !== -1 ||
+                targetName.indexOf('[tabel_hplc]') !== -1 ||
+                targetName.indexOf('[tabel_preparasi]') !== -1) {
+                hitungHPLC();
+                hitungSpektrofotometri();
             }
         });
 
-        // =========================================================================
+        document.addEventListener('change', function(e) {
+            if (!e.target) return;
+            var targetName = e.target.name || '';
+            if (targetName.indexOf('[tabel_hplc]') !== -1 ||
+                targetName.indexOf('[tabel_preparasi]') !== -1 ||
+                targetName.indexOf('[metode_perhitungan_kadar]') !== -1 ||
+                e.target.matches('select[name*="[metode_perhitungan_kadar]"]')) {
+                var pane = e.target.closest('.form-tab-pane-uji');
+                if (pane) {
+                    updateMetodeKadarUI(pane);
+                }
+                hitungHPLC();
+                hitungSpektrofotometri();
+            }
+        });
+
         // Auto-Calculator Engine untuk Formulir GC-MS (KIM-09)
         // Menghitung: Bobot Bersih = Wadah+Zat - Wadah+Sisa
         // Rasio Ion: R1 = B/A, R2 = C/A, R3 = D/A

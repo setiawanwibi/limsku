@@ -90,6 +90,24 @@
                         "placeholder": "Contoh: Metanol : Dapar Fosfat pH 3.0 (60 : 40)"
                     },
                     {
+                        "id": "komposisi_fase_a",
+                        "label": "Komposisi Fase Gerak A (opsional)",
+                        "type": "text",
+                        "placeholder": "Contoh: Asetonitril 100%"
+                    },
+                    {
+                        "id": "komposisi_fase_b",
+                        "label": "Komposisi Fase Gerak B (opsional)",
+                        "type": "text",
+                        "placeholder": "Contoh: Dapar Fosfat pH 3.0"
+                    },
+                    {
+                        "id": "komposisi_fase_c",
+                        "label": "Komposisi Fase Gerak C (opsional)",
+                        "type": "text",
+                        "placeholder": "Contoh: Metanol : Air (50:50)"
+                    },
+                    {
                         "id": "tabel_gradient",
                         "label": "Program Fase Gerak Gradien (jika Elusi Gradien)",
                         "type": "table",
@@ -346,8 +364,7 @@
                                 "id": "bobot_bersih",
                                 "label": "Bobot Bersih (g)",
                                 "type": "number",
-                                "step": "any",
-                                "readonly": true
+                                "step": "any"
                             },
                             {
                                 "id": "faktor_pengenceran",
