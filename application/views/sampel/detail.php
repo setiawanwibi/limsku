@@ -482,10 +482,11 @@
                         <?php 
                         $kom = isset($sampel['komoditi']) ? strtolower($sampel['komoditi']) : 'obat';
                         $kom_badge = array(
-                            'obat'     => array('label' => '💊 Obat', 'class' => 'bg-primary-subtle text-primary border border-primary-subtle'),
-                            'pangan'   => array('label' => '🍲 Pangan & Air', 'class' => 'bg-success-subtle text-success border border-success-subtle'),
-                            'herbal'   => array('label' => '🌿 Herbal / Jamu', 'class' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'),
-                            'kosmetik' => array('label' => '💄 Kosmetik', 'class' => 'bg-danger-subtle text-danger border border-danger-subtle')
+                            'obat'     => array('label' => 'Obat', 'class' => 'bg-primary-subtle text-primary border border-primary-subtle'),
+                            'pangan'   => array('label' => 'Pangan', 'class' => 'bg-success-subtle text-success border border-success-subtle'),
+                            'herbal'   => array('label' => 'Obat Tradisional', 'class' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'),
+                            'kosmetik' => array('label' => 'Kosmetik', 'class' => 'bg-danger-subtle text-danger border border-danger-subtle'),
+                            'suplemen' => array('label' => 'Suplemen', 'class' => 'bg-secondary-subtle text-secondary border border-secondary-subtle')
                         );
                         $badge_info = isset($kom_badge[$kom]) ? $kom_badge[$kom] : array('label' => strtoupper($kom), 'class' => 'bg-secondary text-white');
                         ?>

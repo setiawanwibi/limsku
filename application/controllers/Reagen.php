@@ -144,10 +144,7 @@ class Reagen extends MY_Controller
 
         $this->data['halaman_aktif'] = 'reagen';
         $this->data['judul_halaman'] = 'Detail Reagen: ' . html_escape(!empty($reagen['nama_barang']) ? $reagen['nama_barang'] : $reagen['nama_reagen']);
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Reagen', 'url' => site_url('reagen')),
-            array('label' => 'Detail', 'url' => '#')
-        );
+    
         $this->data['reagen']        = $reagen;
 
         $this->muat_tampilan('reagen/detail');
@@ -241,10 +238,7 @@ class Reagen extends MY_Controller
 
         $this->data['halaman_aktif'] = 'reagen';
         $this->data['judul_halaman'] = 'Edit Master Reagen';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Reagen', 'url' => site_url('reagen')),
-            array('label' => 'Edit', 'url' => '#')
-        );
+    
         $this->data['reagen']        = $reagen;
 
         $this->muat_tampilan('reagen/edit');
@@ -659,11 +653,6 @@ class Reagen extends MY_Controller
 
             $this->data['halaman_aktif']   = 'reagen';
             $this->data['judul_halaman']   = 'Pratinjau Validasi Import Master Reagen';
-            $this->data['breadcrumbs']     = array(
-                array('label' => 'Master Reagen', 'url' => site_url('reagen')),
-                array('label' => 'Import', 'url' => site_url('reagen/import')),
-                array('label' => 'Pratinjau', 'url' => '#')
-            );
 
             $this->data['total_read']     = $total_read;
             $this->data['valid_rows']     = $valid_rows;
@@ -676,11 +665,6 @@ class Reagen extends MY_Controller
 
         $this->data['halaman_aktif'] = 'reagen';
         $this->data['judul_halaman'] = 'Import Master Reagen via Excel';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Master Reagen', 'url' => site_url('reagen')),
-            array('label' => 'Import Excel', 'url' => '#')
-        );
-
         $this->muat_tampilan('reagen/import');
     }
 

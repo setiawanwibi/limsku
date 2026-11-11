@@ -116,19 +116,11 @@
 
 <div class="baku-form-page">
 
-    <!-- Header Section -->
-    <div class="baku-form-header-card d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-            <h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2" style="font-size: 1.15rem;">
-                <i class="bi bi-eyedropper text-primary"></i> Tambah Data Baku Pembanding
-            </h4>
-            <p class="text-muted mb-0 small">Masukkan data baku baru beserta nilai kadar air dan kadar baku yang dinormalisasi.</p>
-        </div>
-        <div>
-            <a href="<?php echo site_url('baku'); ?>" class="btn-baku-back">
-                <i class="bi bi-arrow-left"></i> Kembali ke Daftar Baku
-            </a>
-        </div>
+    <!-- Tombol Kembali -->
+    <div class="mb-3">
+        <a href="<?php echo site_url('baku'); ?>" class="btn-baku-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Daftar Baku
+        </a>
     </div>
 
     <!-- Form Card -->

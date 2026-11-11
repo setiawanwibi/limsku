@@ -130,10 +130,7 @@ class Parameter extends MY_Controller
 
         $this->data['halaman_aktif'] = 'parameter';
         $this->data['judul_halaman'] = 'Edit Parameter Pengujian';
-        $this->data['breadcrumbs']   = array(
-            array('label' => 'Parameter', 'url' => site_url('parameter')),
-            array('label' => 'Edit', 'url' => '#')
-        );
+    
         $this->data['parameter']     = $param;
 
         $this->muat_tampilan('parameter/edit');

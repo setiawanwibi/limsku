@@ -85,36 +85,22 @@
 
 <div class="logbook-alat-page">
 
-    <!-- Header Halaman -->
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <a href="<?php echo site_url('logbook'); ?>" class="btn btn-outline-secondary btn-sm py-1 px-2 rounded-circle" title="Kembali ke Semua Logbook">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small">
-                    <i class="bi bi-journal-check me-1"></i> Logbook Digital Individual
-                </span>
-            </div>
-            <h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-                <span>Buku Log: <?php echo html_escape($alat['nama_barang']); ?></span>
-            </h4>
-            <p class="text-muted small mb-0">
-                Lembar resmi pencatatan operasional instrumen laboratorium BBPOM di Bandar Lampung
-            </p>
-        </div>
+    <!-- Bar Navigasi Atas: Kembali (Kiri) & Cetak Lembar Logbook (Kanan) -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <a href="<?php echo site_url('logbook'); ?>" class="btn btn-outline-secondary btn-sm py-1 px-3 rounded-pill d-inline-flex align-items-center gap-1 shadow-sm fw-semibold" title="Kembali ke Daftar Logbook">
+            <i class="bi bi-arrow-left"></i>
+            <span>Kembali ke Logbook</span>
+        </a>
 
-        <div class="d-flex gap-2">
-            <a href="<?php echo site_url('logbook/cetak?instrument_id=' . $alat['id']); ?>" 
-               target="_blank" 
-               class="btn btn-outline-primary btn-sm px-3 shadow-sm rounded-pill d-inline-flex align-items-center gap-2 fw-semibold">
-                <i class="bi bi-printer-fill"></i>
-                <span>Cetak Lembar Logbook Ini</span>
-            </a>
-        </div>
+        <a href="<?php echo site_url('logbook/cetak?instrument_id=' . $alat['id']); ?>" 
+           target="_blank" 
+           class="btn btn-outline-primary btn-sm px-3 shadow-sm rounded-pill d-inline-flex align-items-center gap-2 fw-semibold">
+            <i class="bi bi-printer-fill"></i>
+            <span>Cetak Lembar Logbook Ini</span>
+        </a>
     </div>
 
-    <!-- Spesifikasi Instrumen -->
+    <!-- Spesifikasi Instrumen (Card Detail) -->
     <div class="instrument-card-box shadow-sm mb-4">
         <div class="row g-3">
             <div class="col-md-3">

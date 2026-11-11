@@ -431,31 +431,37 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="obat" id="kom_obat" checked>
                                 <label class="form-check-label fw-semibold" for="kom_obat">
-                                    💊 Lab Obat
+                                    Lab Obat
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="pangan" id="kom_pangan">
                                 <label class="form-check-label fw-semibold" for="kom_pangan">
-                                    🍲 Lab Pangan & Air
+                                    Lab Pangan
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="herbal" id="kom_herbal">
                                 <label class="form-check-label fw-semibold" for="kom_herbal">
-                                    🌿 Lab Herbal / Obat Bahan Alam
+                                    Lab Obat Tradisional
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="kosmetik" id="kom_kosmetik">
                                 <label class="form-check-label fw-semibold" for="kom_kosmetik">
-                                    💄 Lab Kosmetik
+                                    Lab Kosmetik
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="suplemen" id="kom_suplemen">
+                                <label class="form-check-label fw-semibold" for="kom_suplemen">
+                                    Lab Suplemen
                                 </label>
                             </div>
                             <div class="form-check ms-auto">
                                 <input class="form-check-input" type="checkbox" name="komoditi_akses[]" value="all" id="kom_all">
                                 <label class="form-check-label fw-bold text-primary" for="kom_all">
-                                    🌟 Seluruh Komoditi (MT / Mikro / Petugas Sampel)
+                                    Seluruh Komoditi (MT / Mikro / Petugas Sampel)
                                 </label>
                             </div>
                         </div>
