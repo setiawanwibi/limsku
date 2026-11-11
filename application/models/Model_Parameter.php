@@ -37,7 +37,9 @@ class Model_Parameter extends CI_Model
     /**
      * Mengambil parameter yang berstatus Aktif
      * 
-     * @param string|null $kategori
+     * @param string|null $k
+     * 
+     * ategori
      * @return array
      */
     public function ambil_aktif($kategori = NULL)
