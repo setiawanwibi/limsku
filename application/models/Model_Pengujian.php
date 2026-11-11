@@ -914,7 +914,7 @@ class Model_Pengujian extends CI_Model
     /**
      * FASE 4 — Mengambil antrean laporan hasil uji yang "Menunggu Verifikasi"
      */
-    public function ambil_antrean_verifikasi()
+    public function ambil_antrean_verifikasi($komoditi_izin = NULL)
     {
         $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
@@ -925,6 +925,20 @@ class Model_Pengujian extends CI_Model
         $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->where_in('ts.status', array('Menunggu Verifikasi', 'Ditolak MT'));
+
+        // Penyekatan Komoditi untuk Penyelia
+        if (!empty($komoditi_izin) && $komoditi_izin !== 'all') {
+            $izins = is_array($komoditi_izin) ? $komoditi_izin : array($komoditi_izin);
+            if (!in_array('all', $izins) && !in_array('all_sampel', $izins)) {
+                $this->db->group_start();
+                $this->db->where_in('s.komoditi', $izins);
+                if (in_array('obat', $izins)) {
+                    $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                    $this->db->or_where('s.komoditi', '');
+                }
+                $this->db->group_end();
+            }
+        }
         $this->db->order_by('COALESCE(ts.waktu_selesai, ts.updated_at, ts.id) DESC', '', FALSE);
         $res = $this->db->get()->result_array();
 

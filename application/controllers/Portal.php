@@ -60,8 +60,8 @@ class Portal extends MY_Controller
                 'icon'        => 'bi-cup-straw',
                 'color'       => '#27ae60',
                 'bg_gradient' => 'linear-gradient(135deg, #27ae60 0%, #1e824c 100%)',
-                'status'      => 'coming_soon',
-                'url'         => '#',
+                'status'      => 'ready',
+                'url'         => site_url('portal/pilih/pangan'),
                 'can_access'  => $is_all || in_array('pangan', $komoditi_akses)
             ),
             array(

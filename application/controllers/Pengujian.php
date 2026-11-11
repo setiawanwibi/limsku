@@ -2139,7 +2139,8 @@ class Pengujian extends MY_Controller
 
         $this->data['halaman_aktif'] = 'pengujian_verifikasi';
         $this->data['judul_halaman'] = 'Verifikasi Laporan';
-        $antrean = $this->Model_Pengujian->ambil_antrean_verifikasi();
+        $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        $antrean = $this->Model_Pengujian->ambil_antrean_verifikasi($komoditi_akses);
         
         $session_id_selected = $this->input->get('session_id', TRUE);
         $selected_item = NULL;
