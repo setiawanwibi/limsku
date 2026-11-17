@@ -45,11 +45,12 @@
         .login-hero-pane {
             flex: 1.15;
             position: relative;
-            background: linear-gradient(145deg, #071e33 0%, #0c334d 50%, #0a445c 100%);
-            padding: 3rem;
+            background: linear-gradient(135deg, rgba(7, 30, 51, 0.82) 0%, rgba(12, 51, 77, 0.78) 50%, rgba(10, 68, 92, 0.85) 100%), 
+                        url('<?php echo base_url('assets/img/lab-analis-login.jpg'); ?>') center center / cover no-repeat;
+            padding: 3.5rem 4rem;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
             overflow: hidden;
         }
 
@@ -61,7 +62,7 @@
             left: -10%;
             width: 450px;
             height: 450px;
-            background: radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(13, 148, 136, 0.28) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
         }
@@ -73,12 +74,10 @@
             right: -10%;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(2, 132, 199, 0.25) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(2, 132, 199, 0.3) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
         }
-
-        /* Clean overlay removed */
 
         .hero-top, .hero-center, .hero-bottom {
             position: relative;
@@ -86,36 +85,22 @@
         }
 
         .hero-brand {
-            position: relative;
-            z-index: 3;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            gap: 1.25rem;
-            padding: 2.75rem 2.5rem;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-            max-width: 420px;
-            width: 100%;
+            gap: 0.85rem;
         }
 
         .hero-logo-box {
-            width: 80px;
-            height: 80px;
+            width: 48px;
+            height: 48px;
             background: #ffffff;
-            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .hero-logo-box img {
@@ -125,19 +110,17 @@
         }
 
         .hero-brand-text h4 {
-            margin: 0 0 6px;
-            font-weight: 800;
-            font-size: 1.55rem;
-            letter-spacing: 0.8px;
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: 0.5px;
             color: #ffffff;
         }
 
         .hero-brand-text span {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            font-weight: 500;
+            font-size: 0.78rem;
+            color: #cbd5e1;
             display: block;
-            line-height: 1.4;
         }
 
         .badge-system {
@@ -233,13 +216,42 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3rem 4.5rem;
-            background-color: #ffffff;
+            padding: 3rem 3.5rem;
+            background-color: #f8fafc;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2.25rem 2.25rem 2rem;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+        }
+
+        .login-card-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .login-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.25rem 0;
+            letter-spacing: -0.01em;
+        }
+
+        .login-card-subtitle {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin: 0;
         }
 
         .form-content-box {
             width: 100%;
-            max-width: 440px;
         }
 
         .portal-label {
@@ -437,33 +449,46 @@
 <div class="login-container-split">
     <!-- Left Hero Section -->
     <div class="login-hero-pane">
-        <!-- Center Floating Card: Logo & App Title -->
-        <div class="hero-brand">
-            <div class="hero-logo-box">
-                <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-logo">
+        <!-- Top: Logo & App Title -->
+        <div class="hero-top">
+            <div class="hero-brand">
+                <div class="hero-logo-box">
+                    <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-logo">
+                </div>
+                <div class="hero-brand-text">
+                    <h4><?php echo html_escape($nama_aplikasi); ?></h4>
+                    <span><?php echo html_escape($instansi); ?></span>
+                </div>
             </div>
-            <div class="hero-brand-text">
-                <h4><?php echo html_escape($nama_aplikasi); ?></h4>
-                <span><?php echo html_escape($instansi); ?></span>
-            </div>
-            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mt-1 rounded-pill" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.72rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px;">
+        </div>
+
+        <!-- Center: Greeting & Portal Label -->
+        <div class="hero-center my-auto py-4">
+            <div class="badge-system">
                 <i class="bi bi-shield-check"></i>
-                <span>SISTEM INFORMASI LABORATORIUM</span>
+                PORTAL INTERNAL BBPOM
+            </div>
+            
+            <h1 class="hero-title" style="font-size: 2.35rem; line-height: 1.25;">
+                Selamat datang kembali
+            </h1>
+
+            <p class="hero-desc mb-0" style="font-size: 1rem; max-width: 460px;">
+                Masuk menggunakan akun yang telah terdaftar untuk melanjutkan ke ruang kerja Anda.
+            </p>
+        </div>
+
+        <!-- Bottom: Copyright -->
+        <div class="hero-bottom">
+            <div class="hero-footer-text">
+                &copy; <?php echo date('Y'); ?> Balai Besar POM di Bandar Lampung
             </div>
         </div>
     </div>
 
     <!-- Right Form Section -->
     <div class="login-form-pane">
-        <div class="form-content-box">
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <img src="<?php echo base_url('assets/img/limsku-logo.png'); ?>" alt="Logo LIMSKU" class="limsku-brand-icon" style="height: 30px; width: 30px; object-fit: contain;">
-                <span class="portal-label" style="margin-bottom: 0;">PORTAL INTERNAL BBPOM</span>
-            </div>
-            <h2 class="form-main-title">Selamat datang kembali</h2>
-            <p class="form-sub-title">
-                Masuk menggunakan akun yang telah terdaftar untuk melanjutkan ke ruang kerja Anda.
-            </p>
+        <div class="login-card">
 
             <!-- Flash Messages -->
             <?php if ($this->session->flashdata('pesan_sukses')): ?>

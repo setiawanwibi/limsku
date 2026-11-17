@@ -251,12 +251,48 @@ $tgl_lap = date('d F Y', strtotime($hasil['updated_at'] ?? 'now'));
                     <td class="border-r"><?php echo html_escape(!empty($p['bobot_baku']) ? $p['bobot_baku'] . ' mg' : '-'); ?></td>
                 </tr>
                 <tr>
-                    <td class="border-l" style="padding-left: 4px;">Fase Gerak</td>
-                    <td>:</td>
-                    <td class="border-r"><?php echo html_escape($p['fase_gerak'] ?? '-'); ?></td>
-                    <td class="border-l" style="padding-left: 4px;">Hasil Pengukuran Baku</td>
-                    <td>:</td>
-                    <td class="border-r"><?php echo html_escape($p['hasil_ukur_baku'] ?? '-'); ?></td>
+                    <td class="border-l" style="padding-left: 4px; vertical-align: top;">Fase Gerak</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td class="border-r" style="padding: 2px 4px;">
+                        <?php if (!empty($p['fase_gerak_a']) || !empty($p['fase_gerak_b'])): ?>
+                            <div style="font-size: 6.5pt; line-height: 1.25;">
+                                <?php if (!empty($p['fase_gerak_a'])): ?>
+                                    <div><strong>FG A:</strong> <?php echo html_escape($p['fase_gerak_a']); ?></div>
+                                <?php endif; ?>
+                                <?php if (!empty($p['fase_gerak_b'])): ?>
+                                    <div><strong>FG B:</strong> <?php echo html_escape($p['fase_gerak_b']); ?></div>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <?php echo html_escape($p['fase_gerak'] ?? '-'); ?>
+                        <?php endif; ?>
+
+                        <?php if (!empty($p['tabel_fase_gerak_gradient']) && is_array($p['tabel_fase_gerak_gradient'])): ?>
+                            <table style="width: 100%; margin-top: 3px; font-size: 6.2pt; border-collapse: collapse; text-align: center; border: 1px solid #000;">
+                                <thead>
+                                    <tr style="background: #f1f5f9; font-weight: bold;">
+                                        <th style="border: 1px solid #000; padding: 1px 3px;">Waktu (menit)</th>
+                                        <th style="border: 1px solid #000; padding: 1px 3px;">% A</th>
+                                        <th style="border: 1px solid #000; padding: 1px 3px;">% B</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($p['tabel_fase_gerak_gradient'] as $fg_row): ?>
+                                        <?php if (isset($fg_row['waktu_menit']) && $fg_row['waktu_menit'] !== ''): ?>
+                                            <tr>
+                                                <td style="border: 1px solid #000; padding: 1px 3px;"><?php echo html_escape($fg_row['waktu_menit']); ?></td>
+                                                <td style="border: 1px solid #000; padding: 1px 3px;"><?php echo html_escape($fg_row['persen_a'] ?? '-'); ?></td>
+                                                <td style="border: 1px solid #000; padding: 1px 3px;"><?php echo html_escape($fg_row['persen_b'] ?? '-'); ?></td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    </td>
+                    <td class="border-l" style="padding-left: 4px; vertical-align: top;">Hasil Pengukuran Baku</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td class="border-r" style="vertical-align: top;"><?php echo html_escape($p['hasil_ukur_baku'] ?? '-'); ?></td>
                 </tr>
                 <tr>
                     <td class="border-l" style="padding-left: 4px;">Laju Alir</td>

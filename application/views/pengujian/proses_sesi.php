@@ -1180,6 +1180,16 @@
                                                                                             $existing_rows = !empty($raw_val) && is_array($raw_val)
                                                                                                 ? $raw_val
                                                                                                 : (isset($fld['default_rows']) ? $fld['default_rows'] : array(array()));
+
+                                                                                            // Khusus tabel_penimbangan (Bobot Jenis KIM-12): pastikan minimal 3 baris W0, W1, W2 selalu ada
+                                                                                            if ($fld_id === 'tabel_penimbangan' && isset($fld['default_rows']) && count($existing_rows) < count($fld['default_rows'])) {
+                                                                                                foreach ($fld['default_rows'] as $def_idx => $def_r) {
+                                                                                                    if (!isset($existing_rows[$def_idx])) {
+                                                                                                        $existing_rows[$def_idx] = $def_r;
+                                                                                                    }
+                                                                                                }
+                                                                                                ksort($existing_rows);
+                                                                                            }
                                                                                         }
                                                                                     ?>
                                                                                     <?php foreach ($existing_rows as $r_idx => $row_data): ?>
@@ -1188,7 +1198,9 @@
                                                                                                 <?php
                                                                                                     $c_id = $col['id'];
                                                                                                     $c_val = isset($row_data[$c_id]) ? $row_data[$c_id] : '';
-                                                                                                    $c_readonly = !empty($col['readonly']);
+                                                                                                    // Kolom bobot_bersih, konsentrasi, kadar, respon, rata_rata dsb tidak boleh dirender sebagai div readonly mati agar analis leluasa
+                                                                                                    $is_forced_editable_col = in_array($c_id, array('bobot_bersih', 'bobot_zat', 'konsentrasi', 'respon_puncak', 'wadah_zat', 'wadah_sisa', 'kadar_mg', 'kadar_persen', 'faktor_pengenceran', 'rata_rata'), true);
+                                                                                                    $c_readonly = !empty($col['readonly']) && !$is_forced_editable_col;
                                                                                                     $c_type = isset($col['type']) && $col['type'] === 'date' ? 'date' : 'text';
                                                                                                 ?>
                                                                                                 <td>
@@ -3047,47 +3059,72 @@
         // Rumus Kadar (%):  G25 = E25 / $E$21 * 100
         // =========================================================================
         function hitungKeseragamanKandungan() {
-            var kbInput = document.querySelector('input[name*="[kemurnian_baku]"]');       // L11: Kemurnian Baku (%)
-            var bbInput = document.querySelector('input[name*="[bobot_baku]"]');           // L13: Bobot Baku (mg)
-            var areaBakuInput = document.querySelector('input[name*="[hasil_ukur_baku]"]'); // L14: Hasil Ukur Baku
-            var fbInput = document.querySelector('input[name*="[faktor_pengenceran_baku]"]'); // L15: Faktor Pengenceran Baku
-            var fuInput = document.querySelector('input[name*="[faktor_pengenceran_uji]"]');  // L16: Faktor Pengenceran Uji
-            var etiketInput = document.querySelector('input[name*="[etiket]"]');           // E21: Etiket (mg/tab)
-            var tahap2Select = document.querySelector('select[name*="[lakukan_tahap2]"]');
+            var panes = document.querySelectorAll('.form-tab-pane-uji');
+            panes.forEach(function(pane) {
+                var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
+                var namaTpl = (pane.getAttribute('data-nama-template') || '').toLowerCase();
+                var paramTpl = (pane.getAttribute('data-parameter') || '').toLowerCase();
+                if (kodeTpl === 'KIM-03' || namaTpl.indexOf('keseragaman kandungan') !== -1 || paramTpl.indexOf('keseragaman kandungan') !== -1 || pane.querySelector('input[name*="[hasil_ukur_baku]"]') || (pane.querySelector('input[name*="[tabel_tahap1]"]') && pane.querySelector('input[name*="[area_serapan]"]'))) {
+                    hitungKeseragamanKandunganPane(pane);
+                }
+            });
+        }
 
-            var L11 = kbInput ? parseFloat(kbInput.value) || 0 : 0;
-            var L13 = bbInput ? parseFloat(bbInput.value) || 0 : 0;
-            var L14 = areaBakuInput ? parseFloat(areaBakuInput.value) || 0 : 0;
-            var L15 = fbInput ? parseFloat(fbInput.value) || 0 : 0;
-            var L16 = fuInput ? parseFloat(fuInput.value) || 0 : 0;
-            var E21 = etiketInput ? parseFloat(etiketInput.value) || 0 : 0;
+        function hitungKeseragamanKandunganPane(pane) {
+            if (!pane) return;
+
+            var kbInput = pane.querySelector('input[name*="[kemurnian_baku]"]');       // L11: Kemurnian Baku (%)
+            var bbInput = pane.querySelector('input[name*="[bobot_baku]"]');           // L13: Bobot Baku (mg)
+            var areaBakuInput = pane.querySelector('input[name*="[hasil_ukur_baku]"]'); // L14: Hasil Ukur Baku
+            var fbInput = pane.querySelector('input[name*="[faktor_pengenceran_baku]"]'); // L15: Faktor Pengenceran Baku
+            var fuInput = pane.querySelector('input[name*="[faktor_pengenceran_uji]"]');  // L16: Faktor Pengenceran Uji
+            var etiketInput = pane.querySelector('input[name*="[etiket]"]');           // E21: Etiket (mg/tab)
+            var tahap2Select = pane.querySelector('select[name*="[lakukan_tahap2]"]');
+
+            var L11 = kbInput ? parseNum(kbInput.value) : 0;
+            var L13 = bbInput ? parseNum(bbInput.value) : 0;
+            var L14 = areaBakuInput ? parseNum(areaBakuInput.value) : 0;
+            var L15 = fbInput ? parseNum(fbInput.value) : 0;
+            var L16 = fuInput ? parseNum(fuInput.value) : 0;
+            var E21 = etiketInput ? parseNum(etiketInput.value) : 0;
             var isTahap2 = tahap2Select && tahap2Select.value === 'Ya';
 
-            // Jika bukan form KIM-03 (misal field L14 tidak ada), lewati
+            // Jika bukan form KIM-03 (field area_baku / kb tidak ada), lewati
             if (!areaBakuInput && !kbInput) return;
 
             // 1. Hitung Tahap 1 (n = 10)
             var kadarMgT1 = [];
             var kadarPersenT1 = [];
             for (var i = 0; i < 10; i++) {
-                var areaEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][area_serapan]"]');
-                var kadarMgEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_mg]"]');
-                var kadarPersenEl = document.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_persen]"]');
+                var areaEl = pane.querySelector('input[name*="[tabel_tahap1][' + i + '][area_serapan]"]');
+                var kadarMgEl = pane.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_mg]"]');
+                var kadarPersenEl = pane.querySelector('input[name*="[tabel_tahap1][' + i + '][kadar_persen]"]');
 
                 if (areaEl) {
-                    var C25 = parseFloat(areaEl.value) || 0;
+                    var C25 = parseNum(areaEl.value);
                     if (C25 > 0 && L14 > 0 && L15 > 0) {
-                        // Formula Excel persis: C25 / $L$14 * $L$13 * $L$16 / $L$15 * ($L$11/100 jika persen, atau langsung sesuai template)
+                        // Formula Excel persis: C25 / $L$14 * $L$13 * $L$16 / $L$15 * ($L$11/100)
                         var faktorKb = (L11 > 1) ? (L11 / 100) : L11;
                         var kadarMg = (C25 / L14) * L13 * (L16 / L15) * faktorKb;
-                        if (kadarMgEl) kadarMgEl.value = kadarMg.toFixed(2);
-                        kadarMgT1.push(kadarMg);
-
                         var kadarPersen = E21 > 0 ? (kadarMg / E21) * 100 : 0;
-                        if (kadarPersenEl) kadarPersenEl.value = kadarPersen.toFixed(2);
-                        kadarPersenT1.push(kadarPersen);
-                    } else if (kadarPersenEl && parseFloat(kadarPersenEl.value)) {
-                        kadarPersenT1.push(parseFloat(kadarPersenEl.value));
+
+                        if (kadarMgEl) {
+                            kadarMgEl.value = kadarMg.toFixed(2);
+                        }
+                        if (kadarPersenEl) {
+                            kadarPersenEl.value = kadarPersen.toFixed(2);
+                        }
+
+                        var finalMgVal = kadarMgEl ? (parseNum(kadarMgEl.value) || kadarMg) : kadarMg;
+                        var finalPersenVal = kadarPersenEl ? (parseNum(kadarPersenEl.value) || kadarPersen) : kadarPersen;
+
+                        kadarMgT1.push(finalMgVal);
+                        kadarPersenT1.push(finalPersenVal);
+                    } else if (kadarPersenEl && parseNum(kadarPersenEl.value)) {
+                        kadarPersenT1.push(parseNum(kadarPersenEl.value));
+                        if (kadarMgEl && parseNum(kadarMgEl.value)) {
+                            kadarMgT1.push(parseNum(kadarMgEl.value));
+                        }
                     }
                 }
             }
@@ -3103,10 +3140,10 @@
                 sdT1 = Math.sqrt(var1); // G36: STDEV
                 rsdT1 = meanPersenT1 > 0 ? (sdT1 / meanPersenT1) * 100 : 0; // G37: RSD
 
-                var rerataMgInput = document.querySelector('input[name*="[rerata_kadar_mg_t1]"]');
-                var xRerataInput = document.querySelector('input[name*="[x_rerata_tahap1]"]');
-                var sdInput = document.querySelector('input[name*="[sd_tahap1]"]');
-                var rsdInput = document.querySelector('input[name*="[rsd_tahap1]"]');
+                var rerataMgInput = pane.querySelector('input[name*="[rerata_kadar_mg_t1]"]');
+                var xRerataInput = pane.querySelector('input[name*="[x_rerata_tahap1]"]');
+                var sdInput = pane.querySelector('input[name*="[sd_tahap1]"]');
+                var rsdInput = pane.querySelector('input[name*="[rsd_tahap1]"]');
 
                 if (rerataMgInput) rerataMgInput.value = meanMgT1.toFixed(2);
                 if (xRerataInput) xRerataInput.value = meanPersenT1.toFixed(2);
@@ -3117,22 +3154,28 @@
             // 2. Hitung Tahap 2 (No. 11 - 30) jika ada
             var kadarPersenT2 = [];
             for (var j = 0; j < 20; j++) {
-                var area2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][area_serapan]"]');
-                var kadarMg2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_mg]"]');
-                var kadarPersen2El = document.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_persen]"]');
+                var area2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][area_serapan]"]');
+                var kadarMg2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_mg]"]');
+                var kadarPersen2El = pane.querySelector('input[name*="[tabel_tahap2][' + j + '][kadar_persen]"]');
 
                 if (area2El) {
-                    var areaVal = parseFloat(area2El.value) || 0;
+                    var areaVal = parseNum(area2El.value);
                     if (areaVal > 0 && L14 > 0 && L15 > 0) {
                         var faktorKb2 = (L11 > 1) ? (L11 / 100) : L11;
                         var km2 = (areaVal / L14) * L13 * (L16 / L15) * faktorKb2;
-                        if (kadarMg2El) kadarMg2El.value = km2.toFixed(2);
-
                         var kp2 = E21 > 0 ? (km2 / E21) * 100 : 0;
-                        if (kadarPersen2El) kadarPersen2El.value = kp2.toFixed(2);
-                        kadarPersenT2.push(kp2);
-                    } else if (kadarPersen2El && parseFloat(kadarPersen2El.value)) {
-                        kadarPersenT2.push(parseFloat(kadarPersen2El.value));
+
+                        if (kadarMg2El) {
+                            kadarMg2El.value = km2.toFixed(2);
+                        }
+                        if (kadarPersen2El) {
+                            kadarPersen2El.value = kp2.toFixed(2);
+                        }
+
+                        var finalKp2 = kadarPersen2El ? (parseNum(kadarPersen2El.value) || kp2) : kp2;
+                        kadarPersenT2.push(finalKp2);
+                    } else if (kadarPersen2El && parseNum(kadarPersen2El.value)) {
+                        kadarPersenT2.push(parseNum(kadarPersen2El.value));
                     }
                 }
             }
@@ -3147,9 +3190,9 @@
                 sd30 = Math.sqrt(var30);
                 rsd30 = mean30 > 0 ? (sd30 / mean30) * 100 : 0;
 
-                var xRerata30Input = document.querySelector('input[name*="[x_rerata_30]"]');
-                var sd30Input = document.querySelector('input[name*="[sd_30]"]');
-                var rsd30Input = document.querySelector('input[name*="[rsd_30]"]');
+                var xRerata30Input = pane.querySelector('input[name*="[x_rerata_30]"]');
+                var sd30Input = pane.querySelector('input[name*="[sd_30]"]');
+                var rsd30Input = pane.querySelector('input[name*="[rsd_30]"]');
 
                 if (xRerata30Input) xRerata30Input.value = mean30.toFixed(2);
                 if (sd30Input) sd30Input.value = sd30.toFixed(2);
@@ -3176,10 +3219,10 @@
                     AV = (finalMean - 101.5) + (k * finalSD);
                 }
 
-                var mInput = document.querySelector('input[name*="[nilai_m]"]');
-                var avInput = document.querySelector('input[name*="[nilai_av]"]');
-                var kInput = document.querySelector('input[name*="[nilai_k]"]');
-                var kesimpulanSelect = document.querySelector('select[name*="[kesimpulan]"]');
+                var mInput = pane.querySelector('input[name*="[nilai_m]"]');
+                var avInput = pane.querySelector('input[name*="[nilai_av]"]');
+                var kInput = pane.querySelector('input[name*="[nilai_k]"]');
+                var kesimpulanSelect = pane.querySelector('select[name*="[kesimpulan]"]');
 
                 if (mInput) mInput.value = M.toFixed(2);
                 if (avInput) avInput.value = AV.toFixed(2);
@@ -3188,15 +3231,33 @@
                 if (kesimpulanSelect) {
                     kesimpulanSelect.value = (AV <= 15.0) ? 'Memenuhi Syarat (MS)' : 'Tidak Memenuhi Syarat (TMS)';
                 }
-                var pKandungan = kbInput ? kbInput.closest('.form-tab-pane-uji') : null;
-                if (pKandungan) evaluasiKesimpulanPane(pKandungan);
+                evaluasiKesimpulanPane(pane);
             }
         }
 
+        // Jalankan kalkulasi awal Keseragaman Kandungan saat dokumen selesai dimuat
+        hitungKeseragamanKandungan();
+
         // Listener untuk KIM-03
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.matches('input[name*="[area_serapan]"], input[name*="[kemurnian_baku]"], input[name*="[bobot_baku]"], input[name*="[hasil_ukur_baku]"], input[name*="[faktor_pengenceran_baku]"], input[name*="[faktor_pengenceran_uji]"], input[name*="[etiket]"]')) {
-                hitungKeseragamanKandungan();
+            if (e.target && e.target.matches('input[name*="[area_serapan]"], input[name*="[kadar_mg]"], input[name*="[kadar_persen]"], input[name*="[kemurnian_baku]"], input[name*="[bobot_baku]"], input[name*="[hasil_ukur_baku]"], input[name*="[faktor_pengenceran_baku]"], input[name*="[faktor_pengenceran_uji]"], input[name*="[etiket]"]')) {
+                var p = e.target.closest('.form-tab-pane-uji');
+                if (p) {
+                    hitungKeseragamanKandunganPane(p);
+                } else {
+                    hitungKeseragamanKandungan();
+                }
+            }
+        });
+
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.matches('select[name*="[lakukan_tahap2]"], input[name*="[kemurnian_baku]"], input[name*="[bobot_baku]"], input[name*="[hasil_ukur_baku]"], input[name*="[faktor_pengenceran_baku]"], input[name*="[faktor_pengenceran_uji]"], input[name*="[etiket]"]')) {
+                var p = e.target.closest('.form-tab-pane-uji');
+                if (p) {
+                    hitungKeseragamanKandunganPane(p);
+                } else {
+                    hitungKeseragamanKandungan();
+                }
             }
         });
 
@@ -3853,9 +3914,14 @@
             var wSisaInput = tr.querySelector('input[name*="[wadah_sisa]"]');
             var bZatInput = tr.querySelector('input[name*="[bobot_zat]"]');
 
+            // Jika baris ini merupakan baris tabel HPLC, lewati (ditangani oleh hitungBarisHPLC)
+            if (tr.querySelector('input[name*="[bobot_bersih]"]')) {
+                return;
+            }
+
             if (wZatInput && wSisaInput && bZatInput) {
-                var wZat = parseFloat(wZatInput.value) || 0;
-                var wSisa = parseFloat(wSisaInput.value) || 0;
+                var wZat = parseNum(wZatInput.value);
+                var wSisa = parseNum(wSisaInput.value);
                 if (wZat > 0 && wSisa > 0 && wZat >= wSisa) {
                     var bZat = wZat - wSisa;
                     bZatInput.value = bZat.toFixed(4);
@@ -3910,15 +3976,28 @@
             var bakuTerkoreksiInput = pane.querySelector('input[name*="[baku_kadar_terkoreksi]"]');
 
             var Kb = 100.0;
-            if (bakuKadarInput && parseFloat(bakuKadarInput.value) > 0) {
-                var rawKadar = parseFloat(bakuKadarInput.value) || 0;
-                var sp = parseFloat(bakuSpInput ? bakuSpInput.value : 0) || 0;
+            if (bakuKadarInput && parseNum(bakuKadarInput.value) > 0) {
+                var rawKadar = parseNum(bakuKadarInput.value);
+                var sp = bakuSpInput ? parseNum(bakuSpInput.value) : 0;
                 Kb = (100 - sp) * (rawKadar / 100);
                 if (bakuTerkoreksiInput) {
                     bakuTerkoreksiInput.value = parseFloat(Kb.toPrecision(8)).toString();
                 }
-            } else if (bakuTerkoreksiInput && parseFloat(bakuTerkoreksiInput.value) > 0) {
-                Kb = parseFloat(bakuTerkoreksiInput.value);
+            } else if (bakuTerkoreksiInput && parseNum(bakuTerkoreksiInput.value) > 0) {
+                Kb = parseNum(bakuTerkoreksiInput.value);
+            }
+
+            // 2b. Koreksi Kadar Kemurnian Baku Internal (jika diisi)
+            var internalKadarInput = pane.querySelector('input[name*="[internal_kadar]"]');
+            var internalSpInput = pane.querySelector('input[name*="[internal_sp]"]');
+            var internalTerkoreksiInput = pane.querySelector('input[name*="[internal_kadar_terkoreksi]"]');
+            if (internalKadarInput && parseNum(internalKadarInput.value) > 0) {
+                var rawIntKadar = parseNum(internalKadarInput.value);
+                var intSp = internalSpInput ? parseNum(internalSpInput.value) : 0;
+                var KbInt = (100 - intSp) * (rawIntKadar / 100);
+                if (internalTerkoreksiInput) {
+                    internalTerkoreksiInput.value = parseFloat(KbInt.toPrecision(8)).toString();
+                }
             }
 
             // 3. Faktor Koreksi BM / BR (BM1 / BM2)
@@ -3941,8 +4020,8 @@
             // 5. Parameter Tambahan: Br (Bobot rata tablet) & Ke (Klaim etiket)
             var brInput = pane.querySelector('input[name*="[bobot_rata_tablet]"], input[name*="[bobot_rata_rata_tablet]"]');
             var keInput = pane.querySelector('input[name*="[klaim_etiket]"]');
-            var Br = parseFloat(brInput ? brInput.value : 0) || 0;
-            var Ke = parseFloat(keInput ? keInput.value : 0) || 0;
+            var Br = parseNum(brInput ? brInput.value : 0);
+            var Ke = parseNum(keInput ? keInput.value : 0);
 
             // 6. Ambil Data Baku Pembanding & Zat Uji Replikasi 1 & 2 secara dinamis dari tabel HPLC
             var bakuRow = null;
@@ -3977,9 +4056,9 @@
                 var bbEl = bakuRow.querySelector('input[name*="[bobot_bersih]"]');
                 var fbEl = bakuRow.querySelector('input[name*="[faktor_pengenceran]"]');
                 var lbEl = bakuRow.querySelector('input[name*="[respon_puncak]"]');
-                Bb = parseFloat(bbEl ? bbEl.value : 0) || 0;
-                Fb = parseFloat(fbEl ? fbEl.value : 1) || 1;
-                Lb = parseFloat(lbEl ? lbEl.value : 0) || 0;
+                Bb = parseNum(bbEl ? bbEl.value : 0);
+                Fb = parseNum(fbEl ? fbEl.value : 1) || 1;
+                Lb = parseNum(lbEl ? lbEl.value : 0);
             }
 
             // 7. Hitung Kadar Uji 1 dan Uji 2 (Presisi unrounded sebenar-benarnya)
@@ -4046,23 +4125,24 @@
                 }
             } else if (isUjiRow && mode === 'sirup') {
                 if (wSisaInput) wSisaInput.placeholder = "(Digabung)";
-                if (wZatInput && parseFloat(wZatInput.value) > 0) {
-                    if (bBersihInput && !bBersihInput.dataset.manualEdited) {
+                if (wZatInput && parseNum(wZatInput.value) > 0) {
+                    if (bBersihInput && (document.activeElement !== bBersihInput || !bBersihInput.value)) {
                         bBersihInput.value = wZatInput.value;
                     }
                 }
             } else {
-                // Mode standar / Baku Pembanding: Wadah + Zat - Wadah + Sisa (presisi sebenarnya tanpa pembulatan paksa)
+                // Mode standar / Baku Pembanding: Wadah + Zat - Wadah + Sisa
                 if (wZatInput && bBersihInput) {
                     var wZatStr = (wZatInput.value || '').trim();
                     var wSisaStr = wSisaInput ? (wSisaInput.value || '').trim() : '';
                     if (wZatStr !== '') {
-                        var wZat = parseFloat(wZatStr) || 0;
-                        var wSisa = (wSisaStr !== '') ? (parseFloat(wSisaStr) || 0) : 0;
+                        var wZat = parseNum(wZatStr);
+                        var wSisa = (wSisaStr !== '') ? parseNum(wSisaStr) : 0;
                         if (wZat >= wSisa) {
                             var diff = wZat - wSisa;
                             var cleanVal = parseFloat(diff.toPrecision(12)).toString();
-                            if (!bBersihInput.dataset.manualEdited || bBersihInput.value === '') {
+                            // Update otomatis saat user mengetik wadah_zat / wadah_sisa tanpa perlu refresh
+                            if (document.activeElement !== bBersihInput) {
                                 bBersihInput.value = cleanVal;
                             }
                         }
@@ -4070,12 +4150,12 @@
                 }
             }
 
-            var bBersih = parseFloat(bBersihInput ? bBersihInput.value : 0) || 0;
+            var bBersih = parseNum(bBersihInput ? bBersihInput.value : 0);
 
-            // Hitung dan tampilkan nilai konsentrasi secara otomatis HANYA jika belum diubah manual oleh pengguna
+            // Hitung dan tampilkan nilai konsentrasi secara otomatis
             if (cInput && fpInput && bBersih > 0) {
-                var fpVal = parseFloat(fpInput.value) || 0;
-                if (fpVal > 0 && !cInput.dataset.manualEdited) {
+                var fpVal = parseNum(fpInput.value);
+                if (fpVal > 0 && document.activeElement !== cInput) {
                     var bMg = (bBersih < 2.0) ? (bBersih * 1000) : bBersih;
                     var cVal = bMg / fpVal; // mg/mL
                     cInput.value = parseFloat(cVal.toPrecision(12)).toString();
@@ -4093,9 +4173,9 @@
             var fuEl = tr.querySelector('input[name*="[faktor_pengenceran]"]');
             var luEl = tr.querySelector('input[name*="[respon_puncak]"], input[name*="[serapan]"]');
 
-            var Bu = parseFloat(buEl ? buEl.value : 0) || 0;
-            var Fu = parseFloat(fuEl ? fuEl.value : 1) || 1;
-            var Lu = parseFloat(luEl ? luEl.value : 0) || 0;
+            var Bu = parseNum(buEl ? buEl.value : 0);
+            var Fu = parseNum(fuEl ? fuEl.value : 1) || 1;
+            var Lu = parseNum(luEl ? luEl.value : 0);
 
             if (Lu <= 0) return 0;
 
@@ -4126,14 +4206,38 @@
             if (!e.target || !e.target.name) return;
             var targetName = e.target.name;
 
-            // Jika pengguna mengetik wadah_zat atau wadah_sisa, reset manualEdited pada bobot_bersih dan konsentrasi baris tsb
+            // Jika pengguna mengetik wadah_zat atau wadah_sisa, hitung instan bobot_bersih pada baris tersebut
             if (targetName.indexOf('[wadah_zat]') !== -1 || targetName.indexOf('[wadah_sisa]') !== -1) {
                 var tr = e.target.closest('tr');
                 if (tr) {
                     var bbEl = tr.querySelector('input[name*="[bobot_bersih]"], input[name*="[bobot_zat]"]');
                     var cEl = tr.querySelector('input[name*="[konsentrasi]"]');
-                    if (bbEl) delete bbEl.dataset.manualEdited;
-                    if (cEl) delete cEl.dataset.manualEdited;
+                    var fpEl = tr.querySelector('input[name*="[faktor_pengenceran]"]');
+                    var wzEl = tr.querySelector('input[name*="[wadah_zat]"]');
+                    var wsEl = tr.querySelector('input[name*="[wadah_sisa]"]');
+
+                    if (bbEl) {
+                        delete bbEl.dataset.manualEdited;
+                        var wzVal = (wzEl && wzEl.value !== '') ? parseNum(wzEl.value) : 0;
+                        var wsVal = (wsEl && wsEl.value !== '') ? parseNum(wsEl.value) : 0;
+                        if (wzVal >= wsVal && wzVal > 0) {
+                            var bDiff = wzVal - wsVal;
+                            bbEl.value = parseFloat(bDiff.toPrecision(12)).toString();
+                        } else if (wzVal > 0 && (!wsEl || wsEl.value.trim() === '')) {
+                            // Belum input wadah sisa, default selisih wadah zat
+                            bbEl.value = parseFloat(wzVal.toPrecision(12)).toString();
+                        }
+                    }
+
+                    if (cEl && fpEl && bbEl && parseNum(bbEl.value) > 0) {
+                        delete cEl.dataset.manualEdited;
+                        var fpV = parseNum(fpEl.value);
+                        if (fpV > 0) {
+                            var bVal = parseNum(bbEl.value);
+                            var bMg = (bVal < 2.0) ? (bVal * 1000) : bVal;
+                            cEl.value = parseFloat((bMg / fpV).toPrecision(12)).toString();
+                        }
+                    }
                 }
                 hitungHPLC();
                 hitungSpektrofotometri();
@@ -4171,11 +4275,13 @@
                 return;
             }
 
-            // Semua field terkait penetapan kadar (baku, respon puncak, serapan, tablet BR, klaim etiket, BM, volume)
+            // Semua field terkait penetapan kadar (baku, baku internal, respon puncak, serapan, tablet BR, klaim etiket, BM, volume)
             if (targetName.indexOf('[respon_puncak]') !== -1 ||
                 targetName.indexOf('[serapan]') !== -1 ||
                 targetName.indexOf('[baku_kadar]') !== -1 ||
                 targetName.indexOf('[baku_sp]') !== -1 ||
+                targetName.indexOf('[internal_kadar]') !== -1 ||
+                targetName.indexOf('[internal_sp]') !== -1 ||
                 targetName.indexOf('[kadar_baku_persen]') !== -1 ||
                 targetName.indexOf('[bobot_rata_tablet]') !== -1 ||
                 targetName.indexOf('[bobot_rata_rata_tablet]') !== -1 ||
@@ -4329,30 +4435,26 @@
                 var rataInput = pane.querySelector('input[name*="[tabel_penimbangan][' + i + '][rata_rata]"]');
 
                 if (b1Input) {
-                    var v1 = parseFloat(b1Input.value.replace(',', '.'));
-                    var v2 = b2Input && b2Input.value.trim() !== '' ? parseFloat(b2Input.value.replace(',', '.')) : NaN;
+                    var v1 = parseNum(b1Input.value);
+                    var v2 = (b2Input && b2Input.value.trim() !== '') ? parseNum(b2Input.value) : NaN;
 
                     // Hitung rata-rata otomatis jika kedua bobot atau salah satunya diisi
-                    if (!isNaN(v1) && !isNaN(v2)) {
+                    if (!isNaN(v1) && !isNaN(v2) && (b1Input.value.trim() !== '' && b2Input.value.trim() !== '')) {
                         var mean = (v1 + v2) / 2;
-                        // Tanpa pembulatan fixed, tampilkan presisi floating number murni
-                        if (rataInput) rataInput.value = mean.toString();
-                        w[i] = mean;
-                    } else if (!isNaN(v1)) {
-                        if (rataInput) rataInput.value = v1.toString();
-                        w[i] = v1;
-                    } else if (rataInput && rataInput.value.trim() !== '') {
-                        // Jika analis mengedit nilai rata-rata manual secara langsung
-                        var vRataManual = parseFloat(rataInput.value.replace(',', '.'));
-                        if (!isNaN(vRataManual)) {
-                            w[i] = vRataManual;
+                        if (rataInput && document.activeElement !== rataInput) {
+                            rataInput.value = parseFloat(mean.toPrecision(12)).toString();
                         }
+                        w[i] = parseNum(rataInput ? rataInput.value : mean);
+                    } else if (b1Input.value.trim() !== '' && (!b2Input || b2Input.value.trim() === '')) {
+                        if (rataInput && document.activeElement !== rataInput) {
+                            rataInput.value = parseFloat(v1.toPrecision(12)).toString();
+                        }
+                        w[i] = parseNum(rataInput ? rataInput.value : v1);
+                    } else if (rataInput && rataInput.value.trim() !== '') {
+                        w[i] = parseNum(rataInput.value);
                     }
                 } else if (rataInput && rataInput.value.trim() !== '') {
-                    var vRataManual2 = parseFloat(rataInput.value.replace(',', '.'));
-                    if (!isNaN(vRataManual2)) {
-                        w[i] = vRataManual2;
-                    }
+                    w[i] = parseNum(rataInput.value);
                 }
             }
 
@@ -4366,12 +4468,12 @@
 
             if (w0 !== null && w1 !== null) {
                 var bZat = w1 - w0;
-                if (zatEl) zatEl.value = bZat.toString();
+                if (zatEl) zatEl.value = parseFloat(bZat.toPrecision(12)).toString();
             }
 
             if (w0 !== null && w2 !== null) {
                 var bAir = w2 - w0;
-                if (airEl) airEl.value = bAir.toString();
+                if (airEl) airEl.value = parseFloat(bAir.toPrecision(12)).toString();
             }
 
             if (w0 !== null && w1 !== null && w2 !== null) {
@@ -4379,7 +4481,8 @@
                 var bAirFinal = w2 - w0;
                 // Rumus Bobot Jenis (BJ) = (W2 - W0) / (W1 - W0)
                 if (bZatFinal > 0 && bjEl) {
-                    bjEl.value = (bAirFinal / bZatFinal).toString();
+                    var bjCalculated = bAirFinal / bZatFinal;
+                    bjEl.value = parseFloat(bjCalculated.toPrecision(12)).toString();
                     evaluasiKesimpulanPane(pane);
                 }
             }
