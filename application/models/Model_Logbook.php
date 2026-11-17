@@ -256,6 +256,16 @@ class Model_Logbook extends CI_Model
             $this->db->where('i.nama_ruangan', $ruangan);
         }
 
+        if (!empty($filter['komoditi']) && $filter['komoditi'] !== 'semua') {
+            $this->db->group_start();
+            $this->db->where('i.komoditi', $filter['komoditi']);
+            $this->db->or_where('i.komoditi', 'semua');
+            if ($filter['komoditi'] === 'herbal' || $filter['komoditi'] === 'suplemen') {
+                $this->db->or_where('i.komoditi', 'obat');
+            }
+            $this->db->group_end();
+        }
+
         if (!empty($q)) {
             $this->db->group_start();
             $this->db->like('i.nama_barang', $q);

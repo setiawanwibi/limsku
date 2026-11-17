@@ -46,6 +46,21 @@ class Model_Notifikasi extends CI_Model
             return array();
         }
 
+        // Ambil penugasan komoditi pengguna (dari session atau database)
+        $komoditi_akses = $this->session->userdata('komoditi_akses');
+        if (empty($komoditi_akses) || (!empty($user_id) && (int)$user_id !== (int)$this->session->userdata('user_id'))) {
+            $user_row = $this->db->select('komoditi_akses')->where('id', $user_id)->get('users')->row_array();
+            if (!empty($user_row['komoditi_akses'])) {
+                $komoditi_akses = json_decode($user_row['komoditi_akses'], true);
+                if (!is_array($komoditi_akses)) {
+                    $komoditi_akses = array($user_row['komoditi_akses']);
+                }
+            }
+        }
+        if (empty($komoditi_akses)) {
+            $komoditi_akses = array('obat');
+        }
+
         // Cek izin peran
         $bisa_sampel     = $this->Model_Hak_Akses->memiliki_akses($role_id, 'sampel_view');
         $bisa_antrean    = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_view');
@@ -95,6 +110,15 @@ class Model_Notifikasi extends CI_Model
         // =========================================================================
         if ($bisa_sampel) {
             $this->db->where('status', 'Menunggu Pengujian');
+            if (!empty($komoditi_akses) && !in_array('all', $komoditi_akses) && !in_array('all_sampel', $komoditi_akses)) {
+                $this->db->group_start();
+                $this->db->where_in('komoditi', $komoditi_akses);
+                if (in_array('obat', $komoditi_akses)) {
+                    $this->db->or_where('komoditi IS NULL', NULL, FALSE);
+                    $this->db->or_where('komoditi', '');
+                }
+                $this->db->group_end();
+            }
             $jml_sampel_menunggu = $this->db->count_all_results('samples');
             $badges['sampel'] = (int) $jml_sampel_menunggu;
             $badges['sampel_label'] = $jml_sampel_menunggu . ' sampel menunggu pengujian';
@@ -107,7 +131,7 @@ class Model_Notifikasi extends CI_Model
         // =========================================================================
         if ($bisa_antrean) {
             $this->load->model('Model_Pengujian');
-            $antrean_list = $this->Model_Pengujian->ambil_antrean();
+            $antrean_list = $this->Model_Pengujian->ambil_antrean($komoditi_akses);
             $jml_antrean_uji = count($antrean_list);
             $badges['pengujian_antrean'] = (int) $jml_antrean_uji;
             $badges['pengujian_antrean_label'] = $jml_antrean_uji . ' sampel dalam antrean pengujian';
@@ -119,8 +143,9 @@ class Model_Notifikasi extends CI_Model
         // Sesi pengujian yang menunggu review & persetujuan Penyelia
         // =========================================================================
         if ($bisa_verifikasi) {
-            $this->db->where('status', 'Menunggu Verifikasi');
-            $jml_verifikasi = $this->db->count_all_results('testing_sessions');
+            $this->load->model('Model_Pengujian');
+            $antrean_verif = $this->Model_Pengujian->ambil_antrean_verifikasi($komoditi_akses);
+            $jml_verifikasi = count($antrean_verif);
             $badges['pengujian_verifikasi'] = (int) $jml_verifikasi;
             $badges['pengujian_verifikasi_label'] = $jml_verifikasi . ' sesi menunggu verifikasi penyelia';
             $badges['pengujian_verifikasi_type']  = 'danger';
@@ -132,7 +157,7 @@ class Model_Notifikasi extends CI_Model
         // =========================================================================
         if ($bisa_approval) {
             $this->load->model('Model_Pengujian');
-            $antrean_approval = $this->Model_Pengujian->ambil_antrean_approval_sampel();
+            $antrean_approval = $this->Model_Pengujian->ambil_antrean_approval_sampel($komoditi_akses);
             $jml_approval = count($antrean_approval);
             $badges['pengujian_approval'] = (int) $jml_approval;
             $badges['pengujian_approval_label'] = $jml_approval . ' laporan siap disahkan Manajer Teknis';
@@ -146,12 +171,23 @@ class Model_Notifikasi extends CI_Model
         // =========================================================================
         if ($bisa_laporan) {
             // Cek apakah ada sesi pengujian yang ditolak
-            $this->db->where('status', 'Ditolak');
+            $this->db->from('testing_sessions ts');
+            $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+            $this->db->where('ts.status', 'Ditolak');
             if (!$bisa_verifikasi && !$bisa_approval) {
                 // Penguji hanya melihat sesi miliknya yang ditolak
-                $this->db->where('penguji_id', $user_id);
+                $this->db->where('ts.penguji_id', $user_id);
             }
-            $jml_ditolak = $this->db->count_all_results('testing_sessions');
+            if (!empty($komoditi_akses) && !in_array('all', $komoditi_akses) && !in_array('all_sampel', $komoditi_akses)) {
+                $this->db->group_start();
+                $this->db->where_in('s.komoditi', $komoditi_akses);
+                if (in_array('obat', $komoditi_akses)) {
+                    $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                    $this->db->or_where('s.komoditi', '');
+                }
+                $this->db->group_end();
+            }
+            $jml_ditolak = $this->db->count_all_results();
 
             if ($jml_ditolak > 0) {
                 $badges['pengujian_riwayat'] = (int) $jml_ditolak;
@@ -161,14 +197,20 @@ class Model_Notifikasi extends CI_Model
                 // Untuk analis/penguji operasional: tampilkan sampel aktif yang sedang dikerjakan
                 $is_penguji = (!$bisa_verifikasi && !$bisa_approval && $bisa_antrean);
                 if ($is_penguji) {
-                    $this->db->where('status', 'Sedang Diuji');
-                    $this->db->where('penguji_id', $user_id);
-                    $jml_sedang_diuji = $this->db->count_all_results('samples');
-                    if ($jml_sedang_diuji === 0) {
-                        $this->db->where('status', 'Sedang Diuji');
-                        $this->db->where('penguji_id', $user_id);
-                        $jml_sedang_diuji = $this->db->count_all_results('testing_sessions');
+                    $this->db->from('testing_sessions ts');
+                    $this->db->join('samples s', 's.id = ts.sample_id', 'inner');
+                    $this->db->where('ts.status', 'Sedang Diuji');
+                    $this->db->where('ts.penguji_id', $user_id);
+                    if (!empty($komoditi_akses) && !in_array('all', $komoditi_akses) && !in_array('all_sampel', $komoditi_akses)) {
+                        $this->db->group_start();
+                        $this->db->where_in('s.komoditi', $komoditi_akses);
+                        if (in_array('obat', $komoditi_akses)) {
+                            $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                            $this->db->or_where('s.komoditi', '');
+                        }
+                        $this->db->group_end();
                     }
+                    $jml_sedang_diuji = $this->db->count_all_results();
 
                     if ($jml_sedang_diuji > 0) {
                         $badges['pengujian_riwayat'] = (int) $jml_sedang_diuji;
@@ -189,5 +231,13 @@ class Model_Notifikasi extends CI_Model
 
         self::$cache_badges = $badges;
         return $badges;
+    }
+
+    /**
+     * Reset cache badge (berguna pada test atau saat data session diperbarui)
+     */
+    public function reset_cache()
+    {
+        self::$cache_badges = NULL;
     }
 }

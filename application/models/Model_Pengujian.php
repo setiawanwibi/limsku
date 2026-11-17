@@ -744,7 +744,7 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_semua_hasil($penguji_id = NULL, $limit = 1000, $offset = 0)
     {
-        $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt,
+        $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.komoditi, s.kategori_sampel,
             COALESCE(NULLIF(s.status, ""), MAX(ts.status)) as status,
             GROUP_CONCAT(DISTINCT ts.jenis_pengujian ORDER BY ts.jenis_pengujian ASC SEPARATOR " & ") as jenis_pengujian,
             GROUP_CONCAT(DISTINCT u.nama_lengkap SEPARATOR "; ") as nama_penguji,
@@ -782,7 +782,7 @@ class Model_Pengujian extends CI_Model
 
         if (empty($res)) {
             // Fallback ke test_results jika belum ada testing_sessions
-            $this->db->select('tr.sample_id, s.id, tr.id as test_id, m.nama_metode, t.nama_template, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.status, 1 as jumlah_sesi, 1 as jumlah_form, tr.kesimpulan, "Kimia" as jenis_pengujian');
+            $this->db->select('tr.sample_id, s.id, tr.id as test_id, m.nama_metode, t.nama_template, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.komoditi, s.kategori_sampel, s.status, 1 as jumlah_sesi, 1 as jumlah_form, tr.kesimpulan, "Kimia" as jenis_pengujian');
             $this->db->from($this->tabel_hasil . ' tr');
             $this->db->join('samples s', 's.id = tr.sample_id', 'inner');
             $this->db->join('methods m', 'm.id = tr.method_id', 'left');
@@ -806,7 +806,7 @@ class Model_Pengujian extends CI_Model
     /**
      * FASE 5 — Mengambil antrean laporan hasil uji / sesi yang "Menunggu Approval"
      */
-    public function ambil_antrean_approval()
+    public function ambil_antrean_approval($komoditi_izin = NULL)
     {
         $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
@@ -818,6 +818,21 @@ class Model_Pengujian extends CI_Model
         $this->db->join('users u', 'u.id = ts.penguji_id', 'left');
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->where('ts.status', 'Menunggu Approval');
+
+        // Penyekatan Komoditi untuk Approval
+        if (!empty($komoditi_izin) && $komoditi_izin !== 'all') {
+            $izins = is_array($komoditi_izin) ? $komoditi_izin : array($komoditi_izin);
+            if (!in_array('all', $izins) && !in_array('all_sampel', $izins)) {
+                $this->db->group_start();
+                $this->db->where_in('s.komoditi', $izins);
+                if (in_array('obat', $izins)) {
+                    $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                    $this->db->or_where('s.komoditi', '');
+                }
+                $this->db->group_end();
+            }
+        }
+
         $this->db->order_by('ts.id', 'ASC');
         $res = $this->db->get()->result_array();
 
@@ -830,6 +845,20 @@ class Model_Pengujian extends CI_Model
             $this->db->join('users u', 'u.id = tr.penguji_id', 'left');
             $this->db->join('users uv', 'uv.id = tr.verifier_id', 'left');
             $this->db->where('tr.status', 'Menunggu Approval');
+
+            if (!empty($komoditi_izin) && $komoditi_izin !== 'all') {
+                $izins = is_array($komoditi_izin) ? $komoditi_izin : array($komoditi_izin);
+                if (!in_array('all', $izins) && !in_array('all_sampel', $izins)) {
+                    $this->db->group_start();
+                    $this->db->where_in('s.komoditi', $izins);
+                    if (in_array('obat', $izins)) {
+                        $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                        $this->db->or_where('s.komoditi', '');
+                    }
+                    $this->db->group_end();
+                }
+            }
+
             $this->db->order_by('tr.id', 'ASC');
             return $this->db->get()->result_array();
         }
@@ -1212,7 +1241,7 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_riwayat_verifikasi_by_user($verifier_id)
     {
-        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
+        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.komoditi, s.kategori_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
             (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
             (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
@@ -1231,7 +1260,7 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_riwayat_penguji_by_user($penguji_id)
     {
-        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
+        $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.komoditi, s.kategori_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
             (SELECT GROUP_CONCAT(DISTINCT t.nama_template SEPARATOR ", ") FROM test_results tr JOIN form_templates t ON t.id = tr.template_id WHERE tr.session_id = ts.id) as nama_template,
             (SELECT GROUP_CONCAT(DISTINCT tr.kesimpulan SEPARATOR ", ") FROM test_results tr WHERE tr.session_id = ts.id) as kesimpulan');
@@ -1250,7 +1279,7 @@ class Model_Pengujian extends CI_Model
      */
     public function ambil_riwayat_approval_by_user($approver_id)
     {
-        $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt,
+        $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.komoditi, s.kategori_sampel, s.komoditi, s.kategori_sampel,
             GROUP_CONCAT(DISTINCT ts.jenis_pengujian SEPARATOR " & ") as jenis_pengujian,
             GROUP_CONCAT(DISTINCT u.nama_lengkap SEPARATOR "; ") as nama_penguji,
             GROUP_CONCAT(DISTINCT uv.nama_lengkap SEPARATOR "; ") as nama_verifier,
@@ -1758,13 +1787,28 @@ class Model_Pengujian extends CI_Model
      *
      * @return array
      */
-    public function ambil_antrean_approval_sampel()
+    public function ambil_antrean_approval_sampel($komoditi_izin = NULL)
     {
         // 1. Ambil kandidat sampel unik berdasarkan kode sampel yang memiliki sesi 'Menunggu Approval'
         $this->db->select('s.*');
         $this->db->from('samples s');
         $this->db->join('testing_sessions ts', 'ts.sample_id = s.id', 'inner');
         $this->db->where('ts.status', 'Menunggu Approval');
+
+        // Penyekatan Komoditi untuk Approval
+        if (!empty($komoditi_izin) && $komoditi_izin !== 'all') {
+            $izins = is_array($komoditi_izin) ? $komoditi_izin : array($komoditi_izin);
+            if (!in_array('all', $izins) && !in_array('all_sampel', $izins)) {
+                $this->db->group_start();
+                $this->db->where_in('s.komoditi', $izins);
+                if (in_array('obat', $izins)) {
+                    $this->db->or_where('s.komoditi IS NULL', NULL, FALSE);
+                    $this->db->or_where('s.komoditi', '');
+                }
+                $this->db->group_end();
+            }
+        }
+
         $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
         $this->db->order_by('s.id', 'DESC');
         $daftar_sampel = $this->db->get()->result_array();

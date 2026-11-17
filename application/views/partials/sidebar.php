@@ -53,17 +53,74 @@ if (!isset($badges)) {
     </div>
 
     <!-- Active Workspace Bar (Clean Pill Style) -->
+    <?php
+    $ws_komoditi = !empty($komoditi_aktif) ? $komoditi_aktif : ($this->session->userdata('komoditi_aktif') ?: 'obat');
+    $ws_meta = array(
+        'obat' => array(
+            'label' => 'LAB OBAT',
+            'sub'   => 'Farmasi &amp; Uji',
+            'icon'  => 'bi-capsule',
+            'bg'    => '#e0f2fe',
+            'color' => '#0369a1',
+            'border'=> '#bae6fd'
+        ),
+        'pangan' => array(
+            'label' => 'LAB PANGAN',
+            'sub'   => 'Pangan &amp; AMDK',
+            'icon'  => 'bi-cup-straw',
+            'bg'    => '#dcfce7',
+            'color' => '#15803d',
+            'border'=> '#bbf7d0'
+        ),
+        'herbal' => array(
+            'label' => 'LAB OBAT TRADISIONAL',
+            'sub'   => 'Jamu &amp; OHT',
+            'icon'  => 'bi-flower1',
+            'bg'    => '#ffedd5',
+            'color' => '#c2410c',
+            'border'=> '#fed7aa'
+        ),
+        'kosmetik' => array(
+            'label' => 'LAB KOSMETIK',
+            'sub'   => 'Kosmetika &amp; Riasan',
+            'icon'  => 'bi-brush',
+            'bg'    => '#f3e8ff',
+            'color' => '#7e22ce',
+            'border'=> '#e9d5ff'
+        ),
+        'suplemen' => array(
+            'label' => 'LAB SUPLEMEN',
+            'sub'   => 'Suplemen Kesehatan',
+            'icon'  => 'bi-capsule-pill',
+            'bg'    => '#e0f2fe',
+            'color' => '#0284c7',
+            'border'=> '#bae6fd'
+        ),
+    );
+    $ws_curr = isset($ws_meta[$ws_komoditi]) ? $ws_meta[$ws_komoditi] : $ws_meta['obat'];
+    ?>
+    <?php if ((int)$role_id === 2): ?>
     <div class="px-3 py-2 bg-white border-bottom d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2 overflow-hidden">
-            <span class="badge rounded-pill px-2 py-1 shadow-xs" style="font-size: 0.65rem; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
-                <i class="bi bi-capsule me-1 text-primary"></i> LAB OBAT
+            <span class="badge rounded-pill px-2 py-1 shadow-xs" style="font-size: 0.65rem; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                <i class="bi bi-inboxes-fill me-1 text-primary"></i> PENERIMAAN SAMPEL
             </span>
-            <span class="text-secondary small text-truncate" style="font-size: 0.72rem; font-weight: 500;">Farmasi &amp; Uji</span>
+            <span class="text-secondary small text-truncate" style="font-size: 0.72rem; font-weight: 500;">Semua Komoditi</span>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="px-3 py-2 bg-white border-bottom d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <span class="badge rounded-pill px-2 py-1 shadow-xs" style="font-size: 0.65rem; background: <?php echo $ws_curr['bg']; ?>; color: <?php echo $ws_curr['color']; ?>; border: 1px solid <?php echo $ws_curr['border']; ?>;">
+                <i class="bi <?php echo $ws_curr['icon']; ?> me-1"></i> <?php echo $ws_curr['label']; ?>
+            </span>
+            <span class="text-secondary small text-truncate" style="font-size: 0.72rem; font-weight: 500;"><?php echo $ws_curr['sub']; ?></span>
         </div>
         <a href="<?php echo site_url('portal'); ?>" class="btn btn-xs rounded-pill py-0 px-2" style="font-size: 0.68rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; font-weight: 500;" title="Beralih Modul">
             Ganti
         </a>
     </div>
+    <?php endif; ?>
 
     <ul class="components list-unstyled px-2 py-3">
         <!-- Dasbor: Tampil untuk semua authenticated user -->

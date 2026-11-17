@@ -23,10 +23,14 @@ class Pengguna extends MY_Controller
     {
         $this->cek_hak_akses('pengguna_view');
 
-        $this->data['halaman_aktif'] = 'pengguna';
-        $this->data['judul_halaman'] = 'Manajemen Pengguna';
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
 
-        $this->data['daftar_pengguna'] = $this->Model_Pengguna->ambil_semua();
+        $this->data['halaman_aktif']   = 'pengguna';
+        $this->data['judul_halaman']   = 'Manajemen Pengguna';
+        $this->data['komoditi_aktif']  = $komoditi;
+        $this->data['daftar_pengguna'] = $this->Model_Pengguna->ambil_semua($komoditi);
+        $this->data['counts_komoditi'] = $this->Model_Pengguna->hitung_per_komoditi();
 
         $this->muat_tampilan('pengguna/index');
     }

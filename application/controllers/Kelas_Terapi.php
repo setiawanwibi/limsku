@@ -21,9 +21,14 @@ class Kelas_Terapi extends MY_Controller
     {
         $this->cek_hak_akses('kelas_terapi_view');
 
-        $this->data['halaman_aktif']      = 'kelas_terapi';
-        $this->data['judul_halaman']      = 'Master Kelas Terapi';
-        $this->data['daftar_kelas_terapi'] = $this->Model_Kelas_Terapi->ambil_semua();
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+
+        $this->data['halaman_aktif']       = 'kelas_terapi';
+        $this->data['judul_halaman']       = 'Master Kelas Terapi';
+        $this->data['komoditi_aktif']      = $komoditi;
+        $this->data['daftar_kelas_terapi'] = $this->Model_Kelas_Terapi->ambil_semua(NULL, $komoditi);
+        $this->data['counts_komoditi']     = $this->Model_Kelas_Terapi->hitung_per_komoditi();
 
         // Hitung penggunaan metode untuk setiap kelas terapi
         foreach ($this->data['daftar_kelas_terapi'] as &$kt) {

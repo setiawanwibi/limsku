@@ -13,11 +13,13 @@
 
         <div class="d-flex align-items-center ms-auto flex-shrink-0 gap-2">
             <?php if ($this->session->userdata('logged_in')): ?>
+                <?php if ((int)$this->session->userdata('role_id') !== 2): ?>
                 <!-- Tombol Portal Cepat (Desktop & Tablet) -->
                 <a href="<?php echo site_url('portal'); ?>" class="topbar-portal-btn d-none d-md-inline-flex" title="Beralih Portal Modul Laboratorium">
                     <i class="bi bi-grid-fill"></i>
                     <span>Portal</span>
                 </a>
+                <?php endif; ?>
 
                 <!-- User Dropdown Menu (Universal & Mobile Friendly) -->
                 <div class="dropdown">
@@ -44,11 +46,13 @@
                                 <?php echo html_escape($this->session->userdata('role_name')); ?>
                             </span>
                         </li>
+                        <?php if ((int)$this->session->userdata('role_id') !== 2): ?>
                         <li>
                             <a class="dropdown-item d-flex align-items-center gap-2 d-md-none" href="<?php echo site_url('portal'); ?>">
                                 <i class="bi bi-grid-fill text-primary"></i> Beralih Portal Lab
                             </a>
                         </li>
+                        <?php endif; ?>
                         <li>
                             <a class="dropdown-item d-flex align-items-center gap-2" href="<?php echo site_url('akun'); ?>">
                                 <i class="bi bi-person-badge text-secondary"></i> Profil &amp; TTD Digital

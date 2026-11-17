@@ -62,15 +62,27 @@
     <?php endif; ?>
 
     <div class="metode-card">
+        <?php
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $cnts = isset($counts_komoditi) ? $counts_komoditi : array();
+        $tab_items = array(
+            'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat', 'icon' => 'bi-capsule'),
+            'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan', 'icon' => 'bi-cup-straw'),
+            'herbal'   => array('label' => 'Obat Tradisional', 'full' => 'Laboratorium Obat Tradisional', 'icon' => 'bi-flower1'),
+            'kosmetik' => array('label' => 'Kosmetik', 'full' => 'Laboratorium Kosmetik', 'icon' => 'bi-brush'),
+            'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse'),
+            'semua'    => array('label' => 'Semua Komoditi', 'full' => 'Semua Komoditi', 'icon' => 'bi-collection')
+        );
+        ?>
         <div class="metode-header">
             <div class="metode-heading">
                 <div class="metode-heading-icon">
                     <i class="bi bi-journal-bookmark"></i>
                 </div>
                 <div>
-                    <h5 class="metode-title">Master Metode Pengujian (Monografi Obat)</h5>
+                    <h5 class="metode-title">Master Metode Pengujian (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Laboratorium'; ?>)</h5>
                     <p class="metode-subtitle">
-                        Kelola data monografi zat aktif, parameter uji kritis, spesifikasi, dan pemetaan ke Lembar Catatan Pengujian (LCP).
+                        Kelola data monografi zat aktif, parameter uji kritis, spesifikasi, dan pemetaan ke Lembar Catatan Pengujian (LCP) sesuai komoditi aktif.
                     </p>
                 </div>
             </div>
@@ -88,6 +100,33 @@
                     <i class="bi bi-plus-lg"></i>
                     Tambah Metode
                 </a>
+            </div>
+        </div>
+
+        <!-- Filter Tab Komoditi -->
+        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="nav nav-pills gap-1">
+                    <?php foreach ($tab_items as $k_key => $t_info): ?>
+                        <?php 
+                            $is_active = ($komoditi_curr === $k_key);
+                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
+                        ?>
+                        <a href="<?php echo site_url('metode?komoditi=' . $k_key); ?>" 
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
+                           style="<?php echo $is_active ? 'background-color: #1890ff; border-color: #1890ff; color: #fff;' : 'font-size: 0.82rem;'; ?>">
+                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                            <span><?php echo $t_info['label']; ?></span>
+                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                                <?php echo $c_count; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="text-muted small">
+                    Workspace Aktif: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
+                </div>
             </div>
         </div>
 

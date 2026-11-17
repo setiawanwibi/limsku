@@ -21,9 +21,14 @@ class Alat extends MY_Controller
     {
         $this->cek_hak_akses('alat_view');
 
-        $this->data['halaman_aktif'] = 'alat';
-        $this->data['judul_halaman'] = 'Master Alat Laboratorium';
-        $this->data['daftar_alat'] = $this->Model_Alat->ambil_semua();
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+
+        $this->data['halaman_aktif']   = 'alat';
+        $this->data['judul_halaman']   = 'Master Alat Laboratorium';
+        $this->data['komoditi_aktif']  = $komoditi;
+        $this->data['daftar_alat']     = $this->Model_Alat->ambil_semua(NULL, $komoditi);
+        $this->data['counts_komoditi'] = $this->Model_Alat->hitung_per_komoditi();
 
         $this->muat_tampilan('alat/index');
     }
@@ -77,6 +82,7 @@ class Alat extends MY_Controller
                     'kondisi_adm'       => $this->input->post('kondisi_adm', TRUE) ?: NULL,
                     'kode_ruangan'      => $this->input->post('kode_ruangan', TRUE) ?: NULL,
                     'nama_ruangan'      => $this->input->post('nama_ruangan', TRUE) ?: NULL,
+                    'komoditi'          => $this->input->post('komoditi', TRUE) ?: ($this->session->userdata('komoditi_aktif') ?: 'obat'),
                     'status'            => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 
@@ -183,6 +189,7 @@ class Alat extends MY_Controller
                     'kondisi_adm'       => $this->input->post('kondisi_adm', TRUE) ?: NULL,
                     'kode_ruangan'      => $this->input->post('kode_ruangan', TRUE) ?: NULL,
                     'nama_ruangan'      => $this->input->post('nama_ruangan', TRUE) ?: NULL,
+                    'komoditi'          => $this->input->post('komoditi', TRUE) ?: ($this->session->userdata('komoditi_aktif') ?: 'obat'),
                     'status'            => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 

@@ -2548,7 +2548,8 @@ class Pengujian extends MY_Controller
         $this->data['halaman_aktif'] = 'pengujian_approval';
         $this->data['judul_halaman'] = 'Antrean Approval Laporan';
 
-        $this->data['antrean'] = $this->Model_Pengujian->ambil_antrean_approval_sampel();
+        $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array('obat');
+        $this->data['antrean'] = $this->Model_Pengujian->ambil_antrean_approval_sampel($komoditi_akses);
 
         $this->muat_tampilan('pengujian/approval');
     }

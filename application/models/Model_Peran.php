@@ -80,11 +80,19 @@ class Model_Peran extends CI_Model
      * Menghitung berapa pengguna yang terasosiasi dengan peran ini
      * 
      * @param int $role_id
+     * @param string|null $komoditi
      * @return int
      */
-    public function hitung_pengguna($role_id)
+    public function hitung_pengguna($role_id, $komoditi = NULL)
     {
         $this->db->where('role_id', $role_id);
+        if ($komoditi && $komoditi !== 'semua') {
+            $this->db->group_start();
+            $this->db->like('komoditi_akses', '"' . $komoditi . '"');
+            $this->db->or_like('komoditi_akses', '"all"');
+            $this->db->or_where('role_id', 1);
+            $this->db->group_end();
+        }
         return $this->db->count_all_results('users');
     }
 }

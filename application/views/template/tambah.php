@@ -356,7 +356,7 @@
 
                 <div class="row g-3">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="kode_template" class="form-label">
                             Kode Template
                             <span class="required-mark">*</span>
@@ -373,7 +373,7 @@
                         >
                     </div>
 
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <label for="nama_template" class="form-label">
                             Nama Form Template
                             <span class="required-mark">*</span>
@@ -391,6 +391,20 @@
                     </div>
 
                     <div class="col-md-3">
+                        <label for="komoditi" class="form-label">
+                            Komoditi Lab
+                        </label>
+                        <?php $selected_kom = $this->input->get('komoditi') ?: ($this->session->userdata('komoditi_aktif') ?: 'obat'); ?>
+                        <select class="form-select" id="komoditi" name="komoditi">
+                            <option value="obat" <?php echo set_select('komoditi', 'obat', ($selected_kom === 'obat')); ?>>Obat</option>
+                            <option value="pangan" <?php echo set_select('komoditi', 'pangan', ($selected_kom === 'pangan')); ?>>Pangan</option>
+                            <option value="herbal" <?php echo set_select('komoditi', 'herbal', ($selected_kom === 'herbal')); ?>>Obat Tradisional</option>
+                            <option value="kosmetik" <?php echo set_select('komoditi', 'kosmetik', ($selected_kom === 'kosmetik')); ?>>Kosmetik</option>
+                            <option value="suplemen" <?php echo set_select('komoditi', 'suplemen', ($selected_kom === 'suplemen')); ?>>Suplemen</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
                         <label for="kategori" class="form-label">
                             Kategori Bidang
                         </label>

@@ -70,7 +70,7 @@ class Autentikasi extends MY_Controller
                         'role_name'      => $user['nama_role'],
                         'laboratory_id'  => $user['laboratory_id'],
                         'komoditi_akses' => $komoditi_raw,
-                        'komoditi_aktif' => in_array('all', $komoditi_raw) || in_array('obat', $komoditi_raw) ? 'obat' : ($komoditi_raw[0] ?? 'obat'),
+                        'komoditi_aktif' => (int)$user['role_id'] === 2 ? 'semua' : (in_array('all', $komoditi_raw) || in_array('obat', $komoditi_raw) ? 'obat' : ($komoditi_raw[0] ?? 'obat')),
                         'logged_in'      => TRUE
                     );
                     $this->session->set_userdata($sess_data);
@@ -84,8 +84,10 @@ class Autentikasi extends MY_Controller
 
                     $this->session->set_flashdata('pesan_sukses', 'Selamat datang kembali, ' . $user['nama_lengkap'] . '!');
 
-                    // Alihkan ke portal pemilih modul jika memiliki akses jamak/all, atau langsung ke dasbor
-                    if (in_array('all', $komoditi_raw) || count($komoditi_raw) > 1 || (int)$user['role_id'] === 1 || (int)$user['role_id'] === 2) {
+                    // Alihkan pengguna sesuai peran: Petugas Sampel langsung ke dasbor (tanpa portal)
+                    if ((int)$user['role_id'] === 2) {
+                        redirect('dasbor');
+                    } elseif (in_array('all', $komoditi_raw) || count($komoditi_raw) > 1 || (int)$user['role_id'] === 1) {
                         redirect('portal');
                     } else {
                         redirect('dasbor');

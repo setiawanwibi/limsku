@@ -25,16 +25,22 @@ class Portal extends MY_Controller
      */
     public function index()
     {
+        $role_id = (int)$this->session->userdata('role_id');
+        // Petugas Sampel tidak menggunakan portal pemilih lab
+        if ($role_id === 2) {
+            redirect('dasbor');
+            return;
+        }
+
         $this->data['judul_halaman'] = 'Portal Modul Laboratorium';
         $this->data['halaman_aktif'] = 'portal';
 
-        $role_id = (int)$this->session->userdata('role_id');
         $komoditi_akses = $this->session->userdata('komoditi_akses') ?: array();
         if (!is_array($komoditi_akses)) {
             $komoditi_akses = array($komoditi_akses);
         }
 
-        $is_all = in_array('all', $komoditi_akses) || in_array('all_sampel', $komoditi_akses) || $role_id === 1 || $role_id === 2;
+        $is_all = in_array('all', $komoditi_akses) || in_array('all_sampel', $komoditi_akses) || $role_id === 1;
 
         // Definisi Modul-Modul LIMSKU
         $this->data['daftar_modul'] = array(
@@ -54,7 +60,7 @@ class Portal extends MY_Controller
             array(
                 'id'          => 'pangan',
                 'kode'        => 'LAB-PANGAN',
-                'nama'        => 'Laboratorium Pangan & Air',
+                'nama'        => 'Pangan',
                 'subjudul'    => 'Pangan Olahan, Minuman, AMDK & BTP',
                 'deskripsi'   => 'Pengujian mikrobiologi SNI (ALT, Coliform, Salmonella), Bahan Tambahan Pangan (BTP: Pemanis, Pengawet), dan cemaran pangan.',
                 'icon'        => 'bi-cup-straw',
@@ -66,15 +72,15 @@ class Portal extends MY_Controller
             ),
             array(
                 'id'          => 'herbal',
-                'kode'        => 'LAB-HERBAL',
-                'nama'        => 'Laboratorium Obat Bahan Alam',
-                'subjudul'    => 'Jamu, OHT, Fitofarmaka & Suplemen',
+                'kode'        => 'LAB-OT',
+                'nama'        => 'Laboratorium Obat Tradisional',
+                'subjudul'    => 'Jamu, OHT, Fitofarmaka & Ekstrak Alami',
                 'deskripsi'   => 'Skrining Bahan Kimia Obat (BKO kualitatif KLT/LC-MS), kadar abu, susut pengeringan, aflatoksin, dan cemaran mikroba FHI.',
                 'icon'        => 'bi-flower1',
                 'color'       => '#e67e22',
                 'bg_gradient' => 'linear-gradient(135deg, #e67e22 0%, #d35400 100%)',
-                'status'      => 'coming_soon',
-                'url'         => '#',
+                'status'      => 'ready',
+                'url'         => site_url('portal/pilih/herbal'),
                 'can_access'  => $is_all || in_array('herbal', $komoditi_akses)
             ),
             array(
@@ -86,22 +92,22 @@ class Portal extends MY_Controller
                 'icon'        => 'bi-brush',
                 'color'       => '#9b59b6',
                 'bg_gradient' => 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)',
-                'status'      => 'coming_soon',
-                'url'         => '#',
+                'status'      => 'ready',
+                'url'         => site_url('portal/pilih/kosmetik'),
                 'can_access'  => $is_all || in_array('kosmetik', $komoditi_akses)
             ),
             array(
-                'id'          => 'rekap',
-                'kode'        => 'MONITORING',
-                'nama'        => 'Monitoring & Rekapitulasi',
-                'subjudul'    => 'Penyelia, Manajer Teknis & Eksekutif',
-                'deskripsi'   => 'Tinjauan matriks sampel balai real-time, statistik lead time, tracking status alur, filter komoditi, dan ekspor resmi PDF/Excel.',
-                'icon'        => 'bi-speedometer2',
-                'color'       => '#2980b9',
-                'bg_gradient' => 'linear-gradient(135deg, #2980b9 0%, #1f618d 100%)',
+                'id'          => 'suplemen',
+                'kode'        => 'LAB-SUPLEMEN',
+                'nama'        => 'Laboratorium Suplemen',
+                'subjudul'    => 'Suplemen Kesehatan, Vitamin & Mineral',
+                'deskripsi'   => 'Pengujian kadar vitamin, mineral, asam amino, bahan aktif suplemen kesehatan, batas cemaran logam berat, dan uji disolusi/waktu hancur.',
+                'icon'        => 'bi-capsule-pill',
+                'color'       => '#0284c7',
+                'bg_gradient' => 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                 'status'      => 'ready',
-                'url'         => site_url('laporan'),
-                'can_access'  => $is_all || $role_id === 1 || $role_id === 2 || $role_id === 3
+                'url'         => site_url('portal/pilih/suplemen'),
+                'can_access'  => $is_all || in_array('suplemen', $komoditi_akses)
             ),
             array(
                 'id'          => 'admin',

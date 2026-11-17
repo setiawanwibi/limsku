@@ -898,8 +898,7 @@
                 </h5>
 
                 <p class="template-subtitle">
-                    Kelola template form pengujian dinamis untuk kebutuhan
-                    pengujian Kimia dan Mikrobiologi.
+                    Kelola template form pengujian dinamis sesuai komoditi laboratorium aktif.
                 </p>
 
             </div>
@@ -908,10 +907,8 @@
             <!-- Header Actions -->
             <div class="template-header-actions">
 
-
-
                 <a
-                    href="<?php echo site_url('template/tambah'); ?>"
+                    href="<?php echo site_url('template/tambah?komoditi=' . (isset($komoditi_aktif) ? $komoditi_aktif : 'obat')); ?>"
                     class="template-add-btn"
                 >
 
@@ -923,6 +920,68 @@
 
             </div>
 
+        </div>
+
+        <?php
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $cnts = isset($counts_komoditi) ? $counts_komoditi : array();
+        $tab_items = array(
+            'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat', 'icon' => 'bi-capsule', 'badge_class' => 'bg-info text-dark'),
+            'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan', 'icon' => 'bi-cup-straw', 'badge_class' => 'bg-success text-white'),
+            'herbal'   => array('label' => 'Obat Tradisional', 'full' => 'Laboratorium Obat Tradisional', 'icon' => 'bi-flower1', 'badge_class' => 'bg-warning text-dark'),
+            'kosmetik' => array('label' => 'Kosmetik', 'full' => 'Laboratorium Kosmetik', 'icon' => 'bi-brush', 'badge_class' => 'bg-purple text-white', 'custom_style' => 'background: #9333ea; color: #fff;'),
+            'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse', 'badge_class' => 'bg-primary text-white'),
+            'semua'    => array('label' => 'Semua Komoditi', 'full' => 'Semua Komoditi', 'icon' => 'bi-collection', 'badge_class' => 'bg-secondary text-white')
+        );
+        ?>
+
+        <!-- Filter Tab Komoditi -->
+        <div class="px-3 pt-3 pb-2 border-bottom bg-light">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="nav nav-pills gap-1">
+                    <?php foreach ($tab_items as $k_key => $t_info): ?>
+                        <?php 
+                            $is_active = ($komoditi_curr === $k_key);
+                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
+                        ?>
+                        <a href="<?php echo site_url('template?komoditi=' . $k_key); ?>" 
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
+                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.82rem;'; ?>">
+                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                            <span><?php echo $t_info['label']; ?></span>
+                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                                <?php echo $c_count; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="text-muted small">
+                    Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
+                </div>
+            </div>
+
+            <!-- Grouping Notice Komoditi Obat -->
+            <?php if ($komoditi_curr === 'obat'): ?>
+                <div class="alert alert-info d-flex align-items-center gap-2 mt-3 mb-1 py-2 px-3 border-0 shadow-xs" style="background: #e0f2fe; color: #0369a1; border-radius: 8px; font-size: 0.82rem;">
+                    <i class="bi bi-info-circle-fill fs-6"></i>
+                    <div>
+                        <strong>Kelompok Form Komoditi Obat:</strong> Form pengujian Kimia (12 Form) dan Mikrobiologi (6 Form) telah dikelompokkan ke dalam kategori <strong>Komoditi Obat</strong> untuk pengujian sediaan farmasi.
+                    </div>
+                </div>
+            <?php elseif ($komoditi_curr !== 'semua' && empty($daftar_template)): ?>
+                <div class="alert alert-warning d-flex align-items-center justify-content-between mt-3 mb-1 py-2 px-3 border-0 shadow-xs" style="background: #fef3c7; color: #92400e; border-radius: 8px; font-size: 0.82rem;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-circle-fill fs-6"></i>
+                        <div>
+                            Belum ada template form khusus untuk <strong><?php echo $tab_items[$komoditi_curr]['full']; ?></strong>. Form pengujian Kimia &amp; Biologi saat ini dikelompokkan di Komoditi Obat.
+                        </div>
+                    </div>
+                    <a href="<?php echo site_url('template/tambah?komoditi=' . $komoditi_curr); ?>" class="btn btn-xs btn-outline-warning text-dark bg-white fw-bold">
+                        <i class="bi bi-plus-lg"></i> Tambah Form <?php echo $tab_items[$komoditi_curr]['label']; ?>
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
 
@@ -950,6 +1009,10 @@
 
                             <th>
                                 Nama Form Template
+                            </th>
+
+                            <th>
+                                Komoditi
                             </th>
 
                             <th>
@@ -1012,6 +1075,18 @@
 
                                         </strong>
 
+                                    </td>
+
+
+                                    <!-- Komoditi -->
+                                    <td>
+                                        <?php 
+                                            $t_kom = !empty($t['komoditi']) ? $t['komoditi'] : 'obat';
+                                            $badge_info = isset($tab_items[$t_kom]) ? $tab_items[$t_kom] : array('label' => ucfirst($t_kom), 'badge_class' => 'bg-secondary text-white', 'icon' => 'bi-tag');
+                                        ?>
+                                        <span class="badge <?php echo $badge_info['badge_class']; ?>" style="<?php echo isset($badge_info['custom_style']) ? $badge_info['custom_style'] : ''; ?> font-size: 0.72rem; padding: 4px 8px;">
+                                            <i class="bi <?php echo $badge_info['icon']; ?> me-1"></i><?php echo $badge_info['label']; ?>
+                                        </span>
                                     </td>
 
 

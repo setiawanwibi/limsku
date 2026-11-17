@@ -1480,6 +1480,67 @@
                 </div>
 
                 <!-- =================================================
+                     BAGIAN KHUSUS KOMODITI: SUPLEMEN KESEHATAN
+                     ================================================= -->
+                <div id="section-wrapper-suplemen" class="komoditi-section-wrapper" <?php echo ($val_komoditi !== 'suplemen') ? 'style="display:none;"' : ''; ?>>
+                    <div class="card border-info border-opacity-50 shadow-xs mb-4">
+                        <div class="card-header bg-info bg-opacity-10 py-2 border-info border-opacity-25">
+                            <h6 class="mb-0 text-info fw-bold small">
+                                <i class="bi bi-shield-plus text-info me-1"></i> Parameter Produk &amp; Sampling (Suplemen Kesehatan)
+                            </h6>
+                        </div>
+                        <div class="card-body p-3 row g-3">
+                            <div class="col-md-4">
+                                <label for="suplemen_nie" class="form-label">Nomor Izin Edar (POM SD / SI / SL)</label>
+                                <input type="text" class="form-control" id="suplemen_nie" name="suplemen_nie" placeholder="POM SD 211512341">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="suplemen_bentuk_sediaan" class="form-label">Bentuk Sediaan Suplemen</label>
+                                <select class="form-select" id="suplemen_bentuk_sediaan" name="suplemen_bentuk_sediaan">
+                                    <option value="">-- Pilih Bentuk Sediaan --</option>
+                                    <option value="Tablet Effervescent">Tablet Effervescent</option>
+                                    <option value="Kapsul Lunak (Softgel)">Kapsul Lunak (Softgel)</option>
+                                    <option value="Tablet Salut / Kaplet">Tablet Salut / Kaplet</option>
+                                    <option value="Tablet Hisap / Kunyah">Tablet Hisap / Kunyah</option>
+                                    <option value="Kapsul Keras">Kapsul Keras</option>
+                                    <option value="Sirup / Cairan Suplemen">Sirup / Cairan Suplemen</option>
+                                    <option value="Serbuk / Granul Sachet">Serbuk / Granul Sachet</option>
+                                    <option value="Gummy Suplemen">Gummy Suplemen</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="suplemen_kategori" class="form-label">Sub Kategori Suplemen</label>
+                                <select class="form-select" id="suplemen_kategori" name="suplemen_kategori">
+                                    <option value="Vitamin & Mineral">Vitamin &amp; Mineral</option>
+                                    <option value="Suplemen Vitamin Tunggal">Suplemen Vitamin Tunggal</option>
+                                    <option value="Antioksidan & Nutrasetikal">Antioksidan &amp; Nutrasetikal</option>
+                                    <option value="Minyak Ikan / Omega-3">Minyak Ikan / Omega-3</option>
+                                    <option value="Asam Amino & Protein">Asam Amino &amp; Protein</option>
+                                    <option value="Probiotik & Prebiotik">Probiotik &amp; Prebiotik</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="suplemen_klaim" class="form-label">Klaim Khasiat / Kegunaan Terdaftar</label>
+                                <textarea class="form-control" id="suplemen_klaim" name="suplemen_klaim" rows="2" placeholder="Membantu memelihara daya tahan tubuh, memenuhi kebutuhan vitamin D harian, dll."></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="suplemen_target_uji" class="form-label">Target Pengujian Spesifik</label>
+                                <textarea class="form-control" id="suplemen_target_uji" name="suplemen_target_uji" rows="2" placeholder="Penetapan Kadar Vitamin C, KCKT Vitamin D3, Waktu Larut, Uji ALT/AKK Mikroba"></textarea>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="suplemen_produsen" class="form-label">Nama &amp; Alamat Pendaftar / Produsen</label>
+                                <input type="text" class="form-control" id="suplemen_produsen" name="suplemen_produsen" placeholder="PT Vitapharma Sehat Prima, Sidoarjo, Jawa Timur">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =================================================
                      FORM FOOTER
                      ================================================= -->
 
@@ -1523,7 +1584,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'obat': document.getElementById('section-wrapper-obat'),
         'pangan': document.getElementById('section-wrapper-pangan'),
         'herbal': document.getElementById('section-wrapper-herbal'),
-        'kosmetik': document.getElementById('section-wrapper-kosmetik')
+        'kosmetik': document.getElementById('section-wrapper-kosmetik'),
+        'suplemen': document.getElementById('section-wrapper-suplemen')
     };
 
     function updateKomoditiForm(selectedVal) {

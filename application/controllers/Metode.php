@@ -24,16 +24,19 @@ class Metode extends MY_Controller
     {
         $this->cek_hak_akses('metode_view');
 
-        $bidang = $this->input->get('bidang', TRUE);
-        $status = $this->input->get('status', TRUE);
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $bidang   = $this->input->get('bidang', TRUE);
+        $status   = $this->input->get('status', TRUE);
 
-        $this->data['halaman_aktif'] = 'metode';
-        $this->data['judul_halaman'] = 'Master Metode Pengujian (Monografi)';
-
-        $this->data['bidang_aktif']  = $bidang;
-        $this->data['status_aktif']  = $status;
-        $this->data['daftar_metode'] = $this->Model_Metode->ambil_semua($bidang, $status);
-        $this->data['daftar_lcp']    = $this->Model_Template->ambil_semua();
+        $this->data['halaman_aktif']   = 'metode';
+        $this->data['judul_halaman']   = 'Master Metode Pengujian';
+        $this->data['komoditi_aktif']  = $komoditi;
+        $this->data['bidang_aktif']    = $bidang;
+        $this->data['status_aktif']    = $status;
+        $this->data['daftar_metode']   = $this->Model_Metode->ambil_semua($bidang, $status, $komoditi);
+        $this->data['counts_komoditi'] = $this->Model_Metode->hitung_per_komoditi();
+        $this->data['daftar_lcp']      = $this->Model_Template->ambil_semua();
 
         $this->muat_tampilan('metode/index');
     }
@@ -67,6 +70,7 @@ class Metode extends MY_Controller
                     'kategori'         => $this->input->post('bidang_pengujian', TRUE),
                     'kelas_terapi_id'  => $this->input->post('kelas_terapi_id', TRUE) ?: NULL,
                     'template_id'      => $this->input->post('template_id', TRUE) ?: NULL,
+                    'komoditi'         => $this->input->post('komoditi', TRUE) ?: ($this->session->userdata('komoditi_aktif') ?: 'obat'),
                     'status'           => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 
@@ -126,6 +130,7 @@ class Metode extends MY_Controller
                     'kategori'         => $this->input->post('bidang_pengujian', TRUE),
                     'kelas_terapi_id'  => $this->input->post('kelas_terapi_id', TRUE) ?: NULL,
                     'template_id'      => $this->input->post('template_id', TRUE) ?: NULL,
+                    'komoditi'         => $this->input->post('komoditi', TRUE) ?: ($this->session->userdata('komoditi_aktif') ?: 'obat'),
                     'status'           => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 

@@ -377,7 +377,7 @@
                 <!-- Informasi Utama -->
                 <div class="row g-3 mb-3">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <label
                             for="kode_template"
@@ -399,7 +399,7 @@
                     </div>
 
 
-                    <div class="col-md-5">
+                    <div class="col-md-4">
 
                         <label
                             for="nama_template"
@@ -420,8 +420,21 @@
 
                     </div>
 
-
                     <div class="col-md-3">
+                        <label for="komoditi" class="form-label">
+                            Komoditi Lab
+                        </label>
+                        <?php $curr_kom = !empty($template['komoditi']) ? $template['komoditi'] : 'obat'; ?>
+                        <select class="form-select" id="komoditi" name="komoditi">
+                            <option value="obat" <?php echo set_select('komoditi', 'obat', ($curr_kom === 'obat')); ?>>Obat</option>
+                            <option value="pangan" <?php echo set_select('komoditi', 'pangan', ($curr_kom === 'pangan')); ?>>Pangan</option>
+                            <option value="herbal" <?php echo set_select('komoditi', 'herbal', ($curr_kom === 'herbal')); ?>>Obat Tradisional</option>
+                            <option value="kosmetik" <?php echo set_select('komoditi', 'kosmetik', ($curr_kom === 'kosmetik')); ?>>Kosmetik</option>
+                            <option value="suplemen" <?php echo set_select('komoditi', 'suplemen', ($curr_kom === 'suplemen')); ?>>Suplemen</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
 
                         <label
                             for="kategori"

@@ -18,16 +18,58 @@ class Model_Pengguna extends CI_Model
     /**
      * Mengambil seluruh data pengguna beserta nama role & laboratorium
      * 
+     * @param string|null $komoditi Filter komoditi ('obat' / 'pangan' / 'herbal' / 'kosmetik' / 'suplemen' / 'semua')
      * @return array
      */
-    public function ambil_semua()
+    public function ambil_semua($komoditi = NULL)
     {
         $this->db->select('u.*, r.nama_role, l.nama_lab, l.kode_lab');
         $this->db->from($this->tabel . ' u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
         $this->db->join('laboratories l', 'l.id = u.laboratory_id', 'left');
+
+        if ($komoditi && $komoditi !== 'semua') {
+            $this->db->group_start();
+            $this->db->like('u.komoditi_akses', '"' . $komoditi . '"');
+            $this->db->or_like('u.komoditi_akses', '"all"');
+            $this->db->or_where('u.role_id', 1);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('u.role_id', 'ASC');
         $this->db->order_by('u.nama_lengkap', 'ASC');
         return $this->db->get()->result_array();
+    }
+
+    /**
+     * Menghitung total personil/pengguna per komoditi
+     * 
+     * @return array
+     */
+    public function hitung_per_komoditi()
+    {
+        $all_users = $this->db->get($this->tabel)->result_array();
+        $counts = array(
+            'obat'     => 0,
+            'pangan'   => 0,
+            'herbal'   => 0,
+            'kosmetik' => 0,
+            'suplemen' => 0,
+            'semua'    => count($all_users)
+        );
+
+        foreach ($all_users as $u) {
+            $akses = json_decode($u['komoditi_akses'], true) ?: array();
+            $is_all = in_array('all', $akses) || (int)$u['role_id'] === 1;
+
+            foreach (array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen') as $k) {
+                if ($is_all || in_array($k, $akses)) {
+                    $counts[$k]++;
+                }
+            }
+        }
+
+        return $counts;
     }
 
     /**

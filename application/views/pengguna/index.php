@@ -500,6 +500,18 @@
     <?php endif; ?>
 
     <div class="user-management-card">
+        <?php
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $cnts = isset($counts_komoditi) ? $counts_komoditi : array();
+        $tab_items = array(
+            'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat', 'icon' => 'bi-capsule'),
+            'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan', 'icon' => 'bi-cup-straw'),
+            'herbal'   => array('label' => 'Obat Tradisional', 'full' => 'Laboratorium Obat Tradisional', 'icon' => 'bi-flower1'),
+            'kosmetik' => array('label' => 'Kosmetik', 'full' => 'Laboratorium Kosmetik', 'icon' => 'bi-brush'),
+            'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse'),
+            'semua'    => array('label' => 'Semua Pengguna', 'full' => 'Semua Pengguna', 'icon' => 'bi-people')
+        );
+        ?>
 
         <!-- Header -->
         <div class="user-management-header">
@@ -510,21 +522,48 @@
                 </div>
 
                 <div>
-                    <h5 class="user-management-title">Daftar Pengguna</h5>
+                    <h5 class="user-management-title">Daftar Pengguna (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Sistem'; ?>)</h5>
                     <p class="user-management-subtitle">
-                        Kelola akun, peran, laboratorium, dan status pengguna sistem.
+                        Kelola akun, peran, dan personil yang bertugas pada komoditi laboratorium aktif.
                     </p>
                 </div>
             </div>
 
             <a
-                href="<?php echo site_url('pengguna/tambah'); ?>"
+                href="<?php echo site_url('pengguna/tambah?komoditi=' . $komoditi_curr); ?>"
                 class="user-management-btn-add"
             >
                 <i class="bi bi-person-plus"></i>
                 Tambah Pengguna
             </a>
 
+        </div>
+
+        <!-- Filter Tab Komoditi -->
+        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="nav nav-pills gap-1">
+                    <?php foreach ($tab_items as $k_key => $t_info): ?>
+                        <?php 
+                            $is_active = ($komoditi_curr === $k_key);
+                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
+                        ?>
+                        <a href="<?php echo site_url('pengguna?komoditi=' . $k_key); ?>" 
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
+                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.82rem;'; ?>">
+                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                            <span><?php echo $t_info['label']; ?></span>
+                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                                <?php echo $c_count; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="text-muted small">
+                    Personil di Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
+                </div>
+            </div>
         </div>
 
         <!-- Table -->

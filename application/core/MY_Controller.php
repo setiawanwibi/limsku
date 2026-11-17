@@ -29,6 +29,8 @@ class MY_Controller extends CI_Controller
         $this->data['halaman_aktif'] = '';
         $this->data['judul_halaman'] = '';
         $this->data['breadcrumbs']   = array();
+        $this->data['komoditi_aktif'] = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $this->data['komoditi_akses'] = $this->session->userdata('komoditi_akses') ?: array('obat');
         
         // Load model audit
         $this->load->model('Model_Audit');

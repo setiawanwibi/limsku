@@ -221,6 +221,18 @@
     <?php endif; ?>
 
     <div class="kt-card">
+        <?php
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $cnts = isset($counts_komoditi) ? $counts_komoditi : array();
+        $tab_items = array(
+            'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat', 'icon' => 'bi-capsule'),
+            'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan', 'icon' => 'bi-cup-straw'),
+            'herbal'   => array('label' => 'Obat Tradisional', 'full' => 'Laboratorium Obat Tradisional', 'icon' => 'bi-flower1'),
+            'kosmetik' => array('label' => 'Kosmetik', 'full' => 'Laboratorium Kosmetik', 'icon' => 'bi-brush'),
+            'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse'),
+            'semua'    => array('label' => 'Semua Komoditi', 'full' => 'Semua Komoditi', 'icon' => 'bi-collection')
+        );
+        ?>
 
         <div class="kt-header">
             <div class="kt-heading">
@@ -230,7 +242,7 @@
 
                 <div>
                     <h5 class="kt-title">
-                        Master Kelas Terapi
+                        Master Kelas Terapi (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Laboratorium'; ?>)
                     </h5>
                     <p class="kt-subtitle">
                         Klasifikasi farmakologi obat untuk pengelompokan monografi metode dan registrasi sampel BBPOM.
@@ -238,10 +250,51 @@
                 </div>
             </div>
 
-            <a href="<?php echo site_url('kelas-terapi/tambah'); ?>" class="btn-add-kt">
+            <a href="<?php echo site_url('kelas-terapi/tambah?komoditi=' . $komoditi_curr); ?>" class="btn-add-kt">
                 <i class="bi bi-plus-lg"></i>
                 Tambah Kelas Terapi
             </a>
+        </div>
+
+        <!-- Filter Tab Komoditi -->
+        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="nav nav-pills gap-1">
+                    <?php foreach ($tab_items as $k_key => $t_info): ?>
+                        <?php 
+                            $is_active = ($komoditi_curr === $k_key);
+                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
+                        ?>
+                        <a href="<?php echo site_url('kelas-terapi?komoditi=' . $k_key); ?>" 
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
+                           style="<?php echo $is_active ? 'background-color: #2f54eb; border-color: #2f54eb; color: #fff;' : 'font-size: 0.82rem;'; ?>">
+                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                            <span><?php echo $t_info['label']; ?></span>
+                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                                <?php echo $c_count; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="text-muted small">
+                    Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
+                </div>
+            </div>
+
+            <?php if ($komoditi_curr !== 'obat' && empty($daftar_kelas_terapi)): ?>
+                <div class="alert alert-info d-flex align-items-center justify-content-between mt-3 mb-1 py-2 px-3 border-0 shadow-xs" style="background: #eff6ff; color: #1d4ed8; border-radius: 8px; font-size: 0.82rem;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle-fill fs-6"></i>
+                        <div>
+                            Master Kelas Terapi dikhususkan untuk klasifikasi farmakologi <strong>Komoditi Obat</strong>. Tidak ada data kelas terapi spesifik untuk <?php echo $tab_items[$komoditi_curr]['full']; ?>.
+                        </div>
+                    </div>
+                    <a href="<?php echo site_url('kelas-terapi?komoditi=obat'); ?>" class="btn btn-xs btn-outline-primary bg-white fw-bold">
+                        <i class="bi bi-capsule"></i> Lihat Kelas Terapi Obat
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="kt-body">

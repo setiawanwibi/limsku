@@ -19,15 +19,61 @@ class Model_Alat extends CI_Model
      * Mengambil daftar alat laboratorium dengan filter opsional
      * 
      * @param string|null $status Filter status ('Aktif' / 'Nonaktif')
+     * @param string|null $komoditi Filter komoditi ('obat' / 'pangan' / 'herbal' / 'kosmetik' / 'suplemen' / 'semua')
      * @return array
      */
-    public function ambil_semua($status = NULL)
+    public function ambil_semua($status = NULL, $komoditi = NULL)
     {
         if ($status) {
             $this->db->where('status', $status);
         }
+        if ($komoditi && $komoditi !== 'semua') {
+            $this->db->group_start();
+            $this->db->where('komoditi', $komoditi);
+            $this->db->or_where('komoditi', 'semua');
+            if ($komoditi === 'herbal' || $komoditi === 'suplemen') {
+                $this->db->or_where('komoditi', 'obat');
+            }
+            $this->db->group_end();
+        }
         $this->db->order_by('id', 'DESC');
         return $this->db->get($this->tabel)->result_array();
+    }
+
+    /**
+     * Menghitung total alat laboratorium per komoditi
+     * 
+     * @return array
+     */
+    public function hitung_per_komoditi()
+    {
+        $all = $this->db->get($this->tabel)->result_array();
+        $counts = array(
+            'obat'     => 0,
+            'pangan'   => 0,
+            'herbal'   => 0,
+            'kosmetik' => 0,
+            'suplemen' => 0,
+            'semua'    => count($all)
+        );
+
+        foreach ($all as $item) {
+            $k = !empty($item['komoditi']) ? $item['komoditi'] : 'obat';
+            if ($k === 'semua') {
+                $counts['obat']++;
+                $counts['pangan']++;
+                $counts['herbal']++;
+                $counts['kosmetik']++;
+                $counts['suplemen']++;
+            } elseif ($k === 'obat') {
+                $counts['obat']++;
+                $counts['herbal']++;
+                $counts['suplemen']++;
+            } elseif (isset($counts[$k])) {
+                $counts[$k]++;
+            }
+        }
+        return $counts;
     }
 
     /**

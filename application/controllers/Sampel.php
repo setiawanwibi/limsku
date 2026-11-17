@@ -26,8 +26,10 @@ class Sampel extends MY_Controller
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Daftar Sampel Laboratorium';
 
-        // Filter Komoditi (Default 'obat' atau 'semua' sesuai pilihan)
-        $komoditi_pilih = $this->input->get('komoditi', TRUE) ?: 'obat';
+        // Filter Komoditi (Default 'semua' untuk Petugas Sampel, atau 'obat' untuk peran lainnya)
+        $role_id_aktif = (int)$this->session->userdata('role_id');
+        $default_komoditi = ($role_id_aktif === 2) ? 'semua' : 'obat';
+        $komoditi_pilih = $this->input->get('komoditi', TRUE) ?: $default_komoditi;
         $this->data['komoditi_aktif'] = $komoditi_pilih;
 
         $this->data['daftar_sampel']    = $this->Model_Sampel->ambil_semua($komoditi_pilih);
@@ -164,6 +166,20 @@ class Sampel extends MY_Controller
                     }
                     if (!empty($this->input->post('kosmetik_produsen', TRUE))) {
                         $data_simpan['nama_alamat_perusahaan'] = $this->input->post('kosmetik_produsen', TRUE);
+                    }
+                } elseif ($komoditi_post === 'suplemen') {
+                    $atribut_spesifik = array(
+                        'nie_suplemen'       => $this->input->post('suplemen_nie', TRUE) ?: NULL,
+                        'bentuk_sediaan'     => $this->input->post('suplemen_bentuk_sediaan', TRUE) ?: NULL,
+                        'klaim_suplemen'     => $this->input->post('suplemen_klaim', TRUE) ?: NULL,
+                        'target_pengujian'   => $this->input->post('suplemen_target_uji', TRUE) ?: NULL,
+                        'produsen_suplemen'  => $this->input->post('suplemen_produsen', TRUE) ?: NULL,
+                    );
+                    if (!empty($this->input->post('suplemen_nie', TRUE))) {
+                        $data_simpan['nomor_izin_edar'] = $this->input->post('suplemen_nie', TRUE);
+                    }
+                    if (!empty($this->input->post('suplemen_produsen', TRUE))) {
+                        $data_simpan['nama_alamat_perusahaan'] = $this->input->post('suplemen_produsen', TRUE);
                     }
                 }
 
@@ -510,6 +526,10 @@ class Sampel extends MY_Controller
             $rows[] = array('No', 'Nama Sampel', 'Kategori Kosmetik', 'Nomor Notifikasi', 'Bentuk Sediaan', 'Asal Produk', 'Kategori Sarana', 'Nama Sarana', 'Kabupaten Kota', 'Tanggal Sampling', 'Surtug', 'Target Uji Bahan Berbahaya', 'Nama Alamat Produsen');
             $rows[] = array('1', 'Brightening Day Cream SPF 30', 'Perawatan Kulit (Skincare: Serum, Krim, Toner)', 'NA18240105678', 'Krim Siang', 'Produksi Dalam Negeri (Lokal)', 'Klinik Kecantikan', 'Glow Estetika Center', 'Metro', date('Y-m-d'), 'ST/083/BBPOM/2026', 'Uji Merkuri (Hg) dan Hidrokuinon', 'PT Kosmetika Prima Indonesia, Bandung');
             $rows[] = array('2', 'Matte Velvet Lip Cream Shade 05', 'Riasan Wajah / Makeup (Lipstik, Bedak, Foundation)', 'NA18241300999', 'Lip Cream Cair', 'Produksi Dalam Negeri (Lokal)', 'Toko Kosmetik', 'Toko Cantik Jelita', 'Bandar Lampung', date('Y-m-d'), 'ST/083/BBPOM/2026', 'Uji Pewarna Merah K3 / K10 dan Timbal (Pb)', 'PT Beauty Pesona Indonesia, Tangerang');
+        } elseif ($komoditi === 'suplemen') {
+            $rows[] = array('No', 'Nama Sampel', 'Bentuk Sediaan', 'Nomor Izin Edar', 'No Bets Exp', 'Kategori Sarana', 'Nama Sarana', 'Kabupaten Kota', 'Tanggal Sampling', 'Surtug', 'Klaim Suplemen', 'Target Pengujian', 'Nama Alamat Produsen');
+            $rows[] = array('1', 'Effervescent Vitamin C 1000 mg + Zinc', 'Tablet Effervescent', 'POM SD 211512341', 'BETS-VC24 EXP 2027-09', 'Apotek', 'Apotek Kimia Farma', 'Bandar Lampung', date('Y-m-d'), 'ST/084/BBPOM/2026', 'Membantu memelihara daya tahan tubuh', 'Penetapan Kadar Vitamin C, Waktu Larut, ALT', 'PT Vitapharma Sehat Prima, Sidoarjo');
+            $rows[] = array('2', 'Kapsul Lunak Vitamin D3 1000 IU', 'Kapsul Lunak (Softgel)', 'POM SD 202398761', 'BETS-D309 EXP 2027-05', 'Toko Obat', 'Toko Sehat Prima', 'Lampung Selatan', date('Y-m-d'), 'ST/084/BBPOM/2026', 'Memenuhi kebutuhan Vitamin D harian', 'Penetapan Kadar Vitamin D3, Keragaman Bobot, ALT/AKK', 'PT Nutriprima Sejahtera, Jakarta');
         } else {
             // Header Baku Obat (31 Kolom)
             $rows[] = array(

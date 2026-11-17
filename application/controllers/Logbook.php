@@ -41,9 +41,13 @@ class Logbook extends MY_Controller
         $ruangan = $this->input->get('ruangan', TRUE);
         $q       = $this->input->get('q', TRUE);
 
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+
         $filter = array(
             'status_penggunaan' => $tab,
             'ruangan'           => !empty($ruangan) ? trim($ruangan) : NULL,
+            'komoditi'          => $komoditi,
             'q'                 => !empty($q) ? trim($q) : NULL
         );
 
@@ -53,6 +57,7 @@ class Logbook extends MY_Controller
 
         $this->data['halaman_aktif']    = 'logbook_alat';
         $this->data['judul_halaman']    = 'Buku Log Penggunaan Alat Laboratorium';
+        $this->data['komoditi_aktif']   = $komoditi;
         $this->data['tab_aktif']        = $tab;
         $this->data['daftar_alat_stat'] = $daftar_alat_stat;
         $this->data['daftar_ruangan']   = $daftar_ruangan;

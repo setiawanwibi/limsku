@@ -22,9 +22,10 @@ class Model_Metode extends CI_Model
      * 
      * @param string|null $bidang Filter bidang ('Kimia' / 'Mikrobiologi')
      * @param string|null $status Filter status ('Aktif' / 'Nonaktif')
+     * @param string|null $komoditi Filter komoditi ('obat' / 'pangan' / 'herbal' / 'kosmetik' / 'suplemen' / 'semua')
      * @return array
      */
-    public function ambil_semua($bidang = NULL, $status = NULL)
+    public function ambil_semua($bidang = NULL, $status = NULL, $komoditi = NULL)
     {
         $this->db->select('m.*, tc.nama_kelas_terapi, ft.kode_template, ft.nama_template');
         $this->db->from($this->tabel . ' m');
@@ -40,10 +41,45 @@ class Model_Metode extends CI_Model
         if ($status) {
             $this->db->where('m.status', $status);
         }
+        if ($komoditi && $komoditi !== 'semua') {
+            $this->db->where('m.komoditi', $komoditi);
+        }
 
         $this->db->order_by('m.nama_zat_aktif', 'ASC');
         $this->db->order_by('m.parameter_uji', 'ASC');
         return $this->db->get()->result_array();
+    }
+
+    /**
+     * Menghitung total metode per komoditi
+     * 
+     * @return array
+     */
+    public function hitung_per_komoditi()
+    {
+        $res = $this->db->select('komoditi, COUNT(*) as total')
+                        ->group_by('komoditi')
+                        ->get($this->tabel)
+                        ->result_array();
+
+        $counts = array(
+            'obat'     => 0,
+            'pangan'   => 0,
+            'herbal'   => 0,
+            'kosmetik' => 0,
+            'suplemen' => 0,
+            'semua'    => 0
+        );
+
+        $total_semua = 0;
+        foreach ($res as $r) {
+            $kom = !empty($r['komoditi']) ? $r['komoditi'] : 'obat';
+            $cnt = (int)$r['total'];
+            $counts[$kom] = $cnt;
+            $total_semua += $cnt;
+        }
+        $counts['semua'] = $total_semua;
+        return $counts;
     }
 
     /**

@@ -22,12 +22,17 @@ class Peran extends MY_Controller
     {
         $this->cek_hak_akses('peran_view');
 
-        $this->data['halaman_aktif'] = 'peran';
-        $this->data['judul_halaman'] = 'Manajemen Peran & Hak Akses';
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+
+        $this->data['halaman_aktif']  = 'peran';
+        $this->data['judul_halaman']  = 'Manajemen Peran & Hak Akses';
+        $this->data['komoditi_aktif'] = $komoditi;
 
         $daftar_peran = $this->Model_Peran->ambil_semua();
         foreach ($daftar_peran as &$role) {
-            $role['total_pengguna'] = $this->Model_Peran->hitung_pengguna($role['id']);
+            $role['total_pengguna']        = $this->Model_Peran->hitung_pengguna($role['id'], $komoditi);
+            $role['total_pengguna_global'] = $this->Model_Peran->hitung_pengguna($role['id']);
         }
 
         $this->data['daftar_peran'] = $daftar_peran;

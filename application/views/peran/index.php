@@ -413,12 +413,28 @@
 
     <!-- Kartu Daftar Peran -->
     <div class="role-card mb-4">
+        <?php
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $tab_items = array(
+            'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat', 'icon' => 'bi-capsule'),
+            'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan', 'icon' => 'bi-cup-straw'),
+            'herbal'   => array('label' => 'Obat Tradisional', 'full' => 'Laboratorium Obat Tradisional', 'icon' => 'bi-flower1'),
+            'kosmetik' => array('label' => 'Kosmetik', 'full' => 'Laboratorium Kosmetik', 'icon' => 'bi-brush'),
+            'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse'),
+            'semua'    => array('label' => 'Semua Komoditi', 'full' => 'Semua Komoditi', 'icon' => 'bi-collection')
+        );
+        ?>
 
         <div class="role-header">
-            <h5 class="role-heading">
-                <i class="bi bi-people"></i>
-                Daftar Peran (Roles)
-            </h5>
+            <div>
+                <h5 class="role-heading">
+                    <i class="bi bi-people"></i>
+                    Daftar Peran (Roles)
+                </h5>
+                <p class="text-muted small mb-0 mt-1" style="font-size: 0.78rem;">
+                    Struktur peran RBAC LIMSKU &amp; jumlah personil bertugas di Workspace <strong><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>.
+                </p>
+            </div>
 
             <div class="role-header-actions">
                 <button
@@ -438,6 +454,27 @@
                     <i class="bi bi-plus-lg"></i>
                     Tambah Peran
                 </a>
+            </div>
+        </div>
+
+        <!-- Filter Tab Komoditi -->
+        <div class="px-3 pt-2 pb-2 border-bottom bg-light">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="nav nav-pills gap-1">
+                    <?php foreach ($tab_items as $k_key => $t_info): ?>
+                        <?php $is_active = ($komoditi_curr === $k_key); ?>
+                        <a href="<?php echo site_url('peran?komoditi=' . $k_key); ?>" 
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
+                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.8rem;'; ?>">
+                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                            <span><?php echo $t_info['label']; ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="text-muted small" style="font-size: 0.75rem;">
+                    Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
+                </div>
             </div>
         </div>
 
@@ -479,8 +516,11 @@
                                     <td>
                                         <span class="role-user-count">
                                             <i class="bi bi-person"></i>
-                                            <?php echo $r['total_pengguna']; ?> Pengguna
+                                            <?php echo $r['total_pengguna']; ?> Personil
                                         </span>
+                                        <?php if ($komoditi_curr !== 'semua'): ?>
+                                            <div class="text-muted" style="font-size: 0.68rem;">(Total Sistem: <?php echo $r['total_pengguna_global']; ?>)</div>
+                                        <?php endif; ?>
                                     </td>
 
                                     <td>

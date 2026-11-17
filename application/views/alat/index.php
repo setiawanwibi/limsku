@@ -278,6 +278,18 @@
     <?php endif; ?>
 
     <div class="instrument-card">
+        <?php
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
+        $cnts = isset($counts_komoditi) ? $counts_komoditi : array();
+        $tab_items = array(
+            'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat & Mikrobiologi', 'icon' => 'bi-capsule'),
+            'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan & Mikrobiologi', 'icon' => 'bi-cup-straw'),
+            'herbal'   => array('label' => 'Obat Tradisional', 'full' => 'Laboratorium Obat Tradisional', 'icon' => 'bi-flower1'),
+            'kosmetik' => array('label' => 'Kosmetik', 'full' => 'Laboratorium Kosmetik & Mikrobiologi', 'icon' => 'bi-brush'),
+            'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse'),
+            'semua'    => array('label' => 'Semua Alat', 'full' => 'Semua Alat Laboratorium', 'icon' => 'bi-tools')
+        );
+        ?>
 
         <div class="instrument-header">
             <div class="instrument-heading">
@@ -287,10 +299,10 @@
 
                 <div>
                     <h5 class="instrument-title">
-                        Daftar Alat Laboratorium
+                        Daftar Alat Laboratorium (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Laboratorium'; ?>)
                     </h5>
                     <p class="instrument-subtitle">
-                        Kelola data inventaris alat pengujian, spesifikasi teknis, kondisi, dan lokasi ruangan.
+                        Kelola data inventaris alat pengujian, spesifikasi teknis, kondisi, dan lokasi ruangan sesuai komoditi aktif.
                     </p>
                 </div>
             </div>
@@ -300,10 +312,37 @@
                     <i class="bi bi-file-earmark-excel"></i>
                     Import Excel
                 </a>
-                <a href="<?php echo site_url('alat/tambah'); ?>" class="btn-add-instrument">
+                <a href="<?php echo site_url('alat/tambah?komoditi=' . $komoditi_curr); ?>" class="btn-add-instrument">
                     <i class="bi bi-plus-lg"></i>
                     Tambah Alat
                 </a>
+            </div>
+        </div>
+
+        <!-- Filter Tab Komoditi -->
+        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="nav nav-pills gap-1">
+                    <?php foreach ($tab_items as $k_key => $t_info): ?>
+                        <?php 
+                            $is_active = ($komoditi_curr === $k_key);
+                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
+                        ?>
+                        <a href="<?php echo site_url('alat?komoditi=' . $k_key); ?>" 
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
+                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.82rem;'; ?>">
+                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                            <span><?php echo $t_info['label']; ?></span>
+                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                                <?php echo $c_count; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="text-muted small">
+                    Alat Ruang: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
+                </div>
             </div>
         </div>
 

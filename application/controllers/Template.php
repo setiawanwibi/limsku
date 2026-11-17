@@ -23,9 +23,18 @@ class Template extends MY_Controller
     {
         $this->cek_hak_akses('template_view');
 
-        $this->data['halaman_aktif'] = 'template';
-        $this->data['judul_halaman'] = 'Master Template Form Pengujian (17 Form)';
-        $this->data['daftar_template'] = $this->Model_Template->ambil_semua();
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $kategori = $this->input->get('kategori', TRUE);
+        $status   = $this->input->get('status', TRUE);
+
+        $this->data['halaman_aktif']   = 'template';
+        $this->data['judul_halaman']   = 'Master Template Form Pengujian';
+        $this->data['komoditi_aktif']  = $komoditi;
+        $this->data['kategori_aktif']  = $kategori;
+        $this->data['status_aktif']    = $status;
+        $this->data['daftar_template'] = $this->Model_Template->ambil_semua($kategori, $status, $komoditi);
+        $this->data['counts_komoditi'] = $this->Model_Template->hitung_per_komoditi();
 
         $this->muat_tampilan('template/index');
     }
@@ -60,6 +69,7 @@ class Template extends MY_Controller
                     'kode_template' => strtoupper($this->input->post('kode_template', TRUE)),
                     'nama_template' => $this->input->post('nama_template', TRUE),
                     'kategori'      => $this->input->post('kategori', TRUE) ?: 'Kimia',
+                    'komoditi'      => $this->input->post('komoditi', TRUE) ?: ($this->session->userdata('komoditi_aktif') ?: 'obat'),
                     'method_id'     => $this->input->post('method_id', TRUE) ?: NULL,
                     'parameter_id'  => $this->input->post('parameter_id', TRUE) ?: NULL,
                     'skema_form'    => $skema_json,
@@ -128,6 +138,7 @@ class Template extends MY_Controller
                     'kode_template' => strtoupper($this->input->post('kode_template', TRUE)),
                     'nama_template' => $this->input->post('nama_template', TRUE),
                     'kategori'      => $this->input->post('kategori', TRUE) ?: 'Kimia',
+                    'komoditi'      => $this->input->post('komoditi', TRUE) ?: (!empty($tpl['komoditi']) ? $tpl['komoditi'] : 'obat'),
                     'method_id'     => $this->input->post('method_id', TRUE) ?: NULL,
                     'parameter_id'  => $this->input->post('parameter_id', TRUE) ?: NULL,
                     'skema_form'    => $skema_json,

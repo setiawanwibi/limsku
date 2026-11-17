@@ -71,6 +71,81 @@
     }
 
     /* =========================
+       KOMODITI PILLS NAVIGATION
+       ========================= */
+    .komoditi-pills-card {
+        margin-bottom: 14px;
+        padding: 10px 14px;
+        border: 1px solid #e0e8ed;
+        border-radius: 9px;
+        background: #fff;
+        box-shadow: 0 3px 12px rgba(35, 58, 76, 0.04);
+    }
+
+    .btn-komoditi-tab {
+        border: 1px solid #dce5eb;
+        background: #f8fafb;
+        color: #556c7d;
+        font-size: 0.76rem;
+        padding: 5px 13px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-komoditi-tab:hover {
+        background: #edf3f7;
+        border-color: #c9d7e0;
+        color: #294257;
+    }
+
+    .btn-komoditi-tab.active {
+        background: #159b98 !important;
+        border-color: #159b98 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 6px rgba(21, 155, 152, 0.28);
+    }
+
+    .btn-komoditi-tab.active .badge {
+        background: #fff !important;
+        color: #159b98 !important;
+        border-color: #fff !important;
+    }
+
+    .btn-komoditi-tab.active i {
+        color: #fff !important;
+    }
+
+    .badge-komoditi-obat {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+
+    .badge-komoditi-pangan {
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    .badge-komoditi-herbal {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+
+    .badge-komoditi-kosmetik {
+        background: #f3e8ff;
+        color: #7e22ce;
+        border: 1px solid #e9d5ff;
+    }
+
+    .badge-komoditi-suplemen {
+        background: #e0f2fe;
+        color: #0284c7;
+        border: 1px solid #bae6fd;
+    }
+
+    /* =========================
        FILTER CARD
        ========================= */
 
@@ -970,6 +1045,51 @@
 
 
     <!-- =========================================================
+         QUICK TAB SWITCHER KOMODITI (CONTEXT-AWARE MT)
+         ========================================================= -->
+    <?php if (!empty($daftar_hasil)): ?>
+        <?php
+            $current_komoditi = isset($komoditi_aktif) ? strtolower($komoditi_aktif) : "obat";
+        ?>
+        <div class="komoditi-pills-card">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="text-secondary small fw-bold me-1">
+                        <i class="bi bi-funnel-fill text-primary me-1"></i>Komoditi:
+                    </span>
+                    <button type="button" class="btn btn-sm btn-komoditi-tab rounded-pill" data-komoditi="all">
+                        <i class="bi bi-grid-fill me-1"></i> Semua Komoditi
+                        <span class="badge rounded-pill bg-secondary ms-1 pill-count" id="count-all">0</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-komoditi-tab rounded-pill" data-komoditi="obat">
+                        <i class="bi bi-capsule me-1 text-primary"></i> Lab Obat
+                        <span class="badge rounded-pill bg-light text-dark border ms-1 pill-count" id="count-obat">0</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-komoditi-tab rounded-pill" data-komoditi="pangan">
+                        <i class="bi bi-cup-hot me-1 text-success"></i> Pangan
+                        <span class="badge rounded-pill bg-light text-dark border ms-1 pill-count" id="count-pangan">0</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-komoditi-tab rounded-pill" data-komoditi="herbal">
+                        <i class="bi bi-flower1 me-1 text-warning"></i> Lab Obat Tradisional
+                        <span class="badge rounded-pill bg-light text-dark border ms-1 pill-count" id="count-herbal">0</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-komoditi-tab rounded-pill" data-komoditi="kosmetik">
+                        <i class="bi bi-brush me-1 text-purple"></i> Lab Kosmetik
+                        <span class="badge rounded-pill bg-light text-dark border ms-1 pill-count" id="count-kosmetik">0</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-komoditi-tab rounded-pill" data-komoditi="suplemen">
+                        <i class="bi bi-capsule-pill me-1 text-info"></i> Lab Suplemen
+                        <span class="badge rounded-pill bg-light text-dark border ms-1 pill-count" id="count-suplemen">0</span>
+                    </button>
+                </div>
+                <div class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-info-circle me-1 text-info"></i>Filter cepat komoditi tanpa reload
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- =========================================================
          FILTER BAR
          ========================================================= -->
 
@@ -1290,12 +1410,11 @@
 
                                 <td>
 
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <?php echo $komoditi_badge; ?>
+                                    </div>
                                     <strong class="riwayat-nama">
-
-                                        <?php echo html_escape(
-                                            $h['nama_sampel']
-                                        ); ?>
-
+                                        <?php echo html_escape($h['nama_sampel']); ?>
                                     </strong>
 
 
@@ -2006,20 +2125,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                 : '';
 
 
-                        var okJenis =
-                            !jenis ||
-                            rowJenis === jenis;
+                        var rowKomoditi = rowNode ? (rowNode.getAttribute('data-komoditi') || 'obat') : '';
+                        var okKomoditi = (!window.activeKomoditi || window.activeKomoditi === 'all' || rowKomoditi === window.activeKomoditi);
+                        var okJenis = !jenis || rowJenis === jenis;
+                        var okStatus = !status || rowSt === status;
 
-
-                        var okStatus =
-                            !status ||
-                            rowSt === status;
-
-
-                        return (
-                            okJenis &&
-                            okStatus
-                        );
+                        return (okJenis && okStatus && okKomoditi);
 
                     }
 
@@ -2116,13 +2227,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     if (filterStatus) {
-
-        filterStatus.addEventListener(
-            'change',
-            applyFilter
-        );
-
+        filterStatus.addEventListener('change', applyFilter);
     }
 
+    // ==========================================
+    // LOGIKA TAB QUICK SWITCHER KOMODITI
+    // ==========================================
+    window.activeKomoditi = 'all';
+    <?php if (!empty($komoditi_aktif)): ?>
+        window.activeKomoditi = '<?php echo html_escape(strtolower($komoditi_aktif)); ?>';
+    <?php endif; ?>
+
+    // Hitung badge angka untuk tiap komoditi
+    function updateKomoditiCounts() {
+        var counts = { all: 0, obat: 0, pangan: 0, herbal: 0, kosmetik: 0, suplemen: 0 };
+        var rows = document.querySelectorAll('#tabel-riwayat tbody tr');
+        rows.forEach(function(r) {
+            var km = r.getAttribute('data-komoditi') || 'obat';
+            counts.all++;
+            if (counts[km] !== undefined) {
+                counts[km]++;
+            }
+        });
+        for (var k in counts) {
+            var el = document.getElementById('count-' + k);
+            if (el) el.textContent = counts[k];
+        }
+    }
+    updateKomoditiCounts();
+
+    // Set tab aktif awal berdasarkan workspace aktif
+    var initialTab = document.querySelector('.btn-komoditi-tab[data-komoditi="' + window.activeKomoditi + '"]');
+    if (initialTab) {
+        document.querySelectorAll('.btn-komoditi-tab').forEach(function(b) { b.classList.remove('active'); });
+        initialTab.classList.add('active');
+    } else {
+        var allTab = document.querySelector('.btn-komoditi-tab[data-komoditi="all"]');
+        if (allTab) {
+            document.querySelectorAll('.btn-komoditi-tab').forEach(function(b) { b.classList.remove('active'); });
+            allTab.classList.add('active');
+            window.activeKomoditi = 'all';
+        }
+    }
+
+    // Event click tombol pill komoditi
+    document.querySelectorAll('.btn-komoditi-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.btn-komoditi-tab').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            window.activeKomoditi = this.getAttribute('data-komoditi') || 'all';
+            applyFilter();
+        });
+    });
+
+    // Jalankan filter awal
+    setTimeout(applyFilter, 100);
 });
 </script>
