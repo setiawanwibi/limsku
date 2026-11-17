@@ -60,13 +60,76 @@
                             "Gradien",
                             "Bukan KCKT"
                         ],
-                        "default": "Isokratik"
+                        "default": "Gradien"
                     },
                     {
-                        "id": "fase_gerak",
-                        "label": "Fase Gerak",
+                        "id": "fase_gerak_a",
+                        "label": "Fase Gerak A (FG A)",
                         "type": "text",
-                        "placeholder": "Contoh: Metanol : Air (60:40)"
+                        "placeholder": "Contoh: 0.4 g Ammonium bikarbonat dalam 75 mL air + 425 mL metanol"
+                    },
+                    {
+                        "id": "fase_gerak_b",
+                        "label": "Fase Gerak B (FG B)",
+                        "type": "text",
+                        "placeholder": "Contoh: 0.4 g Ammonium bikarbonat dalam 400 mL air + 100 mL metanol"
+                    },
+                    {
+                        "id": "tabel_fase_gerak_gradient",
+                        "label": "Program Fase Gerak Gradien",
+                        "type": "table",
+                        "columns": [
+                            {
+                                "id": "waktu_menit",
+                                "label": "Waktu (menit)",
+                                "type": "number",
+                                "step": "any"
+                            },
+                            {
+                                "id": "persen_a",
+                                "label": "% A",
+                                "type": "number",
+                                "step": "any"
+                            },
+                            {
+                                "id": "persen_b",
+                                "label": "% B",
+                                "type": "number",
+                                "step": "any"
+                            }
+                        ],
+                        "default_rows": [
+                            {
+                                "waktu_menit": "",
+                                "persen_a": "",
+                                "persen_b": ""
+                            },
+                            {
+                                "waktu_menit": "",
+                                "persen_a": "",
+                                "persen_b": ""
+                            },
+                            {
+                                "waktu_menit": "",
+                                "persen_a": "",
+                                "persen_b": ""
+                            },
+                            {
+                                "waktu_menit": "",
+                                "persen_a": "",
+                                "persen_b": ""
+                            },
+                            {
+                                "waktu_menit": "",
+                                "persen_a": "",
+                                "persen_b": ""
+                            },
+                            {
+                                "waktu_menit": "",
+                                "persen_a": "",
+                                "persen_b": ""
+                            }
+                        ]
                     },
                     {
                         "id": "laju_alir",
