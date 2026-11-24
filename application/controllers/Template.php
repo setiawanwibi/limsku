@@ -23,18 +23,36 @@ class Template extends MY_Controller
     {
         $this->cek_hak_akses('template_view');
 
-        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
-        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        // Komoditi aktif otomatis mengikuti workspace yang dipilih pada Portal/Sidebar
+        $komoditi_session   = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $is_admin_workspace = ($komoditi_session === 'admin');
+
+        // Jika ruang kerja Admin TI: data umum terpusat (default 'semua' komoditi)
+        // Jika ruang kerja komoditi khusus (lab obat, lab pangan, dsb): terkunci ke komoditi tersebut
+        if ($is_admin_workspace) {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: 'semua';
+        } else {
+            $valid_komoditi = array('obat', 'pangan', 'herbal', 'kosmetik', 'suplemen');
+            if (!in_array($komoditi_session, $valid_komoditi)) {
+                $komoditi_session = 'obat';
+            }
+            $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+            if (!in_array($komoditi, $valid_komoditi) && $komoditi !== 'semua') {
+                $komoditi = $komoditi_session;
+            }
+        }
+
         $kategori = $this->input->get('kategori', TRUE);
         $status   = $this->input->get('status', TRUE);
 
-        $this->data['halaman_aktif']   = 'template';
-        $this->data['judul_halaman']   = 'Master Template Form Pengujian';
-        $this->data['komoditi_aktif']  = $komoditi;
-        $this->data['kategori_aktif']  = $kategori;
-        $this->data['status_aktif']    = $status;
-        $this->data['daftar_template'] = $this->Model_Template->ambil_semua($kategori, $status, $komoditi);
-        $this->data['counts_komoditi'] = $this->Model_Template->hitung_per_komoditi();
+        $this->data['halaman_aktif']      = 'template';
+        $this->data['judul_halaman']      = 'Master Template Form Pengujian';
+        $this->data['komoditi_aktif']     = $komoditi;
+        $this->data['is_admin_workspace'] = $is_admin_workspace;
+        $this->data['kategori_aktif']     = $kategori;
+        $this->data['status_aktif']       = $status;
+        $this->data['daftar_template']    = $this->Model_Template->ambil_semua($kategori, $status, $komoditi);
+        $this->data['counts_komoditi']    = $this->Model_Template->hitung_per_komoditi();
 
         $this->muat_tampilan('template/index');
     }

@@ -570,8 +570,8 @@
                 },
                 columnDefs: [ { orderable: false, targets: [0, 8] } ],
                 order: [[3, 'asc']],
-                pageLength: 15,
-                lengthMenu: [[15, 30, 50, 100, -1], [15, 30, 50, 100, "Semua"]],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
                 responsive: true
             });
         }

@@ -24,20 +24,29 @@ class Metode extends MY_Controller
     {
         $this->cek_hak_akses('metode_view');
 
-        // Mengikuti komoditi aktif yang dipilih pengguna di sistem (workspace/session)
-        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
-        $komoditi = $komoditi_session;
+        $komoditi_session   = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $is_admin_workspace = ($komoditi_session === 'admin');
+
+        // Jika ruang kerja Admin TI: data default 'semua' (terpusat)
+        // Jika ruang kerja lab spesifik: default ke komoditi lab tersebut
+        if ($is_admin_workspace) {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: 'semua';
+        } else {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        }
+
         $bidang   = $this->input->get('bidang', TRUE);
         $status   = $this->input->get('status', TRUE);
 
-        $this->data['halaman_aktif']   = 'metode';
-        $this->data['judul_halaman']   = 'Master Metode Pengujian';
-        $this->data['komoditi_aktif']  = $komoditi;
-        $this->data['bidang_aktif']    = $bidang;
-        $this->data['status_aktif']    = $status;
-        $this->data['daftar_metode']   = $this->Model_Metode->ambil_semua($bidang, $status, $komoditi);
-        $this->data['counts_komoditi'] = $this->Model_Metode->hitung_per_komoditi();
-        $this->data['daftar_lcp']      = $this->Model_Template->ambil_semua();
+        $this->data['halaman_aktif']      = 'metode';
+        $this->data['judul_halaman']      = 'Master Metode Pengujian';
+        $this->data['komoditi_aktif']     = $komoditi;
+        $this->data['is_admin_workspace'] = $is_admin_workspace;
+        $this->data['bidang_aktif']       = $bidang;
+        $this->data['status_aktif']       = $status;
+        $this->data['daftar_metode']      = $this->Model_Metode->ambil_semua($bidang, $status, $komoditi);
+        $this->data['counts_komoditi']    = $this->Model_Metode->hitung_per_komoditi();
+        $this->data['daftar_lcp']         = $this->Model_Template->ambil_semua();
 
         $this->muat_tampilan('metode/index');
     }

@@ -494,6 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
             },
             pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             columnDefs: [
                 { orderable: false, targets: [11] }
             ]

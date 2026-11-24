@@ -667,8 +667,19 @@ class Pengujian extends MY_Controller
     {
         $this->cek_hak_akses('laporan_view');
 
-        $this->data['halaman_aktif'] = 'pengujian_riwayat';
-        $this->data['judul_halaman'] = 'Riwayat Hasil Uji';
+        $komoditi_session   = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $is_admin_workspace = ($komoditi_session === 'admin');
+
+        if ($is_admin_workspace) {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: 'semua';
+        } else {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        }
+
+        $this->data['halaman_aktif']      = 'pengujian_riwayat';
+        $this->data['judul_halaman']      = 'Riwayat Hasil Uji';
+        $this->data['komoditi_aktif']     = $komoditi;
+        $this->data['is_admin_workspace'] = $is_admin_workspace;
 
         // Filter: Penguji (permission pengujian_input) hanya melihat riwayat miliknya.
         // Role dengan laporan_view tapi bukan penguji operasional melihat semua data.
@@ -681,7 +692,7 @@ class Pengujian extends MY_Controller
             $penguji_id = $this->session->userdata('user_id');
         }
 
-        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_semua_hasil($penguji_id);
+        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_semua_hasil($penguji_id, 1000, 0, $komoditi);
 
         $this->muat_tampilan('pengujian/riwayat');
     }
@@ -2661,8 +2672,12 @@ class Pengujian extends MY_Controller
         $this->data['halaman_aktif'] = 'pengujian_riwayat_verifikasi';
         $this->data['judul_halaman'] = 'Riwayat Verifikasi Laporan (Penyelia)';
 
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $this->data['komoditi_aktif'] = $komoditi;
+
         $user_id = $this->session->userdata('user_id');
-        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_verifikasi_by_user($user_id);
+        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_verifikasi_by_user($user_id, $komoditi);
 
         $this->muat_tampilan('pengujian/riwayat');
     }
@@ -2677,8 +2692,12 @@ class Pengujian extends MY_Controller
         $this->data['halaman_aktif'] = 'pengujian_riwayat_approval';
         $this->data['judul_halaman'] = 'Riwayat Approval Laporan (Manajer Teknis)';
 
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $this->data['komoditi_aktif'] = $komoditi;
+
         $user_id = $this->session->userdata('user_id');
-        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id);
+        $this->data['daftar_hasil'] = $this->Model_Pengujian->ambil_riwayat_approval_by_user($user_id, $komoditi);
 
         $this->muat_tampilan('pengujian/riwayat');
     }
@@ -2702,9 +2721,13 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+
         $this->data['halaman_aktif']      = 'pengujian_riwayat_saya';
         $this->data['judul_halaman']      = 'Historical Riwayat Pengujian Saya';
-        $this->data['daftar_hasil']       = $this->Model_Pengujian->ambil_riwayat_penguji_by_user($user_id);
+        $this->data['komoditi_aktif']     = $komoditi;
+        $this->data['daftar_hasil']       = $this->Model_Pengujian->ambil_riwayat_penguji_by_user($user_id, $komoditi);
         $this->data['tipe_riwayat_saya']  = 'penguji';
 
         $this->muat_tampilan('pengujian/riwayat');

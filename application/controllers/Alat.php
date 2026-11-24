@@ -21,14 +21,23 @@ class Alat extends MY_Controller
     {
         $this->cek_hak_akses('alat_view');
 
-        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
-        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $komoditi_session   = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $is_admin_workspace = ($komoditi_session === 'admin');
 
-        $this->data['halaman_aktif']   = 'alat';
-        $this->data['judul_halaman']   = 'Master Alat Laboratorium';
-        $this->data['komoditi_aktif']  = $komoditi;
-        $this->data['daftar_alat']     = $this->Model_Alat->ambil_semua(NULL, $komoditi);
-        $this->data['counts_komoditi'] = $this->Model_Alat->hitung_per_komoditi();
+        // Jika ruang kerja Admin TI: data default 'semua' (terpusat)
+        // Jika ruang kerja lab spesifik: default ke komoditi lab tersebut
+        if ($is_admin_workspace) {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: 'semua';
+        } else {
+            $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        }
+
+        $this->data['halaman_aktif']      = 'alat';
+        $this->data['judul_halaman']      = 'Master Alat Laboratorium';
+        $this->data['komoditi_aktif']     = $komoditi;
+        $this->data['is_admin_workspace'] = $is_admin_workspace;
+        $this->data['daftar_alat']        = $this->Model_Alat->ambil_semua(NULL, $komoditi);
+        $this->data['counts_komoditi']    = $this->Model_Alat->hitung_per_komoditi();
 
         $this->muat_tampilan('alat/index');
     }

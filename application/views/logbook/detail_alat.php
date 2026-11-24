@@ -214,7 +214,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table align-middle mb-0 logbook-detail-table">
+            <table class="table align-middle mb-0 logbook-detail-table" id="tabel-logbook-detail">
                 <thead>
                     <tr>
                         <th class="ps-4" style="width: 5%;">No</th>
@@ -333,3 +333,23 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.DataTable !== 'undefined') {
+        var $tbl = $('#tabel-logbook-detail');
+        if ($tbl.find('tbody tr td[colspan]').length === 0) {
+            $tbl.DataTable({
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                language: {
+                    url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
+                },
+                columnDefs: [
+                    { orderable: false, targets: [0, -1] }
+                ]
+            });
+        }
+    }
+});
+</script>

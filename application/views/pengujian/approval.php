@@ -1003,6 +1003,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             order: [[7, 'desc']],
 
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+
             columnDefs: [
                 { orderable: false, targets: [-1] }
             ],

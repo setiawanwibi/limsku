@@ -21,12 +21,23 @@ class Kelas_Terapi extends MY_Controller
     {
         $this->cek_hak_akses('kelas_terapi_view');
 
-        $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
-        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $komoditi_session   = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $is_admin_workspace = ($komoditi_session === 'admin');
+
+        // Master Kelas Terapi khusus untuk komoditi obat
+        // Jika sedang di ruang kerja non-obat dan bukan admin TI, arahkan ke dasbor
+        if ($komoditi_session !== 'obat' && !$is_admin_workspace) {
+            $this->session->set_flashdata('pesan_gagal', 'Master Kelas Terapi hanya tersedia untuk Komoditi Obat.');
+            redirect('dasbor');
+            return;
+        }
+
+        $komoditi = 'obat';
 
         $this->data['halaman_aktif']       = 'kelas_terapi';
         $this->data['judul_halaman']       = 'Master Kelas Terapi';
         $this->data['komoditi_aktif']      = $komoditi;
+        $this->data['is_admin_workspace']  = $is_admin_workspace;
         $this->data['daftar_kelas_terapi'] = $this->Model_Kelas_Terapi->ambil_semua(NULL, $komoditi);
         $this->data['counts_komoditi']     = $this->Model_Kelas_Terapi->hitung_per_komoditi();
 
@@ -56,6 +67,7 @@ class Kelas_Terapi extends MY_Controller
             if ($this->form_validation->run() === TRUE) {
                 $data_simpan = array(
                     'nama_kelas_terapi' => $this->input->post('nama_kelas_terapi', TRUE),
+                    'komoditi'          => 'obat',
                     'status'            => $this->input->post('status', TRUE) ?: 'Aktif'
                 );
 

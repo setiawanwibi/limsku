@@ -269,7 +269,7 @@
 
         <!-- Tabel Logbook Bersih -->
         <div class="table-responsive">
-            <table class="table table-logbook align-middle">
+            <table class="table table-logbook align-middle" id="tabel-logbook">
                 <thead>
                     <tr>
                         <th class="ps-3" style="width: 4%;">#</th>
@@ -363,3 +363,23 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.DataTable !== 'undefined') {
+        var $tbl = $('#tabel-logbook');
+        if ($tbl.find('tbody tr td[colspan]').length === 0) {
+            $tbl.DataTable({
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                language: {
+                    url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
+                },
+                columnDefs: [
+                    { orderable: false, targets: [0, -1] }
+                ]
+            });
+        }
+    }
+});
+</script>

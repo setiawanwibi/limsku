@@ -1135,8 +1135,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         order: [[0, 'asc']],
 
-        /* Maksimal 15 data per halaman */
-        pageLength: 15,
+        /* Maksimal 10 data per halaman */
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
 
         language: {
             url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'

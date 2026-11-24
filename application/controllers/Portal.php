@@ -119,7 +119,7 @@ class Portal extends MY_Controller
                 'color'       => '#34495e',
                 'bg_gradient' => 'linear-gradient(135deg, #34495e 0%, #2c3e50 100%)',
                 'status'      => 'ready',
-                'url'         => site_url('pengguna'),
+                'url'         => site_url('portal/pilih/admin'),
                 'can_access'  => $role_id === 1 || in_array('admin', $komoditi_akses)
             )
         );
@@ -139,6 +139,18 @@ class Portal extends MY_Controller
         }
 
         $is_all = in_array('all', $komoditi_akses) || in_array('all_sampel', $komoditi_akses) || $role_id === 1 || $role_id === 2;
+
+        if ($komoditi === 'admin') {
+            if ($role_id !== 1 && !in_array('admin', $komoditi_akses)) {
+                $this->session->set_flashdata('pesan_gagal', 'Anda tidak memiliki hak akses Admin TI & Manajemen Sistem.');
+                redirect('portal');
+                return;
+            }
+            $this->session->set_userdata('komoditi_aktif', 'admin');
+            $this->session->set_flashdata('pesan_sukses', 'Workspace aktif: Admin TI & Manajemen Sistem (Pusat Data Semua Komoditi)');
+            redirect('dasbor');
+            return;
+        }
 
         if (!$is_all && !in_array($komoditi, $komoditi_akses)) {
             $this->session->set_flashdata('pesan_gagal', 'Anda tidak memiliki penugasan pada Laboratorium ' . ucfirst($komoditi) . '.');

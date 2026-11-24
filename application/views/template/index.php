@@ -935,53 +935,56 @@
         );
         ?>
 
-        <!-- Filter Tab Komoditi -->
-        <div class="px-3 pt-3 pb-2 border-bottom bg-light">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <div class="nav nav-pills gap-1">
-                    <?php foreach ($tab_items as $k_key => $t_info): ?>
-                        <?php 
-                            $is_active = ($komoditi_curr === $k_key);
-                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
-                        ?>
-                        <a href="<?php echo site_url('template?komoditi=' . $k_key); ?>" 
-                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
-                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.82rem;'; ?>">
-                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
-                            <span><?php echo $t_info['label']; ?></span>
-                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
-                                <?php echo $c_count; ?>
-                            </span>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+        <!-- Toolbar & Filter Bar -->
+        <div class="px-3 py-2 border-bottom bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-secondary small fw-bold d-flex align-items-center gap-1">
+                    <i class="bi bi-funnel"></i> Filter:
+                </span>
 
-                <div class="text-muted small">
-                    Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
-                </div>
+                <?php if (!empty($is_admin_workspace) || $komoditi_curr === 'semua' || $komoditi_curr === 'admin'): ?>
+                <select id="filter-komoditi" class="form-select form-select-sm" style="width: auto; min-width: 140px; font-size: 0.82rem;">
+                    <option value="">Semua Komoditi</option>
+                    <option value="Obat">Obat</option>
+                    <option value="Pangan">Pangan</option>
+                    <option value="Obat Tradisional">Obat Tradisional</option>
+                    <option value="Kosmetik">Kosmetik</option>
+                    <option value="Suplemen">Suplemen</option>
+                </select>
+                <?php endif; ?>
+                
+                <select id="filter-kategori" class="form-select form-select-sm" style="width: auto; min-width: 130px; font-size: 0.82rem;">
+                    <option value="">Semua Kategori</option>
+                    <option value="Kimia">Kimia</option>
+                    <option value="Mikrobiologi">Mikrobiologi</option>
+                </select>
+
+                <select id="filter-status" class="form-select form-select-sm" style="width: auto; min-width: 125px; font-size: 0.82rem;">
+                    <option value="">Semua Status</option>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Nonaktif">Nonaktif</option>
+                </select>
             </div>
 
-            <!-- Grouping Notice Komoditi Obat -->
-            <?php if ($komoditi_curr === 'obat'): ?>
-                <div class="alert alert-info d-flex align-items-center gap-2 mt-3 mb-1 py-2 px-3 border-0 shadow-xs" style="background: #e0f2fe; color: #0369a1; border-radius: 8px; font-size: 0.82rem;">
-                    <i class="bi bi-info-circle-fill fs-6"></i>
-                    <div>
-                        <strong>Kelompok Form Komoditi Obat:</strong> Form pengujian Kimia (12 Form) dan Mikrobiologi (6 Form) telah dikelompokkan ke dalam kategori <strong>Komoditi Obat</strong> untuk pengujian sediaan farmasi.
-                    </div>
-                </div>
-            <?php elseif ($komoditi_curr !== 'semua' && empty($daftar_template)): ?>
-                <div class="alert alert-warning d-flex align-items-center justify-content-between mt-3 mb-1 py-2 px-3 border-0 shadow-xs" style="background: #fef3c7; color: #92400e; border-radius: 8px; font-size: 0.82rem;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-exclamation-circle-fill fs-6"></i>
-                        <div>
-                            Belum ada template form khusus untuk <strong><?php echo $tab_items[$komoditi_curr]['full']; ?></strong>. Form pengujian Kimia &amp; Biologi saat ini dikelompokkan di Komoditi Obat.
-                        </div>
-                    </div>
-                    <a href="<?php echo site_url('template/tambah?komoditi=' . $komoditi_curr); ?>" class="btn btn-xs btn-outline-warning text-dark bg-white fw-bold">
-                        <i class="bi bi-plus-lg"></i> Tambah Form <?php echo $tab_items[$komoditi_curr]['label']; ?>
-                    </a>
-                </div>
-            <?php endif; ?>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small">
+                    <?php if (!empty($is_admin_workspace) || $komoditi_curr === 'admin' || $komoditi_curr === 'semua'): ?>
+                        Workspace:
+                        <span class="badge rounded-pill bg-dark text-white px-2 py-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Admin TI (Semua Komoditi)
+                        </span>
+                    <?php else: ?>
+                        Komoditi Aktif:
+                        <span class="badge rounded-pill <?php echo isset($tab_items[$komoditi_curr]['badge_class']) ? $tab_items[$komoditi_curr]['badge_class'] : 'bg-primary text-white'; ?> px-2 py-1" style="<?php echo isset($tab_items[$komoditi_curr]['custom_style']) ? $tab_items[$komoditi_curr]['custom_style'] : ''; ?> font-size: 0.75rem;">
+                            <i class="bi <?php echo isset($tab_items[$komoditi_curr]['icon']) ? $tab_items[$komoditi_curr]['icon'] : 'bi-tag'; ?> me-1"></i>
+                            <?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?>
+                        </span>
+                    <?php endif; ?>
+                </span>
+                <span class="text-muted small ms-2">
+                    Total: <strong id="total-template" class="text-dark"><?php echo count($daftar_template); ?></strong> template
+                </span>
+            </div>
         </div>
 
 
@@ -1210,21 +1213,14 @@
                         <?php else: ?>
 
                             <tr>
-
-                                <td
-                                    colspan="7"
-                                    class="template-empty"
-                                >
-
-                                    <i class="bi bi-file-earmark-x"></i>
-
-                                    Belum ada template form pengujian.
-                                    Klik <strong>"Inisialisasi 17 Preset Form"</strong>
-                                    untuk mengisikan 12 Form Kimia &amp;
-                                    5 Form Mikrobiologi secara otomatis.
-
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary" style="opacity: 0.5;"></i>
+                                    <h6 class="fw-bold text-dark mb-1">Belum Ada Template Form untuk <?php echo html_escape(isset($tab_items[$komoditi_curr]['label']) ? $tab_items[$komoditi_curr]['label'] : ucfirst($komoditi_curr)); ?></h6>
+                                    <p class="small text-muted mb-3">Template formulir pengujian untuk komoditi ini belum tersedia.</p>
+                                    <a href="<?php echo site_url('template/tambah?komoditi=' . $komoditi_curr); ?>" class="btn btn-sm btn-primary px-3 shadow-sm">
+                                        <i class="bi bi-plus-lg me-1"></i> Tambah Template <?php echo html_escape(isset($tab_items[$komoditi_curr]['label']) ? $tab_items[$komoditi_curr]['label'] : ucfirst($komoditi_curr)); ?>
+                                    </a>
                                 </td>
-
                             </tr>
 
                         <?php endif; ?>
@@ -1244,18 +1240,35 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-
     if (typeof $.fn.DataTable !== 'undefined') {
-
-        $('#tabel-template').DataTable({
-
+        var table = $('#tabel-template').DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             language: {
                 url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                var count = api.rows({ search: 'applied' }).count();
+                $('#total-template').text(count);
             }
-
         });
 
-    }
+        $('#filter-komoditi').on('change', function() {
+            var val = $(this).val();
+            // Kolom index 3 = Komoditi
+            table.column(3).search(val ? val : '', true, false).draw();
+        });
 
+        $('#filter-kategori').on('change', function() {
+            var val = $(this).val();
+            table.column(4).search(val ? '^' + val + '$' : '', true, false).draw();
+        });
+
+        $('#filter-status').on('change', function() {
+            var val = $(this).val();
+            table.column(6).search(val ? '^' + val : '', true, false).draw();
+        });
+    }
 });
 </script>
