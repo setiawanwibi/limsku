@@ -63,8 +63,7 @@
 
     <div class="metode-card">
         <?php
-        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : 'obat';
-        $cnts = isset($counts_komoditi) ? $counts_komoditi : array();
+        $komoditi_curr = isset($komoditi_aktif) ? $komoditi_aktif : ($this->session->userdata('komoditi_aktif') ?: 'obat');
         $tab_items = array(
             'obat'     => array('label' => 'Obat', 'full' => 'Laboratorium Obat', 'icon' => 'bi-capsule'),
             'pangan'   => array('label' => 'Pangan', 'full' => 'Laboratorium Pangan', 'icon' => 'bi-cup-straw'),
@@ -73,16 +72,21 @@
             'suplemen' => array('label' => 'Suplemen', 'full' => 'Laboratorium Suplemen', 'icon' => 'bi-heart-pulse'),
             'semua'    => array('label' => 'Semua Komoditi', 'full' => 'Semua Komoditi', 'icon' => 'bi-collection')
         );
+        $is_pangan = ($komoditi_curr === 'pangan');
         ?>
         <div class="metode-header">
             <div class="metode-heading">
                 <div class="metode-heading-icon">
-                    <i class="bi bi-journal-bookmark"></i>
+                    <i class="bi <?php echo isset($tab_items[$komoditi_curr]['icon']) ? $tab_items[$komoditi_curr]['icon'] : 'bi-journal-bookmark'; ?>"></i>
                 </div>
                 <div>
-                    <h5 class="metode-title">Master Metode Pengujian (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Laboratorium'; ?>)</h5>
+                    <h5 class="metode-title">Master Metode Pengujian &bull; <?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></h5>
                     <p class="metode-subtitle">
-                        Kelola data monografi zat aktif, parameter uji kritis, spesifikasi, dan pemetaan ke Lembar Catatan Pengujian (LCP) sesuai komoditi aktif.
+                        <?php if ($is_pangan): ?>
+                            Kelola data parameter uji kritis, kategori pangan (Katpang), standar batas mutu (SK Pedoman Sampling Pangan), dan pemetaan ke LCP.
+                        <?php else: ?>
+                            Kelola data monografi zat aktif, parameter uji kritis, spesifikasi, dan pemetaan ke Lembar Catatan Pengujian (LCP).
+                        <?php endif; ?>
                     </p>
                 </div>
             </div>
@@ -103,48 +107,23 @@
             </div>
         </div>
 
-        <!-- Filter Tab Komoditi -->
-        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <div class="nav nav-pills gap-1">
-                    <?php foreach ($tab_items as $k_key => $t_info): ?>
-                        <?php 
-                            $is_active = ($komoditi_curr === $k_key);
-                            $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
-                        ?>
-                        <a href="<?php echo site_url('metode?komoditi=' . $k_key); ?>" 
-                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
-                           style="<?php echo $is_active ? 'background-color: #1890ff; border-color: #1890ff; color: #fff;' : 'font-size: 0.82rem;'; ?>">
-                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
-                            <span><?php echo $t_info['label']; ?></span>
-                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
-                                <?php echo $c_count; ?>
-                            </span>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-
-                <div class="text-muted small">
-                    Workspace Aktif: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
-                </div>
-            </div>
-        </div>
-
         <div class="metode-body">
             <div class="table-responsive">
                 <table class="table table-hover align-middle metode-table" id="tabel-metode">
                     <thead>
                         <tr>
                             <th width="3%">NO</th>
-                            <th>NAMA ZAT AKTIF</th>
-                            <th>JENIS SEDIAAN</th>
-                            <th>BENTUK SEDIAAN</th>
+                            <th><?php echo $is_pangan ? 'PARAMETER UJI' : 'NAMA ZAT AKTIF'; ?></th>
+                            <th><?php echo $is_pangan ? 'KATEGORI PANGAN (KATPANG)' : 'JENIS SEDIAAN'; ?></th>
+                            <th><?php echo $is_pangan ? 'JENIS PANGAN / MATRIKS' : 'BENTUK SEDIAAN'; ?></th>
                             <th>PUSTAKA ACUAN</th>
                             <th>PARAMETER UJI KRITIS SESUAI MONOGRAFI</th>
                             <th>METODE ANALISA</th>
                             <th>PERSYARATAN</th>
                             <th>BIDANG PENGUJIAN</th>
-                            <th>KELAS TERAPI</th>
+                            <?php if (!$is_pangan): ?>
+                                <th>KELAS TERAPI</th>
+                            <?php endif; ?>
                             <th width="10%">AKSI</th>
                         </tr>
                     </thead>
@@ -186,9 +165,11 @@
                                             <?php echo html_escape($m['bidang_pengujian']); ?>
                                         </span>
                                     </td>
+                                    <?php if (!$is_pangan): ?>
                                     <td>
                                         <small class="fw-semibold text-dark"><?php echo html_escape($m['nama_kelas_terapi'] ?: '-'); ?></small>
                                     </td>
+                                    <?php endif; ?>
                                     <td>
                                         <div class="action-btn-group">
                                             <button type="button" class="action-btn btn-sm btn-outline-primary" title="Petakan LCP" data-bs-toggle="modal" data-bs-target="#modalMapLcp<?php echo $m['id']; ?>">
@@ -256,7 +237,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof jQuery !== 'undefined' && $.fn.DataTable) {
-            $('#tabel-metode').DataTable({
+            var table = $('#tabel-metode').DataTable({
                 language: {
                     search: "Cari Monografi:",
                     lengthMenu: "Tampilkan _MENU_ baris",
@@ -265,12 +246,20 @@
                     zeroRecords: "Tidak ada monografi yang cocok",
                     paginate: { first: "Awal", last: "Akhir", next: "Berikutnya", previous: "Sebelumnya" }
                 },
-                columnDefs: [ { orderable: false, targets: [0, 10] } ],
-                order: [[1, 'asc'], [5, 'asc']],
+                columnDefs: [ { orderable: false, targets: [0, -1] } ],
+                order: [], // Tetap mempertahankan urutan asli dari database atau urutan nomor
                 pageLength: 10,
-                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 responsive: true
             });
+
+            // Auto-reindex nomor urut kolom 0 secara dinamis saat di-sort atau di-filter
+            table.on('order.dt search.dt page.dt', function () {
+                let info = table.page.info();
+                table.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+                    cell.innerHTML = info.start + i + 1;
+                });
+            }).draw();
         }
     });
 </script>
