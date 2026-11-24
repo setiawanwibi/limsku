@@ -1,7 +1,9 @@
 -- LIMSKU MASTER METODE PANGAN (PANGAN OLAHAN DAN PIRT)
--- Aman dijalankan di phpMyAdmin (menggunakan INSERT IGNORE agar tidak error ID)
+-- Menghapus seluruh data metode pangan dummy lama, lalu menggantinya dengan 1.028 master metode resmi SK Pedoman
 
-INSERT IGNORE INTO `methods` (`kode_metode`, `nama_metode`, `nama_zat_aktif`, `jenis_sediaan`, `bentuk_sediaan`, `pustaka_acuan`, `parameter_uji`, `metode_analisa`, `persyaratan`, `bidang_pengujian`, `kelas_terapi_id`, `template_id`, `komoditi`, `composite_hash`, `kategori`, `status`) VALUES
+DELETE FROM `methods` WHERE `komoditi` = 'pangan';
+
+INSERT INTO `methods` (`kode_metode`, `nama_metode`, `nama_zat_aktif`, `jenis_sediaan`, `bentuk_sediaan`, `pustaka_acuan`, `parameter_uji`, `metode_analisa`, `persyaratan`, `bidang_pengujian`, `kelas_terapi_id`, `template_id`, `komoditi`, `composite_hash`, `kategori`, `status`) VALUES
 ('MET-PNG-001', 'KLT Pewarna Sintetik (Rhodamin B & Kuning Metanil) Saus', 'Rhodamin B & Kuning Metanil', 'Saus & Olahan Buah/Sayur', 'Cairan Kental', 'PerBPOM No. 11/2019 / MA PPOMN', 'Identifikasi Pewarna Terlarang', 'Kromatografi Lapis Tipis (KLT)', 'Negatif / Tidak Terdeteksi', 'Kimia', NULL, 26, 'pangan', '218acefb5f2f5d9fc769cd5aa8a65f1c', 'Kimia', 'Aktif'),
 ('MET-PNG-002', 'KCKT Pengawet Natrium Benzoat Saus Sambal', 'Natrium Benzoat', 'Saus & Olahan Buah/Sayur', 'Cairan Kental', 'SNI 01-3546-2004 / PerBPOM BTP', 'Penetapan Kadar Natrium Benzoat', 'KCKT / HPLC', 'Maks. 1000 mg/kg', 'Kimia', NULL, 27, 'pangan', '16ec8e302bb80e1bb0e1371f8e74f9f4', 'Kimia', 'Aktif'),
 ('MET-PNG-003', 'ALT Bakteri Aerob Mesofil AMDK', 'Angka Lempeng Total (ALT)', 'Air Minum Dalam Kemasan', 'Cairan Jernih', 'SNI ISO 4833-1:2015', 'Uji Angka Lempeng Total (ALT)', 'Hitungan Cawan Tuang', 'Maks. 1,0 x 10^2 koloni/mL', 'Mikrobiologi', NULL, 32, 'pangan', '3efe0e6507a73779c779fc6f2cb23aee', 'Mikrobiologi', 'Aktif'),
