@@ -24,8 +24,9 @@ class Metode extends MY_Controller
     {
         $this->cek_hak_akses('metode_view');
 
+        // Mengikuti komoditi aktif yang dipilih pengguna di sistem (workspace/session)
         $komoditi_session = $this->session->userdata('komoditi_aktif') ?: 'obat';
-        $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
+        $komoditi = $komoditi_session;
         $bidang   = $this->input->get('bidang', TRUE);
         $status   = $this->input->get('status', TRUE);
 
