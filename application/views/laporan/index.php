@@ -851,7 +851,8 @@
             // Hanya jalankan DataTable jika ada baris data nyata (bukan baris kosong colspan)
             if ($tabel.find('tbody tr td[colspan]').length === 0) {
                 $tabel.DataTable({
-                    pageLength: 20,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                     ordering: true,
                     language: {
                         search: "Cari di tabel:",

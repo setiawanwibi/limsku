@@ -3,6 +3,9 @@
 // Evaluasi permission user yang sedang login dari session role_id
 $role_id = $this->session->userdata('role_id');
 
+// Active Workspace Komoditi
+$ws_komoditi = !empty($komoditi_aktif) ? $komoditi_aktif : ($this->session->userdata('komoditi_aktif') ?: 'obat');
+
 // Permissions
 $bisa_sampel             = $this->Model_Hak_Akses->memiliki_akses($role_id, 'sampel_view');
 $bisa_pengujian_antrean  = $this->Model_Hak_Akses->memiliki_akses($role_id, 'pengujian_view');
@@ -28,7 +31,8 @@ $bisa_audit              = $this->Model_Hak_Akses->memiliki_akses($role_id, 'aud
 // Parent Header Visibility Flags
 $ada_menu_registrasi = $bisa_sampel;
 $ada_menu_pengujian  = ($bisa_pengujian_antrean || $bisa_verifikasi || $bisa_approval || $bisa_laporan || $bisa_riwayat_saya);
-$ada_menu_master     = ($bisa_metode || $bisa_kelas_terapi || $bisa_template || $bisa_alat || $bisa_reagen || $bisa_baku || $bisa_pengguna || $bisa_peran);
+$tampil_kelas_terapi = ($bisa_kelas_terapi && $ws_komoditi === 'obat');
+$ada_menu_master     = ($bisa_metode || $tampil_kelas_terapi || $bisa_template || $bisa_alat || $bisa_reagen || $bisa_baku || $bisa_pengguna || $bisa_peran);
 $ada_menu_sistem     = $bisa_audit;
 
 // Ambil badge notifikasi antrean & workflow laboratorium
@@ -54,7 +58,6 @@ if (!isset($badges)) {
 
     <!-- Active Workspace Bar (Clean Pill Style) -->
     <?php
-    $ws_komoditi = !empty($komoditi_aktif) ? $komoditi_aktif : ($this->session->userdata('komoditi_aktif') ?: 'obat');
     $ws_meta = array(
         'obat' => array(
             'label' => 'LAB OBAT',
@@ -95,6 +98,14 @@ if (!isset($badges)) {
             'bg'    => '#e0f2fe',
             'color' => '#0284c7',
             'border'=> '#bae6fd'
+        ),
+        'admin' => array(
+            'label' => 'ADMIN TI',
+            'sub'   => 'Semua Komoditi',
+            'icon'  => 'bi-shield-lock-fill',
+            'bg'    => '#f1f5f9',
+            'color' => '#1e293b',
+            'border'=> '#cbd5e1'
         ),
     );
     $ws_curr = isset($ws_meta[$ws_komoditi]) ? $ws_meta[$ws_komoditi] : $ws_meta['obat'];
@@ -280,7 +291,7 @@ if (!isset($badges)) {
                 </li>
             <?php endif; ?>
 
-            <?php if ($bisa_kelas_terapi): ?>
+            <?php if ($tampil_kelas_terapi): ?>
                 <li class="mb-1 <?php echo ($halaman_aktif === 'kelas_terapi') ? 'active' : ''; ?>">
                     <a href="<?php echo site_url('kelas-terapi'); ?>" class="nav-link px-3 py-2 rounded">
                         <i class="bi bi-diagram-3 me-2"></i>

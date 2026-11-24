@@ -26,11 +26,15 @@ class Sampel extends MY_Controller
         $this->data['halaman_aktif'] = 'sampel';
         $this->data['judul_halaman'] = 'Daftar Sampel Laboratorium';
 
-        // Filter Komoditi (Default 'semua' untuk Petugas Sampel, atau 'obat' untuk peran lainnya)
-        $role_id_aktif = (int)$this->session->userdata('role_id');
-        $default_komoditi = ($role_id_aktif === 2) ? 'semua' : 'obat';
-        $komoditi_pilih = $this->input->get('komoditi', TRUE) ?: $default_komoditi;
-        $this->data['komoditi_aktif'] = $komoditi_pilih;
+        // Filter Komoditi (Default 'semua' untuk Admin TI & Petugas Sampel, atau komoditi aktif lab terkait)
+        $role_id_aktif      = (int)$this->session->userdata('role_id');
+        $komoditi_session   = $this->session->userdata('komoditi_aktif') ?: 'obat';
+        $is_admin_workspace = ($komoditi_session === 'admin');
+
+        $default_komoditi   = ($role_id_aktif === 2 || $is_admin_workspace) ? 'semua' : $komoditi_session;
+        $komoditi_pilih     = $this->input->get('komoditi', TRUE) ?: $default_komoditi;
+        $this->data['komoditi_aktif']     = $komoditi_pilih;
+        $this->data['is_admin_workspace'] = $is_admin_workspace;
 
         $this->data['daftar_sampel']    = $this->Model_Sampel->ambil_semua($komoditi_pilih);
         $this->data['rekap_komoditi']   = $this->Model_Sampel->hitung_per_komoditi();

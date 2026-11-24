@@ -76,6 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof $.fn.DataTable !== 'undefined') {
         $('#tabel-audit').DataTable({
             order: [[0, 'asc']],
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             language: {
                 url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
             }

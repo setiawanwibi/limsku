@@ -742,7 +742,7 @@ class Model_Pengujian extends CI_Model
      * @param int $offset
      * @return array
      */
-    public function ambil_semua_hasil($penguji_id = NULL, $limit = 1000, $offset = 0)
+    public function ambil_semua_hasil($penguji_id = NULL, $limit = 1000, $offset = 0, $komoditi = NULL)
     {
         $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.komoditi, s.kategori_sampel,
             COALESCE(NULLIF(s.status, ""), MAX(ts.status)) as status,
@@ -775,6 +775,14 @@ class Model_Pengujian extends CI_Model
             $this->db->where('EXISTS (SELECT 1 FROM testing_sessions ts_p JOIN samples s_p ON s_p.id = ts_p.sample_id WHERE (s_p.kode_sampel_manual = s.kode_sampel_manual OR s_p.no_sipt = s.no_sipt) AND ts_p.penguji_id = ' . (int)$penguji_id . ')', NULL, FALSE);
         }
 
+        if (!empty($komoditi) && $komoditi !== 'semua' && $komoditi !== 'all') {
+            if ($komoditi === 'herbal') {
+                $this->db->where_in('s.komoditi', array('herbal', 'obat_tradisional', 'jamu'));
+            } else {
+                $this->db->where('s.komoditi', $komoditi);
+            }
+        }
+
         $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
         $this->db->order_by('COALESCE(MAX(ts.updated_at), MAX(ts.created_at), MAX(ts.id)) DESC', '', FALSE);
         $this->db->limit($limit, $offset);
@@ -793,6 +801,14 @@ class Model_Pengujian extends CI_Model
 
             if ($penguji_id) {
                 $this->db->where('tr.penguji_id', $penguji_id);
+            }
+
+            if (!empty($komoditi) && $komoditi !== 'semua' && $komoditi !== 'all') {
+                if ($komoditi === 'herbal') {
+                    $this->db->where_in('s.komoditi', array('herbal', 'obat_tradisional', 'jamu'));
+                } else {
+                    $this->db->where('s.komoditi', $komoditi);
+                }
             }
 
             $this->db->order_by('tr.id', 'DESC');
@@ -1239,7 +1255,7 @@ class Model_Pengujian extends CI_Model
     /**
      * Mengambil riwayat pengujian/sesi yang telah diverifikasi oleh penyelia tertentu
      */
-    public function ambil_riwayat_verifikasi_by_user($verifier_id)
+    public function ambil_riwayat_verifikasi_by_user($verifier_id, $komoditi = NULL)
     {
         $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.komoditi, s.kategori_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
@@ -1251,6 +1267,15 @@ class Model_Pengujian extends CI_Model
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
         $this->db->where('ts.verifier_id', $verifier_id);
+
+        if (!empty($komoditi) && $komoditi !== 'semua' && $komoditi !== 'all') {
+            if ($komoditi === 'herbal') {
+                $this->db->where_in('s.komoditi', array('herbal', 'obat_tradisional', 'jamu'));
+            } else {
+                $this->db->where('s.komoditi', $komoditi);
+            }
+        }
+
         $this->db->order_by('COALESCE(ts.waktu_verifikasi, ts.updated_at, ts.created_at, ts.id) DESC', '', FALSE);
         return $this->db->get()->result_array();
     }
@@ -1258,7 +1283,7 @@ class Model_Pengujian extends CI_Model
     /**
      * Mengambil riwayat pengujian/sesi yang diuji oleh penguji tertentu
      */
-    public function ambil_riwayat_penguji_by_user($penguji_id)
+    public function ambil_riwayat_penguji_by_user($penguji_id, $komoditi = NULL)
     {
         $this->db->select('ts.*, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.komoditi, s.kategori_sampel, u.nama_lengkap as nama_penguji, uv.nama_lengkap as nama_verifier, ua.nama_lengkap as nama_approver,
             (SELECT COUNT(*) FROM test_results tr WHERE tr.session_id = ts.id) as jumlah_form,
@@ -1270,6 +1295,15 @@ class Model_Pengujian extends CI_Model
         $this->db->join('users uv', 'uv.id = ts.verifier_id', 'left');
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
         $this->db->where('ts.penguji_id', $penguji_id);
+
+        if (!empty($komoditi) && $komoditi !== 'semua' && $komoditi !== 'all') {
+            if ($komoditi === 'herbal') {
+                $this->db->where_in('s.komoditi', array('herbal', 'obat_tradisional', 'jamu'));
+            } else {
+                $this->db->where('s.komoditi', $komoditi);
+            }
+        }
+
         $this->db->order_by('COALESCE(ts.waktu_selesai, ts.updated_at, ts.created_at, ts.id) DESC', '', FALSE);
         return $this->db->get()->result_array();
     }
@@ -1277,7 +1311,7 @@ class Model_Pengujian extends CI_Model
     /**
      * Mengambil riwayat pengujian/sesi yang telah diapprove oleh manajer teknis tertentu
      */
-    public function ambil_riwayat_approval_by_user($approver_id)
+    public function ambil_riwayat_approval_by_user($approver_id, $komoditi = NULL)
     {
         $this->db->select('s.id as sample_id, s.id, s.nama_sampel, s.kode_sampel_manual, s.no as no_sampel, s.no_sipt, s.komoditi, s.kategori_sampel, s.komoditi, s.kategori_sampel,
             GROUP_CONCAT(DISTINCT ts.jenis_pengujian SEPARATOR " & ") as jenis_pengujian,
@@ -1303,6 +1337,15 @@ class Model_Pengujian extends CI_Model
         $this->db->join('users ua', 'ua.id = ts.approver_id', 'left');
         $this->db->join('test_results tr', 'tr.session_id = ts.id', 'left');
         $this->db->where('ts.approver_id', $approver_id);
+
+        if (!empty($komoditi) && $komoditi !== 'semua' && $komoditi !== 'all') {
+            if ($komoditi === 'herbal') {
+                $this->db->where_in('s.komoditi', array('herbal', 'obat_tradisional', 'jamu'));
+            } else {
+                $this->db->where('s.komoditi', $komoditi);
+            }
+        }
+
         $this->db->group_by('IF(s.kode_sampel_manual IS NOT NULL AND s.kode_sampel_manual != "", s.kode_sampel_manual, s.no_sipt)');
         $this->db->order_by('MAX(ts.waktu_approval) DESC', '', FALSE);
         return $this->db->get()->result_array();

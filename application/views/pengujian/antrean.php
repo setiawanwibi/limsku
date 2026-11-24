@@ -1448,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 url: '<?php echo base_url('assets/js/dataTables.indonesian.json'); ?>'
             },
 
-            pageLength: 9,
+            pageLength: 10,
 
             lengthChange: false,
 
