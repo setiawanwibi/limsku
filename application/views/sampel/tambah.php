@@ -1308,34 +1308,39 @@
                         </div>
 
                         <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="pangan_petugas_sampling" class="form-label">Petugas Sampling</label>
+                                <input type="text" class="form-control" id="pangan_petugas_sampling" name="pangan_petugas_sampling" placeholder="Contoh: ELFINA / Asih">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="pangan_no_agenda" class="form-label">No. Agenda / Urut Buku</label>
+                                <input type="text" class="form-control" id="pangan_no_agenda" name="pangan_no_agenda" placeholder="Contoh: 78">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="pangan_tanggal_produksi" class="form-label">Tanggal Produksi</label>
+                                <input type="date" class="form-control" id="pangan_tanggal_produksi" name="pangan_tanggal_produksi">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="pangan_alamat_sarana" class="form-label">Alamat Lengkap Sarana</label>
+                                <input type="text" class="form-control" id="pangan_alamat_sarana" name="pangan_alamat_sarana" placeholder="Contoh: JL. Hayam Wuruk Bandar Lampung">
+                            </div>
+
                             <div class="col-md-6">
                                 <label for="pangan_kategori" class="form-label">Kategori Pangan BPOM</label>
-                                <select class="form-select" id="pangan_kategori" name="pangan_kategori">
-                                    <option value="">-- Pilih Kategori Pangan --</option>
-                                    <option value="01.0 Produk Susu dan Analognya">01.0 Produk Susu dan Analognya</option>
-                                    <option value="02.0 Lemak, Minyak, dan Emulsi Minyak">02.0 Lemak, Minyak, dan Emulsi Minyak</option>
-                                    <option value="04.0 Buah dan Sayur Olahan">04.0 Buah dan Sayur Olahan</option>
-                                    <option value="05.0 Kembang Gula / Permen dan Cokelat">05.0 Kembang Gula / Permen dan Cokelat</option>
-                                    <option value="06.0 Serealia dan Produk Biji-bijian">06.0 Serealia dan Produk Biji-bijian</option>
-                                    <option value="08.0 Daging dan Produk Daging Olahan">08.0 Daging dan Produk Daging Olahan</option>
-                                    <option value="14.0 Minuman Siap Konsumsi / AMDK">14.0 Minuman Siap Konsumsi / AMDK</option>
-                                    <option value="15.0 Makanan Ringan Siap Santap">15.0 Makanan Ringan Siap Santap</option>
-                                </select>
+                                <input type="text" class="form-control" id="pangan_kategori" name="pangan_kategori" placeholder="Contoh: 11.1.5 Gula kristal putih / 06.7 Tepung / 15.3 Olahan Perikanan">
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label for="pangan_nie" class="form-label">Izin Edar (BPOM MD/ML/P-IRT)</label>
-                                <input type="text" class="form-control" id="pangan_nie" name="pangan_nie" placeholder="BPOM RI MD 123456789">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label for="pangan_kode_produksi" class="form-label">Kode Produksi / Exp Date</label>
-                                <input type="text" class="form-control" id="pangan_kode_produksi" name="pangan_kode_produksi" placeholder="EXP: 2026-12-31">
+                                <input type="text" class="form-control" id="pangan_nie" name="pangan_nie" placeholder="BPOM RI MD 120867000100167 / PIRT ...">
                             </div>
 
                             <div class="col-md-4">
                                 <label for="pangan_kemasan" class="form-label">Jenis Kemasan Pangan</label>
-                                <input type="text" class="form-control" id="pangan_kemasan" name="pangan_kemasan" placeholder="Botol PET / Kaleng / Plastik Vakum / Tetrapak">
+                                <input type="text" class="form-control" id="pangan_kemasan" name="pangan_kemasan" placeholder="Plastik 1 kg / Mika Plastik / Botol PET / Tetrapak">
                             </div>
 
                             <div class="col-md-4">
@@ -1347,19 +1352,14 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label for="pangan_volume" class="form-label">Volume / Berat Bersih (Netto)</label>
-                                <input type="text" class="form-control" id="pangan_volume" name="pangan_volume" placeholder="Contoh: 600 ml / 250 gram">
-                            </div>
-
                             <div class="col-md-6">
                                 <label for="pangan_parameter" class="form-label">Target Pengujian Utama</label>
-                                <textarea class="form-control" id="pangan_parameter" name="pangan_parameter" rows="2" placeholder="Uji Mikroba (ALT, E. Coli, Salmonella) / Uji Kimia (Bahan Pengawet, Pemanis Buatan, Logam Berat)"></textarea>
+                                <textarea class="form-control" id="pangan_parameter" name="pangan_parameter" rows="2" placeholder="Uji Mikroba (ALT, E. Coli, Salmonella) / Uji Kimia (Pemanis Buatan, Pengawet, Logam Berat)"></textarea>
                             </div>
 
                             <div class="col-md-6">
-                                <label for="pangan_produsen" class="form-label">Nama &amp; Alamat Pabrik / Produsen Pangan</label>
-                                <textarea class="form-control" id="pangan_produsen" name="pangan_produsen" rows="2"></textarea>
+                                <label for="pangan_produsen" class="form-label">Pabrik / Importir / Produsen Pangan</label>
+                                <textarea class="form-control" id="pangan_produsen" name="pangan_produsen" rows="2" placeholder="PT. Gula Putih Mataram Lampung Indonesia / Ny Lie-Lie"></textarea>
                             </div>
                         </div>
                     </div>

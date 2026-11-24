@@ -1373,12 +1373,55 @@
                                     )
                                     : 'Legacy';
 
+
+                            // Komoditi badge & filter attribute
+
+                            $raw_komoditi = !empty($h['komoditi']) ? strtolower(trim($h['komoditi'])) : 'obat';
+                            if ($raw_komoditi === 'obat_tradisional' || $raw_komoditi === 'jamu') {
+                                $raw_komoditi = 'herbal';
+                            }
+                            $row_komoditi = in_array($raw_komoditi, ['obat', 'pangan', 'herbal', 'kosmetik', 'suplemen'], true) ? $raw_komoditi : 'obat';
+
+                            $badge_config = [
+                                'obat' => [
+                                    'label' => 'Lab Obat',
+                                    'icon'  => 'bi-capsule',
+                                    'class' => 'badge-komoditi-obat',
+                                ],
+                                'pangan' => [
+                                    'label' => 'Pangan',
+                                    'icon'  => 'bi-cup-hot',
+                                    'class' => 'badge-komoditi-pangan',
+                                ],
+                                'herbal' => [
+                                    'label' => 'Lab Obat Tradisional',
+                                    'icon'  => 'bi-flower1',
+                                    'class' => 'badge-komoditi-herbal',
+                                ],
+                                'kosmetik' => [
+                                    'label' => 'Lab Kosmetik',
+                                    'icon'  => 'bi-brush',
+                                    'class' => 'badge-komoditi-kosmetik',
+                                ],
+                                'suplemen' => [
+                                    'label' => 'Lab Suplemen',
+                                    'icon'  => 'bi-capsule-pill',
+                                    'class' => 'badge-komoditi-suplemen',
+                                ],
+                            ];
+
+                            $b_cfg = $badge_config[$row_komoditi] ?? $badge_config['obat'];
+                            $komoditi_badge = '<span class="badge ' . $b_cfg['class'] . ' d-inline-flex align-items-center gap-1 py-1 px-2" style="font-size: 0.68rem; font-weight: 600; border-radius: 4px;">'
+                                            . '<i class="bi ' . $b_cfg['icon'] . '"></i> ' . html_escape($b_cfg['label'])
+                                            . '</span>';
+
                             ?>
 
 
                             <tr
                                 data-jenis="<?php echo $jenis_val; ?>"
                                 data-status="<?php echo html_escape($st); ?>"
+                                data-komoditi="<?php echo html_escape($row_komoditi); ?>"
                             >
 
 
@@ -2177,16 +2220,21 @@ document.addEventListener('DOMContentLoaded', function () {
                         'data-status'
                     ) || '';
 
+                var rowKomoditi =
+                    row.getAttribute(
+                        'data-komoditi'
+                    ) || 'obat';
+
+                var okKomoditi = (!window.activeKomoditi || window.activeKomoditi === 'all' || rowKomoditi === window.activeKomoditi);
 
                 var show =
-
                     (!jenis ||
                         rowJenis === jenis)
-
                     &&
-
                     (!status ||
-                        rowStatus === status);
+                        rowStatus === status)
+                    &&
+                    okKomoditi;
 
 
                 row.style.display =

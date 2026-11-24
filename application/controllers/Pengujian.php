@@ -524,8 +524,10 @@ class Pengujian extends MY_Controller
         $daftar_reagen = $this->Model_Reagen->ambil_aktif();
         $this->load->model('Model_Template');
         $this->load->model('Model_Baku');
+        $this->load->model('Model_Metode');
         $daftar_template_bidang = $this->Model_Template->ambil_aktif($sesi['jenis_pengujian']);
         $daftar_baku   = $this->Model_Baku->ambil_semua();
+        $daftar_master_bidang = $this->Model_Metode->ambil_master_parameter_untuk_picker($sesi['jenis_pengujian'], NULL, 300);
 
         $this->data['halaman_aktif']          = 'pengujian_antrean';
         $this->data['judul_halaman']          = 'Pelaksanaan Sesi Pengujian (' . $sesi['jenis_pengujian'] . ')';
@@ -536,6 +538,7 @@ class Pengujian extends MY_Controller
         $this->data['daftar_reagen']          = $daftar_reagen;
         $this->data['daftar_baku']            = $daftar_baku;
         $this->data['daftar_template_bidang'] = $daftar_template_bidang;
+        $this->data['daftar_master_bidang']   = $daftar_master_bidang;
 
         $this->muat_tampilan('pengujian/proses_sesi');
     }

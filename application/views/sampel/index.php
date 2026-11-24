@@ -896,7 +896,7 @@
                                         <?php
 
                                         echo html_escape(
-                                            $s['sub_kategori'] ?: ''
+                                            $s['sub_kategori'] ?: ($s['kategori_sampel'] ?: '')
                                         );
 
                                         ?>

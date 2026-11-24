@@ -123,6 +123,10 @@ class Sampel extends MY_Controller
                 $atribut_spesifik = array();
                 if ($komoditi_post === 'pangan') {
                     $atribut_spesifik = array(
+                        'petugas_sampling'    => $this->input->post('pangan_petugas_sampling', TRUE) ?: NULL,
+                        'no_agenda'           => $this->input->post('pangan_no_agenda', TRUE) ?: NULL,
+                        'alamat_sarana'       => $this->input->post('pangan_alamat_sarana', TRUE) ?: NULL,
+                        'tanggal_produksi'    => $this->input->post('pangan_tanggal_produksi', TRUE) ?: NULL,
                         'kategori_pangan'     => $this->input->post('pangan_kategori', TRUE) ?: NULL,
                         'nie_pangan'          => $this->input->post('pangan_nie', TRUE) ?: NULL,
                         'kode_produksi'       => $this->input->post('pangan_kode_produksi', TRUE) ?: NULL,
@@ -137,6 +141,9 @@ class Sampel extends MY_Controller
                     }
                     if (!empty($this->input->post('pangan_produsen', TRUE))) {
                         $data_simpan['nama_alamat_perusahaan'] = $this->input->post('pangan_produsen', TRUE);
+                    }
+                    if (!empty($this->input->post('pangan_kategori', TRUE))) {
+                        $data_simpan['kategori_sampel'] = $this->input->post('pangan_kategori', TRUE);
                     }
                 } elseif ($komoditi_post === 'herbal') {
                     $atribut_spesifik = array(
@@ -412,8 +419,8 @@ class Sampel extends MY_Controller
                 foreach ($field_map as $col_index => $db_field) {
                     $val = isset($row[$col_index]) ? trim($row[$col_index]) : NULL;
 
-                    // Konversi tanggal jika pada kolom tanggal_sampling atau kedaluwarsa
-                    if (($db_field === 'tanggal_sampling' || $db_field === 'kedaluwarsa') && $val !== NULL) {
+                    // Konversi tanggal jika pada kolom tanggal_sampling, kedaluwarsa, atau tanggal_produksi
+                    if (($db_field === 'tanggal_sampling' || $db_field === 'kedaluwarsa' || $db_field === 'spesifik:tanggal_produksi') && $val !== NULL) {
                         $val = Excel_Importer::convert_excel_date($val);
                     }
 
@@ -515,9 +522,15 @@ class Sampel extends MY_Controller
         $rows = array();
 
         if ($komoditi === 'pangan') {
-            $rows[] = array('No', 'Nama Sampel', 'Kategori Pangan', 'Nomor Izin Edar', 'Kode Produksi', 'Kategori Sarana', 'Nama Sarana', 'Kabupaten Kota', 'Tanggal Sampling', 'Surtug', 'Jenis Kemasan', 'Suhu Sampling', 'Volume Netto', 'Target Pengujian', 'Nama Alamat Produsen');
-            $rows[] = array('1', 'Susu UHT Cokelat 250ml', '01.0 Produk Susu dan Analognya', 'BPOM RI MD 201234567890', 'EXP 2026-11-20', 'Ritel Modern', 'Supermarket Sejahtera', 'Bandar Lampung', date('Y-m-d'), 'ST/081/BBPOM/2026', 'Tetra Pak', 'Suhu Ruang (25-30 °C)', '250 ml', 'Uji ALT, Salmonella, Cemaran Logam Timbal', 'PT Industri Susu Nusantara, Tangerang');
-            $rows[] = array('2', 'Air Mineral Dalam Kemasan 600ml', '14.0 Minuman Siap Konsumsi / AMDK', 'BPOM RI MD 209876543210', 'EXP 2027-01-15', 'Distributor', 'Gudang Tirta Jaya', 'Lampung Selatan', date('Y-m-d'), 'ST/081/BBPOM/2026', 'Botol PET', 'Suhu Ruang (25-30 °C)', '600 ml', 'Uji Mikroba Pseudomonas aeruginosa & Coliform', 'PT Sumber Air Sejuk, Lampung Selatan');
+            // Header Resmi BBPOM Bandar Lampung untuk Komoditi Pangan (Sesuai Berkas Asli)
+            $rows[] = array('', 'Data Contoh Bulan ' . date('F Y'), '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
+            $rows[] = array('', '', '', '', '', '', '', '', '', '', 'BALAI BESAR POM BANDAR LAMPUNG', '', '', '', '', '', '', '', '', '', '', '');
+            $rows[] = array('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
+            $rows[] = array('Petugas Sampling', 'No.', 'No', 'No Sampel', '', 'Tempat dan Tanggal Sampling', '', 'Tanggal Sampling', 'Kategori Sampel', 'Nama Sampel', 'NIE', 'Pabrik/ Importir', 'No Bets', 'Tanggal produksi', 'Komposisi', 'Tgl Kadaluarsa', 'Kemasan', 'Jumlah', '', '', '', '');
+            $rows[] = array('', '', '', 'Manual', 'SIPT', 'Nama Sarana', 'alamat', '', '', '', '', '', '', '', '', '', '', 'Ki', 'Mi', 'Arsip', 'P', 'Total');
+            $rows[] = array('ELFINA', '1', '78', 'P/BL/IV/26', '26.090.301.13.01.0078', 'Pasar Tugu', 'JL.Hayam Wuruk Bandar Lampung', date('Y-m-d'), '11.1.5 Gula kristal putih atau gula pasir, gula batu', 'Gulaku', 'MD 120867000100167', 'PT.Gula Putih Mataram Lampung Indonesia', '2A 23;07', date('Y-m-d', strtotime('-3 months')), 'gula tebu', date('Y-m-d', strtotime('+1 year')), 'Plastik 1 kg', '3', '0', '2', '1', '6');
+            $rows[] = array('Asih', '2', '79', 'P/BL/IV/26', '26.090.301.13.01.0079', 'Aneka Sari Rasa', 'Jl. Ikan Kakap No.26 - 28, Pesawahan, Bandar Lampung', date('Y-m-d'), '15.3 HASIL OLAHAN PERIKANAN (makanan ringan berbasis ikan)', 'Kemplang Panggang Asli', 'PIRT 2021871040881 30', 'Ango Bandar Lampung', 'KP-0921', date('Y-m-d', strtotime('-1 month')), 'sagu, ikan, telur, garam, penyedap rasa', date('Y-m-d', strtotime('+6 months')), 'Plastik isi 10 pc', '3', '5', '2', '1', '11');
+            $rows[] = array('ELFINA', '3', '80', 'P/BL/IV/26', '26.090.301.13.01.0080', 'Chandra Superstore', 'Jalan Hayam Wuruk Kebon Jeruk No.1, Bandar Lampung', date('Y-m-d'), '06.7 TEPUNG DAN HASIL OLAHANNYA (produk olahan beras)', 'Dodol Pandan Ny. Lie-Lie', 'PIRT 2051871031009-29', 'Ny Lie-Lie Bandar Lampung', 'DP-1002', date('Y-m-d', strtotime('-2 weeks')), 'Ketan, Gula, Santan, Pandan', date('Y-m-d', strtotime('+3 months')), 'Mika Plastik 120 g', '3', '5', '2', '1', '11');
         } elseif ($komoditi === 'herbal') {
             $rows[] = array('No', 'Nama Sampel', 'Bentuk Sediaan', 'Nomor Izin Edar', 'No Bets Exp', 'Kategori Sarana', 'Nama Sarana', 'Kabupaten Kota', 'Tanggal Sampling', 'Surtug', 'Klaim Khasiat', 'Skrining BKO', 'Simplisia Utama', 'Nama Alamat Produsen');
             $rows[] = array('1', 'Kapsul Ekstrak Temulawak Plus', 'Kapsul Herbal', 'POM TR 192345671', 'BETS-09 EXP 2027-08', 'Toko Obat Herbal', 'Toko Berkah Sehat', 'Lampung Selatan', date('Y-m-d'), 'ST/082/BBPOM/2026', 'Membantu memelihara fungsi hati dan daya tahan tubuh', 'Skrining Parasetamol dan Deksametason', 'Curcuma xanthorrhiza rhizoma 500mg', 'CV Alami Sejahtera, Sukoharjo');

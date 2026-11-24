@@ -634,6 +634,16 @@
                         $first_za = !empty($hasil_forms[0]['nama_zat_aktif']) ? $hasil_forms[0]['nama_zat_aktif'] : '';
                         $url_ganti_pilihan = site_url('pengujian/pilih_form/' . $sesi['sample_id'] . '?jenis=' . urlencode($sesi['jenis_pengujian']) . '&session_id=' . $sesi['id'] . '&zat_aktif=' . urlencode($first_za));
                     ?>
+                    <button type="button" 
+                            class="btn btn-sm btn-outline-success py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
+                            style="font-size: 0.72rem; font-weight: 600;"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalTambahParameterSesi"
+                            title="Tambah parameter uji langsung dari master data ke sesi pengerjaan ini">
+                        <i class="bi bi-plus-circle"></i>
+                        Tambah Parameter dari Master
+                    </button>
+
                     <a href="<?php echo $url_ganti_pilihan; ?>" 
                        class="btn btn-sm btn-outline-primary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-sm"
                        style="font-size: 0.72rem; font-weight: 600;"

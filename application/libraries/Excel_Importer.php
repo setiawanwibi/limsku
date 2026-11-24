@@ -23,13 +23,30 @@ class Excel_Importer
 
         $val = trim((string)$val);
 
-        // Jika berupa angka serial (misal 46175.0 atau 46175)
-        if (is_numeric($val) && (float)$val > 10000 && (float)$val < 100000) {
+        // Jika berupa angka serial Excel (misal 46113 -> 2026-04-01, 46705 -> 2027-11-14)
+        if (is_numeric($val) && (float)$val >= 30000 && (float)$val <= 65000) {
             $days = (int) floor((float)$val);
             // Excel leap year bug: 25569 = 1970-01-01 (1900 date system)
             $timestamp = ($days - 25569) * 86400;
             if ($timestamp > 0) {
                 return date('Y-m-d', $timestamp);
+            }
+        }
+
+        // Jika berupa 8 digit numerik DDMMYYYY (misal 12062026 -> 2026-06-12)
+        if (preg_match('/^(\d{2})(\d{2})(\d{4})$/', $val, $m)) {
+            if ((int)$m[1] <= 31 && (int)$m[2] <= 12) {
+                return "{$m[3]}-{$m[2]}-{$m[1]}";
+            }
+        }
+
+        // Jika berupa 5 atau 6 digit DMMYY / DDMMYY (misal 80126 -> 2026-01-08, 080128 -> 2028-01-08)
+        if (preg_match('/^(\d{1,2})(\d{2})(\d{2})$/', $val, $m)) {
+            $d = str_pad($m[1], 2, '0', STR_PAD_LEFT);
+            $mth = $m[2];
+            $yr = (int)$m[3] < 50 ? '20' . $m[3] : '19' . $m[3];
+            if ((int)$d <= 31 && (int)$mth <= 12) {
+                return "{$yr}-{$mth}-{$d}";
             }
         }
 
@@ -92,15 +109,23 @@ class Excel_Importer
             $row_str = implode(' ', array_filter($row));
             $norm    = self::normalize_header_key($row_str);
 
-            $is_sub_header = (
-                strpos($norm, 'kategori sarana') !== false ||
-                strpos($norm, 'nama sarana') !== false ||
-                strpos($norm, 'kabupaten') !== false ||
-                strpos($norm, 'tanggal sampling') !== false ||
-                strpos($norm, 'kimia') !== false ||
-                strpos($norm, 'mikro') !== false ||
-                strpos($norm, 'arsip') !== false
-            );
+            $is_sub_header = false;
+            $has_data_indicator = false;
+
+            foreach ($row as $v) {
+                $c_norm = self::normalize_header_key($v);
+                if (in_array($c_norm, array('nama sarana', 'sarana', 'alamat', 'alamat sarana', 'manual', 'sipt', 'kategori sarana', 'kabupaten kota', 'kabupaten', 'ki', 'mi', 'arsip', 'p', 'total', 'kode', 'sub kategori', 'tanggal sampling'))) {
+                    $is_sub_header = true;
+                }
+                // Jika sel mengandung indikator baris data (panjang > 45 karakter atau format kode sampel / izin edar BPOM)
+                if (strlen(trim((string)$v)) > 45 || preg_match('/(\/p\/|\/o\-b\/|bpom|pirt|susu|desa|kec\.)/i', (string)$v)) {
+                    $has_data_indicator = true;
+                }
+            }
+
+            if ($has_data_indicator) {
+                $is_sub_header = false;
+            }
 
             $numeric_count = 0;
             $non_empty     = 0;
@@ -141,6 +166,14 @@ class Excel_Importer
                     $consolidated_header[$c] = $val;
                     break;
                 }
+            }
+        }
+
+        // Deteksi kolom Petugas Sampling (khusus format Pangan BPOM jika Kolom A tidak berheader namun baris data berisi nama)
+        if ($consolidated_header[0] === '' && isset($rows[$first_data_idx][0])) {
+            $first_val = trim((string)$rows[$first_data_idx][0]);
+            if ($first_val !== '' && !is_numeric($first_val) && strlen($first_val) > 2) {
+                $consolidated_header[0] = 'Petugas Sampling';
             }
         }
 
@@ -234,7 +267,20 @@ class Excel_Importer
             switch ($normalized) {
                 case 'no':
                 case 'no.':
-                    $mapped_field = 'no';
+                    if (!in_array('no', $field_map)) {
+                        $mapped_field = 'no';
+                    } else {
+                        $mapped_field = 'spesifik:no_agenda';
+                    }
+                    break;
+                case 'petugas sampling':
+                case 'petugas':
+                case 'pengambil sampel':
+                case 'nama petugas':
+                    $mapped_field = 'spesifik:petugas_sampling';
+                    break;
+                case 'kode':
+                    $mapped_field = 'spesifik:kode_pangan';
                     break;
                 case 'kategori sampel':
                     $mapped_field = 'kategori_sampel';
@@ -250,7 +296,16 @@ class Excel_Importer
                     $mapped_field = 'kategori_sarana';
                     break;
                 case 'nama sarana':
+                case 'sarana':
+                case 'sarana sampling':
+                case 'tempat sampling':
+                case 'tempat dan tanggal sampling':
                     $mapped_field = 'nama_sarana';
+                    break;
+                case 'alamat':
+                case 'alamat sarana':
+                case 'lokasi sarana':
+                    $mapped_field = 'spesifik:alamat_sarana';
                     break;
                 case 'kabupaten kota':
                 case 'kabupaten':
@@ -259,13 +314,20 @@ class Excel_Importer
                     break;
                 case 'tanggal sampling':
                 case 'tgl sampling':
+                case 'tanggal':
+                case 'tgl':
                     $mapped_field = 'tanggal_sampling';
                     break;
                 case 'kode sampel manual':
                 case 'kode sampel':
+                case 'manual':
+                case 'no sampel manual':
+                case 'no sampel':
                     $mapped_field = 'kode_sampel_manual';
                     break;
                 case 'no sipt':
+                case 'sipt':
+                case 'nomor sipt':
                     $mapped_field = 'no_sipt';
                     break;
                 case 'nama sampel':
@@ -284,9 +346,19 @@ class Excel_Importer
                 case 'batch':
                     $mapped_field = 'no_bets';
                     break;
+                case 'tanggal produksi':
+                case 'tgl produksi':
+                case 'tgl pembuatan':
+                case 'tgl prod':
+                    $mapped_field = 'spesifik:tanggal_produksi';
+                    break;
                 case 'kedaluwarsa':
                 case 'exp':
                 case 'expired':
+                case 'tgl kadaluarsa':
+                case 'tgl kedaluwarsa':
+                case 'tanggal kadaluarsa':
+                case 'tanggal kedaluwarsa':
                     $mapped_field = 'kedaluwarsa';
                     break;
                 case 'kemasan':
@@ -296,24 +368,33 @@ class Excel_Importer
                 case 'nama alamat perusahaan':
                 case 'produsen':
                 case 'pabrik':
+                case 'importir':
+                case 'pabrik importir':
+                case 'pabrik importir produsen':
                     $mapped_field = 'nama_alamat_perusahaan';
                     break;
                 case 'komposisi':
                     $mapped_field = 'komposisi';
                     break;
                 case 'kimia':
+                case 'ki':
+                case 'jumlah kimia':
                     $mapped_field = 'jumlah_kimia';
                     break;
                 case 'mikro':
                 case 'mikrobiologi':
+                case 'mi':
+                case 'jumlah mikro':
                     $mapped_field = 'jumlah_mikro';
                     break;
                 case 'arsip di balai penguji':
                 case 'arsip balai penguji':
                 case 'arsip':
+                case 'jumlah arsip':
                     $mapped_field = 'jumlah_arsip';
                     break;
                 case 'penandaan':
+                case 'p':
                     $penandaan_counter++;
                     if ($penandaan_counter === 1) {
                         $mapped_field = 'jumlah_penandaan';

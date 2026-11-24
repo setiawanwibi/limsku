@@ -23,7 +23,7 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: space-between;q
         gap: 16px;
         flex-wrap: wrap;
     }

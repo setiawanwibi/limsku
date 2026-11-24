@@ -540,8 +540,7 @@
                         </li>
 
                         <li>
-                            Baris pertama (Row 1) wajib berisi
-                            Header Kolom (31 kolom baku).
+                            Template menyesuaikan komoditi terpilih (31 kolom baku untuk Obat, atau format resmi bertingkat BBPOM untuk Pangan).
                         </li>
 
                         <li>
