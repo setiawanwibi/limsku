@@ -91,6 +91,7 @@
         border-color: #fca5a5;
         color: #7f1d1d !important;
     }
+    
 
     .btn-berkas-lhu {
         border: 1px solid #e2e8f0;

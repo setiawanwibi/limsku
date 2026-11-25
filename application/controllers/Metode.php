@@ -35,8 +35,10 @@ class Metode extends MY_Controller
             $komoditi = $this->input->get('komoditi', TRUE) ?: $komoditi_session;
         }
 
-        $bidang   = $this->input->get('bidang', TRUE);
-        $status   = $this->input->get('status', TRUE);
+        $bidang       = $this->input->get('bidang', TRUE);
+        $status       = $this->input->get('status', TRUE);
+        $sub_pangan   = $this->input->get('sub', TRUE) ?: 'olahan';
+        $sub_kosmetik = $this->input->get('sub', TRUE) ?: '';
 
         $this->data['halaman_aktif']      = 'metode';
         $this->data['judul_halaman']      = 'Master Metode Pengujian';
@@ -44,9 +46,37 @@ class Metode extends MY_Controller
         $this->data['is_admin_workspace'] = $is_admin_workspace;
         $this->data['bidang_aktif']       = $bidang;
         $this->data['status_aktif']       = $status;
-        $this->data['daftar_metode']      = $this->Model_Metode->ambil_semua($bidang, $status, $komoditi);
+        $this->data['sub_pangan_aktif']   = $sub_pangan;
+        $this->data['sub_kosmetik_aktif'] = $sub_kosmetik;
         $this->data['counts_komoditi']    = $this->Model_Metode->hitung_per_komoditi();
+        $this->data['counts_pangan']      = $this->Model_Metode->hitung_pangan();
+        $this->data['counts_kosmetik']    = $this->Model_Metode->hitung_kosmetik();
         $this->data['daftar_lcp']         = $this->Model_Template->ambil_semua();
+
+        $this->data['is_pangan']   = ($komoditi === 'pangan');
+        $this->data['is_kosmetik'] = ($komoditi === 'kosmetik');
+
+        if ($this->data['is_pangan']) {
+            if ($sub_pangan === 'pirt') {
+                $this->data['daftar_pangan_pirt']   = $this->Model_Metode->ambil_pangan_pirt($bidang);
+                $this->data['daftar_pangan_olahan'] = array();
+            } else {
+                $this->data['daftar_pangan_olahan'] = $this->Model_Metode->ambil_pangan_olahan($bidang);
+                $this->data['daftar_pangan_pirt']   = array();
+            }
+            $this->data['daftar_kosmetik'] = array();
+            $this->data['daftar_metode']   = array();
+        } elseif ($this->data['is_kosmetik']) {
+            $this->data['daftar_kosmetik']      = $this->Model_Metode->ambil_kosmetik($bidang, $sub_kosmetik);
+            $this->data['daftar_pangan_olahan'] = array();
+            $this->data['daftar_pangan_pirt']   = array();
+            $this->data['daftar_metode']        = array();
+        } else {
+            $this->data['daftar_metode']        = $this->Model_Metode->ambil_semua($bidang, $status, $komoditi);
+            $this->data['daftar_pangan_olahan'] = array();
+            $this->data['daftar_pangan_pirt']   = array();
+            $this->data['daftar_kosmetik']      = array();
+        }
 
         $this->muat_tampilan('metode/index');
     }
@@ -210,14 +240,17 @@ class Metode extends MY_Controller
             redirect('metode');
         }
 
-        $template_id = $this->input->post('template_id', TRUE);
-        if ($this->Model_Metode->set_template_mapping($id, $template_id)) {
+        $template_id  = $this->input->post('template_id', TRUE);
+        $target_table = $this->input->post('target_table', TRUE) ?: 'methods';
+        $redirect_url = $this->input->post('redirect_url', TRUE) ?: 'metode';
+
+        if ($this->Model_Metode->set_template_mapping($id, $template_id, $target_table)) {
             $this->session->set_flashdata('pesan_sukses', 'Pemetaan LCP berhasil diperbarui.');
         } else {
             $this->session->set_flashdata('pesan_gagal', 'Gagal memperbarui pemetaan LCP.');
         }
 
-        redirect('metode');
+        redirect($redirect_url);
     }
 
     /**

@@ -78,6 +78,23 @@ class Model_Metode extends CI_Model
             $counts[$kom] = $cnt;
             $total_semua += $cnt;
         }
+
+        // Pangan dihitung langsung dari 2 tabel master pedoman pangan resmi (Olahan & PIRT)
+        if ($this->db->table_exists('master_metode_pangan_olahan') && $this->db->table_exists('master_metode_pangan_pirt')) {
+            $cnt_po   = (int)$this->db->count_all('master_metode_pangan_olahan');
+            $cnt_pirt = (int)$this->db->count_all('master_metode_pangan_pirt');
+            $total_pangan = $cnt_po + $cnt_pirt;
+            $total_semua = $total_semua - $counts['pangan'] + $total_pangan;
+            $counts['pangan'] = $total_pangan;
+        }
+
+        // Kosmetik dihitung langsung dari tabel master pedoman kosmetik resmi
+        if ($this->db->table_exists('master_metode_kosmetik')) {
+            $cnt_kos = (int)$this->db->count_all('master_metode_kosmetik');
+            $total_semua = $total_semua - $counts['kosmetik'] + $cnt_kos;
+            $counts['kosmetik'] = $cnt_kos;
+        }
+
         $counts['semua'] = $total_semua;
         return $counts;
     }
@@ -214,14 +231,201 @@ class Model_Metode extends CI_Model
      * 
      * @param int $id
      * @param int|null $template_id
+     * @param string $target 'methods' / 'pangan_olahan' / 'pangan_pirt' / 'kosmetik'
      * @return bool
      */
-    public function set_template_mapping($id, $template_id)
+    public function set_template_mapping($id, $template_id, $target = 'methods')
     {
-        $this->db->where('id', $id);
-        return $this->db->update($this->tabel, array(
-            'template_id' => $template_id ?: NULL
+        $tbl = $this->tabel;
+        if ($target === 'pangan_olahan') {
+            $tbl = 'master_metode_pangan_olahan';
+        } elseif ($target === 'pangan_pirt') {
+            $tbl = 'master_metode_pangan_pirt';
+        } elseif ($target === 'kosmetik') {
+            $tbl = 'master_metode_kosmetik';
+        }
+
+        $this->db->where('id', (int)$id);
+        return $this->db->update($tbl, array(
+            'template_id' => !empty($template_id) ? (int)$template_id : NULL
         ));
+    }
+
+    /**
+     * Ambil data Master Metode Kosmetik (Compliance & Surveillance)
+     * 
+     * @param string|null $bidang 'Kimia' / 'Mikrobiologi'
+     * @param string|null $pengawasan 'Compliance' / 'Surveillance'
+     * @return array
+     */
+    public function ambil_kosmetik($bidang = NULL, $pengawasan = NULL)
+    {
+        $this->db->select('m.*, ft.kode_template, ft.nama_template');
+        $this->db->from('master_metode_kosmetik m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+
+        if ($bidang) {
+            $this->db->where('m.bidang', $bidang);
+        }
+        if ($pengawasan && in_array($pengawasan, array('Compliance', 'Surveillance'), TRUE)) {
+            $this->db->where('m.jenis_pengawasan', $pengawasan);
+        }
+
+        $this->db->order_by('m.id', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Menghitung ringkasan statistik komoditi kosmetik (Compliance vs Surveillance)
+     * 
+     * @return array
+     */
+    public function hitung_kosmetik()
+    {
+        $stats = array(
+            'total_semua'        => 0,
+            'compliance_total'   => 0,
+            'surveillance_total' => 0,
+            'kimia_total'        => 0,
+            'mikro_total'        => 0,
+            'compliance_kimia'   => 0,
+            'compliance_mikro'   => 0,
+            'surveillance_kimia' => 0,
+            'surveillance_mikro' => 0
+        );
+
+        if ($this->db->table_exists('master_metode_kosmetik')) {
+            $stats['total_semua']        = (int)$this->db->count_all('master_metode_kosmetik');
+            $stats['compliance_total']   = (int)$this->db->where('jenis_pengawasan', 'Compliance')->count_all_results('master_metode_kosmetik');
+            $stats['surveillance_total'] = (int)$this->db->where('jenis_pengawasan', 'Surveillance')->count_all_results('master_metode_kosmetik');
+            $stats['kimia_total']        = (int)$this->db->where('bidang', 'Kimia')->count_all_results('master_metode_kosmetik');
+            $stats['mikro_total']        = (int)$this->db->where('bidang', 'Mikrobiologi')->count_all_results('master_metode_kosmetik');
+            $stats['compliance_kimia']   = (int)$this->db->where('jenis_pengawasan', 'Compliance')->where('bidang', 'Kimia')->count_all_results('master_metode_kosmetik');
+            $stats['compliance_mikro']   = (int)$this->db->where('jenis_pengawasan', 'Compliance')->where('bidang', 'Mikrobiologi')->count_all_results('master_metode_kosmetik');
+            $stats['surveillance_kimia'] = (int)$this->db->where('jenis_pengawasan', 'Surveillance')->where('bidang', 'Kimia')->count_all_results('master_metode_kosmetik');
+            $stats['surveillance_mikro'] = (int)$this->db->where('jenis_pengawasan', 'Surveillance')->where('bidang', 'Mikrobiologi')->count_all_results('master_metode_kosmetik');
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Ambil data Master Metode Pangan Olahan
+     * 
+     * @param string|null $bidang 'Kimia' / 'Mikrobiologi'
+     * @param string|null $pu Jenis PU (Wajib / Kajian)
+     * @param string|null $katpang Indeks atau nama kategori pangan
+     * @return array
+     */
+    public function ambil_pangan_olahan($bidang = NULL, $pu = NULL, $katpang = NULL)
+    {
+        $this->db->select('m.*, ft.kode_template, ft.nama_template');
+        $this->db->from('master_metode_pangan_olahan m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+
+        if ($bidang) {
+            $this->db->where('m.bidang', $bidang);
+        }
+        if ($pu) {
+            $this->db->where('m.jenis_pu', $pu);
+        }
+        if ($katpang) {
+            $this->db->group_start();
+            $this->db->where('m.indeks_katpang', $katpang);
+            $this->db->or_like('m.kategori_pangan', $katpang);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('m.id', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Ambil data Master Metode Pangan Industri Rumah Tangga (PIRT)
+     * 
+     * @param string|null $bidang 'Kimia' / 'Mikrobiologi'
+     * @param string|null $pu 'PRIORITAS' / 'PILIHAN'
+     * @param string|null $katnas Kategori pangan nasional / pirt
+     * @return array
+     */
+    public function ambil_pangan_pirt($bidang = NULL, $pu = NULL, $katnas = NULL)
+    {
+        $this->db->select('m.*, ft.kode_template, ft.nama_template');
+        $this->db->from('master_metode_pangan_pirt m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+
+        if ($bidang) {
+            $this->db->where('m.bidang', $bidang);
+        }
+        if ($pu) {
+            $this->db->where('m.pu', $pu);
+        }
+        if ($katnas) {
+            $this->db->group_start();
+            $this->db->where('m.kategori_pangan_nasional', $katnas);
+            $this->db->or_like('m.kategori_pangan_pirt', $katnas);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('m.id', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Detail Metode Pangan Olahan
+     */
+    public function ambil_pangan_olahan_by_id($id)
+    {
+        $this->db->select('m.*, ft.kode_template, ft.nama_template');
+        $this->db->from('master_metode_pangan_olahan m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+        $this->db->where('m.id', (int)$id);
+        return $this->db->get()->row_array();
+    }
+
+    /**
+     * Detail Metode Pangan PIRT
+     */
+    public function ambil_pangan_pirt_by_id($id)
+    {
+        $this->db->select('m.*, ft.kode_template, ft.nama_template');
+        $this->db->from('master_metode_pangan_pirt m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+        $this->db->where('m.id', (int)$id);
+        return $this->db->get()->row_array();
+    }
+
+    /**
+     * Menghitung ringkasan statistik komoditi pangan (Olahan vs PIRT)
+     * 
+     * @return array
+     */
+    public function hitung_pangan()
+    {
+        $stats = array(
+            'olahan_total' => 0,
+            'olahan_kimia' => 0,
+            'olahan_mikro' => 0,
+            'pirt_total'   => 0,
+            'pirt_kimia'   => 0,
+            'pirt_mikro'   => 0,
+            'total_semua'  => 0
+        );
+
+        if ($this->db->table_exists('master_metode_pangan_olahan')) {
+            $stats['olahan_total'] = (int)$this->db->count_all('master_metode_pangan_olahan');
+            $stats['olahan_kimia'] = (int)$this->db->where('bidang', 'Kimia')->count_all_results('master_metode_pangan_olahan');
+            $stats['olahan_mikro'] = (int)$this->db->where('bidang', 'Mikrobiologi')->count_all_results('master_metode_pangan_olahan');
+        }
+
+        if ($this->db->table_exists('master_metode_pangan_pirt')) {
+            $stats['pirt_total'] = (int)$this->db->count_all('master_metode_pangan_pirt');
+            $stats['pirt_kimia'] = (int)$this->db->where('bidang', 'Kimia')->count_all_results('master_metode_pangan_pirt');
+            $stats['pirt_mikro'] = (int)$this->db->where('bidang', 'Mikrobiologi')->count_all_results('master_metode_pangan_pirt');
+        }
+
+        $stats['total_semua'] = $stats['olahan_total'] + $stats['pirt_total'];
+        return $stats;
     }
 
     /**

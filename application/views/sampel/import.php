@@ -540,7 +540,7 @@
                         </li>
 
                         <li>
-                            Template menyesuaikan komoditi terpilih (31 kolom baku untuk Obat, atau format resmi bertingkat BBPOM untuk Pangan).
+                            Template menyesuaikan komoditi terpilih (31 kolom baku untuk Obat, format resmi bertingkat BBPOM untuk Pangan, format resmi sampling untuk Kosmetik, serta format resmi OTSK untuk Obat Tradisional & Suplemen Kesehatan).
                         </li>
 
                         <li>
