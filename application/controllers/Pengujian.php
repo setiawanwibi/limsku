@@ -1964,6 +1964,53 @@ class Pengujian extends MY_Controller
         // --- KHUSUS FORM LCP PANGAN ICP-MS (As & Pb): PNG-ICPMS-01 & PNG-ICPMS-02 ---
         if (!empty($hasil['kode_template']) && in_array(strtoupper($hasil['kode_template']), array('PNG-ICPMS-01', 'PNG-ICPMS-02'), TRUE)) {
             $this->load->view('pengujian/cetak_lcp_icpms_pangan', $view_data);
+        // --- KHUSUS FORM LCP PANGAN AAS (PANG-KIM-AAS: CEMARAN LOGAM As, Cd, Hg, Pb, Sn) ---
+        if (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'PANG-KIM-AAS') {
+            $this->catat_audit('VIEW_LCP_AAS_PANGAN', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => $hasil['kode_template']
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_aas_pangan', $view_data);
+            return;
+        }
+
+        // --- KHUSUS FORM LCP PANGAN HPLC / KCKT (PANG-KIM-01: PEMANIS SIMULTAN 16/PA/13) ---
+        if (!empty($hasil['kode_template']) && stripos($hasil['kode_template'], 'PANG-KIM-') === 0) {
+            $this->catat_audit('VIEW_LCP_KCKT_PANGAN', 'Pengujian', array(
+                'test_id'    => $test_id,
+                'session_id' => $session_id,
+                'template'   => $hasil['kode_template']
+            ));
+
+            $view_data = array(
+                'hasil'              => $hasil,
+                'sampel'             => $sampel_info,
+                'sesi'               => $sesi,
+                'penguji'            => $penguji_info,
+                'verifier'           => $verifier_info,
+                'approver'           => $approver_info,
+                'signature_penguji'  => $signature_penguji,
+                'signature_verifier' => $signature_verifier,
+                'signature_approver' => $signature_approver,
+                'metode'             => $hasil
+            );
+
+            $this->load->view('pengujian/cetak_lcp_kckt_pangan', $view_data);
             return;
         }
 
