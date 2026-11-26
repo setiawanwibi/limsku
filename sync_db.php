@@ -22,10 +22,11 @@ if (!$cfg) {
     die('Konfigurasi database default tidak ditemukan.');
 }
 
-$sqlFile = __DIR__ . '/database/sync_lcp_pangan_part1.sql';
-if (!file_exists($sqlFile)) {
+$sqlFiles = glob(__DIR__ . '/database/sync_*.sql');
+sort($sqlFiles);
+if (empty($sqlFiles)) {
     http_response_code(404);
-    die('File SQL tidak ditemukan: database/sync_lcp_pangan_part1.sql');
+    die('Tidak ada file database/sync_*.sql ditemukan.');
 }
 
 $mysqli = @new mysqli(
@@ -41,27 +42,32 @@ if ($mysqli->connect_errno) {
 }
 
 $mysqli->set_charset('utf8mb4');
-$sql = file_get_contents($sqlFile);
 
 $errors = array();
 $executed = 0;
+$fileNames = array();
 
-if ($mysqli->multi_query($sql)) {
-    do {
-        $executed++;
-        if ($result = $mysqli->store_result()) {
-            $result->free();
-        }
-        if ($mysqli->errno) {
-            $errors[] = "Query #{$executed}: " . $mysqli->error;
-        }
-    } while ($mysqli->more_results() && $mysqli->next_result());
-} else {
-    $errors[] = $mysqli->error;
-}
+foreach ($sqlFiles as $sqlFile) {
+    $fileNames[] = 'database/' . basename($sqlFile);
+    $sql = file_get_contents($sqlFile);
 
-if ($mysqli->errno) {
-    $errors[] = $mysqli->error;
+    if ($mysqli->multi_query($sql)) {
+        do {
+            $executed++;
+            if ($result = $mysqli->store_result()) {
+                $result->free();
+            }
+            if ($mysqli->errno) {
+                $errors[] = basename($sqlFile) . " (Query #{$executed}): " . $mysqli->error;
+            }
+        } while ($mysqli->more_results() && $mysqli->next_result());
+    } else {
+        $errors[] = basename($sqlFile) . ': ' . $mysqli->error;
+    }
+
+    if ($mysqli->errno) {
+        $errors[] = basename($sqlFile) . ': ' . $mysqli->error;
+    }
 }
 
 $mysqli->close();
@@ -82,7 +88,7 @@ $mysqli->close();
 <body>
     <div class="card">
         <h2>Sinkronisasi Database LIMSKU</h2>
-        <p>File: <code>database/sync_lcp_pangan_part1.sql</code> | Database: <code><?= htmlspecialchars($cfg['database']) ?></code></p>
+        <p>File: <code><?= htmlspecialchars(implode(', ', $fileNames)) ?></code> | Database: <code><?= htmlspecialchars($cfg['database']) ?></code></p>
         <?php if (empty($errors)): ?>
             <div class="ok">
                 <strong>Berhasil!</strong> <?= $executed ?> statement SQL telah dijalankan. Database lokal kamu sudah sinkron.
