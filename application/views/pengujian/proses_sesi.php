@@ -1526,6 +1526,28 @@
                                                             <?php endforeach; ?>
                                                         </div>
                                                     <?php endif; ?>
+
+                                                    <?php if ($sec_id === 'tabel_baku_pembanding_kurva'): ?>
+                                                        <!-- Grafik Kurva Baku Otomatis (Chart.js) & Ringkasan Regresi Linier -->
+                                                        <div class="mt-3 p-3 bg-white border rounded">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <span class="small fw-bold text-secondary text-uppercase">
+                                                                    <i class="bi bi-graph-up text-primary me-1"></i> Grafik Kurva Baku &amp; Regresi Linier Otomatis
+                                                                </span>
+                                                                <span class="badge bg-light text-dark border" id="badge_regresi_<?php echo $f['id']; ?>">Menunggu data titik baku</span>
+                                                            </div>
+                                                            <div class="row align-items-center g-3">
+                                                                <div class="col-md-8">
+                                                                    <canvas id="chart_kurva_baku_<?php echo $f['id']; ?>" height="160"></canvas>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="p-3 bg-light rounded border small" id="info_regresi_<?php echo $f['id']; ?>">
+                                                                        Isi konsentrasi dan respon puncak pada baris <strong>Bk Kerja</strong> untuk menghitung regresi linier dan menggambar kurva baku otomatis.
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 </div>
                                             <?php endforeach; ?>
 
@@ -3960,10 +3982,497 @@
                 var kodeTpl = (pane.getAttribute('data-kode-template') || '').toUpperCase();
                 var namaTpl = (pane.getAttribute('data-nama-template') || '').toLowerCase();
                 var paramTpl = (pane.getAttribute('data-parameter') || '').toLowerCase();
-                if (kodeTpl === 'KIM-08' || namaTpl.indexOf('kckt') !== -1 || namaTpl.indexOf('hplc') !== -1 || paramTpl.indexOf('kadar') !== -1 || pane.querySelector('table input[name*="[respon_puncak]"]')) {
+                if (kodeTpl === 'PANG-KIM-AAS') {
+                    hitungPanganAASPane(pane, false);
+                } else if (kodeTpl.indexOf('PANG-KIM-') === 0) {
+                    hitungPanganHPLCPane(pane);
+                } else if (kodeTpl === 'KIM-08' || namaTpl.indexOf('kckt') !== -1 || namaTpl.indexOf('hplc') !== -1 || paramTpl.indexOf('kadar') !== -1 || pane.querySelector('table input[name*="[respon_puncak]"]')) {
                     hitungHPLCPane(pane);
                 }
             });
+        }
+
+        <?php
+            $lod_loq_map = array();
+            if ($this->db->table_exists('master_lod_loq_logam')) {
+                $lod_rows = $this->db->where('instrumen', 'AAS')->get('master_lod_loq_logam')->result_array();
+                foreach ($lod_rows as $lr) {
+                    $lod_loq_map[$lr['elemen']] = $lr;
+                }
+            }
+        ?>
+        window.MASTER_LOD_LOQ_LOGAM = <?php echo json_encode($lod_loq_map, JSON_UNESCAPED_UNICODE); ?>;
+
+        // Bind perubahan dropdown elemen_logam agar mengisi referensi AAS & LOD/LOQ otomatis
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.name && e.target.name.indexOf('[elemen_logam]') !== -1) {
+                var pane = e.target.closest('.form-tab-pane-uji');
+                if (pane) hitungPanganAASPane(pane, true);
+            }
+        });
+
+        function hitungPanganAASPane(pane, elementChanged) {
+            if (!pane) return;
+            var formId = pane.id ? pane.id.replace('pane-form-', '') : '0';
+
+            // 1. Auto-pull LOD, LOQ & referensi dari master_lod_loq_logam
+            var elSelect = pane.querySelector('select[name*="[elemen_logam]"]');
+            var elemen   = elSelect ? elSelect.value : 'Pb';
+            var ref      = (window.MASTER_LOD_LOQ_LOGAM && window.MASTER_LOD_LOQ_LOGAM[elemen]) ? window.MASTER_LOD_LOQ_LOGAM[elemen] : null;
+            if (ref) {
+                setFieldVal(pane, 'lod_nilai', parseFloat(ref.lod_nilai), 6);
+                setFieldVal(pane, 'loq_nilai', parseFloat(ref.loq_nilai), 6);
+                var lodSat = pane.querySelector('input[name*="[lod_satuan]"]');
+                var loqSat = pane.querySelector('input[name*="[loq_satuan]"]');
+                if (lodSat) lodSat.value = ref.satuan || 'mg/kg';
+                if (loqSat) loqSat.value = ref.satuan || 'mg/kg';
+
+                if (elementChanged) {
+                    var setTxt = function(fid, v) {
+                        var inp = pane.querySelector('input[name*="[' + fid + ']"], select[name*="[' + fid + ']"]');
+                        if (inp) inp.value = v || '';
+                    };
+                    setTxt('wavelength', ref.wavelength);
+                    setTxt('metode_aas', ref.metode_aas);
+                    setTxt('baku_nama', ref.baku_pembanding);
+                    setTxt('pelarut', ref.pelarut);
+                    setTxt('larutan_pereduksi', ref.larutan_pereduksi);
+                    setTxt('pustaka_metode', ref.pustaka_metode);
+                }
+            }
+
+            // 2. Regresi Linier 6 titik Baku Kerja AAS
+            var tblBaku = pane.querySelector('input[name*="[tabel_baku_kurva]"]');
+            var bakuRows = tblBaku ? Array.from(tblBaku.closest('table').querySelectorAll('tbody tr')) : [];
+            var pts = [];
+            bakuRows.forEach(function(tr) {
+                var cVal = parseNum((tr.querySelector('input[name*="[konsentrasi]"]') || {}).value);
+                var rVal = parseNum((tr.querySelector('input[name*="[respon_puncak]"]') || {}).value);
+                if (cVal > 0 && rVal !== 0) {
+                    pts.push({ x: cVal, y: rVal });
+                }
+            });
+
+            var slope = 0, intercept = 0, rVal = 0, syx = 0, vx0 = 0;
+            if (pts.length >= 2) {
+                var n = pts.length, sx = 0, sy = 0, sxy = 0, sx2 = 0, sy2 = 0;
+                pts.forEach(function(p) { sx += p.x; sy += p.y; sxy += p.x * p.y; sx2 += p.x * p.x; sy2 += p.y * p.y; });
+                var denom  = (n * sx2) - (sx * sx);
+                var denomY = (n * sy2) - (sy * sy);
+                if (denom !== 0) {
+                    slope = ((n * sxy) - (sx * sy)) / denom;
+                    intercept = (sy - slope * sx) / n;
+                }
+                if (denom > 0 && denomY > 0) {
+                    rVal = ((n * sxy) - (sx * sy)) / Math.sqrt(denom * denomY);
+                }
+                if (n > 2 && slope !== 0) {
+                    var ssRes = 0;
+                    pts.forEach(function(p) {
+                        var yh = slope * p.x + intercept;
+                        ssRes += Math.pow(yh - p.y, 2);
+                    });
+                    syx = Math.sqrt(ssRes / (n - 2));
+                    var xMean = sx / n;
+                    vx0 = xMean > 0 ? ((syx / Math.abs(slope)) / xMean) : 0;
+                }
+                setFieldVal(pane, 'regresi_slope', slope, 6);
+                setFieldVal(pane, 'regresi_intercept', intercept, 6);
+                setFieldVal(pane, 'regresi_r', rVal, 6);
+                setFieldVal(pane, 'sy_x', syx, 6);
+                setFieldVal(pane, 'vx0', vx0, 6);
+            }
+
+            var infoEl  = document.getElementById('info_regresi_' + formId);
+            var badgeEl = document.getElementById('badge_regresi_' + formId);
+            if (infoEl && badgeEl) {
+                if (pts.length >= 2) {
+                    var okR = (rVal >= 0.99);
+                    badgeEl.className = 'badge ' + (okR ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle');
+                    badgeEl.textContent = okR ? 'Memenuhi (r ≥ 0,99)' : 'Cek (r < 0,99)';
+                    infoEl.innerHTML =
+                        '<div><strong>Regresi:</strong> <code>y = ' + slope.toFixed(5) + 'x ' + (intercept >= 0 ? '+ ' : '- ') + Math.abs(intercept).toFixed(5) + '</code></div>' +
+                        '<div><strong>r:</strong> <code>' + rVal.toFixed(6) + '</code> | <strong>Vx0:</strong> <code>' + vx0.toFixed(5) + '</code></div>';
+                }
+            }
+
+            var canvas = document.getElementById('chart_kurva_baku_' + formId);
+            if (canvas && typeof Chart !== 'undefined') {
+                var trendPts = [];
+                if (pts.length >= 2) {
+                    var minX = Math.min.apply(null, pts.map(function(p){ return p.x; }));
+                    var maxX = Math.max.apply(null, pts.map(function(p){ return p.x; }));
+                    trendPts = [{ x: minX, y: slope * minX + intercept }, { x: maxX, y: slope * maxX + intercept }];
+                }
+                if (panganCharts[formId]) {
+                    panganCharts[formId].data.datasets[0].data = pts;
+                    panganCharts[formId].data.datasets[1].data = trendPts;
+                    panganCharts[formId].update('none');
+                } else {
+                    panganCharts[formId] = new Chart(canvas.getContext('2d'), {
+                        type: 'scatter',
+                        data: {
+                            datasets: [
+                                { label: 'Baku Kerja AAS', data: pts, backgroundColor: '#0d6efd', pointRadius: 5 },
+                                { label: 'Garis Regresi', data: trendPts, type: 'line', borderColor: '#198754', borderWidth: 2, fill: false, pointRadius: 0 }
+                            ]
+                        },
+                        options: { responsive: true, animation: false, scales: { x: { title: { display: true, text: 'Konsentrasi (ppb)' } }, y: { title: { display: true, text: 'Absorbansi' } } } }
+                    });
+                }
+            }
+
+            // 3. Zat Uji AAS: Kadar (mg/kg) = (x * Fp * 1e-3) / W(g)
+            var tblZat = pane.querySelector('input[name*="[tabel_zat_uji]"]');
+            var zatRows = tblZat ? Array.from(tblZat.closest('table').querySelectorAll('tbody tr')) : [];
+            var kSampel = [0, 0];
+            zatRows.forEach(function(tr, idx) {
+                if (idx > 1) return;
+                var w = calcBobotBersihRow(tr);
+                var F = evalZatFaktor((tr.querySelector('input[name*="[faktor_pengenceran]"]') || {}).value);
+                var yEl = tr.querySelector('input[name*="[respon_puncak]"]');
+                var hasY = yEl && yEl.value.trim() !== '';
+                var y = parseNum(yEl ? yEl.value : 0);
+                var xVal = 0, kad = 0;
+                if (hasY && slope !== 0 && w > 0) {
+                    xVal = (y - intercept) / slope;
+                    kad  = (xVal * F * 0.001) / w;
+                }
+                kSampel[idx] = kad;
+                setFieldVal(pane, 'x' + (idx + 1) + '_sampel', xVal, 4);
+                setFieldVal(pane, 'kadar' + (idx + 1) + '_sampel', kad, 4);
+            });
+            var rataSampel = (kSampel[0] + kSampel[1]) / 2.0;
+            setFieldVal(pane, 'rata_kadar_sampel', rataSampel, 4);
+
+            // Auto-status < LOD jika rata-rata di bawah LOD referensi
+            var lodVal = ref ? parseFloat(ref.lod_nilai) : parseNum((pane.querySelector('input[name*="[lod_nilai]"]') || {}).value);
+            var ketEl = pane.querySelector('input[name*="[ketidakpastian_teks]"]');
+            if (ketEl && lodVal > 0 && rataSampel < lodVal && (ketEl.value === '' || ketEl.value.indexOf('tidak terdeteksi <LOD') !== -1)) {
+                ketEl.value = 'Cemaran Logam ' + elemen + ' tidak terdeteksi <LOD';
+            }
+
+            // 4. Spiked Sample & RPD/Horwitz
+            var spVol = parseNum((pane.querySelector('input[name*="[spike_vol_ml]"]') || {}).value);
+            var spSrc = parseNum((pane.querySelector('input[name*="[spike_sumber_konsentrasi]"]') || {}).value);
+            var spW   = parseNum((pane.querySelector('input[name*="[spike_berat_sampel]"]') || {}).value);
+            var kadarBakuTambah = (spW > 0 && spVol > 0 && spSrc > 0) ? ((spVol * spSrc) / spW) : 0;
+            setFieldVal(pane, 'kadar_baku_ditambahkan', kadarBakuTambah, 4);
+
+            var tblSpike = pane.querySelector('input[name*="[tabel_spiked_sample]"]');
+            var spikeRows = tblSpike ? Array.from(tblSpike.closest('table').querySelectorAll('tbody tr')) : [];
+            var kSpike = [0, 0];
+            spikeRows.forEach(function(tr, idx) {
+                if (idx > 1) return;
+                var w = calcBobotBersihRow(tr);
+                var F = evalZatFaktor((tr.querySelector('input[name*="[faktor_pengenceran]"]') || {}).value);
+                var yEl = tr.querySelector('input[name*="[respon_puncak]"]');
+                var hasY = yEl && yEl.value.trim() !== '';
+                var y = parseNum(yEl ? yEl.value : 0);
+                if (hasY && slope !== 0 && w > 0) {
+                    var xSp = (y - intercept) / slope;
+                    kSpike[idx] = (xSp * F * 0.001) / w;
+                }
+            });
+            if (kadarBakuTambah > 0 && (kSpike[0] !== 0 || kSpike[1] !== 0)) {
+                setFieldVal(pane, 'recovery_1', ((kSpike[0] - rataSampel) / kadarBakuTambah) * 100.0, 2);
+                setFieldVal(pane, 'recovery_2', ((kSpike[1] - rataSampel) / kadarBakuTambah) * 100.0, 2);
+            }
+            if (rataSampel > 0 && rataSampel >= lodVal) {
+                var rpd = (Math.abs(kSampel[0] - kSampel[1]) / rataSampel) * 100.0;
+                var horwitz = 0.5 * Math.pow(2, 1.0 - 0.5 * Math.log10(rataSampel * 1e-6));
+                setFieldVal(pane, 'nilai_rpd', rpd, 4);
+                setFieldVal(pane, 'syarat_horwitz', horwitz, 4);
+            }
+        }
+
+        var panganCharts = {};
+
+        function evalFaktorPengenceranPangan(str) {
+            var s = String(str || '').trim().replace(',', '.');
+            if (!s) return { mode: 'div', val: 1 };
+            if (s.indexOf('/') !== -1) {
+                var pts = s.split('/');
+                var a = parseFloat(pts[0]);
+                var b = parseFloat(pts[1]);
+                if (!isNaN(a) && !isNaN(b) && b !== 0) {
+                    return { mode: 'mul', val: a / b };
+                }
+            }
+            var v = parseFloat(s);
+            return { mode: 'div', val: (!isNaN(v) && v !== 0) ? v : 1 };
+        }
+
+        function setFieldVal(pane, fieldId, val, decimals) {
+            var el = pane.querySelector('input[name*="[' + fieldId + ']"]');
+            if (!el) return;
+            if (val === null || val === undefined || isNaN(val)) {
+                el.value = '';
+                return;
+            }
+            el.value = (typeof decimals === 'number') ? Number(val).toFixed(decimals) : parseFloat(val.toPrecision(10)).toString();
+        }
+
+        function calcBobotBersihRow(tr) {
+            var wz = tr.querySelector('input[name*="[wadah_zat]"]');
+            var ws = tr.querySelector('input[name*="[wadah_sisa]"]');
+            var bb = tr.querySelector('input[name*="[bobot_bersih]"]');
+            if (wz && ws && bb) {
+                var vWz = parseNum(wz.value);
+                var vWs = parseNum(ws.value);
+                if (vWz > 0 && vWs >= 0 && wz.value !== '' && ws.value !== '') {
+                    var diff = vWz - vWs;
+                    if (diff >= 0) {
+                        bb.value = parseFloat(diff.toFixed(6)).toString();
+                    }
+                }
+            }
+            return bb ? parseNum(bb.value) : 0;
+        }
+
+        function evalZatFaktor(str) {
+            var s = String(str || '').trim().replace(/,/g, '.').replace(/[xX×]/g, '*');
+            if (!s) return 1;
+            if (/^[0-9.\s+\-*/()]+$/.test(s)) {
+                try {
+                    var res = Function('"use strict"; return (' + s + ');')();
+                    if (typeof res === 'number' && !isNaN(res) && isFinite(res)) return res;
+                } catch (e) {}
+            }
+            var v = parseFloat(s);
+            return (!isNaN(v) && isFinite(v)) ? v : 1;
+        }
+
+        function hitungPanganHPLCPane(pane) {
+            if (!pane) return;
+            var formId = pane.id ? pane.id.replace('pane-form-', '') : '0';
+
+            // 1. Kadar, Susut Pengeringan Baku Pembanding & Faktor Konversi BM (mis. 122.12/144.1)
+            var kadarRaw = parseNum((pane.querySelector('input[name*="[baku_kadar]"]') || {}).value);
+            var spRaw    = parseNum((pane.querySelector('input[name*="[baku_sp]"]') || {}).value);
+            var kadarDec = (kadarRaw > 2) ? (kadarRaw / 100.0) : (kadarRaw > 0 ? kadarRaw : 1.0);
+            var Kb       = kadarDec * (1.0 - (spRaw / 100.0));
+            var bmEl     = pane.querySelector('input[name*="[faktor_konversi_bm]"]');
+            var fBM      = bmEl ? evalZatFaktor(bmEl.value || '1') : 1.0;
+            if (!(fBM > 0)) fBM = 1.0;
+
+            // 2. Tabel Baku Pembanding & Kurva Baku
+            var tblBaku = pane.querySelector('input[name*="[tabel_baku_kurva]"]');
+            var bakuRows = tblBaku ? Array.from(tblBaku.closest('table').querySelectorAll('tbody tr')) : [];
+            var concInduk = 0;
+            var concAntara = 0;
+            var pts = [];
+
+            bakuRows.forEach(function(tr, idx) {
+                var tahapEl = tr.querySelector('input[name*="[tahap]"]');
+                var tahap   = (tahapEl ? tahapEl.value : '').toLowerCase();
+                var bobot   = calcBobotBersihRow(tr);
+                var fpEl    = tr.querySelector('input[name*="[faktor_pengenceran]"]');
+                var fpInfo  = evalFaktorPengenceranPangan(fpEl ? fpEl.value : '');
+                var concEl  = tr.querySelector('input[name*="[konsentrasi]"]');
+                var respEl  = tr.querySelector('input[name*="[respon_puncak]"]');
+
+                if (idx === 0 || tahap.indexOf('induk') !== -1) {
+                    if (bobot > 0 && fpInfo.val > 0) {
+                        concInduk = (fpInfo.mode === 'mul')
+                            ? (bobot * 1000.0 * Kb * fpInfo.val)
+                            : ((bobot * 1000.0 * Kb) / fpInfo.val);
+                        if (concEl) concEl.value = parseFloat(concInduk.toPrecision(10)).toString();
+                    } else if (concEl && parseNum(concEl.value) > 0) {
+                        concInduk = parseNum(concEl.value);
+                    }
+                } else if (idx === 1 || tahap.indexOf('antara') !== -1) {
+                    if (concInduk > 0 && fpInfo.val > 0) {
+                        concAntara = (fpInfo.mode === 'mul') ? (concInduk * fpInfo.val) : (concInduk / fpInfo.val);
+                        if (concEl) concEl.value = parseFloat(concAntara.toPrecision(10)).toString();
+                    } else if (concEl && parseNum(concEl.value) > 0) {
+                        concAntara = parseNum(concEl.value);
+                    }
+                } else {
+                    var baseConc = concAntara > 0 ? concAntara : concInduk;
+                    var cVal = parseNum(concEl ? concEl.value : 0);
+                    if (baseConc > 0 && fpEl && fpEl.value.trim() !== '' && fpInfo.val > 0) {
+                        cVal = (fpInfo.mode === 'mul') ? (baseConc * fpInfo.val) : (baseConc / fpInfo.val);
+                        if (concEl) concEl.value = parseFloat(cVal.toPrecision(10)).toString();
+                    }
+                    var rVal = parseNum(respEl ? respEl.value : 0);
+                    if (cVal > 0 && rVal > 0) {
+                        pts.push({ x: cVal, y: rVal });
+                    }
+                }
+            });
+
+            // Auto-isi sumber konsentrasi spike jika masih kosong dan concAntara ada
+            var spikeSrcEl = pane.querySelector('input[name*="[spike_sumber_konsentrasi]"]');
+            if (spikeSrcEl && spikeSrcEl.value.trim() === '' && concAntara > 0) {
+                spikeSrcEl.value = parseFloat(concAntara.toPrecision(10)).toString();
+            }
+
+            // 3. Regresi Linier y = bx + a & r
+            var slope = 0, intercept = 0, rVal = 0;
+            if (pts.length >= 2) {
+                var n = pts.length, sx = 0, sy = 0, sxy = 0, sx2 = 0, sy2 = 0;
+                pts.forEach(function(p) {
+                    sx += p.x; sy += p.y; sxy += p.x * p.y; sx2 += p.x * p.x; sy2 += p.y * p.y;
+                });
+                var denom = (n * sx2) - (sx * sx);
+                var denomY = (n * sy2) - (sy * sy);
+                if (denom !== 0) {
+                    slope = ((n * sxy) - (sx * sy)) / denom;
+                    intercept = (sy - slope * sx) / n;
+                }
+                if (denom > 0 && denomY > 0) {
+                    rVal = ((n * sxy) - (sx * sy)) / Math.sqrt(denom * denomY);
+                }
+                setFieldVal(pane, 'regresi_slope', slope);
+                setFieldVal(pane, 'regresi_intercept', intercept);
+                setFieldVal(pane, 'regresi_r', rVal, 6);
+            } else {
+                setFieldVal(pane, 'regresi_slope', NaN);
+                setFieldVal(pane, 'regresi_intercept', NaN);
+                setFieldVal(pane, 'regresi_r', NaN);
+            }
+
+            // Update info box & Chart.js Kurva Baku
+            var infoEl  = document.getElementById('info_regresi_' + formId);
+            var badgeEl = document.getElementById('badge_regresi_' + formId);
+            if (infoEl && badgeEl) {
+                if (pts.length >= 2) {
+                    var okR = (rVal >= 0.998);
+                    badgeEl.className = 'badge ' + (okR ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle');
+                    badgeEl.textContent = okR ? 'Linearitas Memenuhi (r ≥ 0,998)' : 'Cek Linearitas (r < 0,998)';
+                    infoEl.innerHTML =
+                        '<div class="mb-1"><strong>Persamaan Regresi:</strong><br><code>y = ' + slope.toFixed(4) + 'x ' + (intercept >= 0 ? '+ ' : '- ') + Math.abs(intercept).toFixed(4) + '</code></div>' +
+                        '<div class="mb-1"><strong>Koefisien Korelasi (r):</strong> <code>' + rVal.toFixed(6) + '</code></div>' +
+                        '<div class="text-muted">Jumlah titik kurva: ' + pts.length + ' titik</div>';
+                } else {
+                    badgeEl.className = 'badge bg-light text-dark border';
+                    badgeEl.textContent = 'Menunggu data titik baku';
+                    infoEl.innerHTML = 'Minimal 2 titik <strong>Bk Kerja</strong> (Konsentrasi &amp; Respon Puncak) diperlukan untuk menghitung regresi dan menggambar kurva.';
+                }
+            }
+
+            var canvas = document.getElementById('chart_kurva_baku_' + formId);
+            if (canvas && typeof Chart !== 'undefined') {
+                var trendPts = [];
+                if (pts.length >= 2) {
+                    var minX = Math.min.apply(null, pts.map(function(p){ return p.x; }));
+                    var maxX = Math.max.apply(null, pts.map(function(p){ return p.x; }));
+                    trendPts = [
+                        { x: minX, y: slope * minX + intercept },
+                        { x: maxX, y: slope * maxX + intercept }
+                    ];
+                }
+                if (panganCharts[formId]) {
+                    panganCharts[formId].data.datasets[0].data = pts;
+                    panganCharts[formId].data.datasets[1].data = trendPts;
+                    panganCharts[formId].update('none');
+                } else {
+                    panganCharts[formId] = new Chart(canvas.getContext('2d'), {
+                        type: 'scatter',
+                        data: {
+                            datasets: [
+                                {
+                                    label: 'Titik Baku Kerja',
+                                    data: pts,
+                                    backgroundColor: '#0d6efd',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Garis Regresi Linier',
+                                    data: trendPts,
+                                    type: 'line',
+                                    borderColor: '#198754',
+                                    borderWidth: 2,
+                                    fill: false,
+                                    pointRadius: 0
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: false,
+                            scales: {
+                                x: { title: { display: true, text: 'Konsentrasi (µg/mL)' } },
+                                y: { title: { display: true, text: 'Respon Puncak' } }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // 4. Zat Uji (Sampel Tanpa Spike 1 & 2)
+            var tblZat = pane.querySelector('input[name*="[tabel_zat_uji]"]');
+            var zatRows = tblZat ? Array.from(tblZat.closest('table').querySelectorAll('tbody tr')) : [];
+            var kSampel = [0, 0];
+            zatRows.forEach(function(tr, idx) {
+                if (idx > 1) return;
+                var w = calcBobotBersihRow(tr);
+                var F = evalZatFaktor((tr.querySelector('input[name*="[faktor_pengenceran]"]') || {}).value);
+                var y = parseNum((tr.querySelector('input[name*="[respon_puncak]"]') || {}).value);
+                var xVal = 0, kad = 0;
+                if (y > 0 && slope !== 0 && w > 0) {
+                    xVal = (y - intercept) / slope;
+                    kad  = ((xVal * F) / w) * fBM;
+                }
+                kSampel[idx] = kad;
+                setFieldVal(pane, 'x' + (idx + 1) + '_sampel', xVal, 4);
+                setFieldVal(pane, 'kadar' + (idx + 1) + '_sampel', kad, 4);
+            });
+            var rataSampel = (kSampel[0] + kSampel[1]) / 2.0;
+            setFieldVal(pane, 'rata_kadar_sampel', rataSampel, 4);
+
+            // 5. Spiked Sample Duplo
+            var spVol = parseNum((pane.querySelector('input[name*="[spike_vol_ml]"]') || {}).value);
+            var spSrc = parseNum((pane.querySelector('input[name*="[spike_sumber_konsentrasi]"]') || {}).value);
+            var spW   = parseNum((pane.querySelector('input[name*="[spike_berat_sampel]"]') || {}).value);
+            var kadarBakuTambah = (spW > 0 && spVol > 0 && spSrc > 0) ? (((spVol * spSrc) / spW) * fBM) : 0;
+            setFieldVal(pane, 'kadar_baku_ditambahkan', kadarBakuTambah, 4);
+
+            var tblSpike = pane.querySelector('input[name*="[tabel_spiked_sample]"]');
+            var spikeRows = tblSpike ? Array.from(tblSpike.closest('table').querySelectorAll('tbody tr')) : [];
+            var kSpike = [0, 0];
+            spikeRows.forEach(function(tr, idx) {
+                if (idx > 1) return;
+                var w = calcBobotBersihRow(tr);
+                var F = evalZatFaktor((tr.querySelector('input[name*="[faktor_pengenceran]"]') || {}).value);
+                var y = parseNum((tr.querySelector('input[name*="[respon_puncak]"]') || {}).value);
+                var xVal = 0, kad = 0;
+                if (y > 0 && slope !== 0 && w > 0) {
+                    xVal = (y - intercept) / slope;
+                    kad  = ((xVal * F) / w) * fBM;
+                }
+                kSpike[idx] = kad;
+                setFieldVal(pane, 'x' + (idx + 1) + '_spike', xVal, 4);
+                setFieldVal(pane, 'kadar' + (idx + 1) + '_spike', kad, 4);
+            });
+            var rataSpike = (kSpike[0] + kSpike[1]) / 2.0;
+            setFieldVal(pane, 'rata_kadar_spike', rataSpike, 4);
+
+            if (kadarBakuTambah > 0) {
+                var rec1 = ((kSpike[0] - rataSampel) / kadarBakuTambah) * 100.0;
+                var rec2 = ((kSpike[1] - rataSampel) / kadarBakuTambah) * 100.0;
+                setFieldVal(pane, 'recovery_1', rec1, 2);
+                setFieldVal(pane, 'recovery_2', rec2, 2);
+            } else {
+                setFieldVal(pane, 'recovery_1', NaN);
+                setFieldVal(pane, 'recovery_2', NaN);
+            }
+
+            // 6. RPD/RSD & 1/2 CV Horwitz
+            var pairA = (rataSampel > 0) ? kSampel[0] : kSpike[0];
+            var pairB = (rataSampel > 0) ? kSampel[1] : kSpike[1];
+            var pairAvg = (pairA + pairB) / 2.0;
+            if (pairAvg > 0) {
+                var rpd = (Math.abs(pairA - pairB) / pairAvg) * 100.0;
+                var cFrac = pairAvg * 1e-6;
+                var horwitz = 0.5 * Math.pow(2, 1.0 - 0.5 * Math.log10(cFrac));
+                setFieldVal(pane, 'nilai_rpd', rpd, 4);
+                setFieldVal(pane, 'syarat_horwitz', horwitz, 4);
+            } else {
+                setFieldVal(pane, 'nilai_rpd', NaN);
+                setFieldVal(pane, 'syarat_horwitz', NaN);
+            }
         }
 
         function hitungHPLCPane(pane) {
