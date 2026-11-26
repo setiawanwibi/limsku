@@ -514,6 +514,50 @@ class Model_Metode extends CI_Model
     }
 
     /**
+     * Ambil daftar kategori pangan unik dari master_metode_pangan_olahan
+     */
+    public function ambil_daftar_kategori_pangan($bidang = 'Kimia')
+    {
+        $this->db->select('TRIM(kategori_pangan) as nama_zat_aktif, COUNT(*) as total_parameter, "" as daftar_sediaan');
+        $this->db->where('bidang', $bidang);
+        $this->db->where('status', 'Aktif');
+        $this->db->where("kategori_pangan IS NOT NULL AND TRIM(kategori_pangan) != ''", NULL, FALSE);
+        $this->db->group_by('TRIM(kategori_pangan)');
+        $this->db->order_by('TRIM(kategori_pangan)', 'ASC');
+        return $this->db->get('master_metode_pangan_olahan')->result_array();
+    }
+
+    /**
+     * Ambil parameter uji pangan olahan berdasarkan kategori pangan terpilih
+     */
+    public function ambil_parameter_pangan_by_kategori($kategori_pangan, $bidang = 'Kimia')
+    {
+        $clean_kp = trim(preg_replace('/\s+/', ' ', (string)$kategori_pangan));
+        if (empty($clean_kp)) {
+            return array();
+        }
+        $this->db->select('m.id, m.kode_metode, m.kategori_pangan as nama_zat_aktif, m.jenis_pangan as bentuk_sediaan, "" as jenis_sediaan, m.parameter_uji, m.metode_analisa, m.syarat_batas as persyaratan, m.referensi_regulasi as pustaka_acuan, m.template_id, ft.kode_template, ft.nama_template, ft.kategori as kategori_template, ft.skema_form');
+        $this->db->from('master_metode_pangan_olahan m');
+        $this->db->join('form_templates ft', 'ft.id = m.template_id', 'left');
+        $this->db->where('TRIM(m.kategori_pangan)', $clean_kp);
+        $this->db->where('m.bidang', $bidang);
+        $this->db->where('m.status', 'Aktif');
+        $this->db->order_by('m.parameter_uji', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Ambil 1 baris master metode pangan olahan berdasarkan ID
+     */
+    public function ambil_pangan_by_id($id)
+    {
+        $this->db->select('m.*, m.kategori_pangan as nama_zat_aktif, m.bidang as bidang_pengujian');
+        $this->db->from('master_metode_pangan_olahan m');
+        $this->db->where('m.id', (int)$id);
+        return $this->db->get()->row_array();
+    }
+
+    /**
      * Evaluasi Cerdas Rekomendasi Pengujian Mikrobiologi:
      * - Sediaan oral nonsteril non-antibiotik: Wajib/Rekomendasi Paket 3 Parameter (ALT, AKK, E. coli)
      * - Antibiotik Nistatin: Wajib/Rekomendasi Penetapan Potensi (MIK-03)

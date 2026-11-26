@@ -1,6 +1,6 @@
 {
   "kode_template": "PNG-KCKT-02",
-  "nama_template": "KCKT Pewarna Simultan Pangan (MA PPOMN 67/PA/17)",
+  "nama_template": "KCKT Pewarna Simultan Pangan",
   "kategori": "Kimia",
   "komoditi": "pangan",
   "skema_form": {
@@ -506,8 +506,7 @@
           {
             "id": "pustaka_metode",
             "label": "Pustaka Metode",
-            "type": "text",
-            "default": "MA PPOM 67/PA/17"
+            "type": "text"
           },
           {
             "id": "pustaka_persyaratan",

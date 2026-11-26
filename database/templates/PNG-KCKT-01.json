@@ -1,6 +1,6 @@
 {
   "kode_template": "PNG-KCKT-01",
-  "nama_template": "KCKT Kafein Pangan (MA PPOMN 21/PA/15)",
+  "nama_template": "KCKT Kafein Pangan",
   "kategori": "Kimia",
   "komoditi": "pangan",
   "skema_form": {
@@ -504,8 +504,7 @@
           {
             "id": "pustaka_metode",
             "label": "Pustaka Metode",
-            "type": "text",
-            "default": "MA PPOM 21/PA/15"
+            "type": "text"
           },
           {
             "id": "pustaka_persyaratan",

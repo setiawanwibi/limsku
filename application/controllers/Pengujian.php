@@ -184,8 +184,13 @@ class Pengujian extends MY_Controller
             redirect('pengujian/pilih_jenis/' . $sample_id);
         }
 
-        // Ambil daftar unik Zat Aktif monografi untuk bidang ini
-        $daftar_zat_aktif = $this->Model_Metode->ambil_daftar_zat_aktif($jenis_pengujian);
+        $komoditi_sampel = strtolower(trim((string)($sampel['komoditi'] ?? 'obat')));
+        $is_pangan = ($komoditi_sampel === 'pangan');
+
+        // Ambil daftar unik Zat Aktif / Kategori Pangan untuk bidang ini
+        $daftar_zat_aktif = $is_pangan
+            ? $this->Model_Metode->ambil_daftar_kategori_pangan($jenis_pengujian)
+            : $this->Model_Metode->ambil_daftar_zat_aktif($jenis_pengujian);
 
         // Ambil zat aktif terpilih dari query string jika ada
         $zat_aktif_terpilih = $this->input->get('zat_aktif', TRUE);
@@ -194,11 +199,14 @@ class Pengujian extends MY_Controller
         $bentuk_sediaan_hint = !empty($sampel['bentuk_sediaan']) ? $sampel['bentuk_sediaan'] : (!empty($sampel['kemasan']) ? $sampel['kemasan'] : ($sampel['nama_sampel'] ?? ''));
 
         if (!empty($zat_aktif_terpilih)) {
-            $parameter_monografi = $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian, $bentuk_sediaan_hint);
+            $parameter_monografi = $is_pangan
+                ? $this->Model_Metode->ambil_parameter_pangan_by_kategori($zat_aktif_terpilih, $jenis_pengujian)
+                : $this->Model_Metode->ambil_parameter_by_zat_aktif($zat_aktif_terpilih, $jenis_pengujian, $bentuk_sediaan_hint);
         }
 
         $this->load->model('Model_Template');
-        $daftar_template_bidang = $this->Model_Template->ambil_aktif($jenis_pengujian);
+        $filter_komoditi_tpl = $is_pangan ? 'pangan' : 'obat';
+        $daftar_template_bidang = $this->Model_Template->ambil_semua($jenis_pengujian, 'Aktif', $filter_komoditi_tpl);
 
         // Evaluasi Rekomendasi Pintar (khusus Mikrobiologi: Oral Nonsteril ALT/AKK/E. coli vs Nistatin Potensi vs Antibiotik Lainnya)
         $rekomendasi_mikro = NULL;
@@ -305,8 +313,13 @@ class Pengujian extends MY_Controller
         // 4. Validasi Eksplisit: Setiap parameter wajib cocok dengan Zat Aktif, Bidang, dan memiliki mapping LCP valid
         $valid_items_to_create = array();
 
+        $komoditi_sampel = strtolower(trim((string)($sampel['komoditi'] ?? 'obat')));
+        $is_pangan = ($komoditi_sampel === 'pangan');
+
         foreach ($selected_methods as $m_id) {
-            $metode_item = $this->Model_Metode->ambil_by_id($m_id);
+            $metode_item = $is_pangan
+                ? $this->Model_Metode->ambil_pangan_by_id($m_id)
+                : $this->Model_Metode->ambil_by_id($m_id);
 
             if (!$metode_item) {
                 $this->session->set_flashdata('pesan_gagal', 'Metode tidak ditemukan dalam database.');
@@ -342,10 +355,22 @@ class Pengujian extends MY_Controller
                 redirect('pengujian/pilih_form/' . $sample_id . '?jenis=' . urlencode($jenis_pengujian) . '&zat_aktif=' . urlencode($nama_zat_aktif));
             }
 
-            $valid_items_to_create[] = array(
-                'method_id'   => $metode_item['id'],
+            $item_payload = array(
+                'method_id'   => $is_pangan ? NULL : $metode_item['id'],
                 'template_id' => $chosen_template_id
             );
+            if ($is_pangan) {
+                $item_payload['initial_data'] = json_encode(array(
+                    '_meta_pangan' => array(
+                        'pangan_method_id'   => (int)$metode_item['id'],
+                        'parameter_uji'      => $metode_item['parameter_uji'] ?? '',
+                        'metode_analisa'     => $metode_item['metode_analisa'] ?? '',
+                        'syarat_batas'       => $metode_item['syarat_batas'] ?? '',
+                        'referensi_regulasi' => $metode_item['referensi_regulasi'] ?? ''
+                    )
+                ), JSON_UNESCAPED_UNICODE);
+            }
+            $valid_items_to_create[] = $item_payload;
         }
 
         $penguji_id = $this->session->userdata('user_id');

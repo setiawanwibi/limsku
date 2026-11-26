@@ -1102,6 +1102,37 @@
                                                                         : (isset($data_hasil[$fld_id]) ? $data_hasil[$fld_id] : (isset($fld['default']) ? $fld['default'] : ''));
 
                                                                     // Integrasi Otomatis Master Metode: Pustaka Acuan & Syarat Spesifikasi
+                                                                    if ($fld_id === 'pustaka_metode' || $fld_id === 'pustaka_acuan') {
+                                                                        $meta_pangan_ma = isset($data_hasil['_meta_pangan']['metode_analisa']) ? $data_hasil['_meta_pangan']['metode_analisa'] : '';
+                                                                        $sumber_pustaka = !empty($meta_pangan_ma) ? $meta_pangan_ma : (!empty($f['metode_analisa']) ? $f['metode_analisa'] : (!empty($f['pustaka_acuan']) ? $f['pustaka_acuan'] : ''));
+                                                                        if (empty($sumber_pustaka) && strtolower($sesi['komoditi'] ?? '') === 'pangan' && !empty($f['template_id'])) {
+                                                                            $CI =& get_instance();
+                                                                            $row_pangan_tpl = $CI->db->select('metode_analisa')
+                                                                                ->where('template_id', (int)$f['template_id'])
+                                                                                ->where("metode_analisa IS NOT NULL AND TRIM(metode_analisa) != ''", NULL, FALSE)
+                                                                                ->limit(1)
+                                                                                ->get('master_metode_pangan_olahan')
+                                                                                ->row_array();
+                                                                            if ($row_pangan_tpl && !empty($row_pangan_tpl['metode_analisa'])) {
+                                                                                $sumber_pustaka = $row_pangan_tpl['metode_analisa'];
+                                                                            }
+                                                                        }
+                                                                        if (!empty($sumber_pustaka) && strpos($sumber_pustaka, ';') !== false) {
+                                                                            $opsi_pustaka = array_values(array_filter(array_map('trim', explode(';', $sumber_pustaka))));
+                                                                            if (count($opsi_pustaka) > 1) {
+                                                                                $fld_type = 'select';
+                                                                                $fld['options'] = $opsi_pustaka;
+                                                                                if (!in_array((string)$raw_val, $opsi_pustaka, true)) {
+                                                                                    $raw_val = '';
+                                                                                }
+                                                                            }
+                                                                        } elseif (!empty($sumber_pustaka) && ($raw_val === '' || $raw_val === null || (!empty($meta_pangan_ma) && isset($fld['default']) && $raw_val === $fld['default']))) {
+                                                                            $raw_val = $sumber_pustaka;
+                                                                        }
+                                                                    }
+                                                                    if ($fld_id === 'pustaka_metode' && !empty($data_hasil['_meta_pangan']['metode_analisa'])) {
+                                                                        echo '<input type="hidden" name="forms[' . (int)$f['id'] . '][hasil][_meta_pangan][metode_analisa]" value="' . html_escape($data_hasil['_meta_pangan']['metode_analisa']) . '">';
+                                                                    }
                                                                     if (($raw_val === '' || $raw_val === null)) {
                                                                         if (($fld_id === 'pustaka_metode' || $fld_id === 'pustaka_acuan') && !empty($f['pustaka_acuan'])) {
                                                                             $raw_val = $f['pustaka_acuan'];

@@ -1,6 +1,6 @@
 {
   "kode_template": "PNG-ICPMS-02",
-  "nama_template": "ICP-MS Cemaran Logam Timbal (Pb) Pangan (31/PA/24)",
+  "nama_template": "ICP-MS Cemaran Logam Timbal (Pb) Pangan",
   "kategori": "Kimia",
   "komoditi": "pangan",
   "skema_form": {
@@ -158,7 +158,7 @@
         "title": "G. Pustaka, Syarat & Kesimpulan",
         "fields": [
           { "id": "hasil_uji_kadar_akhir", "label": "Hasil Uji ± Ketidakpastian + Simple Acceptance/Guard Band*", "type": "text", "placeholder": "Contoh: Tidak terdeteksi (< LOD) / 0.05 mg/kg" },
-          { "id": "pustaka_metode", "label": "Pustaka Metode", "type": "text", "default": "101/PA/MA-PPPOMN/21" },
+          { "id": "pustaka_metode", "label": "Pustaka Metode", "type": "text" },
           { "id": "pustaka_persyaratan", "label": "Pustaka Persyaratan", "type": "text", "default": "PBPOM No. 9 Tahun 2022" },
           { "id": "syarat", "label": "Syarat (Tolerance Limit / Acceptance Limit)", "type": "textarea", "default": "Tolerance Limit : Maks. 1 mg/kg" },
           { "id": "kesimpulan", "label": "Kesimpulan", "type": "select", "options": ["MS", "TMS", "Tidak Ditentukan"], "required": true }
