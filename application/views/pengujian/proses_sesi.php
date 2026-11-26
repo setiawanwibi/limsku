@@ -1544,6 +1544,9 @@
                                                             </div>
                                                             <div class="w-100 overflow-auto text-center">
                                                                 <svg class="kafein-regression-svg" viewBox="0 0 640 280" style="max-width: 100%; height: auto; background: #fcfcfd; border: 1px solid #e2e8f0; border-radius: 6px;"></svg>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
 
                                                     <?php if ($sec_id === 'tabel_baku_pembanding_kurva'): ?>
                                                         <!-- Grafik Kurva Baku Otomatis (Chart.js) & Ringkasan Regresi Linier -->
