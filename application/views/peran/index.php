@@ -7,25 +7,24 @@
        ========================================================= */
 
     .role-page {
-        color: #294257;
-        font-size: .84rem;
+        color: #1e293b;
+        font-size: .85rem;
     }
 
     /* Notifikasi */
     .role-page .alert {
         border-radius: 8px;
-        font-size: .78rem;
+        font-size: .82rem;
         line-height: 1.5;
-        box-shadow: 0 3px 10px rgba(35, 58, 76, .04);
     }
 
     /* Kartu utama */
     .role-card {
         overflow: hidden;
         background: #fff;
-        border: 1px solid #e0e8ed;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(35, 58, 76, .05);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
 
     /* Header */
@@ -35,24 +34,38 @@
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 12px;
-        padding: 17px 20px;
+        padding: 16px 22px;
         background: #fff;
-        border-bottom: 1px solid #e5ebee;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .role-heading-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .role-header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0284c7;
+        font-size: 1.05rem;
     }
 
     .role-heading {
-        display: flex;
-        align-items: center;
-        gap: 9px;
         margin: 0;
-        color: #294257;
-        font-size: .98rem;
+        color: #0f172a;
+        font-size: 1.05rem;
         font-weight: 700;
-    }
-
-    .role-heading i {
-        color: #159b98;
-        font-size: 1.1rem;
+        line-height: 1.4;
     }
 
     .role-header-actions {
@@ -67,81 +80,79 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        min-height: 34px;
-        padding: 7px 11px;
+        padding: 0.48rem 1rem;
         border: 1px solid transparent;
-        border-radius: 6px;
-        font-size: .70rem;
-        font-weight: 700;
+        border-radius: 8px;
+        font-size: .82rem;
+        font-weight: 600;
         text-decoration: none;
         white-space: nowrap;
-        transition: .18s ease;
+        transition: .15s ease;
         cursor: pointer;
     }
 
     .role-btn-permission {
-        color: #5e7280;
+        color: #334155;
         background: #fff;
-        border-color: #d9e3e7;
+        border-color: #cbd5e1;
     }
 
     .role-btn-permission:hover {
-        color: #168f8b;
-        background: #f2faf9;
-        border-color: #c6dfdd;
+        color: #0f172a;
+        background: #f8fafc;
+        border-color: #94a3b8;
     }
 
     .role-btn-add {
         color: #fff;
-        background: #159b98;
-        border-color: #159b98;
-        box-shadow: 0 2px 6px rgba(21, 155, 152, .12);
+        background: #0284c7;
+        border-color: #0284c7;
     }
 
     .role-btn-add:hover {
         color: #fff;
-        background: #118b88;
-        border-color: #118b88;
-        transform: translateY(-1px);
+        background: #0369a1;
+        border-color: #0369a1;
     }
 
     /* Bagian tabel */
     .role-body {
-        padding: 18px 20px;
+        padding: 20px 22px;
     }
 
     .role-table-wrap {
         width: 100%;
         overflow-x: auto;
-        border: 1px solid #e3eaee;
-        border-radius: 7px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
     }
 
     .role-table {
         width: 100%;
         min-width: 680px;
         margin: 0;
-        color: #536b79;
-        font-size: .75rem;
+        color: #334155;
+        font-size: 0.83rem;
     }
 
     .role-table thead th {
-        padding: 11px 12px;
-        background: #f7fafb;
-        color: #708490;
-        border-bottom: 1px solid #dfe7eb;
-        font-size: .64rem;
+        padding: 11px 14px;
+        background: #f8fafc;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.74rem;
         font-weight: 700;
-        letter-spacing: .025em;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
         white-space: nowrap;
     }
 
     .role-table tbody td {
-        padding: 12px;
-        border-color: #edf1f3;
+        padding: 12px 14px;
+        border-color: #f1f5f9;
         vertical-align: middle;
         line-height: 1.5;
+        font-size: 0.83rem;
     }
 
     .role-table tbody tr {
@@ -149,24 +160,24 @@
     }
 
     .role-table tbody tr:hover {
-        background: #f8fbfb;
+        background: #f8fafc;
     }
 
     .role-number {
-        color: #8a9aa4;
-        font-size: .70rem;
+        color: #64748b;
+        font-size: 0.82rem;
         font-weight: 600;
     }
 
     .role-name {
-        color: #354f60;
-        font-size: .76rem;
+        color: #0f172a;
+        font-size: 0.84rem;
         font-weight: 700;
     }
 
     .role-description {
-        color: #70838f;
-        font-size: .72rem;
+        color: #64748b;
+        font-size: 0.80rem;
         line-height: 1.5;
     }
 
@@ -176,19 +187,18 @@
         align-items: center;
         justify-content: center;
         gap: 5px;
-        min-height: 25px;
-        padding: 4px 8px;
-        border: 1px solid #dce5e9;
-        border-radius: 5px;
-        background: #f4f7f8;
-        color: #617786;
-        font-size: .66rem;
-        font-weight: 700;
+        padding: 4px 9px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.74rem;
+        font-weight: 600;
         white-space: nowrap;
     }
 
     .role-user-count i {
-        font-size: .72rem;
+        font-size: 0.78rem;
     }
 
     /* Tombol aksi */
@@ -426,14 +436,18 @@
         ?>
 
         <div class="role-header">
-            <div>
-                <h5 class="role-heading">
-                    <i class="bi bi-people"></i>
-                    Daftar Peran (Roles)
-                </h5>
-                <p class="text-muted small mb-0 mt-1" style="font-size: 0.78rem;">
-                    Struktur peran RBAC LIMSKU &amp; jumlah personil bertugas di Workspace <strong><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>.
-                </p>
+            <div class="role-heading-wrap">
+                <div class="role-header-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <h5 class="role-heading">
+                        Daftar Peran (Roles)
+                    </h5>
+                    <p class="text-muted small mb-0 mt-1" style="font-size: 0.8rem;">
+                        Pengaturan peran RBAC dan jumlah personil pada komoditi terkait.
+                    </p>
+                </div>
             </div>
 
             <div class="role-header-actions">
@@ -458,22 +472,17 @@
         </div>
 
         <!-- Filter Tab Komoditi -->
-        <div class="px-3 pt-2 pb-2 border-bottom bg-light">
+        <div class="px-4 py-3 border-bottom" style="background: #f8fafc;">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <div class="nav nav-pills gap-1">
+                <div class="nav nav-pills gap-2">
                     <?php foreach ($tab_items as $k_key => $t_info): ?>
                         <?php $is_active = ($komoditi_curr === $k_key); ?>
                         <a href="<?php echo site_url('peran?komoditi=' . $k_key); ?>" 
-                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
-                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.8rem;'; ?>">
-                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-semibold' : 'text-secondary bg-white border'; ?>" 
+                           style="border-radius: 8px; <?php echo $is_active ? 'background-color: #0284c7; border-color: #0284c7; color: #fff; font-size: 0.82rem;' : 'font-size: 0.82rem; border-color: #cbd5e1;'; ?>">
                             <span><?php echo $t_info['label']; ?></span>
                         </a>
                     <?php endforeach; ?>
-                </div>
-
-                <div class="text-muted small" style="font-size: 0.75rem;">
-                    Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
                 </div>
             </div>
         </div>

@@ -7,17 +7,17 @@
        ========================================================= */
 
     .user-management-page {
-        color: #294257;
-        font-size: .9rem;
+        color: #1e293b;
+        font-size: .85rem;
     }
 
     .user-management-card {
         width: 100%;
         overflow: hidden;
         background: #fff;
-        border: 1px solid #e0e8ed;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(35, 58, 76, .05);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
 
     .user-management-header {
@@ -25,8 +25,8 @@
         align-items: center;
         justify-content: space-between;
         gap: 14px;
-        padding: 18px 22px;
-        border-bottom: 1px solid #e7edf0;
+        padding: 16px 22px;
+        border-bottom: 1px solid #e2e8f0;
         background: #fff;
     }
 
@@ -41,65 +41,64 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         flex-shrink: 0;
         border-radius: 8px;
-        background: #e5f6f4;
-        color: #159b98;
-        font-size: 1.15rem;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0284c7;
+        font-size: 1.05rem;
     }
 
     .user-management-title {
         margin: 0;
-        color: #294257;
-        font-size: 1.08rem;
+        color: #0f172a;
+        font-size: 1.05rem;
         font-weight: 700;
         line-height: 1.4;
     }
 
     .user-management-subtitle {
-        margin: 4px 0 0;
-        color: #8797a1;
+        margin: 2px 0 0;
+        color: #64748b;
         font-size: .8rem;
-        line-height: 1.5;
+        line-height: 1.45;
     }
 
     .user-management-btn-add {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 7px;
-        min-height: 39px;
-        padding: 9px 15px;
+        gap: 6px;
+        padding: 0.48rem 1rem;
         flex-shrink: 0;
-        border: 1px solid #159b98;
-        border-radius: 7px;
-        background: #159b98;
+        border: 1px solid #0284c7;
+        border-radius: 8px;
+        background: #0284c7;
         color: #fff;
-        font-size: .83rem;
-        font-weight: 700;
+        font-size: .82rem;
+        font-weight: 600;
         text-decoration: none;
-        transition: .18s ease;
+        transition: .15s ease;
     }
 
     .user-management-btn-add:hover {
-        border-color: #118b88;
-        background: #118b88;
+        border-color: #0369a1;
+        background: #0369a1;
         color: #fff;
-        box-shadow: 0 3px 8px rgba(21, 155, 152, .15);
     }
 
     .user-management-body {
-        padding: 22px;
+        padding: 20px 22px;
     }
 
     .user-management-page .alert {
         margin-bottom: 18px;
         padding: 12px 15px;
-        border-radius: 7px;
-        font-size: .85rem;
-        line-height: 1.6;
+        border-radius: 8px;
+        font-size: .83rem;
+        line-height: 1.5;
     }
 
     /* Tabel */
@@ -112,26 +111,29 @@
     .user-management-page .table {
         width: 100% !important;
         margin-bottom: 0;
-        color: #40596a;
-        font-size: .84rem;
+        color: #334155;
+        font-size: .83rem;
         vertical-align: middle;
-        border-color: #e7edf0;
+        border-color: #e2e8f0;
     }
 
     .user-management-page .table thead th {
-        padding: 13px 12px;
-        border-bottom: 1px solid #dfe8ec;
-        background: #f5faf9;
-        color: #526b7a;
-        font-size: .78rem;
+        padding: 11px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: .74rem;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
         white-space: nowrap;
     }
 
     .user-management-page .table tbody td {
-        padding: 13px 12px;
-        border-bottom: 1px solid #edf1f3;
+        padding: 12px 14px;
+        border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
+        font-size: .83rem;
     }
 
     .user-management-page .table tbody tr:last-child td {
@@ -139,12 +141,12 @@
     }
 
     .user-management-page .table tbody tr:hover td {
-        background-color: #f8fbfb;
+        background-color: #f8fafc;
     }
 
     .user-management-page .user-name {
-        color: #294257;
-        font-size: .85rem;
+        color: #0f172a;
+        font-size: .84rem;
         font-weight: 700;
     }
 
@@ -153,8 +155,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 5px 9px;
-        border-radius: 5px;
+        padding: 4px 9px;
+        border-radius: 6px;
         font-size: .74rem;
         font-weight: 600;
         line-height: 1.4;
@@ -162,9 +164,9 @@
     }
 
     .user-management-page .role-badge {
-        border: 1px solid #ccece9;
-        background: #e5f6f4;
-        color: #167f7c;
+        border: 1px solid #bae6fd;
+        background: #f0f9ff;
+        color: #0369a1;
     }
 
     .user-management-page .status-active {
@@ -522,9 +524,9 @@
                 </div>
 
                 <div>
-                    <h5 class="user-management-title">Daftar Pengguna (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Sistem'; ?>)</h5>
+                    <h5 class="user-management-title">Daftar Pengguna &bull; <?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Sistem'; ?></h5>
                     <p class="user-management-subtitle">
-                        Kelola akun, peran, dan personil yang bertugas pada komoditi laboratorium aktif.
+                        Kelola akun, peran, dan penugasan personil laboratorium.
                     </p>
                 </div>
             </div>
@@ -540,28 +542,23 @@
         </div>
 
         <!-- Filter Tab Komoditi -->
-        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
+        <div class="px-4 py-3 border-bottom" style="background: #f8fafc;">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <div class="nav nav-pills gap-1">
+                <div class="nav nav-pills gap-2">
                     <?php foreach ($tab_items as $k_key => $t_info): ?>
                         <?php 
                             $is_active = ($komoditi_curr === $k_key);
                             $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
                         ?>
                         <a href="<?php echo site_url('pengguna?komoditi=' . $k_key); ?>" 
-                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
-                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.82rem;'; ?>">
-                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-semibold' : 'text-secondary bg-white border'; ?>" 
+                           style="border-radius: 8px; <?php echo $is_active ? 'background-color: #0284c7; border-color: #0284c7; color: #fff; font-size: 0.82rem;' : 'font-size: 0.82rem; border-color: #cbd5e1;'; ?>">
                             <span><?php echo $t_info['label']; ?></span>
-                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                            <span class="badge <?php echo $is_active ? '' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem; border-radius: 6px; <?php echo $is_active ? 'background: rgba(255,255,255,0.22); color: #fff;' : ''; ?>">
                                 <?php echo $c_count; ?>
                             </span>
                         </a>
                     <?php endforeach; ?>
-                </div>
-
-                <div class="text-muted small">
-                    Personil di Workspace: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
                 </div>
             </div>
         </div>

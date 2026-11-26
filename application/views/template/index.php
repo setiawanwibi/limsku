@@ -976,7 +976,6 @@
                     <?php else: ?>
                         Komoditi Aktif:
                         <span class="badge rounded-pill <?php echo isset($tab_items[$komoditi_curr]['badge_class']) ? $tab_items[$komoditi_curr]['badge_class'] : 'bg-primary text-white'; ?> px-2 py-1" style="<?php echo isset($tab_items[$komoditi_curr]['custom_style']) ? $tab_items[$komoditi_curr]['custom_style'] : ''; ?> font-size: 0.75rem;">
-                            <i class="bi <?php echo isset($tab_items[$komoditi_curr]['icon']) ? $tab_items[$komoditi_curr]['icon'] : 'bi-tag'; ?> me-1"></i>
                             <?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?>
                         </span>
                     <?php endif; ?>
@@ -1088,7 +1087,7 @@
                                             $badge_info = isset($tab_items[$t_kom]) ? $tab_items[$t_kom] : array('label' => ucfirst($t_kom), 'badge_class' => 'bg-secondary text-white', 'icon' => 'bi-tag');
                                         ?>
                                         <span class="badge <?php echo $badge_info['badge_class']; ?>" style="<?php echo isset($badge_info['custom_style']) ? $badge_info['custom_style'] : ''; ?> font-size: 0.72rem; padding: 4px 8px;">
-                                            <i class="bi <?php echo $badge_info['icon']; ?> me-1"></i><?php echo $badge_info['label']; ?>
+                                            <?php echo $badge_info['label']; ?>
                                         </span>
                                     </td>
 
