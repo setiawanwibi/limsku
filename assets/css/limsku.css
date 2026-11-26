@@ -18,10 +18,13 @@
     --lims-bg: #f8fafc;
     --lims-card-border: #e2e8f0;
     --lims-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --lims-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 body {
     font-family: var(--lims-font-family);
+    font-size: 0.875rem;
+    line-height: 1.5;
     background-color: var(--lims-bg);
     color: #334155;
     min-height: 100vh;
@@ -590,24 +593,59 @@ body.sidebar-collapsed #sidebar-toggle-open {
     border: 1px solid #fecaca;
 }
 
-/* Tables */
-.table th {
-    font-weight: 600;
-    font-size: 0.8rem;
+/* Tables & Unified Typography Scale */
+.table th,
+#lims-content .table > thead > tr > th {
+    font-family: var(--lims-font-family);
+    font-weight: 700;
+    font-size: 0.74rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #475569;
 }
 
-.table td {
-    font-size: 0.875rem;
+.table td,
+#lims-content .table > tbody > tr > td {
+    font-family: var(--lims-font-family);
+    font-size: 0.83rem;
     vertical-align: middle;
+}
+
+#lims-content code,
+#lims-content pre,
+#lims-content .font-monospace {
+    font-family: var(--lims-font-mono) !important;
+}
+
+#lims-content h5,
+#lims-content .h5 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+#lims-content h6,
+#lims-content .h6 {
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+#lims-content .form-control,
+#lims-content .form-select {
+    font-size: 0.84rem;
+}
+
+#lims-content .btn {
+    font-size: 0.82rem;
+}
+
+#lims-content .btn-sm {
+    font-size: 0.78rem;
 }
 
 /* Form Polish */
 .form-label {
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.83rem;
     color: #334155;
 }
 

@@ -4,15 +4,15 @@
     .instrument-list-page {
         width: 100%;
         padding: 4px 0 22px;
-        color: #294257;
+        color: #1e293b;
     }
 
     .instrument-list-page .instrument-card {
         width: 100%;
         background: #ffffff;
-        border: 1px solid #e0e8ed;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(41, 66, 87, 0.05);
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         overflow: hidden;
     }
 
@@ -21,9 +21,9 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        padding: 18px 22px;
+        padding: 16px 22px;
         background: #ffffff;
-        border-bottom: 1px solid #e8eef1;
+        border-bottom: 1px solid #e2e8f0;
     }
 
     .instrument-list-page .instrument-heading {
@@ -38,72 +38,70 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        background: #e5f6f4;
-        color: #159b98;
-        font-size: 20px;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0284c7;
+        font-size: 18px;
     }
 
     .instrument-list-page .instrument-title {
         margin: 0;
-        color: #294257;
-        font-size: 1.08rem;
+        color: #0f172a;
+        font-size: 1.05rem;
         font-weight: 700;
     }
 
     .instrument-list-page .instrument-subtitle {
-        margin: 4px 0 0;
-        color: #7b8b98;
+        margin: 2px 0 0;
+        color: #64748b;
         font-size: 0.8rem;
     }
 
     .instrument-list-page .btn-add-instrument {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 9px 16px;
-        background: #159b98;
+        gap: 6px;
+        padding: 0.48rem 1rem;
+        background: #0284c7;
         color: #ffffff;
-        border: 1px solid #159b98;
+        border: 1px solid #0284c7;
         border-radius: 8px;
-        font-size: 0.84rem;
+        font-size: 0.82rem;
         font-weight: 600;
         text-decoration: none;
-        box-shadow: 0 2px 6px rgba(21, 155, 152, 0.2);
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         white-space: nowrap;
     }
 
     .instrument-list-page .btn-add-instrument:hover {
-        background: #118380;
-        border-color: #118380;
+        background: #0369a1;
+        border-color: #0369a1;
         color: #ffffff;
-        box-shadow: 0 4px 10px rgba(21, 155, 152, 0.3);
     }
 
     .instrument-list-page .btn-import-instrument {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 9px 16px;
+        gap: 6px;
+        padding: 0.48rem 1rem;
         background: #ffffff;
-        color: #2b6cb0;
-        border: 1px solid #cbd5e0;
+        color: #334155;
+        border: 1px solid #cbd5e1;
         border-radius: 8px;
-        font-size: 0.84rem;
+        font-size: 0.82rem;
         font-weight: 600;
         text-decoration: none;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         white-space: nowrap;
     }
 
     .instrument-list-page .btn-import-instrument:hover {
-        background: #ebf8ff;
-        border-color: #3182ce;
-        color: #2b6cb0;
-        box-shadow: 0 2px 6px rgba(49, 130, 206, 0.2);
+        background: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a;
     }
 
     .instrument-list-page .instrument-body {
@@ -299,10 +297,10 @@
 
                 <div>
                     <h5 class="instrument-title">
-                        Daftar Alat Laboratorium (<?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Laboratorium'; ?>)
+                        Daftar Alat Laboratorium &bull; <?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : 'Laboratorium'; ?>
                     </h5>
                     <p class="instrument-subtitle">
-                        Kelola data inventaris alat pengujian, spesifikasi teknis, kondisi, dan lokasi ruangan sesuai komoditi aktif.
+                        Kelola inventaris alat pengujian, spesifikasi teknis, kondisi, dan lokasi ruangan.
                     </p>
                 </div>
             </div>
@@ -320,28 +318,23 @@
         </div>
 
         <!-- Filter Tab Komoditi -->
-        <div class="px-4 pt-3 pb-2 border-bottom bg-light">
+        <div class="px-4 py-3 border-bottom" style="background: #f8fafc;">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <div class="nav nav-pills gap-1">
+                <div class="nav nav-pills gap-2">
                     <?php foreach ($tab_items as $k_key => $t_info): ?>
                         <?php 
                             $is_active = ($komoditi_curr === $k_key);
                             $c_count = isset($cnts[$k_key]) ? $cnts[$k_key] : 0;
                         ?>
                         <a href="<?php echo site_url('alat?komoditi=' . $k_key); ?>" 
-                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-bold shadow-sm' : 'text-secondary bg-white border'; ?>" 
-                           style="<?php echo $is_active ? 'background-color: #159b98; border-color: #159b98; color: #fff;' : 'font-size: 0.82rem;'; ?>">
-                            <i class="bi <?php echo $t_info['icon']; ?>"></i>
+                           class="nav-link btn btn-sm py-1 px-3 d-flex align-items-center gap-2 <?php echo $is_active ? 'active fw-semibold' : 'text-secondary bg-white border'; ?>" 
+                           style="border-radius: 8px; <?php echo $is_active ? 'background-color: #0284c7; border-color: #0284c7; color: #fff; font-size: 0.82rem;' : 'font-size: 0.82rem; border-color: #cbd5e1;'; ?>">
                             <span><?php echo $t_info['label']; ?></span>
-                            <span class="badge rounded-pill <?php echo $is_active ? 'bg-white text-dark' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem;">
+                            <span class="badge <?php echo $is_active ? '' : 'bg-light text-muted border'; ?>" style="font-size: 0.7rem; border-radius: 6px; <?php echo $is_active ? 'background: rgba(255,255,255,0.22); color: #fff;' : ''; ?>">
                                 <?php echo $c_count; ?>
                             </span>
                         </a>
                     <?php endforeach; ?>
-                </div>
-
-                <div class="text-muted small">
-                    Alat Ruang: <strong class="text-dark"><?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?></strong>
                 </div>
             </div>
         </div>

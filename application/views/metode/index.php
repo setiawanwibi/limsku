@@ -1,33 +1,33 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 <style>
-    .metode-page { width: 100%; padding: 4px 0 24px; color: #294257; }
-    .metode-card { width: 100%; background: #ffffff; border: 1px solid #e0e8ed; border-radius: 12px; box-shadow: 0 4px 16px rgba(41, 66, 87, 0.05); overflow: hidden; }
-    .metode-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; background: #ffffff; border-bottom: 1px solid #e8eef1; }
+    .metode-page { width: 100%; padding: 4px 0 24px; color: #1e293b; }
+    .metode-card { width: 100%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); overflow: hidden; }
+    .metode-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 22px; background: #ffffff; border-bottom: 1px solid #e2e8f0; }
     .metode-heading { display: flex; align-items: center; gap: 12px; }
-    .metode-heading-icon { width: 42px; height: 42px; border-radius: 10px; background: #e6f7ff; color: #1890ff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .metode-title { margin: 0; color: #294257; font-size: 1.1rem; font-weight: 700; }
-    .metode-subtitle { margin: 4px 0 0; color: #7b8b98; font-size: 0.82rem; }
-    .btn-import-excel { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; background: #ffffff; color: #2b6cb0; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 0.84rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
-    .btn-import-excel:hover { background: #ebf8ff; border-color: #3182ce; color: #2b6cb0; }
-    .btn-add-metode { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; background: #1890ff; color: #ffffff; border: 1px solid #1890ff; border-radius: 8px; font-size: 0.84rem; font-weight: 600; text-decoration: none; box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2); }
-    .btn-add-metode:hover { background: #096dd9; color: #ffffff; }
-    .metode-body { padding: 20px 24px; }
-    .metode-table thead th { background: #f7fafc; color: #40596d; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 12px 14px; border-bottom: 1px solid #e0e8ed; white-space: nowrap; }
-    .metode-table tbody td { padding: 12px 14px; font-size: 0.83rem; color: #334e68; border-bottom: 1px solid #edf2f5; vertical-align: middle; }
-    .badge-lcp-mapped { background: #e6ffed; color: #22863a; border: 1px solid #b7eb8f; padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-    .badge-lcp-unmapped { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
-    .badge-lcp-unmapped:hover { background: #fff1b8; }
-    .action-btn-group { display: inline-flex; gap: 5px; }
+    .metode-heading-icon { width: 38px; height: 38px; border-radius: 8px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .metode-title { margin: 0; color: #0f172a; font-size: 1.05rem; font-weight: 700; }
+    .metode-subtitle { margin: 2px 0 0; color: #64748b; font-size: 0.8rem; }
+    .btn-import-excel { display: inline-flex; align-items: center; gap: 6px; padding: 0.48rem 0.95rem; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: all 0.15s ease; }
+    .btn-import-excel:hover { background: #f8fafc; border-color: #94a3b8; color: #0f172a; }
+    .btn-add-metode { display: inline-flex; align-items: center; gap: 6px; padding: 0.48rem 0.95rem; background: #0284c7; color: #ffffff; border: 1px solid #0284c7; border-radius: 8px; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: all 0.15s ease; }
+    .btn-add-metode:hover { background: #0369a1; border-color: #0369a1; color: #ffffff; }
+    .metode-body { padding: 18px 22px; }
+    .metode-table thead th { background: #f8fafc; color: #475569; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 11px 14px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    .metode-table tbody td { padding: 11px 14px; font-size: 0.83rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .badge-lcp-mapped { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 3px 8px; border-radius: 6px; font-size: 0.73rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-lcp-unmapped { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 3px 8px; border-radius: 6px; font-size: 0.73rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    .badge-lcp-unmapped:hover { background: #fef3c7; }
+    .action-btn-group { display: inline-flex; gap: 4px; }
     .action-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; font-size: 0.82rem; border: 1px solid transparent; }
 
-    /* Pangan Sub-Navigation Styling */
-    .pangan-filter-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
-    .pangan-nav-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; font-size: 0.86rem; font-weight: 600; text-decoration: none; transition: all 0.2s; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; }
-    .pangan-nav-pill:hover { background: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
-    .pangan-nav-pill.active { background: #1890ff; color: #ffffff; border-color: #1890ff; box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25); }
-    .pangan-nav-pill .badge { font-size: 0.74rem; padding: 3px 7px; border-radius: 12px; }
-    .pangan-nav-pill.active .badge { background: #ffffff !important; color: #1890ff !important; }
+    /* Sub-Navigation Styling */
+    .pangan-filter-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+    .pangan-nav-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: all 0.15s ease; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; }
+    .pangan-nav-pill:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
+    .pangan-nav-pill.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
+    .pangan-nav-pill .badge { font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; }
+    .pangan-nav-pill.active .badge { background: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; }
     .pangan-nav-pill:not(.active) .badge { background: #e2e8f0; color: #475569; }
 
     @media (max-width: 991.98px) {
@@ -96,23 +96,14 @@
                 <div>
                     <h5 class="metode-title">
                         Master Metode Pengujian &bull; <?php echo isset($tab_items[$komoditi_curr]['full']) ? $tab_items[$komoditi_curr]['full'] : ucfirst($komoditi_curr); ?>
-                        <?php if ($is_pangan): ?>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2 fw-semibold" style="font-size: 0.78rem;">
-                                <?php echo ($sub_pangan === 'pirt') ? 'Pedoman PIRT' : 'Pedoman Pangan Olahan (MD/ML)'; ?>
-                            </span>
-                        <?php elseif ($is_kosmetik): ?>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2 fw-semibold" style="font-size: 0.78rem;">
-                                <?php echo !empty($sub_kosmetik) ? 'Pedoman ' . html_escape($sub_kosmetik) : 'Pedoman Compliance & Surveillance'; ?>
-                            </span>
-                        <?php endif; ?>
                     </h5>
                     <p class="metode-subtitle">
                         <?php if ($is_pangan): ?>
-                            Pedoman Resmi Metode Pengujian BBPOM: Kategori Pangan (Katpang), Pengujian Prioritas/Kajian, Syarat Mutu 3-Kelas, Acuan Regulasi & LCP.
+                            Daftar parameter uji, syarat batas mutu, regulasi, dan metode analisa pangan.
                         <?php elseif ($is_kosmetik): ?>
-                            Pedoman Resmi Metode Pengujian Kosmetik BBPOM: Tipe Produk, Kategori Sediaan, Kelompok Uji (Compliance & Surveillance), Bidang & Parameter Uji Kritis.
+                            Daftar parameter uji keamanan dan mutu sediaan kosmetik (Compliance &amp; Surveillance).
                         <?php else: ?>
-                            Kelola data monografi zat aktif, parameter uji kritis, spesifikasi, dan pemetaan ke Lembar Catatan Pengujian (LCP).
+                            Daftar parameter uji kritis, spesifikasi, metode analisa, dan pemetaan Form LCP.
                         <?php endif; ?>
                     </p>
                 </div>
@@ -120,8 +111,8 @@
 
             <div class="d-flex align-items-center gap-2">
                 <?php if (!$is_pangan && !$is_kosmetik): ?>
-                    <a href="<?php echo site_url('metode/automap'); ?>" class="btn btn-outline-primary d-inline-flex align-items-center gap-2 fw-semibold px-3 py-2" style="border-radius: 8px; font-size: 0.84rem;">
-                        <i class="bi bi-diagram-3-fill text-primary"></i>
+                    <a href="<?php echo site_url('metode/automap'); ?>" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 fw-semibold px-3" style="border-radius: 8px; font-size: 0.82rem; padding-top: 0.48rem; padding-bottom: 0.48rem;">
+                        <i class="bi bi-diagram-3"></i>
                         Auto-Mapping LCP
                     </a>
                     <a href="<?php echo site_url('metode/import'); ?>" class="btn-import-excel">
@@ -132,11 +123,6 @@
                         <i class="bi bi-plus-lg"></i>
                         Tambah Metode
                     </a>
-                <?php else: ?>
-                    <span class="text-muted small d-inline-flex align-items-center gap-1">
-                        <i class="bi bi-shield-check text-success fs-5"></i> 
-                        <span>Data SK Pedoman Terverifikasi</span>
-                    </span>
                 <?php endif; ?>
             </div>
         </div>
@@ -145,18 +131,17 @@
             <?php if ($is_pangan): ?>
                 <!-- Pangan Sub-Navigation Filter Bar -->
                 <div class="pangan-filter-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <!-- Segmented Control Pilihan Pedoman -->
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="small fw-bold text-secondary text-uppercase me-1"><i class="bi bi-funnel-fill text-primary"></i> Pedoman Data:</span>
-                        <div class="d-inline-flex gap-2">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="small fw-semibold text-secondary me-1">Pedoman:</span>
+                        <div class="d-inline-flex flex-wrap gap-2">
                             <a href="<?php echo site_url('metode?komoditi=pangan&sub=olahan' . ($bidang_cur ? '&bidang=' . urlencode($bidang_cur) : '')); ?>" 
                                class="pangan-nav-pill <?php echo ($sub_pangan === 'olahan') ? 'active' : ''; ?>">
-                                <i class="bi bi-box-seam"></i> Pangan Olahan (MD/ML)
+                                Pangan Olahan (MD/ML)
                                 <span class="badge"><?php echo isset($counts_pangan['olahan_total']) ? number_format($counts_pangan['olahan_total']) : 0; ?></span>
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=pangan&sub=pirt' . ($bidang_cur ? '&bidang=' . urlencode($bidang_cur) : '')); ?>" 
                                class="pangan-nav-pill <?php echo ($sub_pangan === 'pirt') ? 'active' : ''; ?>">
-                                <i class="bi bi-house-door"></i> Pangan Industri Rumah Tangga (PIRT)
+                                Pangan PIRT
                                 <span class="badge"><?php echo isset($counts_pangan['pirt_total']) ? number_format($counts_pangan['pirt_total']) : 0; ?></span>
                             </a>
                         </div>
@@ -164,61 +149,48 @@
 
                     <!-- Filter Bidang Pengujian -->
                     <div class="d-flex align-items-center gap-2">
-                        <span class="small fw-bold text-secondary text-uppercase"><i class="bi bi-filter"></i> Bidang Lab:</span>
+                        <span class="small fw-semibold text-secondary">Bidang:</span>
                         <div class="btn-group" role="group">
                             <a href="<?php echo site_url('metode?komoditi=pangan&sub=' . $sub_pangan); ?>" 
-                               class="btn btn-sm <?php echo empty($bidang_cur) ? 'btn-secondary text-white fw-bold' : 'btn-outline-secondary'; ?>">
+                               class="btn btn-sm <?php echo empty($bidang_cur) ? 'btn-dark fw-semibold' : 'btn-outline-secondary'; ?>">
                                 Semua
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=pangan&sub=' . $sub_pangan . '&bidang=Kimia'); ?>" 
-                               class="btn btn-sm <?php echo ($bidang_cur === 'Kimia') ? 'btn-info text-dark fw-bold' : 'btn-outline-info text-dark'; ?>">
-                                <i class="bi bi-droplet-half me-1"></i> Kimia
+                               class="btn btn-sm <?php echo ($bidang_cur === 'Kimia') ? 'btn-primary fw-semibold' : 'btn-outline-secondary'; ?>">
+                                Kimia
                                 <span class="badge bg-light text-dark ms-1">
                                     <?php echo ($sub_pangan === 'olahan') ? ($counts_pangan['olahan_kimia'] ?? 0) : ($counts_pangan['pirt_kimia'] ?? 0); ?>
                                 </span>
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=pangan&sub=' . $sub_pangan . '&bidang=Mikrobiologi'); ?>" 
-                               class="btn btn-sm <?php echo ($bidang_cur === 'Mikrobiologi') ? 'btn-success text-white fw-bold' : 'btn-outline-success'; ?>">
-                                <i class="bi bi-virus me-1"></i> Mikrobiologi
-                                <span class="badge bg-light text-success ms-1">
+                               class="btn btn-sm <?php echo ($bidang_cur === 'Mikrobiologi') ? 'btn-success fw-semibold' : 'btn-outline-secondary'; ?>">
+                                Mikrobiologi
+                                <span class="badge bg-light text-dark ms-1">
                                     <?php echo ($sub_pangan === 'olahan') ? ($counts_pangan['olahan_mikro'] ?? 0) : ($counts_pangan['pirt_mikro'] ?? 0); ?>
                                 </span>
                             </a>
                         </div>
                     </div>
                 </div>
-
-                <!-- Info Header Banner -->
-                <div class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-3 border-0 bg-info-subtle text-info-emphasis rounded-3">
-                    <i class="bi bi-info-circle-fill fs-5"></i>
-                    <div>
-                        <?php if ($sub_pangan === 'olahan'): ?>
-                            <strong>Tabel Pedoman Metode Pangan Olahan (MD/ML):</strong> Meliputi 16 Kategori Pangan (Katpang 01 s/d 16), pengujian Wajib/Kajian, batas cemaran kimia & kriteria 3-kelas mikrobiologi (n, c, m, M).
-                        <?php else: ?>
-                            <strong>Tabel Pedoman Metode Pangan Industri Rumah Tangga (PIRT):</strong> Meliputi Kategori Pangan PIRT, Kode Katpang Nasional, pengujian PRIORITAS & PILIHAN, syarat mutu, dan metode analisa acuan BBPOM.
-                        <?php endif; ?>
-                    </div>
-                </div>
             <?php elseif ($is_kosmetik): ?>
                 <!-- Kosmetik Sub-Navigation Filter Bar -->
                 <div class="pangan-filter-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <!-- Segmented Control Jenis Pengawasan -->
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="small fw-bold text-secondary text-uppercase me-1"><i class="bi bi-funnel-fill text-primary"></i> Pengawasan:</span>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="small fw-semibold text-secondary me-1">Pengawasan:</span>
                         <div class="d-inline-flex flex-wrap gap-2">
                             <a href="<?php echo site_url('metode?komoditi=kosmetik' . ($bidang_cur ? '&bidang=' . urlencode($bidang_cur) : '')); ?>" 
                                class="pangan-nav-pill <?php echo empty($sub_kosmetik) ? 'active' : ''; ?>">
-                                <i class="bi bi-collection"></i> Semua
+                                Semua
                                 <span class="badge"><?php echo isset($counts_kosmetik['total_semua']) ? number_format($counts_kosmetik['total_semua']) : 0; ?></span>
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=kosmetik&sub=Compliance' . ($bidang_cur ? '&bidang=' . urlencode($bidang_cur) : '')); ?>" 
                                class="pangan-nav-pill <?php echo ($sub_kosmetik === 'Compliance') ? 'active' : ''; ?>">
-                                <i class="bi bi-shield-check"></i> Compliance
+                                Compliance
                                 <span class="badge"><?php echo isset($counts_kosmetik['compliance_total']) ? number_format($counts_kosmetik['compliance_total']) : 0; ?></span>
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=kosmetik&sub=Surveillance' . ($bidang_cur ? '&bidang=' . urlencode($bidang_cur) : '')); ?>" 
                                class="pangan-nav-pill <?php echo ($sub_kosmetik === 'Surveillance') ? 'active' : ''; ?>">
-                                <i class="bi bi-search"></i> Surveillance
+                                Surveillance
                                 <span class="badge"><?php echo isset($counts_kosmetik['surveillance_total']) ? number_format($counts_kosmetik['surveillance_total']) : 0; ?></span>
                             </a>
                         </div>
@@ -226,15 +198,15 @@
 
                     <!-- Filter Bidang Pengujian -->
                     <div class="d-flex align-items-center gap-2">
-                        <span class="small fw-bold text-secondary text-uppercase"><i class="bi bi-filter"></i> Bidang Lab:</span>
+                        <span class="small fw-semibold text-secondary">Bidang:</span>
                         <div class="btn-group" role="group">
                             <a href="<?php echo site_url('metode?komoditi=kosmetik' . ($sub_kosmetik ? '&sub=' . urlencode($sub_kosmetik) : '')); ?>" 
-                               class="btn btn-sm <?php echo empty($bidang_cur) ? 'btn-secondary text-white fw-bold' : 'btn-outline-secondary'; ?>">
+                               class="btn btn-sm <?php echo empty($bidang_cur) ? 'btn-dark fw-semibold' : 'btn-outline-secondary'; ?>">
                                 Semua
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=kosmetik' . ($sub_kosmetik ? '&sub=' . urlencode($sub_kosmetik) : '') . '&bidang=Kimia'); ?>" 
-                               class="btn btn-sm <?php echo ($bidang_cur === 'Kimia') ? 'btn-info text-dark fw-bold' : 'btn-outline-info text-dark'; ?>">
-                                <i class="bi bi-droplet-half me-1"></i> Kimia
+                               class="btn btn-sm <?php echo ($bidang_cur === 'Kimia') ? 'btn-primary fw-semibold' : 'btn-outline-secondary'; ?>">
+                                Kimia
                                 <span class="badge bg-light text-dark ms-1">
                                     <?php 
                                     if ($sub_kosmetik === 'Compliance') echo $counts_kosmetik['compliance_kimia'] ?? 0;
@@ -244,9 +216,9 @@
                                 </span>
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=kosmetik' . ($sub_kosmetik ? '&sub=' . urlencode($sub_kosmetik) : '') . '&bidang=Mikrobiologi'); ?>" 
-                               class="btn btn-sm <?php echo ($bidang_cur === 'Mikrobiologi') ? 'btn-success text-white fw-bold' : 'btn-outline-success'; ?>">
-                                <i class="bi bi-virus me-1"></i> Mikrobiologi
-                                <span class="badge bg-light text-success ms-1">
+                               class="btn btn-sm <?php echo ($bidang_cur === 'Mikrobiologi') ? 'btn-success fw-semibold' : 'btn-outline-secondary'; ?>">
+                                Mikrobiologi
+                                <span class="badge bg-light text-dark ms-1">
                                     <?php 
                                     if ($sub_kosmetik === 'Compliance') echo $counts_kosmetik['compliance_mikro'] ?? 0;
                                     elseif ($sub_kosmetik === 'Surveillance') echo $counts_kosmetik['surveillance_mikro'] ?? 0;
@@ -257,38 +229,29 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Info Header Banner Kosmetik -->
-                <div class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-3 border-0 bg-info-subtle text-info-emphasis rounded-3">
-                    <i class="bi bi-info-circle-fill fs-5"></i>
-                    <div>
-                        <strong>Tabel Pedoman Master Metode Kosmetik:</strong> Data resmi audit BBPOM meliputi Tipe Produk (01 s/d 13), Kategori Sediaan Kosmetik, Kelompok Uji (Keamanan & Mutu Compliance/Surveillance), Bidang Pengujian (Kimia & Mikrobiologi), serta Parameter Uji Kritis.
-                    </div>
-                </div>
             <?php elseif ($komoditi_curr === 'herbal' || $komoditi_curr === 'suplemen'): ?>
                 <!-- Filter Bidang Lab untuk Obat Tradisional (OBASK) & Suplemen -->
                 <div class="pangan-filter-box d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="small fw-bold text-secondary text-uppercase me-1"><i class="bi bi-journal-medical text-primary"></i> Pedoman:</span>
-                        <span class="badge bg-primary px-3 py-2" style="font-size: 0.82rem;">
-                            <?php echo ($komoditi_curr === 'herbal') ? 'Master Metode Herbal (OBASK) &bull; ' . (isset($counts_komoditi['herbal']) ? $counts_komoditi['herbal'] : count($daftar_metode)) . ' Data' : 'Master Metode Suplemen &bull; ' . (isset($counts_komoditi['suplemen']) ? $counts_komoditi['suplemen'] : count($daftar_metode)) . ' Data'; ?>
+                        <span class="small fw-semibold text-secondary">
+                            <?php echo ($komoditi_curr === 'herbal') ? 'Herbal (OBASK) &bull; ' . (isset($counts_komoditi['herbal']) ? $counts_komoditi['herbal'] : count($daftar_metode)) . ' Data' : 'Suplemen &bull; ' . (isset($counts_komoditi['suplemen']) ? $counts_komoditi['suplemen'] : count($daftar_metode)) . ' Data'; ?>
                         </span>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="small fw-bold text-secondary text-uppercase"><i class="bi bi-filter"></i> Bidang Lab:</span>
+                        <span class="small fw-semibold text-secondary">Bidang:</span>
                         <div class="btn-group" role="group">
                             <a href="<?php echo site_url('metode?komoditi=' . $komoditi_curr); ?>" 
-                               class="btn btn-sm <?php echo empty($bidang_cur) ? 'btn-secondary text-white fw-bold' : 'btn-outline-secondary'; ?>">
+                               class="btn btn-sm <?php echo empty($bidang_cur) ? 'btn-dark fw-semibold' : 'btn-outline-secondary'; ?>">
                                 Semua
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=' . $komoditi_curr . '&bidang=Kimia'); ?>" 
-                               class="btn btn-sm <?php echo ($bidang_cur === 'Kimia') ? 'btn-info text-dark fw-bold' : 'btn-outline-info text-dark'; ?>">
-                                <i class="bi bi-droplet-half me-1"></i> Kimia
+                               class="btn btn-sm <?php echo ($bidang_cur === 'Kimia') ? 'btn-primary fw-semibold' : 'btn-outline-secondary'; ?>">
+                                Kimia
                             </a>
                             <a href="<?php echo site_url('metode?komoditi=' . $komoditi_curr . '&bidang=Mikrobiologi'); ?>" 
-                               class="btn btn-sm <?php echo ($bidang_cur === 'Mikrobiologi') ? 'btn-success text-white fw-bold' : 'btn-outline-success'; ?>">
-                                <i class="bi bi-virus me-1"></i> Mikrobiologi
+                               class="btn btn-sm <?php echo ($bidang_cur === 'Mikrobiologi') ? 'btn-success fw-semibold' : 'btn-outline-secondary'; ?>">
+                                Mikrobiologi
                             </a>
                         </div>
                     </div>
@@ -728,7 +691,7 @@
                                 <tr>
                                     <td colspan="11" class="text-center py-4 text-muted">
                                         <i class="bi bi-inbox fs-3 d-block mb-2 text-muted"></i>
-                                        Belum ada data monografi metode. Gunakan tombol <strong>Import Excel</strong> untuk mengunggah ribuan baris data monografi secara instan.
+                                        Belum ada data monografi metode. Gunakan tombol <strong>Import Excel</strong> untuk mengunggah data monografi dari file Excel.
                                     </td>
                                 </tr>
                             <?php else: ?>
