@@ -124,30 +124,25 @@ class Laporan extends MY_Controller
         $this->catat_audit(
             'EXPORT_EXCEL',
             'Laporan',
-            'Pengguna mengunduh rekapitulasi data pengujian format Excel (Filter: ' . json_encode($filter) . ')'
+            'Pengguna mengunduh rekapitulasi data pengujian format Excel (.xlsx) (Filter: ' . json_encode($filter) . ')'
         );
 
-        $filename = 'Rekap_Pengujian_LIMSKU_' . date('Ymd_His') . '.csv';
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
 
-        // Set Headers untuk file download
-        header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Pragma: no-cache');
-        header('Expires: 0');
+        require_once APPPATH . 'libraries/SimpleXLSXGen.php';
 
-        $output = fopen('php://output', 'w');
-        // UTF-8 BOM agar rapi di Microsoft Excel versi Windows/Mac tanpa issue karakter khusus
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        $rows = array();
+        // Header Dokumen (baris 0..4)
+        $rows[] = array('REKAPITULASI MONITORING PENGUJIAN LABORATORIUM - LIMSKU BBPOM DI BANDAR LAMPUNG');
+        $rows[] = array('Periode Tanggal', ($filter['tgl_mulai'] ?: 'Semua') . ' s/d ' . ($filter['tgl_selesai'] ?: 'Semua'));
+        $rows[] = array('Waktu Ekspor', date('d-m-Y H:i:s'));
+        $rows[] = array('Diekspor Oleh', (string)$this->session->userdata('nama_lengkap'));
+        $rows[] = array('');
 
-        // Header Dokumen
-        fputcsv($output, array('REKAPITULASI MONITORING PENGUJIAN LABORATORIUM - LIMSKU BBPOM DI BANDAR LAMPUNG'));
-        fputcsv($output, array('Periode Tanggal:', ($filter['tgl_mulai'] ?: 'Semua') . ' s/d ' . ($filter['tgl_selesai'] ?: 'Semua')));
-        fputcsv($output, array('Waktu Ekspor:', date('d-m-Y H:i:s')));
-        fputcsv($output, array('Diekspor Oleh:', $this->session->userdata('nama_lengkap')));
-        fputcsv($output, array('')); // Baris kosong
-
-        // Header Kolom Tabel
-        fputcsv($output, array(
+        // Baris ke-5 (0-indexed = 5) adalah Header Kolom Tabel
+        $rows[] = array(
             'No',
             'No. Urut / SIPT',
             'Kode Sampel',
@@ -164,36 +159,38 @@ class Laporan extends MY_Controller
             'Jumlah Parameter',
             'Kesimpulan Hasil',
             'Turn Around Time (Hari)'
-        ));
+        );
 
         $no = 1;
         foreach ($daftar_rekap as $row) {
             $kode_sampel = !empty($row['kode_sampel_manual']) ? $row['kode_sampel_manual'] : ('SMP-' . str_pad($row['sample_id'], 5, '0', STR_PAD_LEFT));
-            $no_sipt = !empty($row['no_sipt']) ? $row['no_sipt'] : ('# ' . $row['no_sampel']);
-            $waktu_app = !empty($row['waktu_approval']) ? date('d/m/Y H:i', strtotime($row['waktu_approval'])) : '-';
+            $no_sipt     = !empty($row['no_sipt']) ? (string)$row['no_sipt'] : ('# ' . $row['no_sampel']);
+            $waktu_app   = !empty($row['waktu_approval']) ? date('d/m/Y H:i', strtotime($row['waktu_approval'])) : '-';
 
-            fputcsv($output, array(
-                $no++,
+            $rows[] = array(
+                (int)$no++,
                 $no_sipt,
-                $kode_sampel,
-                $row['nama_sampel'],
-                $row['sub_kategori'] ?: '-',
-                $row['no_bets'] ?: '-',
-                $row['nama_sarana'] ?: '-',
+                (string)$kode_sampel,
+                (string)$row['nama_sampel'],
+                (string)($row['sub_kategori'] ?: '-'),
+                (string)($row['no_bets'] ?: '-'),
+                (string)($row['nama_sarana'] ?: '-'),
                 !empty($row['created_at']) ? date('d/m/Y', strtotime($row['created_at'])) : '-',
-                $row['jenis_pengujian'] ?: 'Kimia',
-                $row['status_sampel'],
-                $row['nama_penguji'] ?: '-',
-                $row['nama_verifier'] ?: '-',
+                (string)($row['jenis_pengujian'] ?: 'Kimia'),
+                (string)$row['status_sampel'],
+                (string)($row['nama_penguji'] ?: '-'),
+                (string)($row['nama_verifier'] ?: '-'),
                 $waktu_app,
-                $row['total_parameter'],
-                $row['kesimpulan_hasil'] ?: 'Belum Ada Hasil',
+                (int)$row['total_parameter'],
+                (string)($row['kesimpulan_hasil'] ?: 'Belum Ada Hasil'),
                 $row['lead_time_hari'] !== null ? $row['lead_time_hari'] . ' hari' : '-'
-            ));
+            );
         }
 
-        fclose($output);
-        exit;
+        $filename = 'Rekap_Pengujian_LIMSKU_' . date('Ymd_His') . '.xlsx';
+        $xlsx = SimpleXLSXGen::fromArray($rows, 'Rekap Pengujian');
+        $xlsx->setHeaderRow(5);
+        $xlsx->downloadAs($filename);
     }
 
     /**

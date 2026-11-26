@@ -9,6 +9,7 @@ class SimpleXLSXGen
     protected $template = [];
     protected $defaultFont = 'Calibri';
     protected $defaultFontSize = 11;
+    protected $headerRow = 0;
 
     public function __construct()
     {
@@ -16,6 +17,12 @@ class SimpleXLSXGen
             'name' => 'Sheet1',
             'rows' => []
         ];
+    }
+
+    public function setHeaderRow($rowIndex)
+    {
+        $this->headerRow = (int)$rowIndex;
+        return $this;
     }
 
     public static function fromArray(array $rows, $sheetName = null)
@@ -78,30 +85,63 @@ class SimpleXLSXGen
         // 1. Process Sheets
         $sheetXMLs = [];
         foreach ($this->sheets as $sheetIndex => $sheet) {
+            // Calculate auto-fit column widths
+            $colWidths = [];
+            foreach ($sheet['rows'] as $rIdx => $row) {
+                if ($this->headerRow > 0 && $rIdx < $this->headerRow) {
+                    continue;
+                }
+                $cIdx = 0;
+                foreach ($row as $cellVal) {
+                    $len = mb_strlen((string)$cellVal, 'UTF-8');
+                    if (!isset($colWidths[$cIdx]) || $len > $colWidths[$cIdx]) {
+                        $colWidths[$cIdx] = $len;
+                    }
+                    $cIdx++;
+                }
+            }
+
             $sheetXML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n";
             $sheetXML .= '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' . "\n";
+
+            if (!empty($colWidths)) {
+                $sheetXML .= '<cols>' . "\n";
+                foreach ($colWidths as $cIdx => $maxLen) {
+                    $width = min(max($maxLen + 4, 8), 42);
+                    $colNum = $cIdx + 1;
+                    $sheetXML .= '<col min="' . $colNum . '" max="' . $colNum . '" width="' . $width . '" customWidth="1"/>' . "\n";
+                }
+                $sheetXML .= '</cols>' . "\n";
+            }
+
             $sheetXML .= '<sheetData>' . "\n";
 
             foreach ($sheet['rows'] as $rIdx => $row) {
                 $rowNum = $rIdx + 1;
-                $sheetXML .= '<row r="' . $rowNum . '">' . "\n";
+                $rowAttr = ($rIdx === $this->headerRow) ? ' ht="24" customHeight="1"' : '';
+                $sheetXML .= '<row r="' . $rowNum . '"' . $rowAttr . '>' . "\n";
 
                 $cIdx = 0;
                 foreach ($row as $cellVal) {
                     $colLetter = $this->num2col($cIdx);
                     $cellRef = $colLetter . $rowNum;
 
-                    // Header styling (Baris 1)
                     $styleIdx = 0;
-                    if ($rIdx === 0) {
-                        // Header style: Bold, Hijau BPOM background, Putih text, border
+                    if ($rIdx === $this->headerRow) {
+                        // Table Header: Bold putih, background hijau toska BPOM, border
                         $styleIdx = 1;
-                    } else {
-                        // Data style: Border tipis
+                    } elseif ($rIdx > $this->headerRow) {
+                        // Data tabel: Border tipis & wrap text
                         $styleIdx = 2;
+                    } elseif ($rIdx === 0 && $this->headerRow > 0) {
+                        // Judul dokumen (baris paling atas): Bold ukuran 13
+                        $styleIdx = 3;
+                    } elseif ($this->headerRow > 0 && $cIdx === 0 && trim((string)$cellVal) !== '') {
+                        // Label metadata (Periode, Waktu Ekspor, dll): Bold
+                        $styleIdx = 4;
                     }
 
-                    if (is_numeric($cellVal) && !preg_match('/^0[0-9]/', (string)$cellVal)) {
+                    if (is_int($cellVal) || is_float($cellVal)) {
                         $sheetXML .= '<c r="' . $cellRef . '" s="' . $styleIdx . '"><v>' . $cellVal . '</v></c>';
                     } else {
                         $strVal = (string) $cellVal;
@@ -134,12 +174,14 @@ class SimpleXLSXGen
         $ssXML .= '</sst>';
         $zip->addFromString('xl/sharedStrings.xml', $ssXML);
 
-        // 3. Styles XML (Header Hijau Toska BPOM, Border Rapi)
+        // 3. Styles XML (Header Hijau Toska BPOM, Border Rapi, Judul & Metadata)
         $styleXML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n";
         $styleXML .= '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' . "\n";
-        $styleXML .= '  <fonts count="2">' . "\n";
+        $styleXML .= '  <fonts count="4">' . "\n";
         $styleXML .= '    <font><sz val="11"/><name val="Calibri"/></font>' . "\n";
         $styleXML .= '    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>' . "\n";
+        $styleXML .= '    <font><b/><sz val="13"/><color rgb="FF1E293B"/><name val="Calibri"/></font>' . "\n";
+        $styleXML .= '    <font><b/><sz val="11"/><color rgb="FF334155"/><name val="Calibri"/></font>' . "\n";
         $styleXML .= '  </fonts>' . "\n";
         $styleXML .= '  <fills count="3">' . "\n";
         $styleXML .= '    <fill><patternFill patternType="none"/></fill>' . "\n";
@@ -155,10 +197,12 @@ class SimpleXLSXGen
         $styleXML .= '      <bottom style="thin"><color rgb="FFD0D7DE"/></bottom>' . "\n";
         $styleXML .= '    </border>' . "\n";
         $styleXML .= '  </borders>' . "\n";
-        $styleXML .= '  <cellXfs count="3">' . "\n";
+        $styleXML .= '  <cellXfs count="5">' . "\n";
         $styleXML .= '    <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' . "\n";
-        $styleXML .= '    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' . "\n";
-        $styleXML .= '    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyBorder="1"/>' . "\n";
+        $styleXML .= '    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' . "\n";
+        $styleXML .= '    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>' . "\n";
+        $styleXML .= '    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" applyFont="1"/>' . "\n";
+        $styleXML .= '    <xf numFmtId="0" fontId="3" fillId="0" borderId="0" applyFont="1"/>' . "\n";
         $styleXML .= '  </cellXfs>' . "\n";
         $styleXML .= '</styleSheet>';
         $zip->addFromString('xl/styles.xml', $styleXML);
