@@ -214,7 +214,8 @@ class Model_Pengujian extends CI_Model
 
         // 2. Insert ke test_results untuk setiap item parameter monografi terpilih
         foreach ($items_metode as $item) {
-            $m_id = is_array($item) ? $item['method_id'] : $item;
+            $raw_m = is_array($item) ? $item['method_id'] : $item;
+            $m_id = !empty($raw_m) ? (int)$raw_m : NULL;
             $t_id = is_array($item) ? $item['template_id'] : NULL;
 
             // Ambil data metode jika t_id belum diketahui
@@ -225,13 +226,15 @@ class Model_Pengujian extends CI_Model
                 }
             }
 
+            $init_data = (is_array($item) && !empty($item['initial_data'])) ? $item['initial_data'] : '[]';
+
             $test_data = array(
                 'session_id'  => $session_id,
                 'sample_id'   => $sample_id,
                 'method_id'   => $m_id,
                 'template_id' => $t_id,
                 'penguji_id'  => $penguji_id,
-                'data_hasil'  => '[]',
+                'data_hasil'  => $init_data,
                 'kesimpulan'  => 'Belum Disimpulkan',
                 'status'      => 'Sedang Diuji',
                 'waktu_mulai' => date('Y-m-d H:i:s')
@@ -300,7 +303,8 @@ class Model_Pengujian extends CI_Model
 
         // Perbarui atau tambahkan item parameter uji baru
         foreach ($items_metode as $item) {
-            $m_id = (int)(is_array($item) ? $item['method_id'] : $item);
+            $raw_m = is_array($item) ? $item['method_id'] : $item;
+            $m_id = !empty($raw_m) ? (int)$raw_m : NULL;
             $t_id = !empty($item['template_id']) ? (int)$item['template_id'] : NULL;
 
             if (isset($existing_by_method[$m_id])) {
@@ -315,7 +319,7 @@ class Model_Pengujian extends CI_Model
             } else {
                 // Parameter baru ditambahkan ke sesi
                 // Cek apakah ada data_hasil dari template yang sama untuk di-inherit jika ada
-                $inherit_hasil = '[]';
+                $inherit_hasil = (is_array($item) && !empty($item['initial_data'])) ? $item['initial_data'] : '[]';
                 $inherit_kesimpulan = 'Belum Disimpulkan';
                 $inherit_catatan = NULL;
                 if ($t_id && isset($existing_by_template[$t_id])) {
