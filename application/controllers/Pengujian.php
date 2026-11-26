@@ -1949,6 +1949,24 @@ class Pengujian extends MY_Controller
             return;
         }
 
+        // --- KHUSUS FORM LCP PANGAN KAFEIN: PNG-KCKT-01 ---
+        if (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'PNG-KCKT-01') {
+            $this->load->view('pengujian/cetak_lcp_kckt_pangan_kafein', $view_data);
+            return;
+        }
+
+        // --- KHUSUS FORM LCP PANGAN PEWARNA SIMULTAN: PNG-KCKT-02 ---
+        if (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'PNG-KCKT-02') {
+            $this->load->view('pengujian/cetak_lcp_kckt_pangan_pewarna', $view_data);
+            return;
+        }
+
+        // --- KHUSUS FORM LCP PANGAN ICP-MS (As & Pb): PNG-ICPMS-01 & PNG-ICPMS-02 ---
+        if (!empty($hasil['kode_template']) && in_array(strtoupper($hasil['kode_template']), array('PNG-ICPMS-01', 'PNG-ICPMS-02'), TRUE)) {
+            $this->load->view('pengujian/cetak_lcp_icpms_pangan', $view_data);
+            return;
+        }
+
         // --- KHUSUS FORM LCP PANGAN AAS (PANG-KIM-AAS: CEMARAN LOGAM As, Cd, Hg, Pb, Sn) ---
         if (!empty($hasil['kode_template']) && strtoupper($hasil['kode_template']) === 'PANG-KIM-AAS') {
             $this->catat_audit('VIEW_LCP_AAS_PANGAN', 'Pengujian', array(
